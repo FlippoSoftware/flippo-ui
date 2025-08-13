@@ -1,0 +1,74 @@
+'use client'
+;
+import React from 'react';
+
+import { useRenderElement } from '@lib/hooks';
+import { popupStateMapping } from '@lib/popupStateMapping';
+
+import type { TAlign, TSide } from '@lib/hooks';
+import type { HeadlessUIComponentProps } from '@lib/types';
+
+import { useTooltipPositionerContext } from '../positioner/TooltipPositionerContext';
+
+/**
+ * Displays an element positioned against the tooltip anchor.
+ * Renders a `<div>` element.
+ *
+ * Documentation: [Base UI Tooltip](https://base-ui.com/react/components/tooltip)
+ */
+export function TooltipArrow({ ref: forwardedRef, ...componentProps }: NTooltipArrow.Props) {
+    const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        className,
+        render,
+        /* eslint-enable unused-imports/no-unused-vars */
+        ...elementProps
+    } = componentProps;
+
+    const {
+        open,
+        arrowRef,
+        side,
+        align,
+        arrowUncentered,
+        arrowStyles
+    }
+    = useTooltipPositionerContext();
+
+    const state: NTooltipArrow.State = React.useMemo(
+        () => ({
+            open,
+            side,
+            align,
+            uncentered: arrowUncentered
+        }),
+        [
+            open,
+            side,
+            align,
+            arrowUncentered
+        ]
+    );
+
+    const element = useRenderElement('div', componentProps, {
+        state,
+        ref: [forwardedRef, arrowRef],
+        props: [{ 'style': arrowStyles, 'aria-hidden': true }, elementProps],
+        customStyleHookMapping: popupStateMapping
+    });
+
+    return element;
+}
+
+export namespace NTooltipArrow {
+    export type State = {
+        open: boolean;
+        side: TSide;
+        align: TAlign;
+        uncentered: boolean;
+    };
+
+    export type Props = HeadlessUIComponentProps<'div', State> & {
+        ref?: React.Ref<HTMLDivElement>;
+    };
+}
