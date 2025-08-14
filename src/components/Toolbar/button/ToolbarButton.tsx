@@ -1,0 +1,89 @@
+'use client';
+
+import React from 'react';
+
+import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+
+import { CompositeItem } from '../../Composite/item/CompositeItem';
+import { useButton } from '../../use-button';
+import { useToolbarGroupContext } from '../group/ToolbarGroupContext';
+import { useToolbarRootContext } from '../root/ToolbarRootContext';
+
+import type { ToolbarRoot } from '../root/ToolbarRoot';
+
+/**
+ * A button that can be used as-is or as a trigger for other components.
+ * Renders a `<button>` element.
+ *
+ * Documentation: [Base UI Toolbar](https://base-ui.com/react/components/toolbar)
+ */
+export function ToolbarButton(componentProps: ToolbarButton.Props) {
+    const {
+        className,
+        disabled: disabledProp = false,
+        focusableWhenDisabled = true,
+        render,
+        nativeButton = true,
+        ref,
+        ...elementProps
+    } = componentProps;
+
+    const itemMetadata = React.useMemo(() => ({ focusableWhenDisabled }), [focusableWhenDisabled]);
+
+    const { disabled: toolbarDisabled, orientation } = useToolbarRootContext();
+
+    const groupContext = useToolbarGroupContext(true);
+
+    const disabled = toolbarDisabled || (groupContext?.disabled ?? false) || disabledProp;
+
+    const { getButtonProps, buttonRef } = useButton({
+        disabled,
+        focusableWhenDisabled,
+        native: nativeButton
+    });
+
+    const state: ToolbarButton.State = React.useMemo(
+        () => ({
+            disabled,
+            orientation,
+            focusable: focusableWhenDisabled
+        }),
+        [disabled, focusableWhenDisabled, orientation]
+    );
+
+    return (
+        <CompositeItem
+          tag={'button'}
+          render={render}
+          className={className}
+          metadata={itemMetadata}
+          state={state}
+          refs={[ref, buttonRef]}
+          props={[elementProps,
+                // for integrating with Menu and Select disabled states, `disabled` is
+                // intentionally duplicated even though getButtonProps includes it already
+                // TODO: follow up after https://github.com/mui/base-ui/issues/1976#issuecomment-2916905663
+                { disabled }, getButtonProps]}
+        />
+    );
+}
+
+export namespace ToolbarButton {
+    export type State = {
+        disabled: boolean;
+        focusable: boolean;
+    } & ToolbarRoot.State;
+
+    export type Props = {
+        /**
+         * When `true` the item is disabled.
+         * @default false
+         */
+        disabled?: boolean;
+        /**
+         * When `true` the item remains focuseable when disabled.
+         * @default true
+         */
+        focusableWhenDisabled?: boolean;
+    } & NativeButtonProps & HeadlessUIComponentProps<'button', ToolbarRoot.State>;
+}

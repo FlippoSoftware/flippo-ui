@@ -3,9 +3,12 @@ import React from 'react';
 
 import { useControlledState, useEventCallback } from '@flippo_ui/hooks';
 
+import { useRenderElement } from '@lib/hooks';
+
 import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '@lib/types';
 
 import { CompositeRoot } from '../Composite/root/CompositeRoot';
+import { useToolbarRootContext } from '../Toolbar/root/ToolbarRootContext';
 
 import { ToggleGroupContext } from './ToggleGroupContext';
 import { ToggleGroupDataAttributes } from './ToggleGroupDataAttributes';
@@ -25,7 +28,7 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
     const {
         value: valueProp,
         defaultValue: defaultValueProp,
-        disabled = false,
+        disabled: disabledProp = false,
         orientation = 'horizontal',
         loop = true,
         ref,
@@ -36,6 +39,8 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
         ...elementProps
     } = componentProps;
 
+    const toolbarContext = useToolbarRootContext(true);
+
     const defaultValue = React.useMemo(() => {
         if (valueProp === undefined) {
             return defaultValueProp ?? [];
@@ -43,6 +48,8 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
 
         return [];
     }, [valueProp, defaultValueProp]);
+
+    const disabled = (toolbarContext?.disabled ?? false) || disabledProp;
 
     const [groupValue, setValueState] = useControlledState({
         prop: valueProp,
@@ -92,23 +99,36 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
         ]
     );
 
-    const defaultProps: HTMLProps = {
+    const defaultProps: HTMLProps = React.useMemo(() => ({
         role: 'group'
-    };
+    }), []);
+
+    const element = useRenderElement('div', componentProps, {
+        enabled: Boolean(toolbarContext),
+        state,
+        ref,
+        props: [defaultProps, elementProps],
+        customStyleHookMapping
+    });
 
     return (
         <ToggleGroupContext value={contextValue}>
-            <CompositeRoot
-              render={render}
-              className={className}
-              state={state}
-              refs={[ref]}
-              orientation={orientation}
-              props={[defaultProps, elementProps]}
-              customStyleHookMapping={customStyleHookMapping}
-              loop={loop}
-              stopEventPropagation
-            />
+            {toolbarContext
+                ? (
+                    element
+                )
+                : (
+                    <CompositeRoot
+                        render={render}
+                        className={className}
+                        state={state}
+                        refs={[ref]}
+                        props={[defaultProps, elementProps]}
+                        customStyleHookMapping={customStyleHookMapping}
+                        loop={loop}
+                        stopEventPropagation
+                    />
+                )}
         </ToggleGroupContext>
     );
 }
