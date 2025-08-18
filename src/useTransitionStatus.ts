@@ -1,50 +1,106 @@
 'use client';
 
-import * as React from 'react';
-import { useEnhancedEffect } from './useEnhancedEffect';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { AnimationFrame } from './useAnimationFrame';
+import { useIsoLayoutEffect } from './useIsoLayoutEffect';
 
 export type TransitionStatus = 'starting' | 'ending' | 'idle' | undefined;
 
-export function useTransitionStatus(open: boolean) {
-  const [transitionStatus, setTransitionStatus] = React.useState<TransitionStatus>(open ? 'idle' : undefined);
-  const [mounted, setMounted] = React.useState(open);
+/**
+ * Provides a status string for CSS animations.
+ * @param open - a boolean that determines if the element is open.
+ * @param enableIdleState - a boolean that enables the `'idle'` state between `'starting'` and `'ending'`
+ */
+export function useTransitionStatus(
+    open: boolean,
+    enableIdleState: boolean = false,
+    deferEndingState: boolean = false
+) {
+    const [transitionStatus, setTransitionStatus] = React.useState<TransitionStatus>(
+        open && enableIdleState ? 'idle' : undefined
+    );
+    const [mounted, setMounted] = React.useState(open);
 
-  if (open && !mounted) {
-    setMounted(true);
-    setTransitionStatus('starting');
-  }
-
-  if (!open && mounted && transitionStatus !== 'ending') {
-    setTransitionStatus('ending');
-  }
-
-  if (!open && !mounted && transitionStatus === 'ending') {
-    setTransitionStatus(undefined);
-  }
-
-  useEnhancedEffect(() => {
-    if (!open) {
-      return undefined;
-    }
-    if (open && mounted && transitionStatus !== 'idle') {
-      setTransitionStatus('starting');
+    if (open && !mounted) {
+        setMounted(true);
+        setTransitionStatus('starting');
     }
 
-    const frame = requestAnimationFrame(() => {
-      setTransitionStatus('idle');
-    });
+    if (!open && mounted && transitionStatus !== 'ending' && !deferEndingState) {
+        setTransitionStatus('ending');
+    }
 
-    return () => {
-      cancelAnimationFrame(frame);
-    };
-  }, [open, mounted, setTransitionStatus, transitionStatus]);
+    if (!open && !mounted && transitionStatus === 'ending') {
+        setTransitionStatus(undefined);
+    }
 
-  return React.useMemo(
-    () => ({
-      mounted,
-      setMounted,
-      transitionStatus
-    }),
-    [mounted, transitionStatus]
-  );
+    useIsoLayoutEffect(() => {
+        if (!open && mounted && transitionStatus !== 'ending' && deferEndingState) {
+            const frame = AnimationFrame.request(() => {
+                setTransitionStatus('ending');
+            });
+
+            return () => {
+                AnimationFrame.cancel(frame);
+            };
+        }
+
+        return undefined;
+    }, [
+        open,
+        mounted,
+        transitionStatus,
+        deferEndingState
+    ]);
+
+    useIsoLayoutEffect(() => {
+        if (!open || enableIdleState) {
+            return undefined;
+        }
+
+        const frame = AnimationFrame.request(() => {
+            // eslint-disable-next-line react-dom/no-flush-sync
+            ReactDOM.flushSync(() => {
+                setTransitionStatus(undefined);
+            });
+        });
+
+        return () => {
+            AnimationFrame.cancel(frame);
+        };
+    }, [enableIdleState, open]);
+
+    useIsoLayoutEffect(() => {
+        if (!open || !enableIdleState) {
+            return undefined;
+        }
+
+        if (open && mounted && transitionStatus !== 'idle') {
+            setTransitionStatus('starting');
+        }
+
+        const frame = AnimationFrame.request(() => {
+            setTransitionStatus('idle');
+        });
+
+        return () => {
+            AnimationFrame.cancel(frame);
+        };
+    }, [
+        enableIdleState,
+        open,
+        mounted,
+        setTransitionStatus,
+        transitionStatus
+    ]);
+
+    return React.useMemo(
+        () => ({
+            mounted,
+            setMounted,
+            transitionStatus
+        }),
+        [mounted, transitionStatus]
+    );
 }
