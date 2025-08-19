@@ -15,6 +15,7 @@ export * from './useMergedRef';
 export * from './useOnMount';
 export * from './useOpenChangeComplete';
 export * from './useOpenInteractionType';
+export * from './useScrollLock';
 export * from './useTimeout';
 export * from './useTransitionStatus';
 export * from './useUnmount';
