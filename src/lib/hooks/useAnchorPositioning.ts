@@ -1,17 +1,6 @@
 'use client';
-import type {
-    AutoUpdateOptions,
-    FloatingContext,
-    FloatingRootContext,
-    Middleware,
-    MiddlewareState,
-    Padding,
-    Side as PhysicalSide,
-    Placement,
-    UseFloatingOptions,
-    VirtualElement
-} from '@floating-ui/react';
-import type { Rect } from '@floating-ui/utils';
+import React from 'react';
+
 import { useEnhancedEffect, useEventCallback, useLatestRef } from '@flippo_ui/hooks';
 import {
     arrow,
@@ -29,8 +18,23 @@ import {
     getSide,
     getSideAxis
 } from '@floating-ui/utils';
-import React from 'react';
+
+import type {
+    AutoUpdateOptions,
+    FloatingContext,
+    FloatingRootContext,
+    Middleware,
+    MiddlewareState,
+    Padding,
+    Side as PhysicalSide,
+    Placement,
+    UseFloatingOptions,
+    VirtualElement
+} from '@floating-ui/react';
+import type { Rect } from '@floating-ui/utils';
+
 import { ownerDocument } from '../owner';
+
 import { useDirection } from './useDirection';
 
 function getLogicalSide(sideParam: TSide, renderedSide: PhysicalSide, isRtl: boolean): TSide {

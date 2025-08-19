@@ -3,8 +3,8 @@
 import React from 'react';
 
 import { useLatestRef } from '@flippo_ui/hooks';
-import { formatNumber } from '@lib/formatNumber';
 
+import { formatNumber } from '@lib/formatNumber';
 import { useRenderElement } from '@lib/hooks';
 
 import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';

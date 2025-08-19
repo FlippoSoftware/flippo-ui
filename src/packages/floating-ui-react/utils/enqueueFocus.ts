@@ -7,7 +7,7 @@ type Options = {
 };
 
 let rafId = 0;
-export function enqueueFocus(el: FocusableElement | null, options: Options = {}) {
+export function enqueueFocus(el: FocusableElement | null | undefined, options: Options = {}) {
     const { preventScroll = false, cancelPrevious = true, sync = false } = options;
     if (cancelPrevious) {
         cancelAnimationFrame(rafId);

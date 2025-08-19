@@ -5,6 +5,7 @@ export const PATIENT_CLICK_THRESHOLD = 500;
 export const DISABLED_TRANSITIONS_STYLE = { style: { transition: 'none' } };
 export const EMPTY_OBJECT = {};
 export const EMPTY_ARRAY = [];
+export const CLICK_TRIGGER_IDENTIFIER = 'data-headless-ui-click-trigger';
 
 export const DROPDOWN_COLLISION_AVOIDANCE = {
     fallbackAxisSide: 'none'

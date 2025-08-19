@@ -1,6 +1,7 @@
+import { floor } from '@floating-ui/utils';
+
 import type { Dimensions } from '../types';
 
-import { floor } from '@floating-ui/utils';
 import {
     ARROW_DOWN,
     ARROW_LEFT,
