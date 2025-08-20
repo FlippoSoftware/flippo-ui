@@ -1,9 +1,10 @@
+import type React from 'react';
+
 import type {
     UseFloatingReturn as UsePositionFloatingReturn,
     UseFloatingOptions as UsePositionOptions,
     VirtualElement
 } from '@floating-ui/react-dom';
-import type * as React from 'react';
 
 import type { ExtendedUserProps } from './hooks/useInteractions';
 
@@ -13,7 +14,7 @@ export type { FloatingFocusManagerProps } from './components/FloatingFocusManage
 export type { FloatingPortalProps, UseFloatingPortalNodeProps } from './components/FloatingPortal';
 export type { FloatingNodeProps, FloatingTreeProps } from './components/FloatingTree';
 export type { UseClientPointProps } from './hooks/useClientPoint';
-export type { UseDismissProps } from './hooks/useDismiss';
+export type { PressType, UseDismissProps } from './hooks/useDismiss';
 export type { UseFloatingRootContextOptions } from './hooks/useFloatingRootContext';
 export type { UseFocusProps } from './hooks/useFocus';
 export type { HandleClose, HandleCloseContext, UseHoverProps } from './hooks/useHover';
@@ -85,26 +86,26 @@ type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {};
 
-export type OpenChangeReason =
-  | 'outside-press'
-  | 'escape-key'
-  | 'ancestor-scroll'
-  | 'reference-press'
-  | 'click'
-  | 'hover'
-  | 'focus'
-  | 'focus-out'
-  | 'list-navigation'
-  | 'safe-polygon';
+export type OpenChangeReason
+  = | 'outside-press'
+    | 'escape-key'
+    | 'ancestor-scroll'
+    | 'reference-press'
+    | 'click'
+    | 'hover'
+    | 'focus'
+    | 'focus-out'
+    | 'list-navigation'
+    | 'safe-polygon';
 
 export type Delay = number | Partial<{ open: number; close: number }>;
 
 export type NarrowedElement<T> = T extends Element ? T : Element;
 
 export type ExtendedRefs<RT> = {
-    reference: React.MutableRefObject<ReferenceType | null>;
-    floating: React.MutableRefObject<HTMLElement | null>;
-    domReference: React.MutableRefObject<NarrowedElement<RT> | null>;
+    reference: React.RefObject<ReferenceType | null>;
+    floating: React.RefObject<HTMLElement | null>;
+    domReference: React.RefObject<NarrowedElement<RT> | null>;
     setReference: (node: RT | null) => void;
     setFloating: (node: HTMLElement | null) => void;
     setPositionReference: (node: ReferenceType | null) => void;
@@ -131,7 +132,7 @@ export type ContextData = {
 };
 
 export type FloatingRootContext<RT extends ReferenceType = ReferenceType> = {
-    dataRef: React.MutableRefObject<ContextData>;
+    dataRef: React.RefObject<ContextData>;
     open: boolean;
     onOpenChange: (open: boolean, event?: Event, reason?: OpenChangeReason) => void;
     elements: {
@@ -153,7 +154,7 @@ export type FloatingContext<RT extends ReferenceType = ReferenceType> = Omit<
     open: boolean;
     onOpenChange: (open: boolean, event?: Event, reason?: OpenChangeReason) => void;
     events: FloatingEvents;
-    dataRef: React.MutableRefObject<ContextData>;
+    dataRef: React.RefObject<ContextData>;
     nodeId: string | undefined;
     floatingId: string | undefined;
     refs: ExtendedRefs<RT>;
@@ -167,7 +168,7 @@ export type FloatingNodeType<RT extends ReferenceType = ReferenceType> = {
 };
 
 export type FloatingTreeType<RT extends ReferenceType = ReferenceType> = {
-    nodesRef: React.MutableRefObject<Array<FloatingNodeType<RT>>>;
+    nodesRef: React.RefObject<Array<FloatingNodeType<RT>>>;
     events: FloatingEvents;
     addNode: (node: FloatingNodeType) => void;
     removeNode: (node: FloatingNodeType) => void;

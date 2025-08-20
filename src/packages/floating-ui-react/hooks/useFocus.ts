@@ -1,8 +1,9 @@
-import * as React from 'react';
+import React from 'react';
 
-import { isMac, isSafari } from '@base-ui-components/utils/detectBrowser';
-import { useTimeout } from '@base-ui-components/utils/useTimeout';
+import { useTimeout } from '@flippo_ui/hooks';
 import { getWindow, isElement, isHTMLElement } from '@floating-ui/utils/dom';
+
+import { isMac, isSafari } from '@lib/detectBrowser';
 
 import {
     activeElement,

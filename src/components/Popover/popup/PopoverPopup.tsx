@@ -122,7 +122,7 @@ export function PopoverPopup(componentProps: PopoverPopup.Props) {
           disabled={!mounted || openReason === 'trigger-hover'}
           initialFocus={resolvedInitialFocus}
           returnFocus={finalFocus}
-          restoreFocus={true}
+          restoreFocus={'popup'}
         >
             {element}
         </FloatingFocusManager>

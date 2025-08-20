@@ -1,5 +1,7 @@
-import type { FocusableElement } from 'tabbable';
 import { tabbable } from 'tabbable';
+
+import type { FocusableElement } from 'tabbable';
+
 import { activeElement, contains, getDocument } from './element';
 
 export function getTabbableOptions() {
