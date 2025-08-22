@@ -4,7 +4,7 @@ import React from 'react';
 
 import { useAnchorPositioning } from '@lib/hooks';
 
-import type { NUseAnchorPositioning, TSide } from '@lib/hooks';
+import type { UseAnchorPositioning, TSide } from '@lib/hooks';
 import type { HTMLProps } from '@lib/types';
 
 import { useTooltipRootContext } from '../root/TooltipRootContext';
@@ -54,13 +54,13 @@ export function useTooltipPositioner(
 }
 
 export namespace NUseTooltipPositioner {
-    export type Parameters = {} & NUseAnchorPositioning.Parameters;
+    export type Parameters = {} & UseAnchorPositioning.Parameters;
 
     export type SharedParameters = {
         side?: TSide;
-    } & NUseAnchorPositioning.SharedParameters;
+    } & UseAnchorPositioning.SharedParameters;
 
     export type ReturnValue = {
         props: HTMLProps;
-    } & NUseAnchorPositioning.ReturnValue;
+    } & UseAnchorPositioning.ReturnValue;
 }

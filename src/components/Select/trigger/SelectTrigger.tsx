@@ -1,0 +1,262 @@
+'use client';
+
+import React from 'react';
+
+import {
+    useEventCallback,
+    useLatestRef,
+    useMergedRef,
+    useStore,
+    useTimeout
+} from '@flippo_ui/hooks';
+
+import { getPseudoElementBounds } from '@lib/getPseudoElementBounds';
+import { useRenderElement } from '@lib/hooks';
+import { mergeProps } from '@lib/merge';
+import { ownerDocument } from '@lib/owner';
+import { pressableTriggerOpenStateMapping } from '@lib/popupStateMapping';
+import { contains } from '@packages/floating-ui-react/utils';
+
+import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '@lib/types';
+
+import { useButton } from '../../use-button';
+import { useSelectRootContext } from '../root/SelectRootContext';
+import { selectors } from '../store';
+
+const BOUNDARY_OFFSET = 2;
+
+const customStyleHookMapping: CustomStyleHookMapping<SelectTrigger.State> = {
+    ...pressableTriggerOpenStateMapping,
+    value: () => null
+};
+
+/**
+ * A button that opens the select menu.
+ * Renders a `<div>` element.
+ *
+ * Documentation: [Base UI Select](https://base-ui.com/react/components/select)
+ */
+export function SelectTrigger(componentProps: SelectTrigger.Props) {
+    const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        className,
+        render,
+        /* eslint-enable unused-imports/no-unused-vars */
+        disabled: disabledProp = false,
+        nativeButton = false,
+        ref,
+        ...elementProps
+    } = componentProps;
+
+    const {
+        store,
+        setOpen,
+        selectionRef,
+        readOnly,
+        alignItemWithTriggerActiveRef,
+        disabled: selectDisabled,
+        keyboardActiveRef
+    } = useSelectRootContext();
+
+    const disabled = selectDisabled || disabledProp;
+
+    const open = useStore(store, selectors.open);
+    const value = useStore(store, selectors.value);
+    const triggerProps = useStore(store, selectors.triggerProps);
+    const positionerElement = useStore(store, selectors.positionerElement);
+
+    const positionerRef = useLatestRef(positionerElement);
+
+    const triggerRef = React.useRef<HTMLElement | null>(null);
+    const timeoutFocus = useTimeout();
+    const timeoutMouseDown = useTimeout();
+
+    const { getButtonProps, buttonRef } = useButton({
+        disabled,
+        native: nativeButton
+    });
+
+    const setTriggerElement = useEventCallback((element) => {
+        store.set('triggerElement', element);
+    });
+
+    const mergedRef = useMergedRef<HTMLElement>(
+        ref,
+        triggerRef,
+        buttonRef,
+        setTriggerElement
+    );
+
+    const timeout1 = useTimeout();
+    const timeout2 = useTimeout();
+
+    React.useEffect(() => {
+        if (open) {
+            // mousedown -> move to unselected item -> mouseup should not select within 200ms.
+            timeout2.start(200, () => {
+                selectionRef.current.allowUnselectedMouseUp = true;
+
+                // mousedown -> mouseup on selected item should not select within 400ms.
+                timeout1.start(200, () => {
+                    selectionRef.current.allowSelectedMouseUp = true;
+                });
+            });
+
+            return () => {
+                timeout1.clear();
+                timeout2.clear();
+            };
+        }
+
+        selectionRef.current = {
+            allowSelectedMouseUp: false,
+            allowUnselectedMouseUp: false,
+            allowSelect: true
+        };
+
+        timeoutMouseDown.clear();
+
+        return undefined;
+    }, [
+        open,
+        selectionRef,
+        timeoutMouseDown,
+        timeout1,
+        timeout2
+    ]);
+
+    const props: HTMLProps = mergeProps<'div'>(
+        triggerProps,
+        {
+            'aria-readonly': readOnly || undefined,
+            'tabIndex': disabled ? -1 : 0,
+            'ref': mergedRef,
+            onFocus(event) {
+                // The popup element shouldn't obscure the focused trigger.
+                if (open && alignItemWithTriggerActiveRef.current) {
+                    setOpen(false, event.nativeEvent, 'focus-out');
+                }
+
+                // Saves a re-render on initial click: `forceMount === true` mounts
+                // the items before `open === true`. We could sync those cycles better
+                // without a timeout, but this is enough for now.
+                //
+                // XXX: might be causing `act()` warnings.
+                timeoutFocus.start(0, () => {
+                    store.set('forceMount', true);
+                });
+            },
+            onPointerMove({ pointerType }) {
+                keyboardActiveRef.current = false;
+                store.set('touchModality', pointerType === 'touch');
+            },
+            onPointerDown({ pointerType }) {
+                store.set('touchModality', pointerType === 'touch');
+            },
+            onKeyDown(event) {
+                keyboardActiveRef.current = true;
+
+                if (event.key === 'ArrowDown') {
+                    setOpen(true, event.nativeEvent, 'list-navigation');
+                }
+            },
+            onMouseDown(event) {
+                if (open) {
+                    return;
+                }
+
+                const doc = ownerDocument(event.currentTarget);
+
+                function handleMouseUp(mouseEvent: MouseEvent) {
+                    if (!triggerRef.current) {
+                        return;
+                    }
+
+                    const mouseUpTarget = mouseEvent.target as Element | null;
+
+                    // Early return if clicked on trigger element or its children
+                    if (
+                        contains(triggerRef.current, mouseUpTarget)
+                        || contains(positionerRef.current, mouseUpTarget)
+                        || mouseUpTarget === triggerRef.current
+                    ) {
+                        return;
+                    }
+
+                    const bounds = getPseudoElementBounds(triggerRef.current);
+
+                    if (
+                        mouseEvent.clientX >= bounds.left - BOUNDARY_OFFSET
+                        && mouseEvent.clientX <= bounds.right + BOUNDARY_OFFSET
+                        && mouseEvent.clientY >= bounds.top - BOUNDARY_OFFSET
+                        && mouseEvent.clientY <= bounds.bottom + BOUNDARY_OFFSET
+                    ) {
+                        return;
+                    }
+
+                    setOpen(false, mouseEvent, 'cancel-open');
+                }
+
+                // Firefox can fire this upon mousedown
+                timeoutMouseDown.start(0, () => {
+                    doc.addEventListener('mouseup', handleMouseUp, { once: true });
+                });
+            }
+        },
+        elementProps,
+        getButtonProps
+    );
+
+    // ensure nested useButton does not overwrite the combobox role:
+    // <Toolbar.Button render={<Select.Trigger />} />
+    props.role = 'combobox';
+
+    const state: SelectTrigger.State = React.useMemo(
+        () => ({
+            open,
+            disabled,
+            value,
+            readOnly
+        }),
+        [
+            open,
+            disabled,
+            readOnly,
+            value
+        ]
+    );
+
+    return useRenderElement('div', componentProps, {
+        ref: [ref, triggerRef],
+        state,
+        customStyleHookMapping,
+        props
+    });
+}
+
+export namespace SelectTrigger {
+    export type State = {
+        /**
+         * Whether the select menu is currently open.
+         */
+        open: boolean;
+        /**
+         * Whether the select menu is readonly.
+         */
+        readOnly: boolean;
+        /**
+         * The value of the currently selected item.
+         */
+        value: any;
+    };
+
+    export type Props = {
+        children?: React.ReactNode;
+        /**
+         * Whether the component should ignore user interaction.
+         * @default false
+         */
+        disabled?: boolean;
+    } & NonNativeButtonProps & HeadlessUIComponentProps<'div', State>;
+}

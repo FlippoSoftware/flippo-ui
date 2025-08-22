@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 /**
  * @internal
@@ -49,6 +49,6 @@ export namespace InternalBackdrop {
          * This is useful for allowing certain elements to be interactive while the backdrop is present.
          */
         cutout?: Element | null;
-        ref: React.Ref<HTMLDivElement>;
+        ref?: React.Ref<HTMLDivElement>;
     } & React.HTMLAttributes<HTMLDivElement>;
 }

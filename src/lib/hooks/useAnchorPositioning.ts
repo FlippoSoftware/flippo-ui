@@ -89,8 +89,8 @@ type SideShiftMode = {
 export type CollisionAvoidance = SideFlipMode | SideShiftMode;
 
 export function useAnchorPositioning(
-    params: NUseAnchorPositioning.Parameters
-): NUseAnchorPositioning.ReturnValue {
+    params: UseAnchorPositioning.Parameters
+): UseAnchorPositioning.ReturnValue {
     const {
         // Public parameters
         anchor,
@@ -491,7 +491,7 @@ function isRef(
     return param != null && 'current' in param;
 }
 
-export namespace NUseAnchorPositioning {
+export namespace UseAnchorPositioning {
     export type SharedParameters = {
         anchor?:
           | Element
