@@ -1,3 +1,74 @@
-import { eslintReactConfig } from '@flippo/eslint';
+import {
+    createEslintConfig,
+    general,
+    overridesStylisticConfig,
+    overridesTsConfig
+} from '@flippo/eslint';
 
-export default eslintReactConfig(import.meta.dirname);
+export default createEslintConfig(
+    {
+        pnpm: true,
+        react: true,
+        typescript: {
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname
+            },
+            overrides: {
+                ...overridesTsConfig,
+                'ts/no-namespace': 'off',
+                'ts/prefer-literal-enum-member': 'off',
+                'ts/no-unsafe-function-type': 'off'
+            }
+        },
+        stylistic: {
+            jsx: true,
+            semi: true,
+            overrides: overridesStylisticConfig
+        },
+        jsx: true,
+        formatters: true,
+        ...general,
+        ignores: ['**/*.md/*.ts']
+    },
+    {
+        rules: {
+            'react-dom/no-flush-sync': 'off',
+            'unused-imports/no-unused-vars': ['warn', {
+                varsIgnorePattern: '^_',
+                argsIgnorePattern: '^_',
+                caughtErrorsIgnorePattern: '^_'
+            }],
+            'node/prefer-global/process': ['error', 'always'],
+            'perfectionist/sort-imports': ['error', {
+                type: 'natural',
+                order: 'asc',
+                newlinesBetween: 'always',
+                internalPattern: ['^~/.+', '^@/.+'],
+                groups: [
+                    'react',
+                    'builtin',
+                    'builtin-type',
+                    'external',
+                    'external-type',
+                    'internal',
+                    'internal-type',
+                    'parent',
+                    'parent-type',
+                    'sibling',
+                    'sibling-type',
+                    'unknown',
+                    'index',
+                    'index-type',
+                    'object',
+                    'type'
+                ],
+                tsconfigRootDir: './tsconfig.json',
+                customGroups: [{
+                    groupName: 'react',
+                    elementNamePattern: ['^react$', '^react-.+']
+                }]
+            }]
+        }
+    }
+);
