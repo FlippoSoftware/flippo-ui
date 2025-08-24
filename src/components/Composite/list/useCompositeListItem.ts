@@ -11,7 +11,7 @@ export enum IndexGuessBehavior {
     GuessFromOrder
 }
 
-export function useCompositeListItem<Metadata>(params: NUseCompositeListItem.Params<Metadata>) {
+export function useCompositeListItem<Metadata>(params: NUseCompositeListItem.Params<Metadata> = {}) {
     const {
         label,
         metadata,

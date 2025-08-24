@@ -8,6 +8,7 @@ import { visuallyHidden } from '@lib/visuallyHidden';
 
 import type { TBaseOpenChangeReason } from '@lib/translateOpenChangeReason';
 
+import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { serializeValue } from '../utils/serialize';
 
 import { SelectFloatingContext, SelectRootContext } from './SelectRootContext';
@@ -64,7 +65,14 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
     const store = rootContext.store;
     const isMultiple = multiple ?? false;
 
-    const ref = useMergedRef(inputRef);
+    const {
+        setDirty,
+        validityData,
+        validationMode,
+        controlId
+    } = useFieldRootContext();
+
+    const ref = useMergedRef(inputRef, rootContext.fieldControlValidation.inputRef);
 
     const serializedValue = React.useMemo(() => {
         if (isMultiple && Array.isArray(value) && value.length === 0) {
@@ -97,52 +105,59 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
             <SelectFloatingContext value={floatingContext}>
                 {children}
                 <input
-                  onFocus={() => {
-                        // Move focus to the trigger element when the hidden input is focused.
-                        store.state.triggerElement?.focus();
-                    }}
-                    // Handle browser autofill.
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                        // Workaround for https://github.com/facebook/react/issues/9023
-                        if (event.nativeEvent.defaultPrevented) {
-                            return;
-                        }
-
-                        const nextValue = event.target.value;
-
-                        store.set('forceMount', true);
-
-                        queueMicrotask(() => {
-                            if (isMultiple) {
-                                // Browser autofill only ever writes one scalar value per field.
-                                // Because a multi-select expects an array, every mainstream engine skips it.
-                                // Reliably pre-selecting multiple options therefore has to be done in
-                                // application code, not via browser autofill.
+                    {...rootContext.fieldControlValidation.getInputValidationProps({
+                        onFocus() {
+                            // Move focus to the trigger element when the hidden input is focused.
+                            store.state.triggerElement?.focus();
+                        },
+                        // Handle browser autofill.
+                        onChange(event: React.ChangeEvent<HTMLSelectElement>) {
+                            // Workaround for https://github.com/facebook/react/issues/9023
+                            if (event.nativeEvent.defaultPrevented) {
+                                return;
                             }
-                            else {
-                                // Handle single selection
-                                const exactValue = rootContext.valuesRef.current.find(
-                                    (v: string) =>
-                                        v === nextValue
-                                        || (typeof value === 'string' && nextValue.toLowerCase() === v.toLowerCase())
-                                );
 
-                                if (exactValue != null) {
-                                    rootContext.setValue?.(exactValue, event.nativeEvent);
+                            const nextValue = event.target.value;
+
+                            store.set('forceMount', true);
+
+                            queueMicrotask(() => {
+                                if (isMultiple) {
+                                    // Browser autofill only ever writes one scalar value per field.
+                                    // Because a multi-select expects an array, every mainstream engine skips it.
+                                    // Reliably pre-selecting multiple options therefore has to be done in
+                                    // application code, not via browser autofill.
                                 }
-                            }
-                        });
-                    }}
-                  id={id || undefined}
-                  name={isMultiple ? undefined : rootContext.name}
-                  value={serializedValue}
-                  disabled={rootContext.disabled}
-                  required={rootContext.required}
-                  readOnly={rootContext.readOnly}
-                  ref={ref}
-                  style={visuallyHidden}
-                  tabIndex={-1}
-                  aria-hidden={true}
+                                else {
+                                    // Handle single selection
+                                    const exactValue = rootContext.valuesRef.current.find(
+                                        (v) =>
+                                            v === nextValue
+                                            || (typeof value === 'string' && nextValue.toLowerCase() === v.toLowerCase())
+                                    );
+
+                                    if (exactValue != null) {
+                                        setDirty(exactValue !== validityData.initialValue);
+                                        rootContext.setValue?.(exactValue, event.nativeEvent);
+
+                                        if (validationMode === 'onChange') {
+                                            rootContext.fieldControlValidation.commitValidation(exactValue);
+                                        }
+                                    }
+                                }
+                            });
+                        },
+                        'id': id || controlId || undefined,
+                        'name': isMultiple ? undefined : rootContext.name,
+                        'value': serializedValue,
+                        'disabled': rootContext.disabled,
+                        'required': rootContext.required,
+                        'readOnly': rootContext.readOnly,
+                        ref,
+                        'style': visuallyHidden,
+                        'tabIndex': -1,
+                        'aria-hidden': true
+                    })}
                 />
                 {hiddenInputs}
             </SelectFloatingContext>
@@ -224,8 +239,8 @@ type SelectRootProps<Value> = {
     open?: boolean;
     /**
      * Determines if the select enters a modal state when open.
-     * - `true`: user interaction is limited to the select: document page scroll is locked and
-     *   pointer interactions on outside elements are disabled.
+     * - `true`: user interaction is limited to the select: document page scroll is locked
+     *   and pointer interactions on outside elements are disabled.
      * - `false`: user interaction with the rest of the document is allowed.
      * @default true
      */
@@ -285,16 +300,16 @@ export type SelectRootConditionalProps<Value, Multiple extends boolean | undefin
 };
 
 export namespace SelectRoot {
-    export type Props<
-        Value,
-        Multiple extends boolean | undefined = false
-    > = SelectRootConditionalProps<Value, Multiple>;
-
-    export type State = object;
-
     export type Actions = {
         unmount: () => void;
     };
 
     export type OpenChangeReason = TBaseOpenChangeReason | 'window-resize';
+
+    export type State = object;
+
+    export type Props<
+        Value,
+        Multiple extends boolean | undefined = false
+    > = SelectRootConditionalProps<Value, Multiple>;
 }

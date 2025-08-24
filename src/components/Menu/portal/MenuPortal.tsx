@@ -1,0 +1,48 @@
+'use client';
+import React from 'react';
+
+import { FloatingPortal } from '@packages/floating-ui-react';
+
+import type { FloatingPortalProps } from '@packages/floating-ui-react';
+
+import { useMenuRootContext } from '../root/MenuRootContext';
+
+import { MenuPortalContext } from './MenuPortalContext';
+
+/**
+ * A portal element that moves the popup to a different part of the DOM.
+ * By default, the portal element is appended to `<body>`.
+ *
+ * Documentation: [Base UI Menu](https://base-ui.com/react/components/menu)
+ */
+export function MenuPortal(props: MenuPortal.Props) {
+    const { children, keepMounted = false, container } = props;
+
+    const { mounted } = useMenuRootContext();
+
+    const shouldRender = mounted || keepMounted;
+    if (!shouldRender) {
+        return null;
+    }
+
+    return (
+        <MenuPortalContext value={keepMounted}>
+            <FloatingPortal root={container}>{children}</FloatingPortal>
+        </MenuPortalContext>
+    );
+}
+
+export namespace MenuPortal {
+    export type Props = {
+        children?: React.ReactNode;
+        /**
+         * Whether to keep the portal mounted in the DOM while the popup is hidden.
+         * @default false
+         */
+        keepMounted?: boolean;
+        /**
+         * A parent element to render the portal element into.
+         */
+        container?: FloatingPortalProps['root'];
+    };
+}

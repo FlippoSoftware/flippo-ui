@@ -5,6 +5,7 @@ import type { Timeout } from '@flippo_ui/hooks';
 import type { HTMLProps } from '@lib/types';
 import type { FloatingRootContext, useFloatingRootContext } from '@packages/floating-ui-react';
 
+import type { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
 import type { SelectStore } from '../store';
 
 import type { SelectRoot } from './SelectRoot';
@@ -38,6 +39,7 @@ export type TSelectRootContext = {
         allowSelect: boolean;
     }>;
     selectedItemTextRef: React.RefObject<HTMLSpanElement | null>;
+    fieldControlValidation: ReturnType<typeof useFieldControlValidation>;
     /**
      * Called by each <Select.Item> when it knows its stable list index.
      * Allows the root to map option values to their DOM positions.
@@ -67,8 +69,9 @@ export function useSelectFloatingContext() {
 
     if (context === null) {
         throw new Error(
-            'Headless UI: SelectFloatingContext is missing. Select parts must be placed within <Select.Root>.'
+            'Base UI: SelectFloatingContext is missing. Select parts must be placed within <Select.Root>.'
         );
     }
+
     return context;
 }

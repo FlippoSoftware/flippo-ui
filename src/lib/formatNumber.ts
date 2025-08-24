@@ -15,7 +15,7 @@ export function getFormatter(locale?: Intl.LocalesArgument, options?: Intl.Numbe
 }
 
 export function formatNumber(
-    value: number | null,
+    value: number | null | undefined,
     locale?: Intl.LocalesArgument,
     options?: Intl.NumberFormatOptions
 ) {

@@ -20,14 +20,19 @@ import { contains } from '@packages/floating-ui-react/utils';
 import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '@lib/types';
 
+import { useFieldRootContext } from '../../Field/root/FieldRootContext';
+import { fieldValidityMapping } from '../../Field/utils/constants';
 import { useButton } from '../../use-button';
 import { useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';
+
+import type { FieldRoot } from '../../Field/root/FieldRoot';
 
 const BOUNDARY_OFFSET = 2;
 
 const customStyleHookMapping: CustomStyleHookMapping<SelectTrigger.State> = {
     ...pressableTriggerOpenStateMapping,
+    ...fieldValidityMapping,
     value: () => null
 };
 
@@ -49,17 +54,19 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
         ...elementProps
     } = componentProps;
 
+    const { state: fieldState, disabled: fieldDisabled } = useFieldRootContext();
     const {
         store,
         setOpen,
         selectionRef,
+        fieldControlValidation,
         readOnly,
         alignItemWithTriggerActiveRef,
         disabled: selectDisabled,
         keyboardActiveRef
     } = useSelectRootContext();
 
-    const disabled = selectDisabled || disabledProp;
+    const disabled = fieldDisabled || selectDisabled || disabledProp;
 
     const open = useStore(store, selectors.open);
     const value = useStore(store, selectors.value);
@@ -67,6 +74,13 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
     const positionerElement = useStore(store, selectors.positionerElement);
 
     const positionerRef = useLatestRef(positionerElement);
+
+    const {
+        labelId,
+        setTouched,
+        setFocused,
+        validationMode
+    } = useFieldRootContext();
 
     const triggerRef = React.useRef<HTMLElement | null>(null);
     const timeoutFocus = useTimeout();
@@ -129,10 +143,12 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
     const props: HTMLProps = mergeProps<'div'>(
         triggerProps,
         {
+            'aria-labelledby': labelId,
             'aria-readonly': readOnly || undefined,
             'tabIndex': disabled ? -1 : 0,
             'ref': mergedRef,
             onFocus(event) {
+                setFocused(true);
                 // The popup element shouldn't obscure the focused trigger.
                 if (open && alignItemWithTriggerActiveRef.current) {
                     setOpen(false, event.nativeEvent, 'focus-out');
@@ -146,6 +162,14 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
                 timeoutFocus.start(0, () => {
                     store.set('forceMount', true);
                 });
+            },
+            onBlur() {
+                setTouched(true);
+                setFocused(false);
+
+                if (validationMode === 'onBlur') {
+                    fieldControlValidation.commitValidation(value);
+                }
             },
             onPointerMove({ pointerType }) {
                 keyboardActiveRef.current = false;
@@ -204,6 +228,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
                 });
             }
         },
+        fieldControlValidation.getValidationProps,
         elementProps,
         getButtonProps
     );
@@ -214,12 +239,14 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
 
     const state: SelectTrigger.State = React.useMemo(
         () => ({
+            ...fieldState,
             open,
             disabled,
             value,
             readOnly
         }),
         [
+            fieldState,
             open,
             disabled,
             readOnly,
@@ -249,7 +276,7 @@ export namespace SelectTrigger {
          * The value of the currently selected item.
          */
         value: any;
-    };
+    } & FieldRoot.State;
 
     export type Props = {
         children?: React.ReactNode;

@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -7,6 +5,7 @@ import {
     useControlledState,
     useEventCallback,
     useIsoLayoutEffect,
+    useLatestRef,
     useLazyRef,
     useOnFirstRender,
     useOpenChangeComplete,
@@ -31,6 +30,10 @@ import {
 
 import type { FloatingRootContext } from '@packages/floating-ui-react';
 
+import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
+import { useFieldRootContext } from '../../Field/root/FieldRootContext';
+import { useField } from '../../Field/useField';
+import { useFormContext } from '../../Form/FormContext';
 import { selectors } from '../store';
 
 import type { State } from '../store';
@@ -53,10 +56,29 @@ export function useSelectRoot<Value, Multiple extends boolean | undefined>(
         multiple = false
     } = params;
 
+    const { clearErrors } = useFormContext();
+    const {
+        setDirty,
+        validityData,
+        validationMode,
+        setControlId,
+        setFilled,
+        name: fieldName,
+        disabled: fieldDisabled
+    } = useFieldRootContext();
+    const fieldControlValidation = useFieldControlValidation();
+
     const id = useHeadlessUiId(idProp);
 
-    const disabled = disabledProp;
-    const name = nameProp;
+    const disabled = fieldDisabled || disabledProp;
+    const name = fieldName ?? nameProp;
+
+    useIsoLayoutEffect(() => {
+        setControlId(id);
+        return () => {
+            setControlId(undefined);
+        };
+    }, [id, setControlId]);
 
     const [value, setValueUnwrapped] = useControlledState({
         prop: params.value,
@@ -130,7 +152,23 @@ export function useSelectRoot<Value, Multiple extends boolean | undefined>(
     const triggerElement = useStore(store, selectors.triggerElement);
     const positionerElement = useStore(store, selectors.positionerElement);
 
+    const controlRef = useLatestRef(store.state.triggerElement);
+    const commitValidation = fieldControlValidation.commitValidation;
+
+    useField({
+        id,
+        commitValidation,
+        value,
+        controlRef,
+        name,
+        getValue: () => value
+    });
+
     const prevValueRef = React.useRef(value);
+
+    useIsoLayoutEffect(() => {
+        setFilled(value !== null);
+    }, [value, setFilled]);
 
     useIsoLayoutEffect(() => {
         if (prevValueRef.current === value) {
@@ -167,10 +205,24 @@ export function useSelectRoot<Value, Multiple extends boolean | undefined>(
                 label: labelsRef.current[index] ?? ''
             });
         }
+
+        clearErrors(name);
+        setDirty(value !== validityData.initialValue);
+        commitValidation(value, validationMode !== 'onChange');
+
+        if (validationMode === 'onChange') {
+            commitValidation(value);
+        }
     }, [
         value,
+        commitValidation,
+        clearErrors,
         name,
+        validationMode,
         store,
+        setDirty,
+        validityData.initialValue,
+        setFilled,
         multiple
     ]);
 
@@ -436,6 +488,7 @@ export function useSelectRoot<Value, Multiple extends boolean | undefined>(
             typingRef,
             selectionRef,
             selectedItemTextRef,
+            fieldControlValidation,
             registerItemIndex,
             onOpenChangeComplete,
             keyboardActiveRef,
@@ -461,6 +514,7 @@ export function useSelectRoot<Value, Multiple extends boolean | undefined>(
             typingRef,
             selectionRef,
             selectedItemTextRef,
+            fieldControlValidation,
             registerItemIndex,
             onOpenChangeComplete,
             keyboardActiveRef,
