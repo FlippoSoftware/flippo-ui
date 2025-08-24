@@ -7,6 +7,7 @@ export * from './useEnhancedEffect';
 export * from './useEventCallback';
 export * from './useForcedRerendering';
 export * from './useId';
+export * from './useInterval';
 export * from './useIsFirstRender';
 export * from './useIsoLayoutEffect';
 export * from './useLatestRef';
