@@ -13,6 +13,14 @@ type MergeRef<I> = {
     refs: InputRef<I>[];
 };
 
+export function mergedRef<I>(...refs: InputRef<I>[]): Result<I> {
+    const mergeRef = createMergedRef<I>();
+
+    update(mergeRef, refs);
+
+    return mergeRef.callback;
+}
+
 /**
  * Merges multiple refs into a single callback ref.
  *
