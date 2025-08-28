@@ -1,8 +1,9 @@
-import type { CustomStyleHookMapping } from '../getStyleHookProps';
-
-import type { ComponentRenderFn, HeadlessUIComponentProps, HTMLProps } from '../types';
-import { useMergedRef } from '@flippo_ui/hooks';
 import React from 'react';
+
+import { useMergedRef } from '@flippo_ui/hooks';
+
+import { createSlot } from '@lib/createSlot';
+
 import { EMPTY_OBJECT } from '../constants';
 import { getStyleHookProps } from '../getStyleHookProps';
 import {
@@ -13,13 +14,17 @@ import {
 } from '../merge';
 import { resolveClassName } from '../resolveClassName';
 
+import type { CustomStyleHookMapping } from '../getStyleHookProps';
+import type { ComponentRenderFn, HeadlessUIComponentProps } from '../types';
+
 type IntrinsicTagName = keyof React.JSX.IntrinsicElements;
 
 /**
  * Renders a Base UI element.
  *
  * @param element The default HTML element to render. Can be overridden by the `render` prop.
- * @param componentProps An object containing the `render` and `className` props to be used for element customization. Other props are ignored.
+ * @param componentProps An object containing the `render` and `className` props to be used for element customization.
+ *                       Other props are ignored.
  * @param params Additional parameters for rendering the element.
  */
 export function useRenderElement<
@@ -33,13 +38,14 @@ export function useRenderElement<
     params: useRenderElement.Parameters<State, RenderedElementType, TagName, Enabled> = {}
 ): Enabled extends false ? null : React.ReactElement<Record<string, unknown>> {
     const renderProp = componentProps.render;
+    const asChild = componentProps.asChild ?? false;
     const outProps = useRenderElementProps(componentProps, params);
     if (params.enabled === false) {
         return null as Enabled extends false ? null : React.ReactElement<Record<string, unknown>>;
     }
 
     const state = params.state ?? (EMPTY_OBJECT as State);
-    return evaluateRenderProp(element, renderProp, outProps, state) as Enabled extends false
+    return evaluateRenderProp(element, asChild, renderProp, outProps, state) as Enabled extends false
         ? null
         : React.ReactElement<Record<string, unknown>>;
 }
@@ -114,8 +120,11 @@ function useRenderElementProps<
     return outProps;
 }
 
+const renderElementSlot = createSlot('useRenderElement');
+
 function evaluateRenderProp<T extends React.ElementType, S>(
     element: IntrinsicTagName | undefined,
+    asChild: boolean,
     render: HeadlessUIComponentProps<T, S>['render'],
     props: React.HTMLAttributes<any> & React.RefAttributes<any>,
     state: S
@@ -128,7 +137,12 @@ function evaluateRenderProp<T extends React.ElementType, S>(
         const mergedProps = mergeProps(props, render.props);
         mergedProps.ref = props.ref;
 
+        // eslint-disable-next-line react/no-clone-element
         return React.cloneElement(render, mergedProps);
+    }
+
+    if (asChild) {
+        return renderElementSlot(props, state);
     }
 
     if (element) {
@@ -138,7 +152,7 @@ function evaluateRenderProp<T extends React.ElementType, S>(
     }
     // Unreachable, but the typings on `useRenderElement` need to be reworked
     // to annotate it correctly.
-    throw new Error('Base UI: Render element or function are not defined.');
+    throw new Error('Headless UI: Render element or function are not defined.');
 }
 
 function renderTag(Tag: string, props: Record<string, any>) {
@@ -230,5 +244,7 @@ export namespace useRenderElement {
           | undefined
           | ComponentRenderFn<React.HTMLAttributes<any>, State>
           | React.ReactElement<Record<string, unknown>>;
+
+        asChild?: boolean;
     };
 }

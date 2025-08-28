@@ -62,6 +62,13 @@ export type HeadlessUIComponentProps<
     render?:
       | ComponentRenderFn<RenderFunctionProps, State>
       | React.ReactElement<Record<string, unknown>>;
+
+    /**
+     * Should a component pass all props to a single child component?
+     *
+     * Set to `true` if you want to ignore the component and pass all props to the child component
+     */
+    asChild?: boolean;
 };
 
 export type Simplify<T> = T extends Function ? T : { [K in keyof T]: T[K] };

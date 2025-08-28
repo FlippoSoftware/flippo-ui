@@ -20,6 +20,7 @@ export * from './RadioGroup';
 export * from './Select';
 export * from './Separator';
 export * from './Slider';
+export * from './Slot';
 export * from './Switch';
 export * from './Tabs';
 export * from './Toast';
