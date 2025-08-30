@@ -74,7 +74,8 @@
     "dist"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "peerDependencies": {
     "@flippo_ui/hooks": "workspace:*"
@@ -91,15 +92,21 @@
     "@eslint-react/eslint-plugin": "catalog:",
     "@flippo/eslint": "workspace:*",
     "@flippo/tsconfig": "workspace:*",
+    "@testing-library/jest-dom": "catalog:conflicts_@testing-library/jest-dom_h6_4_8",
+    "@testing-library/react": "catalog:conflicts_@testing-library/react_h16_0_0",
+    "@testing-library/user-event": "catalog:conflicts_@testing-library/user-event_h14_5_2",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitest/ui": "catalog:conflicts_@vitest/ui_h2_0_4",
     "eslint": "catalog:",
     "eslint-plugin-format": "catalog:",
     "eslint-plugin-react-hooks": "catalog:",
     "eslint-plugin-react-refresh": "catalog:",
+    "jsdom": "catalog:conflicts_jsdom_h24_1_1",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:conflicts_vitest_h2_0_4"
   }
 }

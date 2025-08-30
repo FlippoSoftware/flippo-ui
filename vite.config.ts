@@ -1,10 +1,27 @@
-import type { UserConfig } from 'vite';
+import path from 'node:path';
+
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-// https://vite.dev/config/
+import type { UserConfig } from 'vite';
+import type { InlineConfig } from 'vitest';
+
+type VitestConfigExport = {
+    test: InlineConfig;
+} & UserConfig;
+
+// https://vitejs.dev/config/
 export default defineConfig({
     plugins: [react()],
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: './src/test/setup.ts',
+        // you might want to disable it, if you don't have tests that rely on CSS
+        // since parsing CSS is slow
+        css: true,
+        include: ['src/components/Tooltip/**/*.test.tsx']
+    },
     build: {
         outDir: 'build'
     },
@@ -23,7 +40,7 @@ export default defineConfig({
     envPrefix: 'HEADLESS_',
     resolve: {
         alias: {
-            '@lib': './src/lib'
+            '@lib': path.resolve(__dirname, './src/lib')
         }
     },
     esbuild: {
@@ -36,4 +53,4 @@ export default defineConfig({
             usePolling: true
         }
     }
-}) satisfies UserConfig;
+} as VitestConfigExport);

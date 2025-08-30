@@ -3,6 +3,7 @@
 import React from 'react';
 
 import { useIsoLayoutEffect } from '@flippo_ui/hooks';
+
 import { NOOP } from '@lib/noop';
 
 export type ImageLoadingStatus = 'idle' | 'loading' | 'loaded' | 'error';
