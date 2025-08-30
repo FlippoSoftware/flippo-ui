@@ -1,0 +1,63 @@
+{
+  "name": "@flippo/internal-test-utils",
+  "version": "1.0.0",
+  "description": "Internal testing utilities for Flippo headless UI components",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts", 
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "keywords": [
+    "testing",
+    "test-utils",
+    "headless-ui",
+    "react",
+    "flippo",
+    "internal"
+  ],
+  "author": "@BlackPoretsky",
+  "license": "ISC",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "dependencies": {
+    "@testing-library/jest-dom": "^6.1.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.5.0",
+    "@vitest/ui": "^1.0.0",
+    "vitest": "^1.0.0",
+    "jsdom": "^22.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsup": "^8.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "vitest": ">=1.0.0"
+  }
+}
