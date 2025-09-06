@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo_ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { isSafari } from './detectBrowser';
 import { visuallyHidden } from './visuallyHidden';

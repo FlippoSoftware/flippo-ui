@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from '@flippo_ui/hooks';
+import { useId } from '@flippo-ui/hooks';
 
 /**
  * Wraps `useId` and prefixes generated `id`s with `base-ui-`

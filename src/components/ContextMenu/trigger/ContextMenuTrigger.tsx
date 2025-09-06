@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useEventCallback, useTimeout } from '@flippo_ui/hooks';
+import { useEventCallback, useTimeout } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '@lib/hooks';
 import { ownerDocument } from '@lib/owner';

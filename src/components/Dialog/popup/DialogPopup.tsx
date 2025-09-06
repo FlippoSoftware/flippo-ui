@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-import { useMergedRef, useOpenChangeComplete } from '@flippo_ui/hooks';
+import { useMergedRef, useOpenChangeComplete } from '@flippo-ui/hooks';
 
-import type { TInteraction, TransitionStatus } from '@flippo_ui/hooks';
+import type { TInteraction, TransitionStatus } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '@lib/hooks';
 import { InternalBackdrop } from '@lib/InternalBackdrop';

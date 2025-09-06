@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useIsoLayoutEffect, useLatestRef, useStore } from '@flippo_ui/hooks';
+import { useIsoLayoutEffect, useLatestRef, useStore } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '@lib/hooks';
 import { isMouseWithinBounds } from '@lib/isMouseWithinBounds';

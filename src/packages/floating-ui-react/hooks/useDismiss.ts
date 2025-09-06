@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Timeout, useEventCallback, useTimeout } from '@flippo_ui/hooks';
+import { Timeout, useEventCallback, useTimeout } from '@flippo-ui/hooks';
 import { getOverflowAncestors } from '@floating-ui/react-dom';
 import {
     getComputedStyle,

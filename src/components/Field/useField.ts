@@ -1,6 +1,6 @@
 import * as ReactDOM from 'react-dom';
 
-import { useIsoLayoutEffect, useLatestRef } from '@flippo_ui/hooks';
+import { useIsoLayoutEffect, useLatestRef } from '@flippo-ui/hooks';
 
 import { useFormContext } from '../Form/FormContext';
 

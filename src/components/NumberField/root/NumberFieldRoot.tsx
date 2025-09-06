@@ -10,7 +10,7 @@ import {
     useIsoLayoutEffect,
     useLatestRef,
     useTimeout
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { isIOS } from '@lib/detectBrowser';
 import { formatNumber, formatNumberMaxPrecision } from '@lib/formatNumber';

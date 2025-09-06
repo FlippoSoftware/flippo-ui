@@ -3,7 +3,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { useId, useIsoLayoutEffect } from '@flippo_ui/hooks';
+import { useId, useIsoLayoutEffect } from '@flippo-ui/hooks';
 import { isNode } from '@floating-ui/utils/dom';
 
 import { FocusGuard } from '@lib/FocusGuard';

@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 
-import { useId, useIsoLayoutEffect } from '@flippo_ui/hooks';
+import { useId, useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '@lib/hooks';
 

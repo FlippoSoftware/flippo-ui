@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import type { TInteraction, TransitionStatus } from '@flippo_ui/hooks';
+import type { TInteraction, TransitionStatus } from '@flippo-ui/hooks';
 
 import type { TBaseOpenChangeReason } from '@lib/translateOpenChangeReason';
 import type { HTMLProps } from '@lib/types';

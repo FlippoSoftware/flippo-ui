@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useEnhancedEffect, useEventCallback, useLazyRef } from '@flippo_ui/hooks';
+import { useEnhancedEffect, useEventCallback, useLazyRef } from '@flippo-ui/hooks';
 
 import { CompositeListContext } from './CompositeListContext';
 

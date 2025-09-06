@@ -8,7 +8,7 @@ import {
     useMergedRef,
     useStore,
     useTimeout
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { getPseudoElementBounds } from '@lib/getPseudoElementBounds';
 import { useRenderElement } from '@lib/hooks';

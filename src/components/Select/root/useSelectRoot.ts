@@ -12,7 +12,7 @@ import {
     useStore,
     useTimeout,
     useTransitionStatus
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { EMPTY_ARRAY } from '@lib/constants';
 import { useHeadlessUiId } from '@lib/hooks';

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useTimeout } from '@flippo_ui/hooks';
+import { useTimeout } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '@lib/hooks';
 

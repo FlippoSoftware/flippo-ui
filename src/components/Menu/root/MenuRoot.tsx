@@ -12,7 +12,7 @@ import {
     useScrollLock,
     useTimeout,
     useTransitionStatus
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { PATIENT_CLICK_THRESHOLD, TYPEAHEAD_RESET_MS } from '@lib/constants';
 import { useDirection, useMixedToggleClickHandler } from '@lib/hooks';

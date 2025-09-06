@@ -213,7 +213,7 @@
     "test:ui": "vitest --ui"
   },
   "peerDependencies": {
-    "@flippo_ui/hooks": "workspace:*"
+    "@flippo-ui/hooks": "workspace:*"
   },
   "dependencies": {
     "@floating-ui/react": "catalog:",

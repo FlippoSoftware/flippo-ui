@@ -1,9 +1,9 @@
 'use client';
 import React from 'react';
 
-import { useOpenChangeComplete } from '@flippo_ui/hooks';
+import { useOpenChangeComplete } from '@flippo-ui/hooks';
 
-import type { TransitionStatus } from '@flippo_ui/hooks';
+import type { TransitionStatus } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '@lib/hooks';
 import { ownerDocument } from '@lib/owner';

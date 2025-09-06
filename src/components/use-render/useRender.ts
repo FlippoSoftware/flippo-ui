@@ -2,6 +2,7 @@ import type React from 'react';
 
 import { useRenderElement } from '@lib/hooks';
 
+import type { StateAttributesMapping } from '@lib/getStyleHookProps';
 import type { ComponentRenderFn, HTMLProps } from '@lib/types';
 
 /**
@@ -17,11 +18,12 @@ export function useRender<
     params: useRender.Parameters<State, RenderedElementType, Enabled>
 ): useRender.ReturnValue<Enabled> {
     const renderParams = params as useRender.Parameters<State, RenderedElementType, Enabled> & {
-        disableStyleHooks: boolean;
+        customStyleHookMapping?: StateAttributesMapping<State>;
     };
-    renderParams.disableStyleHooks = true;
 
-    return useRenderElement(undefined, renderParams, renderParams);
+    renderParams.customStyleHookMapping = renderParams.stateAttributesMapping;
+
+    return useRenderElement(renderParams.defaultTagName, renderParams, renderParams);
 }
 
 export namespace useRender {
@@ -56,15 +58,22 @@ export namespace useRender {
         /**
          * The React element or a function that returns one to override the default element.
          */
-        render: RenderProp<State>;
+        render?: RenderProp<State>;
         /**
          * The ref to apply to the rendered element.
          */
-        ref?: React.Ref<RenderedElementType> | React.Ref<RenderedElementType>[];
+        ref?: React.Ref<RenderedElementType> | (React.Ref<RenderedElementType> | undefined)[];
         /**
          * The state of the component, passed as the second argument to the `render` callback.
+         * State properties are automatically converted to data-* attributes.
          */
         state?: State;
+        /**
+         * Custom mapping for converting state properties to data-* attributes.
+         * @example
+         * { isActive: (value) => (value ? { 'data-is-active': '' } : null) }
+         */
+        stateAttributesMapping?: StateAttributesMapping<State>;
         /**
          * Props to be spread on the rendered element.
          * They are merged with the internal props of the component, so that event handlers
@@ -78,6 +87,19 @@ export namespace useRender {
          * @default true
          */
         enabled?: Enabled;
+        /**
+         * The default tag name to use for the rendered element when `render` is not provided.
+         * @default 'div'
+         */
+        defaultTagName?: keyof React.JSX.IntrinsicElements;
+        /**
+         * If the value is `true`, all props will be passed to the single child component.
+         * It is important that the render function has higher priority, so if asChild and
+         * render are specified, render will be applied.
+         * @default false
+         */
+        asChild?: boolean;
+
     };
 
     export type ReturnValue<Enabled extends boolean | undefined> = Enabled extends false

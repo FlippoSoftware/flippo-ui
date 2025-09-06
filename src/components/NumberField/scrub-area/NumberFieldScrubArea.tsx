@@ -3,7 +3,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { useEventCallback, useLatestRef } from '@flippo_ui/hooks';
+import { useEventCallback, useLatestRef } from '@flippo-ui/hooks';
 
 import { isWebKit } from '@lib/detectBrowser';
 import { useRenderElement } from '@lib/hooks';

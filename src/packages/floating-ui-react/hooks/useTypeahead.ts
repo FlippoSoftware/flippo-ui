@@ -5,7 +5,7 @@ import {
     useIsoLayoutEffect,
     useLatestRef,
     useTimeout
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { stopEvent } from '../utils';
 

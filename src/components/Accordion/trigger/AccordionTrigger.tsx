@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo_ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { triggerOpenStateMapping } from '@lib/collapsibleOpenStateMapping';
 import { useRenderElement } from '@lib/hooks';

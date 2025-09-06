@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useStore } from '@flippo_ui/hooks';
+import { useStore } from '@flippo-ui/hooks';
 
 import { FloatingPortal } from '@packages/floating-ui-react';
 

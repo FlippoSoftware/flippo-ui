@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useEventCallback, useMergedRef, useTimeout } from '@flippo_ui/hooks';
+import { useEventCallback, useMergedRef, useTimeout } from '@flippo-ui/hooks';
 import { getParentNode, isHTMLElement, isLastTraversableNode } from '@floating-ui/utils/dom';
 
 import { getPseudoElementBounds } from '@lib/getPseudoElementBounds';

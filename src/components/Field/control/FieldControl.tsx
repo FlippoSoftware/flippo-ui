@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useControlledState, useEventCallback, useIsoLayoutEffect } from '@flippo_ui/hooks';
+import { useControlledState, useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 

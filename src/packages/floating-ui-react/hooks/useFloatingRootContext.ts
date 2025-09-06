@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useEventCallback, useId } from '@flippo_ui/hooks';
+import { useEventCallback, useId } from '@flippo-ui/hooks';
 import { isElement } from '@floating-ui/utils/dom';
 
 import { useFloatingParentNodeId } from '../components/FloatingTree';

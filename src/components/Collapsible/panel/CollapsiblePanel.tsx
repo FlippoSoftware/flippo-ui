@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo_ui/hooks';
+import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo-ui/hooks';
 
-import type { TransitionStatus } from '@flippo_ui/hooks';
+import type { TransitionStatus } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '@lib/hooks';
 import { warn } from '@lib/warn';

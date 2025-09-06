@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 
-import { useEnhancedEffect, useEventCallback, useLatestRef } from '@flippo_ui/hooks';
+import { useEnhancedEffect, useEventCallback, useLatestRef } from '@flippo-ui/hooks';
 import {
     arrow,
     autoUpdate,

@@ -8,9 +8,9 @@ import {
     useIsoLayoutEffect,
     useOpenChangeComplete,
     useStore
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
-import type { TransitionStatus } from '@flippo_ui/hooks';
+import type { TransitionStatus } from '@flippo-ui/hooks';
 
 import { DISABLED_TRANSITIONS_STYLE } from '@lib/constants';
 import { isWebKit } from '@lib/detectBrowser';

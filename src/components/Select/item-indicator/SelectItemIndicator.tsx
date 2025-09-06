@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-import { useOpenChangeComplete, useTransitionStatus } from '@flippo_ui/hooks';
+import { useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
 
-import type { TransitionStatus } from '@flippo_ui/hooks';
+import type { TransitionStatus } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '@lib/hooks';
 import { transitionStatusMapping } from '@lib/styleHookMapping';

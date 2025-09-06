@@ -7,7 +7,7 @@ import {
     useEventCallback,
     useIsoLayoutEffect,
     useMergedRef
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 import { mergeProps } from '@lib/merge';

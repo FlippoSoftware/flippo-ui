@@ -11,7 +11,7 @@ import {
     useScrollLock,
     useTimeout,
     useTransitionStatus
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { OPEN_DELAY, PATIENT_CLICK_THRESHOLD } from '@lib/constants';
 import { mergeProps } from '@lib/merge';

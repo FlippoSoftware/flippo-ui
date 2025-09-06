@@ -9,9 +9,9 @@ import {
     useOpenInteractionType,
     useScrollLock,
     useTransitionStatus
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
-import type { TInteraction, TransitionStatus } from '@flippo_ui/hooks';
+import type { TInteraction, TransitionStatus } from '@flippo-ui/hooks';
 
 import { translateOpenChangeReason } from '@lib/translateOpenChangeReason';
 import {

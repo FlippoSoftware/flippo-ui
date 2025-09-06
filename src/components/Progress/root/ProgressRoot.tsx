@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useLatestRef } from '@flippo_ui/hooks';
+import { useLatestRef } from '@flippo-ui/hooks';
 
 import { formatNumber } from '@lib/formatNumber';
 import { useRenderElement } from '@lib/hooks';

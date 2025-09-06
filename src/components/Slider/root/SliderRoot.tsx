@@ -8,7 +8,7 @@ import {
     useIsoLayoutEffect,
     useLatestRef,
     useMergedRef
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 import { areArraysEqual } from '@lib/areArraysEqual';
 
 import { clamp } from '@lib/clamp';

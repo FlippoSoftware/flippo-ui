@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 
-import { useLatestRef } from '@flippo_ui/hooks';
+import { useLatestRef } from '@flippo-ui/hooks';
 
 import { FocusGuard } from '@lib/FocusGuard';
 import { useRenderElement } from '@lib/hooks';

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import type { TransitionStatus } from '@flippo_ui/hooks';
+import type { TransitionStatus } from '@flippo-ui/hooks';
 
 import type { HTMLProps } from '@lib/types';
 import type { FloatingRootContext } from '@packages/floating-ui-react';

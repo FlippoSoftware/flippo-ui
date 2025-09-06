@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo_ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 import { useFloating as usePosition } from '@floating-ui/react-dom';
 import { isElement } from '@floating-ui/utils/dom';
 

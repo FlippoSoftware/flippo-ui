@@ -8,7 +8,7 @@ import {
     useIsoLayoutEffect,
     useMergedRef,
     useOnMount
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { warn } from '@lib/warn';
 

@@ -1,6 +1,6 @@
-import { createSelector } from '@flippo_ui/hooks';
+import { createSelector } from '@flippo-ui/hooks';
 
-import type { Store, TransitionStatus } from '@flippo_ui/hooks';
+import type { Store, TransitionStatus } from '@flippo-ui/hooks';
 
 import type { HTMLProps } from '@lib/types';
 

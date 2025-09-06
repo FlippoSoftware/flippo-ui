@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { AnimationFrame, useOpenInteractionType, useScrollLock } from '@flippo_ui/hooks';
+import { AnimationFrame, useOpenInteractionType, useScrollLock } from '@flippo-ui/hooks';
 
 import { useHeadlessUiId } from '@lib/hooks';
 import {

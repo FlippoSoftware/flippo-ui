@@ -7,7 +7,7 @@ import {
     useIsoLayoutEffect,
     useScrollLock,
     useStore
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { DROPDOWN_COLLISION_AVOIDANCE } from '@lib/constants';
 import { useAnchorPositioning, useRenderElement } from '@lib/hooks';
