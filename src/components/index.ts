@@ -30,5 +30,3 @@ export * from './Toolbar';
 export * from './Tooltip';
 export * from './use-button';
 export * from './use-render';
-export * from '@lib/hooks/useDirection';
-export * from '@lib/merge';

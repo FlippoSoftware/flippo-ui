@@ -1,10 +1,18 @@
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
+import { glob } from 'glob';
 import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
 
 import type { UserConfig } from 'vite';
 import type { InlineConfig } from 'vitest';
+
+const entryPoints = Object.fromEntries(
+    glob.sync('src/**/*.{ts,tsx}', {
+        ignore: ['src/**/*.test.{ts,tsx}', 'src/**/*.stories.{ts,tsx}']
+    }).map((file) => [file.replace('src/', '').replace(/\.[^/.]+$/, ''), path.resolve(file)])
+);
 
 type VitestConfigExport = {
     test: InlineConfig;
@@ -12,18 +20,35 @@ type VitestConfigExport = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [react()],
+    plugins: [react(), dts({
+        insertTypesEntry: true,
+        beforeWriteFile: (filePath, content) => {
+            return { filePath: filePath.replace('/src', ''), content };
+        }
+    })],
     test: {
         globals: true,
         environment: 'jsdom',
         setupFiles: './src/test/setup.ts',
-        // you might want to disable it, if you don't have tests that rely on CSS
-        // since parsing CSS is slow
         css: true,
         include: ['src/components/Tooltip/**/*.test.tsx']
     },
     build: {
-        outDir: 'build'
+        outDir: 'dist',
+        lib: {
+            entry: entryPoints,
+            name: 'FlippoHeadlessComponents',
+            formats: ['es', 'cjs']
+        },
+        rollupOptions: {
+            external: ['react', 'react-dom'],
+            output: {
+                preserveModules: true,
+                preserveModulesRoot: 'src',
+                entryFileNames: '[name].[format].js',
+                chunkFileNames: '[name].[format].js'
+            }
+        }
     },
     css: {
         modules: {
@@ -40,11 +65,9 @@ export default defineConfig({
     envPrefix: 'HEADLESS_',
     resolve: {
         alias: {
-            '@lib': path.resolve(__dirname, './src/lib')
+            '@lib': path.resolve(__dirname, './src/lib'),
+            '@packages': path.resolve(__dirname, './src/packages')
         }
-    },
-    esbuild: {
-        jsxInject: `import React from 'react'`
     },
     server: {
         host: '0.0.0.0', // '127.0.0.1',

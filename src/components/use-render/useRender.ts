@@ -71,7 +71,7 @@ export namespace useRender {
          * are merged, `className` strings and `style` properties are joined, while other external props overwrite the
          * internal ones.
          */
-        props?: Record<string, unknown>;
+        props?: Record<string, unknown> | Record<string, unknown>[];
         /**
          * If `false`, the hook will skip most of its internal logic and return `null`.
          * This is useful for rendering a component conditionally.
