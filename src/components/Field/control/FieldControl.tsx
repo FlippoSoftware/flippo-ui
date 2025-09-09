@@ -3,7 +3,6 @@
 import React from 'react';
 
 import { useControlledState, useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
-
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '@lib/types';

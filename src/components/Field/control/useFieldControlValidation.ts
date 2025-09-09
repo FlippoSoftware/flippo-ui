@@ -3,7 +3,6 @@
 import React from 'react';
 
 import { useEventCallback, useTimeout } from '@flippo-ui/hooks';
-
 import { mergeProps } from '@lib/merge';
 
 import type { HTMLProps } from '@lib/types';
