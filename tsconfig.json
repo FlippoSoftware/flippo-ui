@@ -1,0 +1,16 @@
+{
+  "extends": "@flippo/tsconfig",
+  "compilerOptions": {
+    "jsx": "react",
+
+    "lib": ["dom", "ES2024"],
+
+    "paths": {
+      "@lib/*": ["./src/lib/*"],
+      "@packages/*": ["./src/packages/*"]
+    },
+    "types": ["react", "react-dom", "node"]
+  },
+  "include": ["eslint.config.js", "src/**/*.tsx", "src/**/*.ts", "src/vite-env.d.ts", "src/types/scss.d.ts", "vite.config.ts", "vitest.config.ts", ".storybook/**/*.ts", ".storybook/**/*.tsx"],
+  "exclude": ["node_modules"]
+}

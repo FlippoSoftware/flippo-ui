@@ -1,0 +1,29 @@
+.spacings {
+  --f-spacing-0: 2px;
+  --f-spacing-1: 4px;
+  --f-spacing-2: 8px;
+  --f-spacing-3: 12px;
+  --f-spacing-4: 16px;
+  --f-spacing-5: 20px;
+  --f-spacing-6: 24px;
+  --f-spacing-7: 28px;
+  --f-spacing-8: 32px;
+  --f-spacing-9: 36px;
+  --f-spacing-10: 40px;
+  --f-spacing-11: 44px;
+  --f-spacing-12: 48px;
+  --f-spacing-13: 52px;
+  --f-spacing-14: 56px;
+  --f-spacing-15: 60px;
+  --f-spacing-16: 64px;
+  --f-spacing-max: 1000px;
+
+  --f-border-radius-button: var(--f-spacing-max);
+  --f-border-radius-input-field: var(--f-spacing-max);
+  --f-border-radius-card: var(--f-spacing-4);
+  --f-border-radius-menu: var(--f-spacing-4);
+  --f-border-radius-menu-item: var(--f-spacing-3);
+  --f-border-radius-popup: var(--f-spacing-6);
+  --f-border-radius-zone: var(--f-spacing-4);
+  --f-border-radius-full: 100%;
+}

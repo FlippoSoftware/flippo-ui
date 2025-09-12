@@ -1,0 +1,126 @@
+{
+  "name": "@flippo-ui/flippo-components",
+  "type": "module",
+  "version": "0.1.0",
+  "private": false,
+  "packageManager": "pnpm@10.7.0",
+  "description": "",
+  "author": "@BlackPoretsky",
+  "license": "ISC",
+  "keywords": [
+    "react",
+    "react-component",
+    "flippo",
+    "unstyled",
+    "a11y"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./accordion": "./src/Accordion/index.ts",
+    "./avatar": "./src/avatar/index.ts",
+    "./checkbox": "./src/Checkbox/index.ts",
+    "./checkbox-group": "./src/CheckboxGroup/index.ts",
+    "./collapsible": "./src/Collapsible/index.ts",
+    "./context-menu": "./src/ContextMenu/index.ts",
+    "./dialog": "./src/Dialog/index.ts",
+    "./direction-provider": "./src/lib/hooks/useDirection.ts",
+    "./field": "./src/Field/index.ts",
+    "./fieldset": "./src/Fieldset/index.ts",
+    "./form": "./src/Form/index.ts",
+    "./input": "./src/Input/index.ts",
+    "./menu": "./src/Menu/index.ts",
+    "./menubar": "./src/Menubar/index.ts",
+    "./merge-props": "./src/lib/merge.ts",
+    "./meter": "./src/Meter/index.ts",
+    "./number-field": "./src/NumberField/index.ts",
+    "./popover": "./src/Popover/index.ts",
+    "./progress": "./src/Progress/index.ts",
+    "./radio": "./src/Radio/index.ts",
+    "./radio-group": "./src/RadioGroup/index.ts",
+    "./select": "./src/Select/index.ts",
+    "./separator": "./src/Separator/index.ts",
+    "./slider": "./src/Slider/index.ts",
+    "./switch": "./src/Switch/index.ts",
+    "./tabs": "./src/Tabs/index.ts",
+    "./toast": "./src/Toast/index.ts",
+    "./toggle": "./src/Toggle/index.ts",
+    "./toggle-group": "./src/ToggleGroup/index.ts",
+    "./toolbar": "./src/Toolbar/index.ts",
+    "./tooltip": "./src/Tooltip/index.ts",
+    "./use-render": "./src/use-render/index.ts",
+    "./use-button": "./src/use-button/index.ts"
+  },
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.mts",
+          "default": "./dist/index.mjs"
+        },
+        "require": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        }
+      }
+    }
+  },
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "@flippo-ui/headless-components": "workspace:*",
+    "@flippo-ui/icons": "workspace:*",
+    "class-variance-authority": "catalog:"
+  },
+  "devDependencies": {
+    "@eslint-react/eslint-plugin": "catalog:",
+    "@flippo/eslint": "workspace:*",
+    "@flippo/internal-test-utils": "workspace:*",
+    "@flippo/tsconfig": "workspace:*",
+    "@storybook/addon-essentials": "catalog:",
+    "@storybook/addon-interactions": "catalog:",
+    "@storybook/addon-links": "catalog:",
+    "@storybook/addon-onboarding": "catalog:",
+    "@storybook/blocks": "catalog:",
+    "@storybook/manager-api": "catalog:",
+    "@storybook/react": "catalog:",
+    "@storybook/react-vite": "catalog:",
+    "@storybook/test": "catalog:",
+    "@storybook/theming": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/ui": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-format": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-react-refresh": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sass": "catalog:",
+    "sass-embedded": "catalog:",
+    "storybook": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}

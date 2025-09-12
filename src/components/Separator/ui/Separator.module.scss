@@ -1,0 +1,57 @@
+.Separator {
+  border-radius: 8px;
+  margin: 0;
+  background-color: var(--f-color-stroke-transparent);
+
+  &[data-orientation='horizontal'] {
+    margin: 5px 0;
+    height: 2px;
+    width: 100%;
+
+    &.spacing-4 {
+      margin: 5px 4px;
+    }
+
+    &.spacing-6 {
+      margin: 5px 6px;
+    }
+
+    &.spacing-8 {
+      margin: 5px 8px;
+    }
+
+    &.spacing-10 {
+      margin: 5px 10px;
+    }
+
+    &.spacing-12 {
+      margin: 5px 12px;
+    }
+  }
+
+  &[data-orientation='vertical'] {
+    margin: 0 5px;
+    width: 2px;
+    height: 100%;
+
+    &.spacing-4 {
+      margin: 4px 5px;
+    }
+
+    &.spacing-6 {
+      margin: 6px 5px;
+    }
+
+    &.spacing-8 {
+      margin: 8px 5px;
+    }
+
+    &.spacing-10 {
+      margin: 10px 5px;
+    }
+
+    &.spacing-12 {
+      margin: 12px 5px;
+    }
+  }
+}

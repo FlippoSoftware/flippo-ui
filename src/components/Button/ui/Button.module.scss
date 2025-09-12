@@ -1,0 +1,229 @@
+@use 'mixins/_flex.scss' as flex;
+@use 'mixins/_font.scss' as font;
+@use 'mixins/_corners.scss' as corners;
+
+/*
+*  $size: large | small
+*  $bh - button height
+*  $padding - button padding
+*  $gap - button gap
+*  $iconSize - icon size
+*  $iconPadding - icon padding
+*  $iconSizeIconButton - icon size for icon button
+*/
+@mixin sizeButton($size, $bh, $padding, $gap, $iconSize) {
+  padding: $padding;
+  height: $bh;
+  min-width: $bh;
+
+  gap: $gap;
+
+  @if $size == 'large' {
+    @include font.body('stronger');
+  } @else if $size == 'medium' {
+    @include font.body('default');
+  } @else if $size == 'small' {
+    @include font.bodyMinus('default');
+  } @else if $size == 'x-small' {
+    @include font.label('default');
+  }
+
+  svg {
+    width: $iconSize;
+    aspect-ratio: 1;
+  }
+}
+
+/*
+*  $iconPadding - icon padding
+*  $iconSizeIconButton - icon size for icon button
+*/
+@mixin sizeIconButton($iconPadding, $iconSizeIconButton) {
+  padding: $iconPadding;
+
+  svg {
+    width: $iconSizeIconButton;
+    aspect-ratio: 1;
+  }
+}
+
+/*
+ * $state: hover | focus-within | active | disabled
+ * $bg - background color
+ * $color - text color
+ * $ow - outline width
+ * $oc - outline color
+*/
+$ow: 1.5px;
+@mixin stateButton($state, $bg: null, $color: null, $oc: null) {
+  &#{$state} {
+    @if $bg {
+      background-color: $bg;
+    }
+
+    @if $color {
+      color: $color;
+    }
+
+    @if $oc {
+      outline: $ow solid $oc;
+    }
+  }
+}
+
+.Button {
+  border-radius: var(--f-border-radius-button);
+  cursor: pointer;
+
+  transition: 0.3s ease;
+
+  fill: currentColor;
+
+  @include corners.corners(('::before', '::after'), var(--f-spacing-3));
+
+  @include flex.display(inline-flex, row, center, center, var(--f-spacing-2));
+  width: 100%;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+
+  span {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &:disabled,
+  &[data-disabled] {
+    cursor: not-allowed;
+  }
+}
+
+.loading {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.link {
+  cursor: pointer;
+}
+
+.large {
+  @include sizeButton(
+    'large',
+    var(--f-spacing-14),
+    var(--f-spacing-4) var(--f-spacing-6),
+    calc(var(--f-spacing-5) / 2),
+    var(--f-spacing-6)
+  );
+}
+
+.medium {
+  @include sizeButton(
+    'large',
+    var(--f-spacing-12),
+    calc(var(--f-spacing-4) / 2) var(--f-spacing-5),
+    calc(var(--f-spacing-5) / 2),
+    var(--f-spacing-6)
+  );
+}
+
+.small {
+  @include sizeButton(
+    'small',
+    var(--f-spacing-10),
+    calc(var(--f-spacing-4) / 2) calc(var(--f-spacing-9) / 2),
+    calc(var(--f-spacing-4) / 2),
+    var(--f-spacing-5)
+  );
+}
+
+.x-small {
+  @include sizeButton(
+    'x-small',
+    var(--f-spacing-5),
+    var(--f-spacing-0) var(--f-spacing-2),
+    var(--f-spacing-1),
+    calc(var(--f-spacing-9) / 2)
+  );
+}
+
+.icon-large {
+  @include sizeIconButton(var(--f-spacing-3), var(--f-spacing-8));
+}
+
+.icon-medium {
+  @include sizeIconButton(var(--f-spacing-2), var(--f-spacing-6));
+}
+
+.icon-small {
+  @include sizeIconButton(var(--f-spacing-2), var(--f-spacing-6));
+}
+
+.icon-x-small {
+  @include sizeIconButton(0, var(--f-spacing-5));
+}
+
+.primary {
+  background-color: var(--f-color-brand);
+  color: var(--f-color-text-white);
+
+  @include stateButton(':hover', var(--f-color-brand-hover));
+  @include stateButton(':active', var(--f-color-brand), var(--f-color-brand-light-hover));
+  @include stateButton(':focus-visible', $oc: var(--f-color-text-primary));
+  @include stateButton(':disabled', var(--f-color-bg-2), var(--f-color-text-disabled));
+  @include stateButton('[data-disabled]', var(--f-color-bg-2), var(--f-color-text-disabled));
+}
+
+.secondary {
+  background-color: var(--f-color-bg-3);
+  color: var(--f-color-text-2);
+
+  @include stateButton(':hover', var(--f-color-bg-3-hover), var(--f-color-text-white));
+  @include stateButton(':active', var(--f-color-bg-3), var(--f-color-text-2));
+  @include stateButton(':focus-visible', $oc: var(--f-color-text-primary));
+  @include stateButton(':disabled', var(--f-color-bg-2), var(--f-color-text-disabled));
+  @include stateButton('[data-disabled]', var(--f-color-bg-2), var(--f-color-text-disabled));
+}
+
+.outlined,
+.label,
+.danger {
+  background-color: transparent;
+}
+
+.outlined {
+  outline: $ow solid var(--f-color-stroke);
+  color: var(--f-color-text-3);
+
+  @include stateButton(':hover', $color: var(--f-color-text-white), $oc: var(--f-color-stroke-hover));
+  @include stateButton(':active', $color: var(--f-color-text-3), $oc: var(--f-color-stroke));
+  @include stateButton(':focus-visible', $color: var(--f-color-text-3), $oc: var(--f-color-brand-light));
+  @include stateButton(':disabled', $color: var(--f-color-text-disabled), $oc: var(--f-color-stroke-subtle));
+  @include stateButton('[data-disabled]', $color: var(--f-color-text-disabled), $oc: var(--f-color-stroke-subtle));
+}
+
+.label {
+  color: var(--f-color-text-4);
+
+  @include stateButton(':hover', var(--f-color-bg-2-hover), var(--f-color-text-white));
+  @include stateButton(':active', var(--f-color-bg-2), var(--f-color-text-4));
+  @include stateButton(':focus-visible', $color: var(--f-color-text-3), $oc: var(--f-color-brand-light));
+  @include stateButton(':disabled', $color: var(--f-color-text-disabled));
+  @include stateButton('[data-disabled]', $color: var(--f-color-text-disabled));
+}
+
+.danger {
+  color: var(--f-color-error);
+
+  @include stateButton(':hover', var(--f-color-error-desaturated), var(--f-color-error-hover));
+  @include stateButton(':active', var(--f-color-bg-2-hover), var(--f-color-error));
+  @include stateButton(':focus-visible', $color: var(--f-color-text-3), $oc: var(--f-color-brand-light));
+  @include stateButton(':disabled', $color: var(--f-color-text-disabled));
+  @include stateButton('[data-disabled]', $color: var(--f-color-text-disabled));
+}

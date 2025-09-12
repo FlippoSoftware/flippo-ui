@@ -1,0 +1,42 @@
+@use 'mixins/_flex.scss' as flex;
+@use 'mixins/_font.scss' as font;
+
+.groups {
+  @include flex.display(flex, row, center, baseline, 32px);
+
+  flex-wrap: wrap;
+
+  .group {
+    &:nth-child(n + 2) {
+      margin-top: 20px;
+    }
+
+    .groupName {
+      @include font.title-2('stronger');
+
+      color: var(--text-primary);
+      text-align: center;
+
+      margin-bottom: var(--f-spacing-8);
+    }
+
+    .groupVariants {
+      @include flex.display(flex, $gap: 16px);
+
+      .variantName {
+        align-self: center;
+        color: var(--text-2);
+        @include font.bodyPlus('stronger');
+      }
+
+      .variant {
+        @include flex.display(flex, column, normal, center, $gap: 16px);
+        @include font.label('default');
+
+        flex-wrap: wrap;
+      }
+
+      flex-wrap: wrap;
+    }
+  }
+}

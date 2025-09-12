@@ -1,0 +1,93 @@
+@use 'mixins/_flex.scss' as flex;
+@use 'mixins/_font.scss' as font;
+
+.input {
+  $ow: 1.5px;
+
+  outline-color: transparent;
+
+  flex: 0 1 100%;
+
+  background: var(--bg-area-muted);
+  fill: var(--text-6);
+  border-radius: var(--radius-input-field);
+
+  overflow: hidden;
+
+  transition:
+    outline 0.3s ease,
+    background-color 0.3s ease;
+
+  @include flex.display(inline-flex, row, center, center, var(--f-spacing-3));
+
+  width: 100%;
+
+  & > input {
+    background: transparent;
+    outline: none;
+    border: none;
+    padding: 0;
+    width: 100%;
+
+    text-overflow: ellipsis;
+
+    color: var(--text-primary);
+
+    &::placeholder {
+      color: var(--text-6);
+    }
+
+    caret-color: var(--text-white);
+  }
+
+  & > svg {
+    width: 18px;
+    aspect-ratio: 1;
+  }
+
+  &:hover {
+    background: var(--bg-area-subtle);
+    outline: $ow solid var(--stroke);
+
+    input::placeholder {
+      color: var(--text-5);
+    }
+
+    svg {
+      fill: var(--text-5);
+    }
+  }
+
+  &:focus-within {
+    background: var(--bg-area-muted);
+    outline: $ow solid var(--brand-light);
+
+    input::placeholder {
+      color: var(--text-6);
+    }
+
+    svg {
+      fill: var(--text-5);
+    }
+  }
+
+  &_large {
+    height: 56px;
+
+    @include font.body('weaker');
+
+    .content {
+      padding: 16px 20px;
+    }
+  }
+
+  &_medium {
+    height: 48px;
+
+    @include font.bodyMinus('weaker');
+
+    .content {
+      padding: 8px 20px;
+    }
+  }
+}

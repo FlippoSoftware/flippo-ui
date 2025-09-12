@@ -1,0 +1,59 @@
+@use 'sass:list';
+@use 'sass:selector';
+
+@function get-corners-selector($mod, $selector, $append: true) {
+  @if $append {
+    @return selector.append($mod, $selector);
+  } @else {
+    @return list.join($mod, $selector, $separator: space);
+  }
+}
+
+@mixin corners($selectors, $radius, $append: true) {
+  @each $selector in $selectors {
+    &#{get-corners-selector('.corners-round-round', $selector, $append)} {
+      border-radius: $radius;
+    }
+
+    &#{get-corners-selector('.corners-clear-clear', $selector, $append)} {
+      border-radius: 0;
+      border-inline: 0;
+    }
+
+    &#{get-corners-selector('.corners-circle-circle', $selector, $append)} {
+      border-radius: var(--f-spacing-max);
+    }
+
+    &#{get-corners-selector('.corners-round-clear', $selector, $append)} {
+      border-start-start-radius: $radius;
+      border-start-end-radius: 0;
+      border-end-start-radius: $radius;
+      border-end-end-radius: 0;
+      border-inline-end: 0;
+    }
+
+    &#{get-corners-selector('.corners-clear-round', $selector, $append)} {
+      border-start-start-radius: 0;
+      border-start-end-radius: $radius;
+      border-end-start-radius: 0;
+      border-end-end-radius: $radius;
+      border-inline-start: 0;
+    }
+
+    &#{get-corners-selector('.corners-circle-clear', $selector, $append)} {
+      border-start-start-radius: var(--f-spacing-max);
+      border-start-end-radius: 0;
+      border-end-start-radius: var(--f-spacing-max);
+      border-end-end-radius: 0;
+      border-inline-end: 0;
+    }
+
+    &#{get-corners-selector('.corners-clear-circle', $selector, $append)} {
+      border-start-start-radius: 0;
+      border-start-end-radius: var(--f-spacing-max);
+      border-end-start-radius: 0;
+      border-end-end-radius: var(--f-spacing-max);
+      border-inline-start: 0;
+    }
+  }
+}

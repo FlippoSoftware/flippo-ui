@@ -1,0 +1,55 @@
+@use 'mixins/_flex.scss' as flex;
+@use 'mixins/_font.scss' as font;
+@use 'mixins/_text.scss' as text;
+
+@mixin variantLink($defaultColor, $hoverColor, $activeColor) {
+  color: $defaultColor;
+
+  &:hover {
+    color: $hoverColor;
+  }
+
+  &:active {
+    color: $activeColor;
+  }
+}
+
+.Link {
+  @include flex.display(inline-flex, row, center, center, calc(var(--f-spacing-3) / 2));
+  @include font.bodyMinus('default');
+  width: 100%;
+
+  cursor: pointer;
+
+  transition: color 0.3s ease;
+
+  svg {
+    width: var(--f-spacing-5);
+    aspect-ratio: 1;
+
+    fill: currentColor;
+
+    flex: 0 0 auto;
+  }
+
+  &_neutral {
+    @include variantLink(var(--f-color-text-2), var(--f-color-brand-light), var(--f-color-brand));
+  }
+
+  &_brand {
+    @include variantLink(var(--f-color-brand-light), var(--f-color-brand-light-hover), var(--f-color-brand-light));
+  }
+
+  .text {
+    @include flex.display(inline-flex, row, center, center, calc(var(--f-spacing-3) / 2));
+    @include text.overflow-ellipsis();
+
+    width: 100%;
+
+    flex: 1 1 auto;
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+}

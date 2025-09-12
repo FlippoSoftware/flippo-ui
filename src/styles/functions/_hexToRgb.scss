@@ -1,0 +1,11 @@
+@use 'sass:color';
+@use 'sass:string';
+
+@function hexToRgb($color) {
+  @if string.index('#{$color}', 'var(') {
+    @return #{$color};
+  }
+
+  @return color.channel($color, 'red', $space: rgb), color.channel($color, 'green', $space: rgb),
+    color.channel($color, 'blue', $space: rgb);
+}
