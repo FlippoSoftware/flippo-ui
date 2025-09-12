@@ -9,7 +9,7 @@ export type HeadlessUIEvent<E extends React.SyntheticEvent<Element, Event>> = E 
     readonly headlessUIHandlerPrevented?: boolean;
 };
 
-type WithPreventHeadlessUIHandler<T> = T extends (event: infer E) => any
+export type WithPreventHeadlessUIHandler<T> = T extends (event: infer E) => any
     ? E extends React.SyntheticEvent<Element, Event>
         ? (event: HeadlessUIEvent<E>) => ReturnType<T>
         : T

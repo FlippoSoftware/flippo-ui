@@ -3,6 +3,7 @@
 import React from 'react';
 
 import { useEventCallback, useTimeout } from '@flippo-ui/hooks';
+
 import { mergeProps } from '@lib/merge';
 
 import type { HTMLProps } from '@lib/types';
@@ -38,7 +39,9 @@ function isOnlyValueMissing(state: Record<keyof ValidityState, boolean> | undefi
     return onlyValueMissing;
 }
 
-export function useFieldControlValidation() {
+type HTMLInterface<ControlTag extends 'input' | 'textarea' = 'input' | 'textarea'> = ControlTag extends 'input' ? HTMLInputElement : HTMLTextAreaElement;
+
+export function useFieldControlValidation<ControlTag extends 'input' | 'textarea' = 'input'>() {
     const {
         setValidityData,
         validate,
@@ -56,7 +59,7 @@ export function useFieldControlValidation() {
     const { formRef, clearErrors } = useFormContext();
 
     const timeout = useTimeout();
-    const inputRef = React.useRef<HTMLInputElement | null>(null);
+    const inputRef = React.useRef<HTMLInterface<ControlTag> | null>(null);
 
     const commitValidation = useEventCallback(async (value: unknown, revalidate = false) => {
         const element = inputRef.current;
@@ -117,7 +120,7 @@ export function useFieldControlValidation() {
             // let it fall through to the main validation logic below.
         }
 
-        function getState(el: HTMLInputElement) {
+        function getState(el: HTMLInterface<ControlTag>) {
             const computedState = validityKeys.reduce(
                 (acc, key) => {
                     acc[key] = el.validity[key];
