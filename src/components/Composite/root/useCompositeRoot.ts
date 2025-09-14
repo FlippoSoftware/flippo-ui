@@ -3,6 +3,7 @@
 import React from 'react';
 
 import { useEventCallback, useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
+
 import { EMPTY_ARRAY } from '@lib/constants';
 import { isElementDisabled } from '@lib/isElementDisabled';
 import { ownerDocument } from '@lib/owner';
@@ -31,6 +32,7 @@ import {
     HORIZONTAL_KEYS_WITH_EXTRA_KEYS,
     isIndexOutOfListBounds,
     isListIndexDisabled,
+    isModifierKeySet,
     isNativeInput,
     MODIFIER_KEYS,
     scrollIntoViewIfNeeded,
@@ -365,17 +367,4 @@ export function useCompositeRoot(params: UseCompositeRootParameters) {
             onMapChange
         ]
     );
-}
-
-function isModifierKeySet(event: React.KeyboardEvent, ignoredModifierKeys: ModifierKey[]) {
-    for (const key of MODIFIER_KEYS.values()) {
-        if (ignoredModifierKeys.includes(key)) {
-            continue;
-        }
-        if (event.getModifierState(key)) {
-            return true;
-        }
-    }
-
-    return false;
 }

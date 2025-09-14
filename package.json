@@ -100,6 +100,11 @@
       "import": "./dist/components/NumberField/index.es.js",
       "require": "./dist/components/NumberField/index.cjs.js"
     },
+    "./pin-input": {
+      "types": "./dist/components/PinInput/index.d.ts",
+      "import": "./dist/components/PinInput/index.es.js",
+      "require": "./dist/components/PinInput/index.cjs.js"
+    },
     "./popover": {
       "types": "./dist/components/Popover/index.d.ts",
       "import": "./dist/components/Popover/index.es.js",
@@ -149,6 +154,11 @@
       "types": "./dist/components/Tabs/index.d.ts",
       "import": "./dist/components/Tabs/index.es.js",
       "require": "./dist/components/Tabs/index.cjs.js"
+    },
+    "./textarea": {
+      "types": "./dist/components/Textarea/index.d.ts",
+      "import": "./dist/components/Textarea/index.es.js",
+      "require": "./dist/components/Textarea/index.cjs.js"
     },
     "./toast": {
       "types": "./dist/components/Toast/index.d.ts",

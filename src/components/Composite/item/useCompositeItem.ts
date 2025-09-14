@@ -48,6 +48,7 @@ export function useCompositeItem<Metadata>(params: UseCompositeItemParams<Metada
     return {
         compositeProps,
         compositeRef: mergedRef as React.RefCallback<HTMLElement | null>,
-        index
+        index,
+        isHighlighted
     };
 }

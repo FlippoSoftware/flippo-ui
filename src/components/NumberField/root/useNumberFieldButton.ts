@@ -6,6 +6,8 @@ import { useEventCallback } from '@flippo-ui/hooks';
 
 import type { Timeout } from '@flippo-ui/hooks';
 
+import { parseNumber } from '@lib/parseNumeric';
+
 import type { HTMLProps } from '@lib/types';
 
 import {
@@ -14,7 +16,6 @@ import {
     SCROLLING_POINTER_MOVE_DISTANCE,
     TOUCH_TIMEOUT
 } from '../utils/constants';
-import { parseNumber } from '../utils/parse';
 
 import type { EventWithOptionalKeyState } from '../utils/types';
 

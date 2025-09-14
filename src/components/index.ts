@@ -13,6 +13,7 @@ export * from './Menu';
 export * from './Menubar';
 export * from './Meter';
 export * from './NumberField';
+export * from './PinInput';
 export * from './Popover';
 export * from './Progress';
 export * from './Radio';

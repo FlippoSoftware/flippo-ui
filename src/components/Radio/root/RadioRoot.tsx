@@ -220,13 +220,13 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
             {isRadioGroup
                 ? (
                     <CompositeItem
-                      tag={'button'}
-                      render={render}
-                      className={className}
-                      state={state}
-                      refs={refs}
-                      props={props}
-                      customStyleHookMapping={radioStyleHookMapping}
+                        tag={'button'}
+                        render={render}
+                        className={className}
+                        state={state}
+                        refs={refs}
+                        props={props}
+                        customStyleHookMapping={radioStyleHookMapping}
                     />
                 )
                 : (

@@ -13,6 +13,9 @@ export function Input(props: Input.Props) {
     return <Field.Control control={'input'} {...props} />;
 }
 
+Input.Slot = Field.Control.Slot;
+Input.useInputControl = Field.Control.useFieldControl;
+
 export namespace Input {
     export type State = Field.Control.State;
 
