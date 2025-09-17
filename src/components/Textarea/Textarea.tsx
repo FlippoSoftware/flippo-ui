@@ -13,5 +13,7 @@ Textarea.useTextareaControl = Field.Control.useFieldControl;
 export namespace Textarea {
     export type State = Field.Control.State;
 
+    export type SlotProps = Field.Control.TextAreaSlotProps;
+
     export type Props = Omit<Field.Control.TextAreaProps, 'control'>;
 }

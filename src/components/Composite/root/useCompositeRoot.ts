@@ -34,7 +34,6 @@ import {
     isListIndexDisabled,
     isModifierKeySet,
     isNativeInput,
-    MODIFIER_KEYS,
     scrollIntoViewIfNeeded,
     VERTICAL_KEYS,
     VERTICAL_KEYS_WITH_EXTRA_KEYS

@@ -2,7 +2,6 @@ import type React from 'react';
 
 import { getEventKey, isComposingEvent } from '@lib/event';
 import { useDirection, useRenderElement } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
 import { ARABIC_RE, HAN_RE } from '@lib/parseNumeric';
 
 import type { EventKeyMap, HeadlessUIComponentProps } from '@lib/types';

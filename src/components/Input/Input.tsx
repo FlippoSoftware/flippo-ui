@@ -19,5 +19,7 @@ Input.useInputControl = Field.Control.useFieldControl;
 export namespace Input {
     export type State = Field.Control.State;
 
+    export type SlotProps = Field.Control.InputSlotProps;
+
     export type Props = Omit<Field.Control.InputProps, 'control'>;
 }

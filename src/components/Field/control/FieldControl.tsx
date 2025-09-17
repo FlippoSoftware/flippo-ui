@@ -15,7 +15,7 @@ import { mergeProps } from '@lib/merge';
 import type { HeadlessUIComponentProps } from '@lib/types';
 
 import { useFieldRootContext } from '../root/FieldRootContext';
-import { FieldControlSlot } from '../slot/FieldSlot';
+import { FieldControlSlot } from '../slot/FieldControlSlot';
 import { useField } from '../useField';
 
 import type { FieldRoot } from '../root/FieldRoot';
@@ -113,8 +113,6 @@ export function FieldControl(componentProps: FieldControl.Props) {
         caller: 'FieldControl'
     });
 
-    const isControlled = valueProp !== undefined;
-
     const setValue = useEventCallback((nextValue: string, event: Event) => {
         setValueUnwrapped(nextValue);
         onValueChange?.(nextValue, event);
@@ -133,15 +131,14 @@ export function FieldControl(componentProps: FieldControl.Props) {
 
     const controlProps = React.useMemo(() => {
         const baseProps = {
+            id,
             disabled,
             name,
             'ref': mergedRef,
             'aria-labelledby': labelId,
-            ...(isControlled ? { value } : { defaultValue }),
+            value,
             onChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-                if (value != null) {
-                    setValue(event.currentTarget.value, event.nativeEvent);
-                }
+                setValue(event.currentTarget.value, event.nativeEvent);
 
                 setDirty(event.currentTarget.value !== validityData.initialValue);
                 setFilled(event.currentTarget.value !== '');
@@ -172,13 +169,12 @@ export function FieldControl(componentProps: FieldControl.Props) {
             getInputValidationProps()
         );
     }, [
+        id,
         disabled,
         name,
         mergedRef,
         labelId,
-        isControlled,
         value,
-        defaultValue,
         elementProps,
         getValidationProps,
         getInputValidationProps,
@@ -220,6 +216,10 @@ FieldControl.useFieldControl = useFieldControl;
 
 export namespace FieldControl {
     export type State = FieldRoot.State;
+
+    export type InputSlotProps = FieldControlSlot.InputProps;
+    export type TextAreaSlotProps = FieldControlSlot.TextAreaProps;
+    export type SlotProps = FieldControlSlot.Props;
 
     export type InputProps = HeadlessUIComponentProps<'input', State> & {
         control: 'input';
