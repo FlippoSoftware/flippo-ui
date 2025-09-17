@@ -1,0 +1,39 @@
+@use 'mixins/_flex.scss' as flex;
+
+$ow: 1.5px;
+@mixin stateInputClear($state, $bg: null, $color: null, $oc: null) {
+  &#{$state} {
+    @if $bg {
+      background-color: $bg;
+    }
+
+    @if $color {
+      color: $color;
+    }
+
+    @if $oc {
+      outline: $ow solid $oc;
+    }
+  }
+}
+
+.InputClear {
+  flex: 0 0;
+  padding: 0;
+  background-color: transparent;
+  border-radius: var(--f-border-radius-full);
+
+  @include flex.display(inline-flex, row, center, center);
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  color: var(--f-color-text-4);
+
+  @include stateInputClear(':hover', var(--f-color-bg-2-hover), var(--f-color-text-white));
+  @include stateInputClear(':active', var(--f-color-bg-2), var(--f-color-text-4));
+  @include stateInputClear(':focus-visible', $color: var(--f-color-text-3), $oc: var(--f-color-brand-light));
+  @include stateInputClear(':disabled', $color: var(--f-color-text-disabled));
+  @include stateInputClear('[data-disabled]', $color: var(--f-color-text-disabled));
+}

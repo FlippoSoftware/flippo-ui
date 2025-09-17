@@ -79,7 +79,7 @@ $ow: 1.5px;
 
   fill: currentColor;
 
-  @include corners.corners(('::before', '::after'), var(--f-spacing-3));
+  @include corners.corners((&, '::before', '::after'), var(--f-spacing-3));
 
   @include flex.display(inline-flex, row, center, center, var(--f-spacing-2));
   width: 100%;

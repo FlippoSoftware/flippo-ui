@@ -32,13 +32,15 @@ export function StoryCombine<E extends object>(props: StoryCombine.Props<E>) {
                                             ...componentProps
                                         } as E;
 
-                                        return (
-                                            <div key={`${group.name + variant.name + index.toString()}-component`}>
-                                                {decorator
-                                                    ? decorator(Component, componentArgs)
-                                                    : <Component {...componentArgs} />}
-                                            </div>
-                                        );
+                                        return Component
+                                            ? (
+                                                <div key={`${group.name + variant.name + index.toString()}-component`}>
+                                                    {decorator
+                                                        ? decorator(Component, componentArgs)
+                                                        : <Component {...componentArgs} />}
+                                                </div>
+                                            )
+                                            : null;
                                     })}
                                 </div>
                                 {index !== group.variants.length - 1 ? <Separator orientation={'vertical'} /> : null}
@@ -68,7 +70,7 @@ export namespace StoryCombine {
 
     export type Props<E extends object> = {
         args?: Partial<E>;
-        component: React.ComponentType<E>;
+        component?: React.ComponentType<E> | null;
         decorator?: Decorator<E>;
         groups: Group<E>[];
     };
