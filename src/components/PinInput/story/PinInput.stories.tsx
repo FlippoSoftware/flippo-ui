@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { PinInput } from '..';
 
 const meta: Meta<typeof PinInput.Root> = {
-    title: 'UIKit/Inputs/PinInput',
+    title: 'Input/PinInput',
     component: PinInput.Root
 };
 

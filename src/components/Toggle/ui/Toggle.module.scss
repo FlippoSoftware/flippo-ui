@@ -1,0 +1,85 @@
+@use 'mixins/_flex.scss' as flex;
+
+.Toggle {
+  width: var(--f-spacing-10);
+  aspect-ratio: 1;
+  position: relative;
+
+  padding: var(--f-spacing-2);
+
+  border-radius: var(--f-spacing-3);
+
+  background-color: transparent;
+  color: var(--f-color-text-4);
+
+  cursor: pointer;
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+
+    width: var(--f-spacing-1);
+    height: var(--f-spacing-0);
+    background-color: var(--f-color-text-disabled);
+    border-radius: var(--f-spacing-0);
+
+    bottom: var(--f-spacing-1);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &:hover {
+    background-color: var(--f-color-bg-2-hover);
+    color: var(--f-color-text-white);
+
+    &::after {
+      width: var(--f-spacing-2);
+      background-color: var(--f-color-text-6);
+    }
+  }
+
+  &:active {
+    background-color: var(--f-color-bg-2);
+    color: var(--f-color-text-4);
+
+    &::after {
+      width: var(--f-spacing-4);
+      background-color: var(--f-color-text-6);
+    }
+  }
+
+  &:focus-visible {
+    outline: calc(var(--f-spacing-3) / 4) solid var(--f-color-brand-light);
+  }
+
+  &:disabled {
+    cursor: default;
+    color: var(--f-color-text-disabled);
+
+    &::after {
+      background-color: transparent;
+    }
+  }
+
+  &[data-pressed] {
+    color: var(--f-color-brand-light);
+
+    &::after {
+      background-color: var(--f-color-brand-light);
+    }
+
+    &:active {
+      color: var(--f-color-brand-light-subtitle);
+
+      &::after {
+        background-color: var(--f-color-brand-light-subtitle);
+      }
+    }
+
+    &:disabled {
+      cursor: default;
+      color: var(--f-color-brand-disabled);
+    }
+  }
+}

@@ -13,15 +13,7 @@ const meta: Meta<typeof Link> = {
         variant: { control: 'select', options: ['neutral', 'brand'] }
     },
     component: Link,
-    parameters: {
-        docs: {
-            description: {
-                component:
-                    'The component is a wrapper for Link from the atomic-router-react library (https://atomic-router.github.io/react/api/link.html ).'
-            }
-        }
-    },
-    title: 'UIKit/Link'
+    title: 'Navigation/Link'
 };
 
 export default meta;

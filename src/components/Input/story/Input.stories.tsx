@@ -6,20 +6,8 @@ import { Input } from '../';
 import { StoryCombine } from '../../StoryCombine';
 
 const meta: Meta<typeof Input.Root> = {
-    argTypes: {
-        children: { control: 'object', name: 'React.ReactNode' },
-        disabled: { control: 'boolean' },
-        size: {
-            control: 'select',
-            options: ['small', 'medium', 'large']
-        },
-        variant: {
-            control: 'select',
-            options: ['inverted', 'underline']
-        }
-    },
     component: Input.Root,
-    title: 'UIKit/Input'
+    title: 'Input/Input'
 };
 
 export default meta;

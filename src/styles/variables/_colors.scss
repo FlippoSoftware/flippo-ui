@@ -25,9 +25,11 @@
 
   --f-color-brand-10: #d8cbf2;
   --f-color-brand-20: #b698f3;
+  --f-color-brand-25: #a073fb;
   --f-color-brand-30: #9265ed;
+  --f-color-brand-35: #814aef;
   --f-color-brand-40: #662fd3;
-  --f-color-brand-50: #410cac;
+  --f-color-brand-50: #5028a1;
   --f-color-brand-60: #320787;
   --f-color-brand-70: #2a0573;
   --f-color-brand-80: #20025d;
@@ -54,9 +56,12 @@
   --f-color-neutral-black: #000000;
 
   --f-color-brand: var(--f-color-brand-50);
-  --f-color-brand-hover: var(--f-color-brand-40);
-  --f-color-brand-light: var(--f-color-brand-30);
+  --f-color-brand-hover: var(--f-color-brand-30);
+  --f-color-brand-light: var(--f-color-brand-25);
   --f-color-brand-light-hover: var(--f-color-brand-10);
+  --f-color-brand-light-subtitle: var(--f-color-brand-35);
+  --f-color-brand-dark-subtitle: var(--f-color-brand-50);
+  --f-color-brand-disabled: var(--f-color-brand-60);
 
   --f-color-bg-0: var(--f-color-neutral-10);
   --f-color-bg-area-muted: var(--f-color-neutral-12);

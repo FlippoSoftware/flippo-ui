@@ -37,7 +37,7 @@ const meta: Meta<typeof Separator> = {
         }
     },
     component: Separator,
-    title: 'UIKit/Separator'
+    title: 'Layout/Separator'
 };
 
 export default meta;

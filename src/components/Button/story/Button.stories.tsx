@@ -31,7 +31,7 @@ const meta: Meta = {
         ] }
     },
     component: Button,
-    title: 'UIKit/Button'
+    title: 'Input/Button'
 };
 
 export default meta;
