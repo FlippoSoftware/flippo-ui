@@ -25,7 +25,12 @@ export function PinInputGroup(componentProps: PinInputGroup.Props) {
         {
             ref,
             state,
-            props: [{ role: 'group' }, elementProps],
+            props: [{
+                'role': 'group',
+                'aria-label': 'PIN code input',
+                'aria-describedby': state.valid === false ? 'pin-input-error' : undefined,
+                'aria-invalid': state.valid === false
+            }, elementProps],
             customStyleHookMapping: pinInputStyleHookMapping
         }
     );

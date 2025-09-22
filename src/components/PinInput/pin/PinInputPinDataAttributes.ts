@@ -1,8 +1,8 @@
 export enum PinInputPinDataAttributes {
     /**
-     * Present when the pin input is completed.
+     * Present when the field has a value.
      */
-    completed = 'data-completed',
+    value = 'data-value',
     /**
      * Present when the field is disabled.
      */

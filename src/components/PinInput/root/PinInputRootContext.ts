@@ -17,14 +17,18 @@ export type PinInputRootContextValue = {
     checkedValue: string;
     touched: boolean;
     placeholder: string;
+    readOnly: boolean;
+    focusedInputIndex: number | null;
+    lastFocusedInputIndex: number | null;
     fieldControlValidation?: ReturnType<typeof useFieldControlValidation>;
     values: string[];
     state: PinInputRoot.State;
     controlRef: React.RefObject<HTMLElement | null>;
     setFocused: React.Dispatch<React.SetStateAction<boolean>>;
+    setFocusedInputIndex: React.Dispatch<React.SetStateAction<number | null>>;
+    setLastFocusedInputIndex: React.Dispatch<React.SetStateAction<number | null>>;
     setDirty: React.Dispatch<React.SetStateAction<boolean>>;
     setFilled: React.Dispatch<React.SetStateAction<boolean>>;
-    setCompleted: React.Dispatch<React.SetStateAction<boolean>>;
     setValues: React.Dispatch<React.SetStateAction<string[]>>;
     setCheckedValue: React.Dispatch<React.SetStateAction<string>>;
     setTouched: React.Dispatch<React.SetStateAction<boolean>>;
@@ -35,6 +39,8 @@ export type PinInputRootContextValue = {
 export const PinInputRootContext = React.createContext<PinInputRootContextValue>({
     mask: false,
     otp: false,
+    focusedInputIndex: null,
+    readOnly: false,
     blurOnComplete: false,
     selectOnFocus: false,
     name: undefined,
@@ -43,7 +49,6 @@ export const PinInputRootContext = React.createContext<PinInputRootContextValue>
     values: [],
     touched: false,
     state: {
-        completed: false,
         readOnly: false,
         disabled: false,
         touched: false,
@@ -52,9 +57,11 @@ export const PinInputRootContext = React.createContext<PinInputRootContextValue>
         filled: false,
         focused: false
     },
+    lastFocusedInputIndex: null,
     controlRef: { current: null },
+    setLastFocusedInputIndex: NOOP,
     setFocused: NOOP,
-    setCompleted: NOOP,
+    setFocusedInputIndex: NOOP,
     setDirty: NOOP,
     setFilled: NOOP,
     setValues: NOOP,

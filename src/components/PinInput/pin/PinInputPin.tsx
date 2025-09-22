@@ -1,21 +1,20 @@
-import type React from 'react';
+import React from 'react';
 
-import { getEventKey, isComposingEvent } from '@lib/event';
-import { useDirection, useRenderElement } from '@lib/hooks';
-import { ARABIC_RE, HAN_RE } from '@lib/parseNumeric';
+import { useDirection, useHeadlessUiId, useRenderElement } from '@lib/hooks';
 
-import type { EventKeyMap, HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '@lib/types';
 
-import { useCompositeItem } from '../../Composite';
+import { useCompositeListItem } from '../../Composite';
 import { isModifierKeySet } from '../../Composite/composite';
 import { useCompositeListContext } from '../../Composite/list/CompositeListContext';
+import { usePinInputFocusFunnelContext } from '../focus-funnel/PinInputFocusFunnelContext';
 import { usePinInputRootContext } from '../root/PinInputRootContext';
 import { pinInputStyleHookMapping } from '../utils/styleHooks';
 import { testPattern } from '../utils/testPattern';
 
 import type { PinInputRoot } from '../root/PinInputRoot';
 
-const NAVIGATE_KEYS = new Set(['Tab', 'Enter', 'Escape']);
+import { handlePasteValue, handleSpecialKeys, shouldAllowKey } from './handleEvents';
 
 export function PinInputPin(componentProps: PinInputPin.Props) {
     const {
@@ -23,6 +22,7 @@ export function PinInputPin(componentProps: PinInputPin.Props) {
         className,
         render,
         /* eslint-enable unused-imports/no-unused-vars */
+        id: idProp,
         ref,
         ...elementProps
     } = componentProps;
@@ -30,137 +30,125 @@ export function PinInputPin(componentProps: PinInputPin.Props) {
     const {
         otp,
         mask,
-        state,
+        state: stateContext,
         placeholder,
         values,
-        controlRef,
-        blurOnComplete,
         selectOnFocus,
+        readOnly: readOnlyProp,
         pattern,
         type,
+        focusedInputIndex,
+        setFocusedInputIndex,
+        setLastFocusedInputIndex,
         setFocused,
         setDirty,
         setFilled,
         setTouched,
-        setCompleted,
         onValueChange: onPinInputValueChange
     } = usePinInputRootContext();
 
-    const {
-        index,
-        compositeRef,
-        isHighlighted,
-        compositeProps
-    } = useCompositeItem();
+    const { ref: compositeRef, index } = useCompositeListItem();
 
+    const id = useHeadlessUiId(idProp);
     const { elementsRef } = useCompositeListContext();
+    const focusFunnelContext = usePinInputFocusFunnelContext(true);
     const direction = useDirection();
 
+    const readOnly = ((focusFunnelContext?.focusMode === 'first-empty') && focusedInputIndex !== index) || readOnlyProp;
     const inputType = otp ? 'tel' : 'text';
-    const isCompleted = values.every((value) => value !== '') && values.length === elementsRef.current.length;
+
+    const state = React.useMemo(() => ({
+        ...stateContext,
+        value: values[index]
+    }), [index, stateContext, values]);
 
     const element = useRenderElement('input', componentProps, {
-        state,
         ref: [compositeRef, ref],
+        state,
         props: [{
+            id,
+            'tabIndex': focusedInputIndex === index ? 0 : -1,
             'value': values[index] ?? '',
             'dir': direction,
             'inputMode': otp ? 'numeric' : 'text',
             'aria-invalid': !state.valid,
+            'aria-label': `PIN digit ${index + 1}`,
+            'aria-describedby': state.valid === false ? `${id}-error` : undefined,
             'type': mask ? 'password' : inputType,
-            'maxLength': 1,
-            'readOnly': true,
+            readOnly,
             'autoCapitalize': 'none',
             'autoComplete': otp ? 'one-time-code' : 'off',
-            'placeholder': isHighlighted ? '' : placeholder,
+            'placeholder': focusedInputIndex === index ? '' : placeholder,
             onFocus() {
                 setFocused(true);
-                if (selectOnFocus)
+                setFocusedInputIndex(index);
+                setLastFocusedInputIndex(index);
+
+                if (selectOnFocus) {
                     (elementsRef.current[index] as HTMLInputElement | null)?.select();
+                }
             },
             onBlur() {
                 setTouched(true);
                 setFocused(false);
+                setFocusedInputIndex(null);
             },
             onChange(event) {
-                const newValue = event.target.value;
+                const inputValue = event.target.value.at(-1) ?? '';
 
-                if (!testPattern(newValue, type, pattern))
+                // Validate input against pattern
+                if (!testPattern(inputValue, type, pattern)) {
                     return;
+                }
 
+                // Update field state
                 setDirty(true);
                 setFilled(true);
 
-                onPinInputValueChange(newValue, index, event.nativeEvent);
+                // Trigger value change callback
+                onPinInputValueChange(inputValue, index, event.nativeEvent);
 
-                if (isCompleted) {
-                    setCompleted(true);
-
-                    if (blurOnComplete)
-                        (elementsRef.current[index] as HTMLInputElement | null)?.blur();
-
-                    (controlRef.current as HTMLInputElement | null)?.form?.requestSubmit();
+                // Auto-focus next input if available, or check completion for last input
+                const nextIndex = index + 1;
+                if (nextIndex < elementsRef.current.length) {
+                    elementsRef.current[nextIndex]?.focus();
                 }
             },
+            onPaste(event) {
+                handlePasteValue(event.clipboardData.getData('text'), index, {
+                    elementsRef,
+                    onPinInputValueChange,
+                    setDirty,
+                    setFilled,
+                    type,
+                    pattern
+                });
+            },
             onKeyDown(event) {
-                if (event.defaultPrevented)
-                    return;
-
-                const isLatinNumeral = /^\d$/.test(event.key);
-                const isArabicNumeral = ARABIC_RE.test(event.key);
-                const isHanNumeral = HAN_RE.test(event.key);
-                const isNavigateKey = NAVIGATE_KEYS.has(event.key);
-
-                if (
-                    // Allow composition events (e.g., pinyin)
-                    // event.nativeEvent.isComposing does not work in Safari:
-                    // https://bugs.webkit.org/show_bug.cgi?id=165004
-                    isComposingEvent(event)
-                    || isLatinNumeral
-                    || isArabicNumeral
-                    || isHanNumeral
-                    || isNavigateKey
-                ) {
+                if (event.defaultPrevented) {
                     return;
                 }
 
-                if (isModifierKeySet(event, []))
+                // Check if key should be allowed through
+                if (shouldAllowKey(event)) {
                     return;
-
-                const keyMap: EventKeyMap = {
-                    Backspace() {
-                        onPinInputValueChange('', index, event.nativeEvent);
-
-                        const nextIndex = index - 1 < 0 ? 0 : index - 1;
-                        elementsRef.current[nextIndex]?.focus();
-
-                        setCompleted(false);
-                    },
-                    Delete() {
-                        onPinInputValueChange('', index, event.nativeEvent);
-                        setCompleted(false);
-                    },
-                    Enter() {
-                        if (isCompleted) {
-                            (controlRef.current as HTMLInputElement | null)?.form?.requestSubmit();
-                            setCompleted(true);
-                        }
-                    }
-                };
-
-                const exec
-                    = keyMap[
-                        getEventKey(event, {
-                            dir: direction,
-                            orientation: 'horizontal'
-                        })
-                    ];
-
-                if (exec) {
-                    exec(event);
                 }
+
+                if (isModifierKeySet(event, [])) {
+                    return;
+                }
+
+                // Handle special keys
+                handleSpecialKeys(event, {
+                    index,
+                    elementsRef,
+                    onPinInputValueChange,
+                    direction,
+                    focusMode: focusFunnelContext?.focusMode,
+                    values
+                });
             }
-        }, compositeProps, elementProps],
+        }, elementProps],
         customStyleHookMapping: pinInputStyleHookMapping
     });
 

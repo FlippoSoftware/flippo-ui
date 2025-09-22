@@ -7,38 +7,38 @@ import {
     useMergedRef
 } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId } from '@lib/hooks';
+import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 import { mergeProps } from '@lib/merge';
 import { visuallyHidden } from '@lib/visuallyHidden';
 import { contains } from '@packages/floating-ui-react/utils';
 
 import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
 
-import { CompositeRoot } from '../../Composite';
-import { SHIFT } from '../../Composite/composite';
+import { CompositeList } from '../../Composite';
 import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { useField } from '../../Field/useField';
 import { useFormContext } from '../../Form/FormContext';
 import { pinInputStyleHookMapping } from '../utils/styleHooks';
 
-import type { CompositeMetadata } from '../../Composite';
+import type { CompositeMetadata, CompositeRoot } from '../../Composite';
 import type { Field } from '../../Field';
 
 import { PinInputRootContext } from './PinInputRootContext';
 
 import type { PinInputRootContextValue } from './PinInputRootContext';
 
-const MODIFIER_KEYS = [SHIFT];
-
 export function PinInputRoot(componentProps: PinInputRoot.Props) {
     const {
+        /* eslint-disable unused-imports/no-unused-vars */
         className,
         render,
+        /* eslint-enable unused-imports/no-unused-vars */
         disabled: disabledProp,
-        readOnly,
+        readOnly = false,
         required,
         onValueChange: onValueChangeProp,
+        onValueComplete,
         value: externalValue,
         defaultValue,
         name: nameProp,
@@ -55,7 +55,8 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
         ...elementProps
     } = componentProps;
 
-    const [completed, setCompleted] = React.useState(false);
+    const [focusedInputIndex, setFocusedInputIndex] = React.useState<number | null>(null);
+    const [lastFocusedInputIndex, setLastFocusedInputIndex] = React.useState<number | null>(null);
 
     const {
         labelId,
@@ -82,6 +83,9 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
     });
 
     const [values, setValues] = React.useState(() => String(checkedValue).split(''));
+    const [touched, setTouched] = React.useState(false);
+    const pinElementsRefs = React.useRef<(HTMLElement | null)[]>([]);
+    const prevValueRef = React.useRef(checkedValue);
 
     const controlRef = React.useRef<HTMLElement>(null);
     const registerControlRef = useEventCallback((element: HTMLElement | null) => {
@@ -98,8 +102,6 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
         name,
         getValue: () => checkedValue ?? null
     });
-
-    const prevValueRef = React.useRef(checkedValue);
 
     useIsoLayoutEffect(() => {
         if (prevValueRef.current === checkedValue) {
@@ -126,8 +128,6 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
         prevValueRef.current = checkedValue;
     }, [checkedValue]);
 
-    const [touched, setTouched] = React.useState(false);
-
     const onBlur = useEventCallback((event) => {
         if (!contains(event.currentTarget, event.relatedTarget)) {
             setFieldTouched(true);
@@ -148,15 +148,37 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
     });
 
     const onValueChange = React.useCallback((pinValue: string, index: number, event: Event) => {
-        const newValues = [...values];
-        newValues[index] = pinValue;
+        setValues((prevValues) => {
+            const newValues = [...prevValues];
+            newValues[index] = pinValue;
 
-        const value = newValues.join('');
+            const value = newValues.join('');
+            setCheckedValue(value);
+            onValueChangeProp?.(value, newValues, event);
 
-        setValues(newValues);
-        setCheckedValue(value);
-        onValueChangeProp?.(value, newValues, event);
-    }, [onValueChangeProp, setCheckedValue, values]);
+            // Check if PIN input is completed and handle completion logic
+            const isComplete = pinElementsRefs.current.length === newValues.length && newValues.every((val) => val !== '');
+            if (isComplete && focusedInputIndex === pinElementsRefs.current.length - 1) {
+                // Trigger onValueComplete callback
+                onValueComplete?.(value, newValues, event);
+
+                if (blurOnComplete) {
+                    // Blur the currently focused input
+                    setTimeout(() => {
+                        pinElementsRefs.current[focusedInputIndex ?? 0]?.blur();
+                    }, 0);
+                }
+            }
+
+            return newValues;
+        });
+    }, [
+        setCheckedValue,
+        onValueChangeProp,
+        onValueComplete,
+        blurOnComplete,
+        focusedInputIndex
+    ]);
 
     const serializedCheckedValue = React.useMemo(() => {
         if (checkedValue == null) {
@@ -192,14 +214,12 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
     const state: PinInputRoot.State = React.useMemo(
         () => ({
             ...fieldState,
-            completed,
             disabled: disabled ?? false,
             required: required ?? false,
             readOnly: readOnly ?? false
         }),
         [
             fieldState,
-            completed,
             disabled,
             required,
             readOnly
@@ -212,6 +232,7 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
             mask,
             otp,
             checkedValue,
+            readOnly,
             name,
             touched,
             values,
@@ -221,10 +242,13 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
             selectOnFocus,
             pattern,
             type,
+            focusedInputIndex,
+            lastFocusedInputIndex,
+            setLastFocusedInputIndex,
+            setFocusedInputIndex,
             setFocused,
             setDirty,
             setFilled,
-            setCompleted,
             setValues,
             setTouched,
             setCheckedValue,
@@ -234,12 +258,15 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
         [
             blurOnComplete,
             checkedValue,
+            focusedInputIndex,
+            lastFocusedInputIndex,
             mask,
             name,
             onValueChange,
             otp,
             pattern,
             placeholder,
+            readOnly,
             registerControlRef,
             selectOnFocus,
             setCheckedValue,
@@ -254,10 +281,9 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
     );
 
     const defaultProps: HTMLProps = {
-        'role': 'radiogroup',
-        'aria-required': required || undefined,
-        'aria-disabled': disabled || undefined,
-        'aria-readonly': readOnly || undefined,
+        'aria-required': required,
+        'aria-disabled': disabled,
+        'aria-readonly': readOnly,
         'aria-labelledby': labelId,
         onFocus() {
             setFocused(true);
@@ -266,19 +292,16 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
         onKeyDownCapture
     };
 
+    const element = useRenderElement('div', componentProps, {
+        ref,
+        state,
+        props: [defaultProps, elementProps],
+        customStyleHookMapping: pinInputStyleHookMapping
+    });
+
     return (
         <PinInputRootContext value={contextValue}>
-            <CompositeRoot
-                render={render}
-                className={className}
-                state={state}
-                props={[defaultProps, fieldControlValidation.getValidationProps, elementProps]}
-                refs={[ref]}
-              customStyleHookMapping={pinInputStyleHookMapping}
-                enableHomeAndEndKeys={false}
-                modifierKeys={MODIFIER_KEYS}
-                stopEventPropagation
-            />
+            <CompositeList elementsRef={pinElementsRefs}>{element}</CompositeList>
             <input {...inputProps} />
         </PinInputRootContext>
     );
@@ -290,7 +313,6 @@ export namespace PinInputRoot {
     }>;
 
     export type State = {
-        completed: boolean;
         readOnly: boolean;
     } & Field.Root.State;
 

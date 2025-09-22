@@ -12,5 +12,5 @@
     "types": ["react", "react-dom", "node"]
   },
   "include": ["eslint.config.js", "src/**/*.tsx", "src/**/*.ts", "vite.config.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "**/*.md", "**/README.md"]
 }
