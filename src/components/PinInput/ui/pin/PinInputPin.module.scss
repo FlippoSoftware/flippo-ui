@@ -1,0 +1,107 @@
+@use 'mixins/_flex.scss' as flex;
+@use 'mixins/_font.scss' as font;
+@use 'mixins/_corners.scss' as corners;
+
+.PinInputPin {
+  $ow: 1.5px;
+  $parent: &;
+  @include font.title-2('default');
+  color: var(--f-color-text-primary);
+
+  outline: none;
+
+  flex: 0 1 100%;
+
+  fill: var(--f-color-text-6);
+
+  overflow: hidden;
+  //border-radius: var(--f-border-radius-card);
+
+  text-align: center;
+
+  &:read-only {
+    pointer-events: none;
+  }
+
+  transition:
+    outline 0.3s ease,
+    background-color 0.3s ease;
+
+  padding: var(--f-spacing-4) 0;
+  height: calc(var(--f-spacing-10) * 2);
+  max-width: var(--f-spacing-15);
+
+  &:hover {
+    [data-slot]::placeholder {
+      color: var(--f-color-text-5);
+    }
+  }
+
+  &:focus-within {
+    [data-slot]::placeholder {
+      color: var(--f-color-text-6);
+    }
+  }
+
+  @include corners.corners((&, '::before', '::after'), var(--f-spacing-4));
+
+  &_light {
+    background: var(--f-color-bg-1);
+    border: $ow solid transparent;
+
+    &:hover {
+      background: var(--f-color-bg-area-subtle);
+      border-color: var(--f-color-stroke-hover);
+
+      &[data-invalid] {
+        border-color: var(--f-color-error-hover);
+      }
+    }
+
+    &[data-invalid] {
+      border-color: var(--f-color-error);
+    }
+
+    &:is(:focus-within, [data-focused]) {
+      background: var(--f-color-bg-area-muted);
+      border-color: var(--f-color-brand-light);
+    }
+
+    &:is(:disabled, [data-disabled]) {
+      background: var(--f-color-bg-1);
+      color: var(--f-color-text-disabled);
+    }
+  }
+
+  &_inverted {
+    background: var(--f-color-bg-area-muted);
+    border: $ow solid transparent;
+
+    &:hover {
+      background: var(--f-color-bg-area-subtle);
+      border-color: var(--f-color-stroke);
+
+      &[data-invalid] {
+        border-color: var(--f-color-error-hover);
+      }
+    }
+
+    &[data-invalid] {
+      border-color: var(--f-color-error);
+    }
+
+    &:is(:focus-within, [data-focused]) {
+      background: var(--f-color-bg-area-muted);
+      border-color: var(--f-color-brand-light);
+    }
+
+    &:is(:disabled, [data-disabled]) {
+      background: var(--f-color-bg-area-muted);
+      color: var(--f-color-text-disabled);
+    }
+  }
+
+  &[data-value] {
+    border-color: var(--f-color-brand-light);
+  }
+}

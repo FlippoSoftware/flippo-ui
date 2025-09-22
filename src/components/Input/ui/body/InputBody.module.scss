@@ -144,7 +144,7 @@
       background: var(--f-color-bg-area-muted);
       color: var(--f-color-text-disabled);
 
-      &_affordance {
+      #{$parent}_affordance {
         border-color: var(--f-color-stroke);
       }
     }

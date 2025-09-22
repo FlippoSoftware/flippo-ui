@@ -1,0 +1,6 @@
+@use 'mixins/_flex.scss' as flex;
+
+.PinInputRoot {
+  @include flex.display(flex, row, center, center, var(--f-spacing-3));
+  color: var(--f-color-text-primary);
+}
