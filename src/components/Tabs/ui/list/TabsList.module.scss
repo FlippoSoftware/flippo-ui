@@ -1,0 +1,8 @@
+@use 'mixins/_flex.scss' as flex;
+
+.TabsList {
+  @include flex.display(flex, row, start, center, var(--f-spacing-5));
+
+  position: relative;
+  z-index: 0;
+}

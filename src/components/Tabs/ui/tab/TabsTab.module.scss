@@ -1,0 +1,39 @@
+@use 'mixins/_flex.scss' as flex;
+@use 'mixins/_font.scss' as font;
+
+.TabsTab {
+  @include flex.display(flex, row, center, center, calc(var(--f-spacing-5) / 2));
+  @include font.body('stronger');
+
+  width: fit-content;
+  padding: var(--f-spacing-4) calc(var(--f-spacing-3) / 2);
+  position: relative;
+
+  background: transparent;
+  color: var(--f-color-text-3);
+  fill: currentColor;
+
+  transition: color 0.3s ease;
+
+  &:hover:not(:disabled) {
+    color: var(--f-color-text-primary);
+  }
+
+  &:active:not(:disabled) {
+    color: var(--f-color-text-4);
+  }
+
+  &[aria-selected='true']:not(:disabled) {
+    color: var(--f-color-text-white);
+  }
+
+  &:disabled {
+    color: var(--f-color-text-disabled);
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: var(--f-spacing-6);
+    aspect-ratio: 1;
+  }
+}

@@ -1,0 +1,16 @@
+.TabsIndicator {
+  position: absolute;
+
+  background: var(--f-color-brand-light);
+
+  z-index: -1;
+  bottom: 0;
+  left: 0;
+  translate: var(--active-tab-left) -50%;
+  width: var(--active-tab-width);
+  height: var(--f-spacing-0);
+
+  transition-property: translate, width;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
