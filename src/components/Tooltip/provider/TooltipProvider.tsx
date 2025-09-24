@@ -6,7 +6,7 @@ import { NextFloatingDelayGroup } from '@floating-ui/react';
 
 import { TooltipProviderContext } from './TooltipProviderContext';
 
-export function TooltipProvider(props: NTooltipProvider.Props) {
+export function TooltipProvider(props: TooltipProvider.Props) {
     const {
         delay,
         closeDelay,
@@ -29,7 +29,7 @@ export function TooltipProvider(props: NTooltipProvider.Props) {
     );
 }
 
-export namespace NTooltipProvider {
+export namespace TooltipProvider {
     export type Props = React.PropsWithChildren<{
         delay?: number;
         closeDelay?: number;

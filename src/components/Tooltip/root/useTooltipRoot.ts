@@ -33,7 +33,7 @@ import { useTooltipProviderContext } from '../provider/TooltipProviderContext';
 
 export type TTooltipOpenChangeReason = TBaseOpenChangeReason | 'disabled';
 
-export function useTooltipRoot(params: NUseTooltipRoot.Params): NUseTooltipRoot.ReturnValue {
+export function useTooltipRoot(params: UseTooltipRoot.Params): UseTooltipRoot.ReturnValue {
     const {
         open: externalOpen,
         defaultOpen = false,
@@ -211,7 +211,7 @@ export function useTooltipRoot(params: NUseTooltipRoot.Params): NUseTooltipRoot.
     );
 }
 
-export namespace NUseTooltipRoot {
+export namespace UseTooltipRoot {
     export type Params = {
         defaultOpen?: boolean;
         open?: boolean;

@@ -16,7 +16,7 @@ import { TooltipPositionerContext } from './TooltipPositionerContext';
 import { useTooltipPositioner } from './useTooltipPositioner';
 
 import type { TTooltipPositionerContext } from './TooltipPositionerContext';
-import type { NUseTooltipPositioner } from './useTooltipPositioner';
+import type { UseTooltipPositioner } from './useTooltipPositioner';
 
 /**
  * Positions the tooltip against the trigger.
@@ -24,7 +24,7 @@ import type { NUseTooltipPositioner } from './useTooltipPositioner';
  *
  * Documentation: [Base UI Tooltip](https://base-ui.com/react/components/tooltip)
  */
-export function TooltipPositioner({ ref: forwardedRef, ...componentProps }: NTooltipPositioner.Props) {
+export function TooltipPositioner({ ref: forwardedRef, ...componentProps }: TooltipPositioner.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,
@@ -71,7 +71,7 @@ export function TooltipPositioner({ ref: forwardedRef, ...componentProps }: NToo
         collisionAvoidance
     });
 
-    const state: NTooltipPositioner.State = React.useMemo(
+    const state: TooltipPositioner.State = React.useMemo(
         () => ({
             open,
             side: positioner.side,
@@ -115,7 +115,7 @@ export function TooltipPositioner({ ref: forwardedRef, ...componentProps }: NToo
     );
 }
 
-export namespace NTooltipPositioner {
+export namespace TooltipPositioner {
     export type State = {
         open: boolean;
         side: TSide;
@@ -123,5 +123,5 @@ export namespace NTooltipPositioner {
         anchorHidden: boolean;
     };
 
-    export type Props = { ref?: React.Ref<HTMLDivElement> } & HeadlessUIComponentProps<'div', State> & NUseTooltipPositioner.SharedParameters;
+    export type Props = { ref?: React.Ref<HTMLDivElement> } & HeadlessUIComponentProps<'div', State> & UseTooltipPositioner.SharedParameters;
 }

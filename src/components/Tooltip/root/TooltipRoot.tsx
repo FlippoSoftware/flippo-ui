@@ -5,9 +5,9 @@ import React from 'react';
 import { TooltipRootContext } from './TooltipRootContext';
 import { useTooltipRoot } from './useTooltipRoot';
 
-import type { NUseTooltipRoot, TTooltipOpenChangeReason } from './useTooltipRoot';
+import type { TTooltipOpenChangeReason, UseTooltipRoot } from './useTooltipRoot';
 
-export function TooltipRoot(props: NTooltipRoot.Props) {
+export function TooltipRoot(props: TooltipRoot.Props) {
     const {
         children,
         disabled = false,
@@ -43,10 +43,10 @@ export function TooltipRoot(props: NTooltipRoot.Props) {
     );
 }
 
-export namespace NTooltipRoot {
-    export type Props = React.PropsWithChildren<NUseTooltipRoot.Params>;
+export namespace TooltipRoot {
+    export type Props = React.PropsWithChildren<UseTooltipRoot.Params>;
 
-    export type Actions = NUseTooltipRoot.Actions;
+    export type Actions = UseTooltipRoot.Actions;
 
     export type OpenChangeReason = TTooltipOpenChangeReason;
 }

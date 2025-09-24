@@ -9,12 +9,8 @@ export type TTooltipProviderContext = {
 
 export const TooltipProviderContext = React.createContext<TTooltipProviderContext | undefined>(undefined);
 
-export function useTooltipProviderContext(): TTooltipProviderContext {
+export function useTooltipProviderContext(): TTooltipProviderContext | undefined {
     const context = React.use(TooltipProviderContext);
-
-    if (!context) {
-        throw new Error('TooltipProvider is not defined');
-    }
 
     return context;
 }
