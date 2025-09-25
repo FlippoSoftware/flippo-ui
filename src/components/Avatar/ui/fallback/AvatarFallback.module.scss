@@ -1,0 +1,11 @@
+@use 'mixins/_font.scss' as font;
+
+.AvatarFallback {
+  @include font.heading-3('stronger');
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}

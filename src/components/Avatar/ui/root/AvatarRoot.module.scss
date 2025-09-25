@@ -1,0 +1,14 @@
+@use 'mixins/_flex.scss' as flex;
+
+.AvatarRoot {
+  @include flex.display(inline-flex, row, center, center);
+
+  vertical-align: middle;
+  border-radius: 100%;
+  user-select: none;
+  color: var(--f-color-text-primary);
+  background-color: var(--f-color-bg-primary);
+  overflow: hidden;
+  width: var(--f-spacing-7);
+  aspect-ratio: 1;
+}
