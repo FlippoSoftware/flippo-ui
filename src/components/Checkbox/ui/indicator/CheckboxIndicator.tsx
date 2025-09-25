@@ -6,10 +6,10 @@ import { cx } from 'class-variance-authority';
 import styles from './CheckboxIndicator.module.scss';
 
 export function CheckboxIndicator(props: CheckboxIndicator.Props) {
-    const { className, ...rest } = props;
+    const { className, ...otherProps } = props;
 
     return (
-        <CheckboxHeadless.Indicator {...rest} className={cx(styles.CheckboxIndicator, className)} />
+        <CheckboxHeadless.Indicator {...otherProps} className={cx(styles.CheckboxIndicator, className)} />
     );
 }
 

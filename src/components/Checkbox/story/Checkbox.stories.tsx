@@ -16,7 +16,9 @@ type CheckboxStory = StoryObj<typeof Checkbox.Root>;
 export const Default: CheckboxStory = {
     render: (args) => (
         <Checkbox.Root {...args}>
-            <Checkbox.Indicator />
+            <Checkbox.Indicator>
+                <Checkbox.Indicator.Svg />
+            </Checkbox.Indicator>
         </Checkbox.Root>
     )
 };
