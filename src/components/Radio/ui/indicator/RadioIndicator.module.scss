@@ -1,0 +1,17 @@
+.RadioIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &[data-unchecked] {
+    display: none;
+  }
+
+  &::before {
+    content: '';
+    border-radius: 100%;
+    width: var(--f-spacing-2);
+    height: var(--f-spacing-2);
+    background-color: var(--f-color-bg-2);
+  }
+}
