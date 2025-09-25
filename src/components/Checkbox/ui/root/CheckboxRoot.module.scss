@@ -1,0 +1,55 @@
+.CheckboxRoot {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+
+  width: var(--f-spacing-5);
+  aspect-ratio: 1;
+
+  border-radius: var(--f-spacing-1);
+  background-color: transparent;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--f-color-brand-light);
+    outline-offset: 2px;
+  }
+
+  &[data-unchecked] {
+    border: var(--f-spacing-0) solid var(--f-color-stroke-hover);
+    background-color: transparent;
+
+    &:hover {
+      border-color: var(--f-color-text-2);
+    }
+  }
+
+  &[data-checked] {
+    background-color: var(--f-color-brand-hover);
+    border-color: var(--f-color-brand-hover);
+
+    &:hover {
+      background-color: var(--f-color-brand-light);
+      border-color: var(--f-color-brand-light);
+    }
+  }
+
+  &[data-disabled] {
+    cursor: default;
+
+    &[data-unchecked] {
+      border: var(--f-spacing-0) solid var(--f-color-stroke-muted);
+    }
+
+    &[data-checked] {
+      border-color: var(--f-color-brand-disabled);
+    }
+  }
+}

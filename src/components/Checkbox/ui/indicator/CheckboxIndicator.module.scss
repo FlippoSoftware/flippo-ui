@@ -1,0 +1,17 @@
+.CheckboxIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--f-color-neutral-white);
+
+  &[data-unchecked] {
+    display: none;
+  }
+}
+
+.CheckIcon {
+  width: var(--f-spacing-3);
+  height: var(--f-spacing-3);
+}
