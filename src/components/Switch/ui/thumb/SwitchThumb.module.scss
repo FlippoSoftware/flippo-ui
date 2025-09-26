@@ -1,0 +1,15 @@
+@use 'mixins/_common.scss' as common;
+
+.SwitchThumb {
+  @include common.reset-appearance;
+
+  aspect-ratio: 1 / 1;
+  height: 100%;
+  border-radius: 100%;
+  background-color: var(--f-color-neutral-80);
+  transition: translate 150ms ease;
+
+  &[data-checked] {
+    translate: 1rem 0;
+  }
+}
