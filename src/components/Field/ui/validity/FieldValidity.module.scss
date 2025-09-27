@@ -1,0 +1,7 @@
+@use 'mixins/_common.scss' as common;
+
+.FieldValidity {
+    @include common.reset-appearance;
+    
+    // Validity indicator styling
+}

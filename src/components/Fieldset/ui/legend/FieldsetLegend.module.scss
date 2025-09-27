@@ -3,7 +3,7 @@
 
 .FieldsetLegend {
   @include common.reset-appearance;
-  @include font.heading-1(default);
+  @include font.bodyPlus(default);
 
   border-bottom: 2px solid var(--f-color-stroke-transparent);
   padding-bottom: var(--f-spacing-3);

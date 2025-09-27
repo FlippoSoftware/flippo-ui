@@ -1,7 +1,7 @@
 @use 'mixins/_common.scss' as common;
 
 .FieldsetRoot {
-  @include common.reset-appearance;
+  @include common.reset-appearance();
 
   display: flex;
   flex-direction: column;

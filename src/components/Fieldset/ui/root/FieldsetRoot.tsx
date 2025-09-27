@@ -8,7 +8,7 @@ import styles from './FieldsetRoot.module.scss';
 export function FieldsetRoot(props: FieldsetRoot.Props) {
     const { className, ...otherProps } = props;
 
-    return <FieldsetHeadless.Root {...otherProps} className={cx(styles.Fieldset, className)} />;
+    return <FieldsetHeadless.Root {...otherProps} className={cx(styles.FieldsetRoot, className)} />;
 }
 
 export namespace FieldsetRoot {

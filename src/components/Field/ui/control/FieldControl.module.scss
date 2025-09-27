@@ -1,0 +1,178 @@
+@use 'mixins/_flex.scss' as flex;
+@use 'mixins/_font.scss' as font;
+@use 'mixins/_corners.scss' as corners;
+@use 'mixins/_common.scss' as common;
+
+.FieldControl {
+  @include common.reset-appearance;
+
+  $ow: 1.5px;
+  $parent: &;
+
+  outline-color: transparent;
+
+  flex: 0 1 100%;
+
+  fill: var(--f-color-text-6);
+
+  overflow: hidden;
+
+  transition:
+    outline 0.3s ease,
+    background-color 0.3s ease;
+
+  @include flex.display(inline-flex, row, center, center, var(--f-spacing-3));
+
+  width: 100%;
+
+  & > svg {
+    width: calc(var(--f-spacing-9) / 2);
+    aspect-ratio: 1;
+  }
+
+  &:hover {
+    [data-slot]::placeholder {
+      color: var(--f-color-text-5);
+    }
+
+    svg {
+      fill: var(--f-color-text-5);
+    }
+  }
+
+  &:focus-within {
+    [data-slot]::placeholder {
+      color: var(--f-color-text-6);
+    }
+
+    svg {
+      fill: var(--f-color-text-5);
+    }
+  }
+
+  @include corners.corners((&, '::before', '::after'), var(--f-spacing-3));
+
+  &_light {
+    background: var(--f-color-bg-1);
+    border-radius: var(--f-border-radius-input-field);
+    border: $ow solid transparent;
+
+    &:hover {
+      background: var(--f-color-bg-area-subtle);
+      border-color: var(--f-color-stroke-hover);
+
+      &[data-invalid] {
+        border-color: var(--f-color-error-hover);
+      }
+    }
+
+    &[data-invalid] {
+      border-color: var(--f-color-error);
+    }
+
+    &:is(:focus-within, [data-focused]) {
+      background: var(--f-color-bg-area-muted);
+      border-color: var(--f-color-brand-light);
+    }
+
+    &:is(:disabled, [data-disabled]) {
+      background: var(--f-color-bg-1);
+      color: var(--f-color-text-disabled);
+    }
+  }
+
+  &_inverted {
+    background: var(--f-color-bg-area-muted);
+    border-radius: var(--f-border-radius-input-field);
+    border: $ow solid transparent;
+
+    &:hover {
+      background: var(--f-color-bg-area-subtle);
+      border-color: var(--f-color-stroke);
+
+      &[data-invalid] {
+        border-color: var(--f-color-error-hover);
+      }
+    }
+
+    &[data-invalid] {
+      border-color: var(--f-color-error);
+    }
+
+    &:is(:focus-within, [data-focused]) {
+      background: var(--f-color-bg-area-muted);
+      border-color: var(--f-color-brand-light);
+    }
+
+    &:is(:disabled, [data-disabled]) {
+      background: var(--f-color-bg-area-muted);
+      color: var(--f-color-text-disabled);
+    }
+  }
+
+  &_large {
+    height: var(--f-spacing-14);
+
+    @include font.body('weaker');
+
+    padding: var(--f-spacing-4) var(--f-spacing-5);
+
+    &:has([data-input-clear]) {
+      padding-right: var(--f-spacing-3);
+    }
+
+    [data-input-clear] {
+      height: var(--f-spacing-9);
+      aspect-ratio: 1;
+
+      svg {
+        height: var(--f-spacing-6);
+        aspect-ratio: 1;
+      }
+    }
+  }
+
+  &_medium {
+    height: var(--f-spacing-12);
+
+    @include font.bodyMinus('weaker');
+
+    padding: var(--f-spacing-2) var(--f-spacing-5);
+
+    &:has([data-input-clear]) {
+      padding-right: var(--f-spacing-2);
+    }
+
+    [data-input-clear] {
+      height: var(--f-spacing-7);
+      aspect-ratio: 1;
+
+      svg {
+        height: var(--f-spacing-5);
+        aspect-ratio: 1;
+      }
+    }
+  }
+
+  &_small {
+    height: var(--f-spacing-10);
+
+    @include font.bodyMinus('weaker');
+
+    padding: calc(var(--f-spacing-4) / 2) calc(var(--f-spacing-9) / 2);
+
+    &:has([data-input-clear]) {
+      padding-right: var(--f-spacing-2);
+    }
+
+    [data-input-clear] {
+      height: var(--f-spacing-6);
+      aspect-ratio: 1;
+
+      svg {
+        height: var(--f-spacing-4);
+        aspect-ratio: 1;
+      }
+    }
+  }
+}

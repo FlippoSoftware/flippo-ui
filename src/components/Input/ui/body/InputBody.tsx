@@ -22,6 +22,7 @@ const InputBodyInvertedVariants = cva(styles.InputBody, {
         corners: {
             'clear': styles['corners-clear-clear'],
             'circle': styles['corners-circle-circle'],
+            'round': styles['corners-round-round'],
             'round-clear': styles['corners-round-clear'],
             'clear-round': styles['corners-clear-round'],
             'round-circle': styles['corners-round-circle'],

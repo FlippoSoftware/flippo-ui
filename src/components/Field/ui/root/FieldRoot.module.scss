@@ -1,0 +1,11 @@
+@use 'mixins/_common.scss' as common;
+
+.FieldRoot {
+  @include common.reset-appearance;
+
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--f-spacing-1);
+  width: 100%;
+}

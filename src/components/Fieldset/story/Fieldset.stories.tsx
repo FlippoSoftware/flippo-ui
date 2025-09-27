@@ -23,7 +23,7 @@ export const Default: FieldsetStory = {
             <Field.Root>
                 <Field.Label>{'First Name'}</Field.Label>
                 <Input.Root>
-                    <Input.Body>
+                    <Input.Body dimensions={'medium'} corners={'round'}>
                         <Input.Slot />
                     </Input.Body>
                 </Input.Root>

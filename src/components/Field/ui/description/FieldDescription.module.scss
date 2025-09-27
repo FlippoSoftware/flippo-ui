@@ -1,0 +1,10 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.FieldDescription {
+  @include common.reset-appearance;
+  @include font.label(weaker);
+
+  color: var(--f-color-text-4);
+  margin: 0;
+}
