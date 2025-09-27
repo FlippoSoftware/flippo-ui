@@ -3,10 +3,9 @@
 import React from 'react';
 
 import { useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
-
 import { formatNumber } from '@lib/formatNumber';
 import { getStyleHookProps } from '@lib/getStyleHookProps';
-import { useDirection, useHeadlessUiId } from '@lib/hooks';
+import { useDirection, useHeadlessUiId, useRenderElement } from '@lib/hooks';
 import { mergeProps } from '@lib/merge';
 import { resolveClassName } from '@lib/resolveClassName';
 import { visuallyHidden } from '@lib/visuallyHidden';
@@ -25,6 +24,8 @@ import {
 import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { useSliderRootContext } from '../root/SliderRootContext';
+import { sliderStyleHookMapping } from '../root/styleHooks';
+import { getMidpoint } from '../utils/getMidpoint';
 import { getSliderValue } from '../utils/getSliderValue';
 import { roundValueToStep } from '../utils/roundValueToStep';
 import { valueArrayToPercentages } from '../utils/valueArrayToPercentages';
@@ -46,19 +47,6 @@ const ALL_KEYS = new Set([
     PAGE_UP,
     PAGE_DOWN
 ]);
-
-function defaultRender(
-    props: React.ComponentPropsWithRef<'div'>,
-    inputProps: React.ComponentPropsWithRef<'input'>
-) {
-    const { children, ...thumbProps } = props;
-    return (
-        <div {...thumbProps}>
-            {children}
-            <input {...inputProps} />
-        </div>
-    );
-}
 
 function getDefaultAriaValueText(
     values: readonly number[],
@@ -93,18 +81,26 @@ function getNewValue(
 
 /**
  * The draggable part of the the slider at the tip of the indicator.
- * Renders a `<div>` element.
+ * Renders a `<div>` element and a nested `<input type="range">`.
  *
  * Documentation: [Base UI Slider](https://base-ui.com/react/components/slider)
  */
 export function SliderThumb(componentProps: SliderThumb.Props) {
     const {
-        render: renderProp,
+        /* eslint-disable unused-imports/no-unused-vars */
+        render,
         className,
+        /* eslint-enable unused-imports/no-unused-vars */
+        children: childrenProp,
+        'aria-describedby': ariaDescribedByProp,
+        'aria-label': ariaLabelProp,
+        'aria-labelledby': ariaLabelledByProp,
         disabled: disabledProp = false,
         getAriaLabel: getAriaLabelProp,
         getAriaValueText: getAriaValueTextProp,
         id: idProp,
+        index: indexProp,
+        inputRef: inputRefProp,
         onBlur: onBlurProp,
         onFocus: onFocusProp,
         onKeyDown: onKeyDownProp,
@@ -115,8 +111,6 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
 
     const id = useHeadlessUiId(idProp);
     const inputId = `${id}-input`;
-
-    const render = renderProp ?? defaultRender;
 
     const {
         active: activeIndex,
@@ -130,22 +124,19 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
         max,
         min,
         minStepsBetweenValues,
+        name,
         orientation,
+        pressedInputRef,
+        pressedThumbCenterOffsetRef,
+        pressedThumbIndexRef,
         setActive,
         state,
         step,
-        tabIndex: contextTabIndex,
         values: sliderValues
     } = useSliderRootContext();
 
-    let renderPropRef = null;
-    if (typeof render !== 'function') {
-        renderPropRef = (render.props as any).ref;
-    }
-
     const disabled = disabledProp || contextDisabled;
-
-    const externalTabIndex = tabIndexProp ?? contextTabIndex;
+    const range = sliderValues.length > 1;
 
     const direction = useDirection();
     const {
@@ -157,6 +148,7 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
     } = useFieldRootContext();
 
     const thumbRef = React.useRef<HTMLElement>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
 
     useIsoLayoutEffect(() => {
         setControlId(inputId);
@@ -173,13 +165,13 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
         [inputId]
     );
 
-    const { ref: listItemRef, index } = useCompositeListItem<ThumbMetadata>({
+    const { ref: listItemRef, index: compositeIndex } = useCompositeListItem<ThumbMetadata>({
         metadata: thumbMetadata
     });
 
-    const mergedThumbRef = useMergedRef(renderPropRef, ref, listItemRef, thumbRef);
+    const index = !range ? 0 : (indexProp ?? compositeIndex);
 
-    const thumbValue = sliderValues[index] ?? min;
+    const thumbValue = sliderValues[index];
 
     const percentageValues = valueArrayToPercentages(sliderValues.slice(), min, max);
     // for SSR, don't wait for the index if there's only one thumb
@@ -199,7 +191,7 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
             [{
                 horizontal: 'insetInlineStart',
                 vertical: 'bottom'
-            }[orientation as Orientation]]: `${percent}%`,
+            }[orientation]]: `${percent}%`,
             [isVertical ? 'left' : 'top']: '50%',
             transform: `translate(${(isVertical || !isRtl ? -1 : 1) * 50}%, ${(isVertical ? 1 : -1) * 50}%)`,
             zIndex: activeIndex === index ? 1 : undefined
@@ -212,23 +204,45 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
         index
     ]);
 
-    const styleHooks = React.useMemo(
-        () => getStyleHookProps({ disabled, dragging: index !== -1 && activeIndex === index }),
-        [activeIndex, disabled, index]
-    );
+    let cssWritingMode: React.CSSProperties['writingMode'];
+    if (orientation === 'vertical') {
+        cssWritingMode = isRtl ? 'vertical-rl' : 'vertical-lr';
+    }
 
-    const thumbProps = mergeProps(
+    const inputProps = mergeProps<'input'>(
         {
-            [SliderThumbDataAttributes.index]: index,
-            className: resolveClassName(className, state),
-            id,
-            onFocus(event: HeadlessUIEvent<React.FocusEvent<HTMLDivElement, Element>>) {
+            'aria-label':
+                typeof getAriaLabelProp === 'function' ? getAriaLabelProp(index) : ariaLabelProp,
+            'aria-labelledby': ariaLabelledByProp ?? labelId,
+            'aria-describedby': ariaDescribedByProp,
+            'aria-orientation': orientation,
+            'aria-valuenow': thumbValue,
+            'aria-valuetext':
+                typeof getAriaValueTextProp === 'function'
+                    ? getAriaValueTextProp(
+                        formatNumber(thumbValue, locale, formatOptionsRef.current ?? undefined),
+                        thumbValue ?? 0,
+                        index
+                    )
+                    : getDefaultAriaValueText(
+                        sliderValues,
+                        index,
+                        formatOptionsRef.current ?? undefined,
+                        locale
+                    ),
+            disabled,
+            'id': inputId,
+            max,
+            min,
+            name,
+            onChange(event: React.ChangeEvent<HTMLInputElement>) {
+                handleInputChange(event.target.valueAsNumber, index, event);
+            },
+            onFocus() {
                 setActive(index);
                 setFocused(true);
-
-                onFocusProp?.(event);
             },
-            onBlur(event: HeadlessUIEvent<React.FocusEvent<HTMLDivElement, Element>>) {
+            onBlur() {
                 if (!thumbRef.current) {
                     return;
                 }
@@ -239,13 +253,11 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
 
                 if (validationMode === 'onBlur') {
                     fieldControlValidation.commitValidation(
-                        getSliderValue(thumbValue, index, min, max, sliderValues.length > 1, sliderValues)
+                        getSliderValue(thumbValue ?? 0, index, min, max, range, sliderValues)
                     );
                 }
-
-                onBlurProp?.(event);
             },
-            onKeyDown(event: HeadlessUIEvent<React.KeyboardEvent<HTMLDivElement>>) {
+            onKeyDown(event: React.KeyboardEvent) {
                 if (!ALL_KEYS.has(event.key)) {
                     return;
                 }
@@ -254,8 +266,7 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
                 }
 
                 let newValue = null;
-                const isRange = sliderValues.length > 1;
-                const roundedValue = roundValueToStep(thumbValue, step, min);
+                const roundedValue = roundValueToStep(thumbValue ?? 0, step, min);
                 switch (event.key) {
                     case ARROW_UP:
                         newValue = getNewValue(roundedValue, event.shiftKey ? largeStep : step, 1, min, max);
@@ -290,7 +301,7 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
                     case END:
                         newValue = max;
 
-                        if (isRange) {
+                        if (range) {
                             const value = sliderValues[index + 1];
                             newValue = Number.isFinite(value) && value
                                 ? value - step * minStepsBetweenValues
@@ -300,7 +311,7 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
                     case HOME:
                         newValue = min;
 
-                        if (isRange) {
+                        if (range) {
                             const value = sliderValues[index + 1];
                             newValue = Number.isFinite(value) && value
                                 ? value + step * minStepsBetweenValues
@@ -315,54 +326,6 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
                     handleInputChange(newValue, index, event);
                     event.preventDefault();
                 }
-
-                onKeyDownProp?.(event);
-            },
-            ref: mergedThumbRef,
-            style: getThumbStyle(),
-            tabIndex: externalTabIndex ?? (disabled ? undefined : 0)
-        },
-        styleHooks,
-        elementProps
-    );
-
-    let cssWritingMode: React.CSSProperties['writingMode'];
-    if (orientation === 'vertical') {
-        cssWritingMode = isRtl ? 'vertical-rl' : 'vertical-lr';
-    }
-
-    const inputProps = mergeProps<'input'>(
-        {
-            'aria-label':
-        typeof getAriaLabelProp === 'function'
-            ? getAriaLabelProp(index)
-            : elementProps['aria-label'],
-            'aria-labelledby': labelId,
-            'aria-orientation': orientation,
-            'aria-valuemax': max,
-            'aria-valuemin': min,
-            'aria-valuenow': thumbValue,
-            'aria-valuetext':
-        typeof getAriaValueTextProp === 'function'
-            ? getAriaValueTextProp(
-                formatNumber(thumbValue, locale, formatOptionsRef.current ?? undefined),
-                thumbValue,
-                index
-            )
-            : elementProps['aria-valuetext']
-              || getDefaultAriaValueText(
-                  sliderValues,
-                  index,
-                  formatOptionsRef.current ?? undefined,
-                  locale
-              ),
-            [SliderThumbDataAttributes.index as string]: index,
-            disabled,
-            'id': inputId,
-            max,
-            min,
-            onChange(event: React.ChangeEvent<HTMLInputElement>) {
-                handleInputChange(event.target.valueAsNumber, index, event);
             },
             step,
             'style': {
@@ -372,41 +335,57 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
                 height: '100%',
                 writingMode: cssWritingMode
             },
-            'tabIndex': -1,
+            'tabIndex': tabIndexProp ?? undefined,
             'type': 'range',
             'value': thumbValue ?? ''
         },
-        fieldControlValidation.getValidationProps
+        fieldControlValidation.getInputValidationProps
     );
 
-    if (typeof render === 'function') {
-        return render(thumbProps, inputProps, state);
-    }
+    const mergedInputRef = useMergedRef(inputRef, fieldControlValidation.inputRef, inputRefProp);
 
-    const { children: renderPropsChildren, ...otherRenderProps }
-    = render.props as React.PropsWithChildren<unknown>;
-
-    const children = thumbProps.children ?? renderPropsChildren;
-
-    // eslint-disable-next-line react/no-clone-element
-    return React.cloneElement(
-        render,
-        mergeProps(
-            thumbProps,
-            {
-                children: (
-                    <React.Fragment>
-                        {typeof children === 'function' ? children() : children}
-                        <input {...inputProps} />
-                    </React.Fragment>
-                )
-            },
-            otherRenderProps,
-            {
-                ref: thumbProps.ref
-            }
+    const children = childrenProp
+        ? (
+            <React.Fragment>
+                {childrenProp}
+                <input ref={mergedInputRef} {...inputProps} />
+            </React.Fragment>
         )
-    );
+        : (
+            <input ref={mergedInputRef} {...inputProps} />
+        );
+
+    const element = useRenderElement('div', componentProps, {
+        state,
+        ref: [ref, listItemRef, thumbRef],
+        props: [{
+            [SliderThumbDataAttributes.index as string]: index,
+            children,
+            id,
+            onBlur: onBlurProp,
+            onFocus: onFocusProp,
+            onPointerDown(event) {
+                pressedThumbIndexRef.current = index;
+
+                if (thumbRef.current != null) {
+                    const axis = orientation === 'horizontal' ? 'x' : 'y';
+                    const midpoint = getMidpoint(thumbRef.current);
+                    const offset
+                            = (orientation === 'horizontal' ? event.clientX : event.clientY) - midpoint[axis];
+                    pressedThumbCenterOffsetRef.current = offset;
+                }
+
+                if (inputRef.current != null && pressedInputRef.current !== inputRef.current) {
+                    pressedInputRef.current = inputRef.current;
+                }
+            },
+            style: getThumbStyle(),
+            tabIndex: -1
+        }, elementProps],
+        customStyleHookMapping: sliderStyleHookMapping
+    });
+
+    return element;
 }
 
 export type ThumbMetadata = {
@@ -414,22 +393,22 @@ export type ThumbMetadata = {
 };
 
 export namespace SliderThumb {
-    export type State = SliderRoot.State;
+    export type State = { } & SliderRoot.State;
 
     export type Props = {
-    /**
-     * Whether the thumb should ignore user interaction.
-     * @default false
-     */
+        /**
+         * Whether the thumb should ignore user interaction.
+         * @default false
+         */
         disabled?: boolean;
         /**
-         * Accepts a function which returns a string value that provides a user-friendly name for the input associated with the thumb
+         * A function which returns a string value for the [`aria-label`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label) attribute of the `input`.
          * @param {number} index The index of the input
          * @returns {string}
          */
         getAriaLabel?: ((index: number) => string) | null;
         /**
-         * Accepts a function which returns a string value that provides a user-friendly name for the current value of the slider.
+         * A function which returns a string value for the [`aria-valuetext`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-valuetext) attribute of the `input`.
          * This is important for screen reader users.
          * @param {string} formattedValue The thumb's formatted value.
          * @param {number} value The thumb's numerical value.
@@ -438,17 +417,34 @@ export namespace SliderThumb {
          */
         getAriaValueText?: ((formattedValue: string, value: number, index: number) => string) | null;
         /**
-         * Allows you to replace the component’s HTML element
-         * with a different tag, or compose it with another component.
-         *
-         * Accepts a `ReactElement` or a function that returns the element to render.
+         * The index of the thumb which corresponds to the index of its value in the
+         * `value` or `defaultValue` array.
+         * This prop is required to support server-side rendering for range sliders
+         * with multiple thumbs.
+         * @example
+         * ```tsx
+         * <Slider.Root value={[10, 20]}>
+         *   <Slider.Thumb index={0} />
+         *   <Slider.Thumb index={1} />
+         * </Slider.Root>
+         * ```
          */
-        render?:
-      | ((
-          props: React.ComponentPropsWithRef<'div'>,
-          inputProps: React.ComponentPropsWithRef<'input'>,
-          state: State,
-      ) => React.ReactElement)
-      | (React.ReactElement & { ref: React.Ref<Element> });
-    } & Omit<HeadlessUIComponentProps<'div', State>, 'render'>;
+        index?: number | undefined;
+        /**
+         * A ref to access the nested input element.
+         */
+        inputRef?: React.Ref<HTMLInputElement>;
+        /**
+         * A blur handler forwarded to the `input`.
+         */
+        onBlur?: React.FocusEventHandler<HTMLInputElement>;
+        /**
+         * A focus handler forwarded to the `input`.
+         */
+        onFocus?: React.FocusEventHandler<HTMLInputElement>;
+        /**
+         * Optional tab index attribute forwarded to the `input`.
+         */
+        tabIndex?: number;
+    } & Omit<HeadlessUIComponentProps<'div', State>, 'onBlur' | 'onFocus'>;
 }
