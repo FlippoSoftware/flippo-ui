@@ -1,0 +1,11 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.FieldsetLegend {
+  @include common.reset-appearance;
+  @include font.heading-1(default);
+
+  border-bottom: 2px solid var(--f-color-stroke-transparent);
+  padding-bottom: var(--f-spacing-3);
+  color: var(--f-color-text-primary);
+}
