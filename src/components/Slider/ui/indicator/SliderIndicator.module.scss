@@ -1,0 +1,9 @@
+@use 'mixins/_common.scss' as common;
+
+.SliderIndicator {
+  @include common.reset-appearance;
+
+  border-radius: var(--f-spacing-1);
+  background-color: var(--f-color-brand-light);
+  user-select: none;
+}

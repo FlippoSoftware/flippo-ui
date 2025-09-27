@@ -1,0 +1,17 @@
+@use 'mixins/_common.scss' as common;
+
+.SliderThumb {
+  @include common.reset-appearance();
+
+  width: var(--f-spacing-4);
+  height: var(--f-spacing-4);
+  border-radius: 100%;
+  background-color: var(--f-color-neutral-90);
+  user-select: none;
+  outline: none;
+
+  &:has(:focus-visible) {
+    outline: 2px solid var(--f-color-brand-light);
+    outline-offset: 2px;
+  }
+}

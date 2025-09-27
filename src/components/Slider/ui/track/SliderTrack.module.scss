@@ -1,0 +1,11 @@
+@use 'mixins/_common.scss' as common;
+
+.SliderTrack {
+  @include common.reset-appearance();
+
+  width: 100%;
+  height: var(--f-spacing-1);
+  background-color: var(--f-color-bg-1-hover);
+  border-radius: var(--f-spacing-1);
+  user-select: none;
+}
