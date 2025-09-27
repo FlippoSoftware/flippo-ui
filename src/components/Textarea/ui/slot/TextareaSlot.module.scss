@@ -1,0 +1,20 @@
+@use 'mixins/_text.scss' as text;
+
+.TextareaSlot {
+  @include text.overflow-ellipsis();
+
+  background: transparent;
+  outline: none;
+  border: none;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+
+  color: var(--f-color-text-primary);
+
+  &::placeholder {
+    color: var(--f-color-text-6);
+  }
+
+  caret-color: var(--f-color-text-white);
+}

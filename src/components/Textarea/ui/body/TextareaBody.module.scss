@@ -1,0 +1,114 @@
+@use 'mixins/_flex.scss' as flex;
+@use 'mixins/_font.scss' as font;
+@use 'mixins/_corners.scss' as corners;
+@use 'mixins/_common.scss' as common;
+
+.TextareaBody {
+  @include common.reset-appearance;
+  @include font.body('weaker');
+  @include flex.display(inline-flex, row, center, center, var(--f-spacing-3));
+
+  $ow: 1.5px;
+  $parent: &;
+
+  outline-color: transparent;
+
+  flex: 0 1 100%;
+
+  fill: var(--f-color-text-6);
+
+  padding: var(--f-spacing-4) var(--f-spacing-5);
+
+  overflow: hidden;
+
+  transition:
+    outline 0.3s ease,
+    background-color 0.3s ease;
+
+  width: 100%;
+
+  & > svg {
+    width: calc(var(--f-spacing-9) / 2);
+    aspect-ratio: 1;
+  }
+
+  &:hover {
+    [data-slot]::placeholder {
+      color: var(--f-color-text-5);
+    }
+
+    svg {
+      fill: var(--f-color-text-5);
+    }
+  }
+
+  &:focus-within {
+    [data-slot]::placeholder {
+      color: var(--f-color-text-6);
+    }
+
+    svg {
+      fill: var(--f-color-text-5);
+    }
+  }
+
+  @include corners.corners((&, '::before', '::after'), var(--f-spacing-3));
+
+  &_light {
+    background: var(--f-color-bg-1);
+    border-radius: var(--f-border-radius-input-field);
+    border: $ow solid transparent;
+
+    &:hover {
+      background: var(--f-color-bg-area-subtle);
+      border-color: var(--f-color-stroke-hover);
+
+      &[data-invalid] {
+        border-color: var(--f-color-error-hover);
+      }
+    }
+
+    &[data-invalid] {
+      border-color: var(--f-color-error);
+    }
+
+    &:is(:focus-within, [data-focused]) {
+      background: var(--f-color-bg-area-muted);
+      border-color: var(--f-color-brand-light);
+    }
+
+    &:is(:disabled, [data-disabled]) {
+      background: var(--f-color-bg-1);
+      color: var(--f-color-text-disabled);
+    }
+  }
+
+  &_inverted {
+    background: var(--f-color-bg-area-muted);
+    border-radius: var(--f-border-radius-input-field);
+    border: $ow solid transparent;
+
+    &:hover {
+      background: var(--f-color-bg-area-subtle);
+      border-color: var(--f-color-stroke);
+
+      &[data-invalid] {
+        border-color: var(--f-color-error-hover);
+      }
+    }
+
+    &[data-invalid] {
+      border-color: var(--f-color-error);
+    }
+
+    &:is(:focus-within, [data-focused]) {
+      background: var(--f-color-bg-area-muted);
+      border-color: var(--f-color-brand-light);
+    }
+
+    &:is(:disabled, [data-disabled]) {
+      background: var(--f-color-bg-area-muted);
+      color: var(--f-color-text-disabled);
+    }
+  }
+}
