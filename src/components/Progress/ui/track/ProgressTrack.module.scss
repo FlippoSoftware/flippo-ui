@@ -1,0 +1,11 @@
+@use 'mixins/_common.scss' as common;
+
+.ProgressTrack {
+  @include common.reset-appearance;
+
+  grid-column: 1 / 3;
+  overflow: hidden;
+  background-color: var(--f-color-bg-2-hover);
+  height: var(--f-spacing-1);
+  border-radius: var(--f-spacing-1);
+}

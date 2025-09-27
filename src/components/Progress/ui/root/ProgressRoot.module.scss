@@ -1,0 +1,11 @@
+@use 'mixins/_common.scss' as common;
+
+.ProgressRoot {
+  @include common.reset-appearance;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: var(--f-spacing-1);
+  grid-row-gap: var(--f-spacing-2);
+  width: 100%;
+}
