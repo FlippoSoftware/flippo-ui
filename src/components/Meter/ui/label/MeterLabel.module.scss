@@ -1,0 +1,9 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.MeterLabel {
+  @include common.reset-appearance;
+  @include font.label(weaker);
+
+  color: var(--f-color-text-5);
+}

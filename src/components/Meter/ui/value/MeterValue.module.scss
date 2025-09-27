@@ -1,0 +1,12 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.MeterValue {
+  @include common.reset-appearance();
+  @include font.label(weaker);
+
+  grid-column-start: 2;
+  margin: 0;
+  color: var(--f-color-text-5);
+  text-align: right;
+}

@@ -1,0 +1,10 @@
+@use 'mixins/_common.scss' as common;
+
+.MeterIndicator {
+  @include common.reset-appearance;
+
+  display: block;
+  background-color: var(--f-color-brand-light);
+  transition: width 500ms;
+  border-radius: var(--f-spacing-1);
+}
