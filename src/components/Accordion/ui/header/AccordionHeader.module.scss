@@ -1,0 +1,5 @@
+@use 'mixins/_common.scss' as common;
+
+.AccordionHeader {
+  @include common.reset-appearance;
+}

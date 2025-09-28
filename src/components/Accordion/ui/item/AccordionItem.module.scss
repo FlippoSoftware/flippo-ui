@@ -1,0 +1,7 @@
+@use 'mixins/_common.scss' as common;
+
+.AccordionItem {
+  @include common.reset-appearance;
+
+  border-bottom: 1px solid var(--f-color-stroke);
+}

@@ -1,0 +1,47 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.AccordionTrigger {
+  @include common.reset-appearance();
+  @include font.body(default);
+
+  position: relative;
+  display: flex;
+  width: 100%;
+  gap: var(--f-spacing-4);
+  align-items: baseline;
+  justify-content: space-between;
+  padding-block: var(--f-spacing-2);
+  padding-inline: var(--f-spacing-3) var(--f-spacing-1);
+  color: var(--f-color-text-primary);
+  font-family: inherit;
+  background: var(--f-color-bg-0);
+  text-align: left;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--f-color-bg-3);
+    }
+  }
+
+  &:focus-visible {
+    outline: var(--f-spacing-0) solid var(--f-color-brand-light);
+    z-index: 1;
+  }
+}
+
+.AccordionTriggerSvg {
+  @include common.reset-appearance();
+
+  width: var(--f-spacing-3);
+  height: var(--f-spacing-3);
+  color: var(--f-color-text-primary);
+
+  flex-shrink: 0;
+  margin-right: var(--f-spacing-2);
+  transition: transform 150ms ease-out;
+
+  [data-panel-open] > & {
+    transform: rotate(45deg) scale(1.1);
+  }
+}

@@ -1,0 +1,10 @@
+@use 'mixins/_common.scss' as common;
+
+.AccordionRoot {
+  @include common.reset-appearance;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--f-color-bg-1);
+}

@@ -1,0 +1,20 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.AccordionPanel {
+  @include common.reset-appearance();
+  @include font.body(default);
+
+  height: var(--accordion-panel-height);
+  overflow: hidden;
+  color: var(--f-color-text-5);
+  transition: height 150ms ease-out;
+
+  padding-block: var(--f-spacing-2);
+  padding-inline: var(--f-spacing-3) var(--f-spacing-1);
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    height: 0;
+  }
+}

@@ -8,7 +8,7 @@ import { Tooltip } from '..';
 import { Button } from '../../Button';
 
 const meta: Meta<typeof Tooltip.Root> = {
-    title: 'Overlays/Tooltip',
+    title: 'Overlay/Tooltip',
     component: Tooltip.Root
 };
 
