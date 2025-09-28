@@ -1,0 +1,27 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.ToolbarInput {
+  @include common.reset-appearance();
+  @include font.bodyMinus(weaker);
+
+  padding: calc(var(--f-spacing-3) / 2) var(--f-spacing-2);
+  border: 1px solid var(--f-color-stroke-transparent);
+  border-radius: var(--f-spacing-1);
+  background-color: transparent;
+  transition: border-color 0.2s ease;
+
+  &::placeholder {
+    color: var(--f-color-text-2);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--f-color-stroke);
+  }
+
+  &[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}

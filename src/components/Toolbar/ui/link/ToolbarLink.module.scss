@@ -1,0 +1,26 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.ToolbarLink {
+  @include common.reset-appearance;
+  @include font.bodyMinus(weaker);
+
+  color: var(--f-color-text-4);
+  font-family: inherit;
+  text-decoration: none;
+  align-self: center;
+  flex: 0 0 auto;
+  margin-inline: auto var(--f-spacing-3);
+
+  &:focus-visible {
+    outline: var(--f-spacing-0) solid var(--f-color-brand-light);
+    outline-offset: -var(--f-spacing-0);
+    border-radius: var(--radius-sm);
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--f-color-text-white);
+    }
+  }
+}

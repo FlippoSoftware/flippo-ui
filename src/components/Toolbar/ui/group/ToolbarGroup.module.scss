@@ -1,0 +1,8 @@
+@use 'mixins/_common.scss' as common;
+
+.ToolbarGroup {
+  @include common.reset-appearance();
+
+  display: flex;
+  gap: var(--f-spacing-1);
+}

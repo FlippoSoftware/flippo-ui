@@ -1,0 +1,19 @@
+@use 'mixins/_common.scss' as common;
+
+.ToolbarSeparator {
+  @include common.reset-appearance();
+
+  background-color: var(--f-color-stroke);
+
+  [data-orientation='horizontal'] & {
+    width: 1px;
+    height: 100%;
+    margin: 0 var(--f-spacing-1);
+  }
+
+  [data-orientation='vertical'] & {
+    height: 1px;
+    width: 100%;
+    margin: var(--f-spacing-1) 0;
+  }
+}

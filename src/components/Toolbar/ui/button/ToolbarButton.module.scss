@@ -1,0 +1,48 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.ToolbarButton {
+  @include common.reset-appearance();
+  @include font.bodyMinus(weaker);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--f-spacing-1);
+  background-color: transparent;
+  color: var(--f-color-text-primary);
+  user-select: none;
+  font-family: inherit;
+  padding: var(--f-spacing-1);
+
+  &:focus-visible {
+    background-color: transparent;
+    outline: var(--f-spacing-0) solid var(--f-color-brand-light);
+    outline-offset: -1px;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--f-color-bg-2-hover);
+    }
+  }
+
+  &:active {
+    background-color: var(--f-color-bg-2-hover);
+  }
+
+  &[data-pressed] {
+    background-color: var(--f-color-bg-2);
+    color: var(--f-color-text-4);
+  }
+
+  &[aria-pressed] {
+    padding: 0 var(--f-spacing-3);
+  }
+
+  &[role='combobox'] {
+    min-width: 8rem;
+    justify-content: space-between;
+    padding: 0 var(--f-spacing-3);
+  }
+}
