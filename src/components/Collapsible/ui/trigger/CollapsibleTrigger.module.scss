@@ -1,0 +1,47 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.CollapsibleTrigger {
+  @include common.reset-appearance;
+  @include font.bodyMinus(weaker);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--f-spacing-2);
+  padding: var(--f-spacing-1) var(--f-spacing-2);
+  border-radius: var(--f-spacing-1);
+  background-color: var(--f-color-bg-0);
+  color: var(--f-color-text-primary);
+  font-family: inherit;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--f-color-bg-3);
+    }
+  }
+
+  &:active {
+    background-color: var(--f-color-bg-3);
+  }
+
+  &:focus-visible {
+    outline: var(--f-spacing-0) solid var(--f-color-brand-light);
+  }
+}
+
+.CollapsibleTriggerSvg {
+  @include common.reset-appearance();
+
+  width: var(--f-spacing-3);
+  height: var(--f-spacing-3);
+  color: var(--f-color-text-primary);
+
+  flex-shrink: 0;
+  margin-right: var(--f-spacing-2);
+  transition: transform 150ms ease-out;
+
+  [data-panel-open] > & {
+    transform: rotate(90deg);
+  }
+}
