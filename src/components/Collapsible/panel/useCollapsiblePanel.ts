@@ -9,7 +9,6 @@ import {
     useMergedRef,
     useOnMount
 } from '@flippo-ui/hooks';
-
 import { warn } from '@lib/warn';
 
 import type { HTMLProps } from '@lib/types';
@@ -411,7 +410,7 @@ export namespace useCollapsiblePanel {
     export type Parameters = {
         abortControllerRef: React.RefObject<AbortController | null>;
         animationTypeRef: React.RefObject<AnimationType>;
-        externalRef: React.RefObject<HTMLDivElement>;
+        externalRef?: React.RefObject<HTMLElement>;
         /**
          * The height of the panel.
          */

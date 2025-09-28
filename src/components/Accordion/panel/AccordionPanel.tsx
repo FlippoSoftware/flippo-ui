@@ -3,12 +3,10 @@
 import React from 'react';
 
 import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo-ui/hooks';
-
-import type { TransitionStatus } from '@flippo-ui/hooks';
-
 import { useRenderElement } from '@lib/hooks';
 import { warn } from '@lib/warn';
 
+import type { TransitionStatus } from '@flippo-ui/hooks';
 import type { HeadlessUIComponentProps } from '@lib/types';
 
 import { useCollapsiblePanel } from '../../Collapsible/panel/useCollapsiblePanel';
@@ -114,7 +112,7 @@ export function AccordionPanel(componentProps: AccordionPanel.Props) {
     const { props } = useCollapsiblePanel({
         abortControllerRef,
         animationTypeRef,
-        externalRef: ref,
+        externalRef: ref as React.RefObject<HTMLElement>,
         height,
         hiddenUntilFound,
         id: idProp ?? panelId,
@@ -172,5 +170,5 @@ export namespace AccordionPanel {
         transitionStatus: TransitionStatus;
     } & AccordionItem.State;
 
-    export type Props = { ref: React.RefObject<HTMLDivElement> } & Omit<HeadlessUIComponentProps<'div', AccordionItem.State>, 'ref'> & Pick<AccordionRoot.Props, 'hiddenUntilFound' | 'keepMounted'>;
+    export type Props = HeadlessUIComponentProps<'div', AccordionItem.State> & Pick<AccordionRoot.Props, 'hiddenUntilFound' | 'keepMounted'>;
 }
