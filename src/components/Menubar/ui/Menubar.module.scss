@@ -1,0 +1,11 @@
+@use 'mixins/_common.scss' as common;
+
+.Menubar {
+  @include common.reset-appearance();
+
+  display: flex;
+  background-color: var(--f-color-bg-1);
+  border: 1px solid var(--f-color-stroke-transparent);
+  border-radius: var(--f-spacing-2);
+  padding: var(--f-spacing-1);
+}
