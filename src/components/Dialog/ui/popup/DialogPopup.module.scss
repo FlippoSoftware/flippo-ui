@@ -1,0 +1,35 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_effect.scss' as effect;
+
+.DialogPopup {
+  @include common.reset-appearance();
+  @include effect.elevation-modal();
+
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: var(--f-spacing-8);
+  border-radius: var(--f-spacing-6);
+  background-color: var(--f-color-bg-1);
+  color: var(--f-color-text-primary);
+  transition: all 150ms;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+
+  &_small {
+    width: 420px;
+  }
+
+  &_medium {
+    width: 732px;
+  }
+
+  &_large {
+    width: 1064px;
+  }
+}
