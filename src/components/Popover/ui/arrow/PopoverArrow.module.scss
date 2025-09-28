@@ -1,0 +1,39 @@
+@use 'mixins/_common.scss' as common;
+
+.PopoverArrow {
+  @include common.reset-appearance();
+
+  display: flex;
+
+  &[data-side='top'] {
+    bottom: -8px;
+    rotate: 180deg;
+  }
+
+  &[data-side='bottom'] {
+    top: -8px;
+    rotate: 0deg;
+  }
+
+  &[data-side='left'] {
+    right: -13px;
+    rotate: 90deg;
+  }
+
+  &[data-side='right'] {
+    left: -13px;
+    rotate: -90deg;
+  }
+}
+
+.ArrowFill {
+  fill: var(--f-color-bg-2-hover);
+}
+
+.ArrowOuterStroke {
+  fill: var(--f-color-bg-2-hover);
+}
+
+.ArrowInnerStroke {
+  fill: var(--f-color-bg-2-hover);
+}

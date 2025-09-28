@@ -1,0 +1,9 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.PopoverTitle {
+  @include common.reset-appearance;
+  @include font.heading-3(default);
+
+  color: var(--f-color-text-primary);
+}
