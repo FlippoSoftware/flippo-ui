@@ -1,0 +1,38 @@
+@use 'mixins/_common.scss' as common;
+
+.NumberFieldDecrement {
+  @include common.reset-appearance();
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--f-spacing-12);
+  height: var(--f-spacing-12);
+  border: 1.5px solid transparent;
+  border-radius: var(--f-spacing-max);
+  background-color: var(--f-color-bg-area-muted);
+  background-clip: padding-box;
+  color: var(--f-color-text-4);
+  user-select: none;
+
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--f-color-bg-area-subtle);
+      border-color: var(--f-color-stroke);
+      color: var(--f-color-text-white);
+    }
+  }
+
+  &:active {
+    background-color: var(--f-color-bg-2);
+    color: var(--f-color-text-4);
+  }
+}
+
+.DecrementIcon {
+  width: var(--f-spacing-3);
+  height: var(--f-spacing-3);
+}

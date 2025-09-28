@@ -1,0 +1,45 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.NumberFieldInput {
+  @include common.reset-appearance();
+  @include font.body(default);
+
+  border-radius: 0;
+  border-top: 1.5px solid transparent;
+  border-bottom: 1.5px solid transparent;
+
+  width: var(--f-spacing-18);
+  height: var(--f-spacing-12);
+  font-family: inherit;
+  color: var(--f-color-text-primary);
+
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+
+  background: var(--f-color-bg-area-muted);
+  background-clip: padding-box;
+
+  &:hover {
+    background: var(--f-color-bg-area-subtle);
+    border-color: var(--f-color-stroke);
+
+    &[data-invalid] {
+      border-color: var(--f-color-error-hover);
+    }
+  }
+
+  &[data-invalid] {
+    border-color: var(--f-color-error);
+  }
+
+  &:is(:focus-within, [data-focused]) {
+    background: var(--f-color-bg-area-muted);
+    border: 1.5px solid var(--f-color-brand-light);
+  }
+
+  &:is(:disabled, [data-disabled]) {
+    background: var(--f-color-bg-area-muted);
+    color: var(--f-color-text-disabled);
+  }
+}

@@ -1,0 +1,7 @@
+@use 'mixins/_common.scss' as common;
+
+.NumberFieldScrubAreaCursor {
+  @include common.reset-appearance;
+
+  filter: drop-shadow(0 1px 1px var(--f-color-neutral-10));
+}
