@@ -1,0 +1,29 @@
+@use 'mixins/_common.scss' as common;
+
+.ToastViewport {
+  @include common.reset-appearance();
+
+  position: fixed;
+  z-index: 1;
+  width: 512px;
+  margin: 0 auto;
+
+  &_bottom {
+    left: 0;
+    right: 0;
+    bottom: var(--f-spacing-4);
+    top: auto;
+  }
+
+  &_bottom-right {
+    left: auto;
+    right: var(--f-spacing-4);
+    bottom: var(--f-spacing-4);
+  }
+
+  &_bottom-left {
+    right: auto;
+    left: var(--f-spacing-4);
+    bottom: var(--f-spacing-4);
+  }
+}

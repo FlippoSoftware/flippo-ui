@@ -1,0 +1,45 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_flex.scss' as flex;
+
+$ow: 1.5px;
+@mixin stateToastClose($state, $bg: null, $color: null, $oc: null) {
+  &#{$state} {
+    @if $bg {
+      background-color: $bg;
+    }
+
+    @if $color {
+      color: $color;
+    }
+
+    @if $oc {
+      outline: $ow solid $oc;
+    }
+  }
+}
+
+.ToastClose {
+  @include common.reset-appearance();
+  @include flex.display(inline-flex, row, center, center, var(--f-spacing-2));
+
+  border-radius: var(--f-border-radius-button);
+  cursor: pointer;
+
+  transition: 0.3s ease;
+
+  width: var(--f-spacing-10);
+  height: var(--f-spacing-10);
+
+  color: var(--f-color-text-4);
+
+  @include stateToastClose(':hover', var(--f-color-bg-2-hover), var(--f-color-text-white));
+  @include stateToastClose(':active', var(--f-color-bg-2), var(--f-color-text-4));
+  @include stateToastClose(':focus-visible', $color: var(--f-color-text-3), $oc: var(--f-color-brand-light));
+  @include stateToastClose(':disabled', $color: var(--f-color-text-disabled));
+  @include stateToastClose('[data-disabled]', $color: var(--f-color-text-disabled));
+}
+
+.ToastCloseSvg {
+  width: var(--f-spacing-6);
+  height: var(--f-spacing-6);
+}

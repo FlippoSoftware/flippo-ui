@@ -1,0 +1,9 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.ToastDescription {
+  @include common.reset-appearance();
+  @include font.bodyMinus(default);
+
+  color: var(--f-color-text-primary);
+}
