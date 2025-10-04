@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { CheckIcon } from '@flippo-ui/icons';
-
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Select } from '..';

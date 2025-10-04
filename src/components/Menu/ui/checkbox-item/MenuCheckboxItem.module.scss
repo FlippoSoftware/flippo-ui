@@ -1,0 +1,29 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.MenuCheckboxItem {
+  @include common.reset-appearance();
+  @include font.bodyMinus(default);
+
+  padding: var(--f-spacing-3) var(--f-spacing-5);
+  min-width: var(--anchor-width);
+  display: grid;
+  gap: var(--f-spacing-4);
+  align-items: center;
+  grid-template-columns: var(--f-spacing-5) 1fr;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+  scroll-margin-block: var(--f-spacing-1);
+  color: var(--f-color-text-3);
+
+  @media (pointer: coarse) {
+    padding-block: var(--f-spacing-4);
+  }
+
+  &[data-highlighted] {
+    z-index: 0;
+    position: relative;
+    color: var(--f-color-text-white);
+  }
+}

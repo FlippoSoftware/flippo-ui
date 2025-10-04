@@ -1,0 +1,12 @@
+@use 'mixins/_common.scss' as common;
+
+.MenuPositioner {
+  @include common.reset-appearance();
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--f-spacing-1);
+  z-index: 1;
+  -webkit-user-select: none;
+  user-select: none;
+}
