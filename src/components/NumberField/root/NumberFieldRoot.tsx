@@ -10,18 +10,18 @@ import {
     useIsoLayoutEffect,
     useLatestRef,
     useTimeout
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
 import { isIOS } from '@lib/detectBrowser';
 import { formatNumber, formatNumberMaxPrecision } from '@lib/formatNumber';
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 import { ownerDocument, ownerWindow } from '@lib/owner';
+import { getNumberLocaleDetails, PERCENTAGES } from '@lib/parseNumeric';
 
 import type { HeadlessUIComponentProps } from '@lib/types';
 
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { CHANGE_VALUE_TICK_DELAY, DEFAULT_STEP, START_AUTO_CHANGE_DELAY } from '../utils/constants';
-import { getNumberLocaleDetails, PERCENTAGES } from '../utils/parse';
 import { styleHookMapping } from '../utils/styleHooks';
 import { toValidatedNumber } from '../utils/validate';
 
@@ -466,12 +466,12 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
             {element}
             {name && (
                 <input
-                  type={'hidden'}
-                  name={name}
-                  ref={inputRefProp}
-                  value={value ?? ''}
-                  disabled={disabled}
-                  required={required}
+                    type={'hidden'}
+                    name={name}
+                    ref={inputRefProp}
+                    value={value ?? ''}
+                    disabled={disabled}
+                    required={required}
                 />
             )}
         </NumberFieldRootContext>

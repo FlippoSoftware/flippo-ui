@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useTimeout } from '@flippo_ui/hooks';
+import { useTimeout } from '@flippo-ui/hooks';
 import { getWindow, isElement, isHTMLElement } from '@floating-ui/utils/dom';
 
 import { isMac, isSafari } from '@lib/detectBrowser';

@@ -7,7 +7,7 @@ import {
     useLatestRef,
     useMergedRef,
     useTimeout
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 import { getNodeName, isHTMLElement } from '@floating-ui/utils/dom';
 import {
     focusable,

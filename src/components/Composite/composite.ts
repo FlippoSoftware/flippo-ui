@@ -208,3 +208,16 @@ function getStyles(element: HTMLElement) {
         scrollPaddingLeft: Number.parseFloat(styles.scrollPaddingLeft) || 0
     };
 }
+
+export function isModifierKeySet(event: React.KeyboardEvent, ignoredModifierKeys: ModifierKey[]) {
+    for (const key of MODIFIER_KEYS.values()) {
+        if (ignoredModifierKeys.includes(key)) {
+            continue;
+        }
+        if (event.getModifierState(key)) {
+            return true;
+        }
+    }
+
+    return false;
+}

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useForcedRerendering } from '@flippo_ui/hooks';
+import { useForcedRerendering } from '@flippo-ui/hooks';
 
 import { generateId } from '@lib/generateId';
 import { useDirection, useRenderElement } from '@lib/hooks';

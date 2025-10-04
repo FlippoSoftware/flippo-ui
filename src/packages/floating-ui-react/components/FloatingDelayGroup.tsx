@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Timeout, useIsoLayoutEffect, useTimeout } from '@flippo_ui/hooks';
+import { Timeout, useIsoLayoutEffect, useTimeout } from '@flippo-ui/hooks';
 
 import { getDelay } from '../hooks/useHover';
 

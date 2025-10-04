@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 
-import { Timeout, useEventCallback, useLatestRef } from '@flippo_ui/hooks';
+import { Timeout, useEventCallback, useLatestRef } from '@flippo-ui/hooks';
 
 import { generateId } from '@lib/generateId';
 import { ownerDocument } from '@lib/owner';

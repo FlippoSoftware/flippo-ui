@@ -1,4 +1,4 @@
-import { Timeout } from '@flippo_ui/hooks';
+import { Timeout } from '@flippo-ui/hooks';
 import { isElement } from '@floating-ui/utils/dom';
 
 import { contains, getTarget } from './utils/element';

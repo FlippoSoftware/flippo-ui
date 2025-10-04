@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useEventCallback, useIsoLayoutEffect, useLatestRef } from '@flippo_ui/hooks';
+import { useEventCallback, useIsoLayoutEffect, useLatestRef } from '@flippo-ui/hooks';
 import { isHTMLElement } from '@floating-ui/utils/dom';
 
 import { useFloatingParentNodeId, useFloatingTree } from '../components/FloatingTree';

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useEventCallback } from '@flippo_ui/hooks';
+import { useEventCallback } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '@lib/hooks';
 

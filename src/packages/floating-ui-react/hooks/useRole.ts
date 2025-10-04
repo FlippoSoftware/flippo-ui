@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useId } from '@flippo_ui/hooks';
+import { useId } from '@flippo-ui/hooks';
 
 import { useFloatingParentNodeId } from '../components/FloatingTree';
 import { getFloatingFocusElement } from '../utils';

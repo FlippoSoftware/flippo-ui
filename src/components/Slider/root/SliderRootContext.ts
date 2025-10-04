@@ -49,15 +49,19 @@ export type TSliderRootContext = {
      * The minimum steps between values in a range slider.
      */
     minStepsBetweenValues: number;
+    name: string | undefined;
     /**
      * Function to be called when drag ends and the pointer is released.
      */
-    onValueCommitted: (newValue: number | readonly number[], event: Event) => void;
+    onValueCommitted: (newValue: number | readonly number[], eventDetails: SliderRoot.ChangeEventDetails,) => void;
     /**
      * The component orientation.
      * @default 'horizontal'
      */
     orientation: Orientation;
+    pressedInputRef: React.RefObject<HTMLInputElement | null>;
+    pressedThumbCenterOffsetRef: React.RefObject<number | null>;
+    pressedThumbIndexRef: React.RefObject<number>;
     /**
      * Whether the slider is a range slider.
      */
@@ -91,7 +95,7 @@ export function useSliderRootContext() {
     const context = React.use(SliderRootContext);
     if (context === undefined) {
         throw new Error(
-            'Base UI: SliderRootContext is missing. Slider parts must be placed within <Slider.Root>.'
+            'Headless UI: SliderRootContext is missing. Slider parts must be placed within <Slider.Root>.'
         );
     }
     return context;

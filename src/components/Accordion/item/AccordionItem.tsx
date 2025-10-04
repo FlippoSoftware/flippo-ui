@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useEventCallback, useMergedRef } from '@flippo_ui/hooks';
+import { useEventCallback, useMergedRef } from '@flippo-ui/hooks';
 
 import { EMPTY_OBJECT } from '@lib/constants';
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';

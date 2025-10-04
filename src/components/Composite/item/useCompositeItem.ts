@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useMergedRef } from '@flippo_ui/hooks';
+import { useMergedRef } from '@flippo-ui/hooks';
 
 import type { HTMLProps } from '@lib/types';
 
@@ -48,6 +48,7 @@ export function useCompositeItem<Metadata>(params: UseCompositeItemParams<Metada
     return {
         compositeProps,
         compositeRef: mergedRef as React.RefCallback<HTMLElement | null>,
-        index
+        index,
+        isHighlighted
     };
 }

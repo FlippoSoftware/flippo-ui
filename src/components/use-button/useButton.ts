@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useEventCallback, useIsoLayoutEffect } from '@flippo_ui/hooks';
+import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { error } from '@lib/error';
 import { useFocusableWhenDisabled } from '@lib/hooks';

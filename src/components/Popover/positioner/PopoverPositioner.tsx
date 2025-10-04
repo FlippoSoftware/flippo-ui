@@ -8,7 +8,7 @@ import { InternalBackdrop } from '@lib/InternalBackdrop';
 import { popupStateMapping } from '@lib/popupStateMapping';
 import { FloatingNode, useFloatingNodeId } from '@packages/floating-ui-react';
 
-import type { TAlign, TSide, UseAnchorPositioning } from '@lib/hooks';
+import type { TAlign, TSide } from '@lib/hooks';
 import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
 
 import { usePopoverPortalContext } from '../portal/PopoverPortalContext';
@@ -149,5 +149,5 @@ export namespace PopoverPositioner {
         anchorHidden: boolean;
     };
 
-    export type Props = UseAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', State>;
+    export type Props = useAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', State>;
 }

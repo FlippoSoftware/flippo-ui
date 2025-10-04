@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import type { Timeout } from '@flippo_ui/hooks';
+import type { Timeout } from '@flippo-ui/hooks';
 
 import type { EventWithOptionalKeyState } from '../utils/types';
 

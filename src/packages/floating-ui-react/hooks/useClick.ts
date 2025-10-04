@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useAnimationFrame } from '@flippo_ui/hooks';
+import { useAnimationFrame } from '@flippo-ui/hooks';
 
 import { EMPTY_OBJECT } from '@lib/constants';
 

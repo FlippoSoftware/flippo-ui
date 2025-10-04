@@ -1,8 +1,6 @@
 'use client';
 import React from 'react';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
-
 import { Field } from '../Field';
 
 /**
@@ -12,17 +10,16 @@ import { Field } from '../Field';
  * Documentation: [Base UI Input](https://base-ui.com/react/components/input)
  */
 export function Input(props: Input.Props) {
-    return <Field.Control {...props} />;
+    return <Field.Control control={'input'} {...props} />;
 }
+
+Input.Slot = Field.Control.Slot;
+Input.useInputControl = Field.Control.useFieldControl;
 
 export namespace Input {
     export type State = Field.Control.State;
 
-    export type Props = {
-        /**
-         * Callback fired when the `value` changes. Use when controlled.
-         */
-        onValueChange?: Field.Control.Props['onValueChange'];
-        defaultValue?: Field.Control.Props['defaultValue'];
-    } & HeadlessUIComponentProps<'input', State>;
+    export type SlotProps = Field.Control.InputSlotProps;
+
+    export type Props = Omit<Field.Control.InputProps, 'control'>;
 }

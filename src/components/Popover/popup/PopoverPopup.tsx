@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-import { useOpenChangeComplete } from '@flippo_ui/hooks';
+import { useOpenChangeComplete } from '@flippo-ui/hooks';
 
-import type { TInteraction, TransitionStatus } from '@flippo_ui/hooks';
+import type { TInteraction, TransitionStatus } from '@flippo-ui/hooks';
 
 import { DISABLED_TRANSITIONS_STYLE, EMPTY_OBJECT } from '@lib/constants';
 import { useRenderElement } from '@lib/hooks';

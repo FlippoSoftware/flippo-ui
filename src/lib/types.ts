@@ -1,7 +1,14 @@
-import type * as React from 'react';
+import type React from 'react';
 
 export type HTMLProps<T = any> = React.HTMLAttributes<T> & {
     ref?: React.Ref<T> | undefined;
+};
+
+export type FloatingUIOpenChangeDetails = {
+    open: boolean;
+    reason: string;
+    nativeEvent: Event;
+    nested: boolean;
 };
 
 export type HeadlessUIEvent<E extends React.SyntheticEvent<Element, Event>> = E & {
@@ -9,7 +16,7 @@ export type HeadlessUIEvent<E extends React.SyntheticEvent<Element, Event>> = E 
     readonly headlessUIHandlerPrevented?: boolean;
 };
 
-type WithPreventHeadlessUIHandler<T> = T extends (event: infer E) => any
+export type WithPreventHeadlessUIHandler<T> = T extends (event: infer E) => any
     ? E extends React.SyntheticEvent<Element, Event>
         ? (event: HeadlessUIEvent<E>) => ReturnType<T>
         : T
@@ -96,3 +103,28 @@ export type NonNativeButtonProps = {
      */
     nativeButton?: boolean;
 };
+
+export type EventKey
+    = | 'ArrowDown'
+      | 'ArrowUp'
+      | 'ArrowLeft'
+      | 'ArrowRight'
+      | 'Space'
+      | 'Enter'
+      | 'Comma'
+      | 'Escape'
+      | 'Backspace'
+      | 'Delete'
+      | 'Home'
+      | 'End'
+      | 'Tab'
+      | 'PageUp'
+      | 'PageDown'
+      | (string & {});
+
+export type EventKeyMap<T extends HTMLElement = HTMLElement> = {
+    [key in EventKey]?: (event: React.KeyboardEvent<T>) => void
+};
+
+export type NativeEvent<E>
+    = React.ChangeEvent<any> extends E ? InputEvent : E extends React.SyntheticEvent<any, infer T> ? T : never;

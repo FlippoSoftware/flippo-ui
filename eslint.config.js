@@ -18,7 +18,13 @@ export default createEslintConfig(
                 ...overridesTsConfig,
                 'ts/no-namespace': 'off',
                 'ts/prefer-literal-enum-member': 'off',
-                'ts/no-unsafe-function-type': 'off'
+                'ts/no-unsafe-function-type': 'off',
+                'ts/naming-convention': ['warn', {
+                    selector: 'variable',
+                    format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+                    leadingUnderscore: 'allow',
+                    trailingUnderscore: 'allow'
+                }]
             }
         },
         stylistic: {

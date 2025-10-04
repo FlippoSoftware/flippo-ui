@@ -16,7 +16,7 @@ import { useTooltipPositionerContext } from '../positioner/TooltipPositionerCont
  *
  * Documentation: [Base UI Tooltip](https://base-ui.com/react/components/tooltip)
  */
-export function TooltipArrow({ ref: forwardedRef, ...componentProps }: NTooltipArrow.Props) {
+export function TooltipArrow({ ref: forwardedRef, ...componentProps }: TooltipArrow.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
@@ -35,7 +35,7 @@ export function TooltipArrow({ ref: forwardedRef, ...componentProps }: NTooltipA
     }
     = useTooltipPositionerContext();
 
-    const state: NTooltipArrow.State = React.useMemo(
+    const state: TooltipArrow.State = React.useMemo(
         () => ({
             open,
             side,
@@ -60,7 +60,7 @@ export function TooltipArrow({ ref: forwardedRef, ...componentProps }: NTooltipA
     return element;
 }
 
-export namespace NTooltipArrow {
+export namespace TooltipArrow {
     export type State = {
         open: boolean;
         side: TSide;

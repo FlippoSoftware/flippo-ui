@@ -1,7 +1,6 @@
 'use client';
 
-import { useIsoLayoutEffect } from '@flippo_ui/hooks';
-
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '@lib/types';

@@ -2,13 +2,15 @@
 
 import React from 'react';
 
-import type { TSide, UseAnchorPositioning } from '@lib/hooks';
+import type { TSide, useAnchorPositioning } from '@lib/hooks';
 
 export type TSelectPositionerContext = {
     side: 'none' | TSide;
     alignItemWithTriggerActive: boolean;
     setControlledAlignItemWithTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-} & Omit<UseAnchorPositioning.ReturnValue, 'side'>;
+    scrollUpArrowRef: React.RefObject<HTMLDivElement | null>;
+    scrollDownArrowRef: React.RefObject<HTMLDivElement | null>;
+} & Omit<useAnchorPositioning.ReturnValue, 'side'>;
 
 export const SelectPositionerContext = React.createContext<TSelectPositionerContext | undefined>(
     undefined

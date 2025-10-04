@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-import { useMergedRef } from '@flippo_ui/hooks';
+import { useMergedRef } from '@flippo-ui/hooks';
 
-import type { TInteraction } from '@flippo_ui/hooks';
+import type { TInteraction } from '@flippo-ui/hooks';
 
 import type { HTMLProps } from '@lib/types';
 

@@ -5,7 +5,7 @@ import {
     useIsoLayoutEffect,
     useLatestRef,
     useTimeout
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 import { isElement } from '@floating-ui/utils/dom';
 
 import { useFloatingParentNodeId, useFloatingTree } from '../components/FloatingTree';

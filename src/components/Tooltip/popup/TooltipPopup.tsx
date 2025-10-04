@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-import { useOpenChangeComplete } from '@flippo_ui/hooks';
+import { useOpenChangeComplete } from '@flippo-ui/hooks';
 
-import type { TransitionStatus } from '@flippo_ui/hooks';
+import type { TransitionStatus } from '@flippo-ui/hooks';
 
 import { DISABLED_TRANSITIONS_STYLE, EMPTY_OBJECT } from '@lib/constants';
 import { useRenderElement } from '@lib/hooks';
@@ -18,12 +18,12 @@ import type { HeadlessUIComponentProps } from '@lib/types';
 import { useTooltipPositionerContext } from '../positioner/TooltipPositionerContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
-const customStyleHookMapping: CustomStyleHookMapping<NTooltipPopup.State> = {
+const customStyleHookMapping: CustomStyleHookMapping<TooltipPopup.State> = {
     ...baseMapping,
     ...transitionStatusMapping
 };
 
-export function TooltipPopup(componentProps: NTooltipPopup.Props) {
+export function TooltipPopup(componentProps: TooltipPopup.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
@@ -54,7 +54,7 @@ export function TooltipPopup(componentProps: NTooltipPopup.Props) {
         }
     });
 
-    const state: NTooltipPopup.State = React.useMemo(
+    const state: TooltipPopup.State = React.useMemo(
         () => ({
             open,
             side,
@@ -81,7 +81,7 @@ export function TooltipPopup(componentProps: NTooltipPopup.Props) {
     return element;
 }
 
-export namespace NTooltipPopup {
+export namespace TooltipPopup {
     export type State = {
         open: boolean;
         side: TSide;

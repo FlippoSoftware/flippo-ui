@@ -2,10 +2,12 @@
 
 import React from 'react';
 
-import { useMergedRef } from '@flippo_ui/hooks';
-
+import { useMergedRef } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
+import { stringifyAsValue } from '@lib/resolveValueLabel';
 import { visuallyHidden } from '@lib/visuallyHidden';
 
+import type { HeadlessUIChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import type { TBaseOpenChangeReason } from '@lib/translateOpenChangeReason';
 
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
@@ -13,7 +15,6 @@ import { serializeValue } from '../utils/serialize';
 
 import { SelectFloatingContext, SelectRootContext } from './SelectRootContext';
 import { useSelectRoot } from './useSelectRoot';
-
 /**
  * Groups all parts of the select.
  * Doesn’t render its own HTML element.
@@ -41,6 +42,9 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
         onOpenChangeComplete,
         items,
         multiple,
+        itemToStringLabel,
+        itemToStringValue,
+        isItemEqualToValue,
         children
     } = props;
 
@@ -60,7 +64,10 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
         actionsRef,
         onOpenChangeComplete,
         items,
-        multiple
+        multiple,
+        itemToStringLabel,
+        itemToStringValue,
+        isItemEqualToValue
     });
     const store = rootContext.store;
     const isMultiple = multiple ?? false;
@@ -88,17 +95,22 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
         }
 
         return value.map((v) => {
-            const currentSerializedValue = serializeValue(v);
+            const currentSerializedValue = stringifyAsValue(v, itemToStringValue);
             return (
                 <input
-                    key={currentSerializedValue}
-                    type={'hidden'}
-                    name={rootContext.name}
-                    value={currentSerializedValue}
+                  key={currentSerializedValue}
+                  type={'hidden'}
+                  name={rootContext.name}
+                  value={currentSerializedValue}
                 />
             );
         });
-    }, [isMultiple, value, rootContext.name]);
+    }, [
+        isMultiple,
+        value,
+        rootContext.name,
+        itemToStringValue
+    ]);
 
     return (
         <SelectRootContext value={rootContext}>
@@ -118,34 +130,35 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
                             }
 
                             const nextValue = event.target.value;
+                            const details = createChangeEventDetails('none', event.nativeEvent);
 
-                            store.set('forceMount', true);
-
-                            queueMicrotask(() => {
+                            function handleChange() {
                                 if (isMultiple) {
-                                    // Browser autofill only ever writes one scalar value per field.
-                                    // Because a multi-select expects an array, every mainstream engine skips it.
-                                    // Reliably pre-selecting multiple options therefore has to be done in
-                                    // application code, not via browser autofill.
+                                    // Browser autofill only writes a single scalar value.
+                                    return;
                                 }
-                                else {
-                                    // Handle single selection
-                                    const exactValue = rootContext.valuesRef.current.find(
-                                        (v) =>
-                                            v === nextValue
-                                            || (typeof value === 'string' && nextValue.toLowerCase() === v.toLowerCase())
-                                    );
 
-                                    if (exactValue != null) {
-                                        setDirty(exactValue !== validityData.initialValue);
-                                        rootContext.setValue?.(exactValue, event.nativeEvent);
+                                // Handle single selection: match against registered values using serialization
+                                const matchingValue = rootContext.valuesRef.current.find((v) => {
+                                    const candidate = stringifyAsValue(v, itemToStringValue);
+                                    if (candidate.toLowerCase() === nextValue.toLowerCase()) {
+                                        return true;
+                                    }
+                                    return false;
+                                });
 
-                                        if (validationMode === 'onChange') {
-                                            rootContext.fieldControlValidation.commitValidation(exactValue);
-                                        }
+                                if (matchingValue != null) {
+                                    setDirty(matchingValue !== validityData.initialValue);
+                                    rootContext.setValue?.(matchingValue, details);
+
+                                    if (validationMode === 'onChange') {
+                                        rootContext.fieldControlValidation.commitValidation(matchingValue);
                                     }
                                 }
-                            });
+                            }
+
+                            store.set('forceMount', true);
+                            queueMicrotask(handleChange);
                         },
                         'id': id || controlId || undefined,
                         'name': isMultiple ? undefined : rootContext.name,
@@ -224,11 +237,8 @@ type SelectRootProps<Value> = {
     /**
      * Event handler called when the select menu is opened or closed.
      */
-    onOpenChange?: (
-        open: boolean,
-        event: Event | undefined,
-        reason: SelectRoot.OpenChangeReason | undefined,
-    ) => void;
+    onOpenChange?: (open: boolean, eventDetails: SelectRoot.ChangeEventDetails) => void;
+
     /**
      * Event handler called after any animations complete when the select menu is opened or closed.
      */
@@ -267,6 +277,24 @@ type SelectRootProps<Value> = {
      * ```
      */
     items?: Record<string, React.ReactNode> | Array<{ label: React.ReactNode; value: Value }>;
+    /**
+     * When the item values are objects (`<Select.Item value={object}>`), this function converts the object value to a string
+     * representation for display in the trigger.
+     * If the shape of the object is `{ value, label }`, the label will be used automatically without needing to specify this prop.
+     */
+    itemToStringLabel?: (itemValue: Value) => string;
+    /**
+     * When the item values are objects (`<Select.Item value={object}>`), this function converts the object value to a string
+     * representation for form submission.
+     * If the shape of the object is `{ value, label }`, the value will be used automatically without needing to specify this prop.
+     */
+    itemToStringValue?: (itemValue: Value) => string;
+    /**
+     * Custom comparison logic used to determine if a select item value matches the current selected value. Useful when item values
+     * are objects without matching referentially.
+     * Defaults to `Object.is` comparison.
+     */
+    isItemEqualToValue?: (itemValue: Value, value: Value) => boolean;
 };
 
 type SelectValueType<Value, Multiple extends boolean | undefined> = Multiple extends true
@@ -296,13 +324,29 @@ export type SelectRootConditionalProps<Value, Multiple extends boolean | undefin
     /**
      * Callback fired when the value of the select changes. Use when controlled.
      */
-    onValueChange?: (value: SelectValueType<Value, Multiple>, event: Event | undefined) => void;
+    onValueChange?: (
+        value: SelectValueType<Value, Multiple>,
+        eventDetails: SelectRoot.ChangeEventDetails,
+    ) => void;
 };
 
 export namespace SelectRoot {
     export type Actions = {
         unmount: () => void;
     };
+
+    export type ChangeEventReason
+        = | 'trigger-press'
+          | 'outside-press'
+          | 'escape-key'
+          | 'window-resize'
+          | 'item-press'
+          | 'focus-out'
+          | 'list-navigation'
+          | 'cancel-open'
+          | 'none';
+
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 
     export type OpenChangeReason = TBaseOpenChangeReason | 'window-resize';
 

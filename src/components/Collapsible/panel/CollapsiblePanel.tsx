@@ -2,13 +2,11 @@
 
 import React from 'react';
 
-import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo_ui/hooks';
-
-import type { TransitionStatus } from '@flippo_ui/hooks';
-
+import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo-ui/hooks';
 import { useRenderElement } from '@lib/hooks';
 import { warn } from '@lib/warn';
 
+import type { TransitionStatus } from '@flippo-ui/hooks';
 import type { HeadlessUIComponentProps } from '@lib/types';
 
 import { useCollapsibleRootContext } from '../root/CollapsibleRootContext';
@@ -97,7 +95,7 @@ export function CollapsiblePanel(componentProps: CollapsiblePanel.Props) {
     const { props } = useCollapsiblePanel({
         abortControllerRef,
         animationTypeRef,
-        externalRef: ref,
+        externalRef: ref as React.RefObject<HTMLElement> | undefined,
         height,
         hiddenUntilFound,
         id: panelId,
@@ -180,6 +178,5 @@ export namespace CollapsiblePanel {
          * @default false
          */
         keepMounted?: boolean;
-        ref: React.RefObject<HTMLDivElement>;
-    } & Omit<HeadlessUIComponentProps<'div', CollapsibleRoot.State>, 'ref'>;
+    } & HeadlessUIComponentProps<'div', CollapsibleRoot.State>;
 }

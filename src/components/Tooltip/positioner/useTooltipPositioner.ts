@@ -4,14 +4,14 @@ import React from 'react';
 
 import { useAnchorPositioning } from '@lib/hooks';
 
-import type { UseAnchorPositioning, TSide } from '@lib/hooks';
+import type { TSide } from '@lib/hooks';
 import type { HTMLProps } from '@lib/types';
 
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
 export function useTooltipPositioner(
-    params: NUseTooltipPositioner.Parameters
-): NUseTooltipPositioner.ReturnValue {
+    params: UseTooltipPositioner.Parameters
+): UseTooltipPositioner.ReturnValue {
     const {
         open,
         trackCursorAxis,
@@ -53,14 +53,14 @@ export function useTooltipPositioner(
     );
 }
 
-export namespace NUseTooltipPositioner {
-    export type Parameters = {} & UseAnchorPositioning.Parameters;
+export namespace UseTooltipPositioner {
+    export type Parameters = {} & useAnchorPositioning.Parameters;
 
     export type SharedParameters = {
         side?: TSide;
-    } & UseAnchorPositioning.SharedParameters;
+    } & useAnchorPositioning.SharedParameters;
 
     export type ReturnValue = {
         props: HTMLProps;
-    } & UseAnchorPositioning.ReturnValue;
+    } & useAnchorPositioning.ReturnValue;
 }

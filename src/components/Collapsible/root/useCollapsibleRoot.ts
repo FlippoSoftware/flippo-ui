@@ -8,9 +8,9 @@ import {
     useEventCallback,
     useIsoLayoutEffect,
     useTransitionStatus
-} from '@flippo_ui/hooks';
+} from '@flippo-ui/hooks';
 
-import type { TransitionStatus } from '@flippo_ui/hooks';
+import type { TransitionStatus } from '@flippo-ui/hooks';
 
 import { useHeadlessUiId } from '@lib/hooks';
 

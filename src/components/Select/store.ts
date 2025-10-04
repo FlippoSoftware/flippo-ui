@@ -1,7 +1,6 @@
-import { createSelector } from '@flippo_ui/hooks';
+import { createSelector } from '@flippo-ui/hooks';
 
-import type { Store, TransitionStatus } from '@flippo_ui/hooks';
-
+import type { Store, TransitionStatus } from '@flippo-ui/hooks';
 import type { HTMLProps } from '@lib/types';
 
 export type State = {
@@ -13,6 +12,10 @@ export type State = {
       | Record<string, React.ReactNode>
       | Array<{ label: React.ReactNode; value: any }>
       | undefined;
+    itemToStringLabel: ((item: any) => string) | undefined;
+    itemToStringValue: ((item: any) => string) | undefined;
+    isItemEqualToValue: (item: any, value: any) => boolean;
+
     value: any;
     label: string;
 
@@ -29,9 +32,12 @@ export type State = {
     triggerProps: HTMLProps;
     triggerElement: HTMLElement | null;
     positionerElement: HTMLElement | null;
+    listElement: HTMLDivElement | null;
 
     scrollUpArrowVisible: boolean;
     scrollDownArrowVisible: boolean;
+
+    hasScrollArrows: boolean;
 };
 
 export type SelectStore = Store<State>;
@@ -42,6 +48,10 @@ export const selectors = {
     multiple: createSelector((state: State) => state.multiple),
 
     items: createSelector((state: State) => state.items),
+    itemToStringLabel: createSelector((state: State) => state.itemToStringLabel),
+    itemToStringValue: createSelector((state: State) => state.itemToStringValue),
+    isItemEqualToValue: createSelector((state: State) => state.isItemEqualToValue),
+
     value: createSelector((state: State) => state.value),
     label: createSelector((state: State) => state.label),
 
@@ -71,7 +81,9 @@ export const selectors = {
     triggerProps: createSelector((state: State) => state.triggerProps),
     triggerElement: createSelector((state: State) => state.triggerElement),
     positionerElement: createSelector((state: State) => state.positionerElement),
+    listElement: createSelector((state: State) => state.listElement),
 
     scrollUpArrowVisible: createSelector((state: State) => state.scrollUpArrowVisible),
-    scrollDownArrowVisible: createSelector((state: State) => state.scrollDownArrowVisible)
+    scrollDownArrowVisible: createSelector((state: State) => state.scrollDownArrowVisible),
+    hasScrollArrows: createSelector((state: State) => state.hasScrollArrows)
 };

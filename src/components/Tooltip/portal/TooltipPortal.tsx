@@ -8,7 +8,7 @@ import { useTooltipRootContext } from '../root/TooltipRootContext';
 
 import { TooltipPortalContext } from './TooltipPortalContext';
 
-export function TooltipPortal(props: NTooltipPortal.Props) {
+export function TooltipPortal(props: TooltipPortal.Props) {
     const { children, keepMounted = false, container } = props;
 
     const { mounted } = useTooltipRootContext();
@@ -25,7 +25,7 @@ export function TooltipPortal(props: NTooltipPortal.Props) {
     );
 }
 
-export namespace NTooltipPortal {
+export namespace TooltipPortal {
     export type Props = {
         children?: React.ReactNode;
         keepMounted?: boolean;

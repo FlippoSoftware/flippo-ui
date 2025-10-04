@@ -6,18 +6,17 @@ import {
     useControlledState,
     useEventCallback,
     useIsoLayoutEffect,
-    useLatestRef,
-    useMergedRef
-} from '@flippo_ui/hooks';
+    useLatestRef
+} from '@flippo-ui/hooks';
 import { areArraysEqual } from '@lib/areArraysEqual';
-
 import { clamp } from '@lib/clamp';
+import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 import { ownerDocument } from '@lib/owner';
-import { visuallyHidden } from '@lib/visuallyHidden';
 import { warn } from '@lib/warn';
 import { activeElement } from '@packages/floating-ui-react/utils';
 
+import type { HeadlessUIChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import type { HeadlessUIComponentProps, Orientation } from '@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
@@ -69,7 +68,6 @@ export function SliderRoot<
         defaultValue,
         disabled: disabledProp = false,
         id: idProp,
-        inputRef: inputRefProp,
         format,
         largeStep = 10,
         locale,
@@ -89,10 +87,14 @@ export function SliderRoot<
 
     const id = useHeadlessUiId(idProp);
     const onValueChange = useEventCallback(
-        onValueChangeProp as (value: number | number[], event: Event, activeThumbIndex: number) => void
+        onValueChangeProp as (
+            value: number | number[],
+            data: HeadlessUIChangeEventDetails<'none'>,
+            activeThumbIndex: number,
+        ) => void
     );
     const onValueCommitted = useEventCallback(
-        onValueCommittedProp as (value: number | readonly number[], event: Event) => void
+        onValueCommittedProp as (value: number | readonly number[], data: HeadlessUIChangeEventDetails<'none'>,) => void
     );
 
     const { clearErrors } = useFormContext();
@@ -124,7 +126,14 @@ export function SliderRoot<
     const sliderRef = React.useRef<HTMLElement>(null);
     const controlRef = React.useRef<HTMLElement>(null);
     const thumbRefs = React.useRef<(HTMLElement | null)[]>([]);
-    const inputRef = useMergedRef(inputRefProp, fieldControlValidation.inputRef);
+    // The input element nested in the pressed thumb.
+    const pressedInputRef = React.useRef<HTMLInputElement>(null);
+    // The px distance between the pointer and the center of a pressed thumb.
+    const pressedThumbCenterOffsetRef = React.useRef<number | null>(null);
+    // The index of the pressed thumb, or the closest thumb if the `Control` was pressed.
+    // This is updated on pointerdown, which is sooner than the `active/activeIndex`
+    // state which is updated later when the nested `input` receives focus.
+    const pressedThumbIndexRef = React.useRef(-1);
     const lastChangedValueRef = React.useRef<number | readonly number[] | null>(null);
     const formatOptionsRef = useLatestRef(format);
 
@@ -186,6 +195,19 @@ export function SliderRoot<
             });
 
             lastChangedValueRef.current = newValue;
+
+            const details = createChangeEventDetails('none', clonedEvent);
+
+            onValueChange(newValue, details, thumbIndex);
+
+            if (details.isCanceled) {
+                return;
+            }
+
+            setValueUnwrapped(newValue as Value);
+            clearErrors(name);
+            fieldControlValidation.commitValidation(newValue, true);
+
             onValueChange(newValue, clonedEvent, thumbIndex);
             clearErrors(name);
             fieldControlValidation.commitValidation(newValue, true);
@@ -203,7 +225,7 @@ export function SliderRoot<
                 setTouched(true);
 
                 const nextValue = lastChangedValueRef.current ?? newValue;
-                onValueCommitted(nextValue, event.nativeEvent);
+                onValueCommitted(nextValue, createChangeEventDetails('none', event.nativeEvent));
                 clearErrors(name);
 
                 if (validationMode === 'onChange') {
@@ -215,11 +237,6 @@ export function SliderRoot<
             }
         }
     );
-
-    const handleHiddenInputFocus = useEventCallback(() => {
-    // focus the first thumb if the hidden input receives focus
-        thumbRefs.current?.[0]?.focus();
-    });
 
     useIsoLayoutEffect(() => {
         if (valueProp === undefined || dragging) {
@@ -279,12 +296,16 @@ export function SliderRoot<
 
     const contextValue: TSliderRootContext = React.useMemo(
         () => ({
+            name,
             active,
             disabled,
             dragging,
             fieldControlValidation,
             formatOptionsRef,
             handleInputChange,
+            pressedInputRef,
+            pressedThumbCenterOffsetRef,
+            pressedThumbIndexRef,
             labelId: ariaLabelledby,
             largeStep,
             lastChangedValueRef,
@@ -311,27 +332,27 @@ export function SliderRoot<
             ariaLabelledby,
             disabled,
             dragging,
+            pressedInputRef,
+            pressedThumbCenterOffsetRef,
+            pressedThumbIndexRef,
             externalTabIndex,
             fieldControlValidation,
             formatOptionsRef,
             handleInputChange,
             largeStep,
-            lastChangedValueRef,
             locale,
             max,
             min,
             minStepsBetweenValues,
+            name,
             onValueCommitted,
             orientation,
             range,
             registerFieldControlRef,
-            setActive,
-            setDragging,
             setValue,
             state,
             step,
             thumbMap,
-            thumbRefs,
             values
         ]
     );
@@ -351,47 +372,15 @@ export function SliderRoot<
         <SliderRootContext value={contextValue}>
             <CompositeList elementsRef={thumbRefs} onMapChange={setThumbMap}>
                 {element}
-                {range
-                    ? (
-                        values.map((value, index) => {
-                            return (
-                                <input
-                                    // eslint-disable-next-line react/no-array-index-key
-                                  key={`${name}-input-${index}`}
-                                  {...fieldControlValidation.getInputValidationProps({
-                                        disabled,
-                                        name,
-                                        'ref': inputRef,
-                                        value,
-                                        'onFocus': handleHiddenInputFocus,
-                                        'style': visuallyHidden,
-                                        'tabIndex': -1,
-                                        'aria-hidden': true
-                                    })}
-                                />
-                            );
-                        })
-                    )
-                    : (
-                        <input
-                          {...fieldControlValidation.getInputValidationProps({
-                                disabled,
-                                name,
-                                'ref': inputRef,
-                                'value': valueUnwrapped,
-                                'onFocus': handleHiddenInputFocus,
-                                'style': visuallyHidden,
-                                'tabIndex': -1,
-                                'aria-hidden': true
-                            })}
-                        />
-                    )}
             </CompositeList>
         </SliderRootContext>
     );
 }
 
 export namespace SliderRoot {
+    export type ChangeEventReason = 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
+
     export type State = {
     /**
      * The index of the active thumb.
@@ -444,10 +433,6 @@ export namespace SliderRoot {
          * Options to format the input value.
          */
         format?: Intl.NumberFormatOptions;
-        /**
-         * A ref to access the hidden input element.
-         */
-        inputRef?: React.Ref<HTMLInputElement>;
         /**
          * The locale used by `Intl.NumberFormat` when formatting the value.
          * Defaults to the user's runtime locale.
@@ -510,7 +495,7 @@ export namespace SliderRoot {
          */
         onValueChange?: (
             value: Value extends number ? number : Value,
-            event: Event,
+            eventDetails: ChangeEventDetails,
             activeThumbIndex: number,
         ) => void;
         /**
@@ -520,6 +505,7 @@ export namespace SliderRoot {
          * @param {Event} event The corresponding event that initiated the change.
          * **Warning**: This is a generic event not a change event.
          */
-        onValueCommitted?: (value: Value extends number ? number : Value, event: Event) => void;
+        onValueCommitted?: (value: Value extends number ? number : Value, eventDetails: ChangeEventDetails,
+        ) => void;
     } & HeadlessUIComponentProps<'div', State>;
 }

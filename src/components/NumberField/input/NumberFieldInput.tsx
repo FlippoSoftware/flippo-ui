@@ -2,10 +2,16 @@
 
 import React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo_ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { formatNumber, formatNumberMaxPrecision } from '@lib/formatNumber';
 import { useRenderElement } from '@lib/hooks';
+import {
+    ARABIC_RE,
+    getNumberLocaleDetails,
+    HAN_RE,
+    parseNumber
+} from '@lib/parseNumeric';
 import { stopEvent } from '@packages/floating-ui-react/utils';
 
 import type { HeadlessUIComponentProps } from '@lib/types';
@@ -17,12 +23,6 @@ import { fieldValidityMapping } from '../../Field/utils/constants';
 import { useFormContext } from '../../Form/FormContext';
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
 import { DEFAULT_STEP } from '../utils/constants';
-import {
-    ARABIC_RE,
-    getNumberLocaleDetails,
-    HAN_RE,
-    parseNumber
-} from '../utils/parse';
 import { styleHookMapping } from '../utils/styleHooks';
 
 import type { NumberFieldRoot } from '../root/NumberFieldRoot';

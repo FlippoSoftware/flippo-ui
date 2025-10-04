@@ -2,12 +2,10 @@
 
 import React from 'react';
 
-import { useOpenChangeComplete, useTransitionStatus } from '@flippo_ui/hooks';
-
-import type { TransitionStatus } from '@flippo_ui/hooks';
-
+import { useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
 import { useRenderElement } from '@lib/hooks';
 
+import type { TransitionStatus } from '@flippo-ui/hooks';
 import type { HeadlessUIComponentProps } from '@lib/types';
 
 import { useMenuRadioItemContext } from '../radio-item/MenuRadioItemContext';
@@ -25,7 +23,7 @@ export function MenuRadioItemIndicator(componentProps: MenuRadioItemIndicator.Pr
         className,
         render,
         /* eslint-enable unused-imports/no-unused-vars */
-        keepMounted = false,
+        keepMounted = true,
         ref,
         ...elementProps
     } = componentProps;
@@ -92,7 +90,7 @@ export namespace MenuRadioItemIndicator {
     export type Props = {
     /**
      * Whether to keep the HTML element in the DOM when the radio item is inactive.
-     * @default false
+     * @default true
      */
         keepMounted?: boolean;
     } & HeadlessUIComponentProps<'span', State>;

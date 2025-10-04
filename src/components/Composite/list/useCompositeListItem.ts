@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useEnhancedEffect } from '@flippo_ui/hooks';
+import { useEnhancedEffect } from '@flippo-ui/hooks';
 
 import { useCompositeListContext } from './CompositeListContext';
 

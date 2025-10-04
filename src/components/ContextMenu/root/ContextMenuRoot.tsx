@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useId } from '@flippo_ui/hooks';
+import { useId } from '@flippo-ui/hooks';
 
 import { Menu } from '../../Menu';
 import { MenuRootContext } from '../../Menu/root/MenuRootContext';

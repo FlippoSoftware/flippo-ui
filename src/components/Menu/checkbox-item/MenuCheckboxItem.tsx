@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useControlledState, useMergedRef } from '@flippo_ui/hooks';
+import { useControlledState, useMergedRef } from '@flippo-ui/hooks';
 
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 import { useFloatingTree } from '@packages/floating-ui-react';

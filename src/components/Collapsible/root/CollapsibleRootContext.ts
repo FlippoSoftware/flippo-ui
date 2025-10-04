@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import type { TransitionStatus } from '@flippo_ui/hooks';
+import type { TransitionStatus } from '@flippo-ui/hooks';
 
 import type { CollapsibleRoot } from './CollapsibleRoot';
 import type { useCollapsibleRoot } from './useCollapsibleRoot';

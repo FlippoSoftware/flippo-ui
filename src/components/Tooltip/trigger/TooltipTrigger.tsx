@@ -10,7 +10,7 @@ import type { HeadlessUIComponentProps } from '@lib/types';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
 export function TooltipTrigger(
-    componentProps: NTooltipTrigger.Props
+    componentProps: TooltipTrigger.Props
 ) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
@@ -23,7 +23,7 @@ export function TooltipTrigger(
 
     const { open, setTriggerElement, triggerProps } = useTooltipRootContext();
 
-    const state: NTooltipTrigger.State = React.useMemo(() => ({ open }), [open]);
+    const state: TooltipTrigger.State = React.useMemo(() => ({ open }), [open]);
 
     const element = useRenderElement('button', componentProps, {
         state,
@@ -35,7 +35,7 @@ export function TooltipTrigger(
     return element;
 }
 
-export namespace NTooltipTrigger {
+export namespace TooltipTrigger {
     export type State = {
         open: boolean;
     };

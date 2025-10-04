@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useEventCallback, useIsoLayoutEffect } from '@flippo_ui/hooks';
+import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
 import { getWindow } from '@floating-ui/utils/dom';
 
 import { contains, getTarget, isMouseLikePointerType } from '../utils';
