@@ -9,15 +9,15 @@ import {
     useStore,
     useTimeout
 } from '@flippo-ui/hooks';
-
+import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import { getPseudoElementBounds } from '@lib/getPseudoElementBounds';
 import { useRenderElement } from '@lib/hooks';
 import { mergeProps } from '@lib/merge';
 import { ownerDocument } from '@lib/owner';
 import { pressableTriggerOpenStateMapping } from '@lib/popupStateMapping';
-import { contains } from '@packages/floating-ui-react/utils';
+import { contains, getFloatingFocusElement } from '@packages/floating-ui-react/utils';
 
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
+import type { StateAttributesMapping } from '@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '@lib/types';
 
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
@@ -30,7 +30,7 @@ import type { FieldRoot } from '../../Field/root/FieldRoot';
 
 const BOUNDARY_OFFSET = 2;
 
-const customStyleHookMapping: CustomStyleHookMapping<SelectTrigger.State> = {
+const customStyleHookMapping: StateAttributesMapping<SelectTrigger.State> = {
     ...pressableTriggerOpenStateMapping,
     ...fieldValidityMapping,
     value: () => null
@@ -72,6 +72,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
     const value = useStore(store, selectors.value);
     const triggerProps = useStore(store, selectors.triggerProps);
     const positionerElement = useStore(store, selectors.positionerElement);
+    const listElement = useStore(store, selectors.listElement);
 
     const positionerRef = useLatestRef(positionerElement);
 
@@ -125,8 +126,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
 
         selectionRef.current = {
             allowSelectedMouseUp: false,
-            allowUnselectedMouseUp: false,
-            allowSelect: true
+            allowUnselectedMouseUp: false
         };
 
         timeoutMouseDown.clear();
@@ -140,9 +140,17 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
         timeout2
     ]);
 
+    const ariaControlsId = React.useMemo(() => {
+        return listElement?.id ?? getFloatingFocusElement(positionerElement)?.id;
+    }, [listElement, positionerElement]);
+
     const props: HTMLProps = mergeProps<'div'>(
         triggerProps,
         {
+            'role': 'combobox',
+            'aria-expanded': open ? 'true' : 'false',
+            'aria-haspopup': 'listbox',
+            'aria-controls': open ? ariaControlsId : undefined,
             'aria-labelledby': labelId,
             'aria-readonly': readOnly || undefined,
             'tabIndex': disabled ? -1 : 0,
@@ -151,7 +159,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
                 setFocused(true);
                 // The popup element shouldn't obscure the focused trigger.
                 if (open && alignItemWithTriggerActiveRef.current) {
-                    setOpen(false, event.nativeEvent, 'focus-out');
+                    setOpen(false, createChangeEventDetails('focus-out', event.nativeEvent));
                 }
 
                 // Saves a re-render on initial click: `forceMount === true` mounts
@@ -178,12 +186,8 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
             onPointerDown({ pointerType }) {
                 store.set('touchModality', pointerType === 'touch');
             },
-            onKeyDown(event) {
+            onKeyDown() {
                 keyboardActiveRef.current = true;
-
-                if (event.key === 'ArrowDown') {
-                    setOpen(true, event.nativeEvent, 'list-navigation');
-                }
             },
             onMouseDown(event) {
                 if (open) {
@@ -219,7 +223,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
                         return;
                     }
 
-                    setOpen(false, mouseEvent, 'cancel-open');
+                    setOpen(false, createChangeEventDetails('cancel-open', mouseEvent));
                 }
 
                 // Firefox can fire this upon mousedown

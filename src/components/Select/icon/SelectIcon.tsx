@@ -1,8 +1,12 @@
-'use client';
+import React from 'react';
 
+import { useStore } from '@flippo-ui/hooks';
 import { useRenderElement } from '@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '@lib/types';
+
+import { useSelectRootContext } from '../root/SelectRootContext';
+import { selectors } from '../store';
 
 /**
  * An icon that indicates that the trigger button opens a select menu.
@@ -20,8 +24,19 @@ export function SelectIcon(componentProps: SelectIcon.Props) {
         ...elementProps
     } = componentProps;
 
+    const { store } = useSelectRootContext();
+    const open = useStore(store, selectors.open);
+
+    const state: SelectIcon.State = React.useMemo(
+        () => ({
+            open
+        }),
+        [open]
+    );
+
     const element = useRenderElement('span', componentProps, {
         ref,
+        state,
         props: [{
             'aria-hidden': true,
             'children': '▼'
@@ -32,7 +47,9 @@ export function SelectIcon(componentProps: SelectIcon.Props) {
 }
 
 export namespace SelectIcon {
-    export type State = object;
+    export type State = {
+        open: boolean;
+    };
 
     export type Props = HeadlessUIComponentProps<'span', State>;
 }

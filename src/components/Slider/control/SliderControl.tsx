@@ -5,7 +5,7 @@ import React from 'react';
 import { useAnimationFrame, useEventCallback } from '@flippo-ui/hooks';
 import { isElement } from '@floating-ui/utils/dom';
 import { clamp } from '@lib/clamp';
-import { createHeadlessUiEventDetails } from '@lib/createHeadlessUIEventDetails';
+import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import { useDirection, useRenderElement } from '@lib/hooks';
 import { ownerDocument } from '@lib/owner';
 import { activeElement, contains } from '@packages/floating-ui-react/utils';
@@ -280,7 +280,7 @@ export function SliderControl(componentProps: SliderControl.Props) {
         fieldControlValidation.commitValidation(lastChangedValueRef.current ?? finger.value);
         onValueCommitted(
             lastChangedValueRef.current ?? finger.value,
-            createHeadlessUiEventDetails('none', nativeEvent)
+            createChangeEventDetails('none', nativeEvent)
         );
 
         if (

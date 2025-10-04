@@ -4,6 +4,13 @@ export type HTMLProps<T = any> = React.HTMLAttributes<T> & {
     ref?: React.Ref<T> | undefined;
 };
 
+export type FloatingUIOpenChangeDetails = {
+    open: boolean;
+    reason: string;
+    nativeEvent: Event;
+    nested: boolean;
+};
+
 export type HeadlessUIEvent<E extends React.SyntheticEvent<Element, Event>> = E & {
     preventHeadlessUIHandler: () => void;
     readonly headlessUIHandlerPrevented?: boolean;

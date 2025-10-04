@@ -11,14 +11,14 @@ import {
 } from '@flippo-ui/hooks';
 import { areArraysEqual } from '@lib/areArraysEqual';
 import { clamp } from '@lib/clamp';
-import { createHeadlessUiEventDetails } from '@lib/createHeadlessUIEventDetails';
+import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 import { ownerDocument } from '@lib/owner';
 import { visuallyHidden } from '@lib/visuallyHidden';
 import { warn } from '@lib/warn';
 import { activeElement } from '@packages/floating-ui-react/utils';
 
-import type { HeadlessUIEventDetails } from '@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import type { HeadlessUIComponentProps, Orientation } from '@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
@@ -92,12 +92,12 @@ export function SliderRoot<
     const onValueChange = useEventCallback(
         onValueChangeProp as (
             value: number | number[],
-            data: HeadlessUIEventDetails<'none'>,
+            data: HeadlessUIChangeEventDetails<'none'>,
             activeThumbIndex: number,
         ) => void
     );
     const onValueCommitted = useEventCallback(
-        onValueCommittedProp as (value: number | readonly number[], data: HeadlessUIEventDetails<'none'>,) => void
+        onValueCommittedProp as (value: number | readonly number[], data: HeadlessUIChangeEventDetails<'none'>,) => void
     );
 
     const { clearErrors } = useFormContext();
@@ -199,7 +199,7 @@ export function SliderRoot<
 
             lastChangedValueRef.current = newValue;
 
-            const details = createHeadlessUiEventDetails('none', clonedEvent);
+            const details = createChangeEventDetails('none', clonedEvent);
 
             onValueChange(newValue, details, thumbIndex);
 
@@ -228,7 +228,7 @@ export function SliderRoot<
                 setTouched(true);
 
                 const nextValue = lastChangedValueRef.current ?? newValue;
-                onValueCommitted(nextValue, createHeadlessUiEventDetails('none', event.nativeEvent));
+                onValueCommitted(nextValue, createChangeEventDetails('none', event.nativeEvent));
                 clearErrors(name);
 
                 if (validationMode === 'onChange') {
@@ -382,7 +382,7 @@ export function SliderRoot<
 
 export namespace SliderRoot {
     export type ChangeEventReason = 'none';
-    export type ChangeEventDetails = HeadlessUIEventDetails<ChangeEventReason>;
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 
     export type State = {
     /**

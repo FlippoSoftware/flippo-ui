@@ -2,10 +2,16 @@
 
 import React from 'react';
 
-import { useIsoLayoutEffect, useLatestRef, useStore } from '@flippo-ui/hooks';
-
+import {
+    useIsoLayoutEffect,
+    useLatestRef,
+    useStore,
+    useTimeout
+} from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import { useRenderElement } from '@lib/hooks';
 import { isMouseWithinBounds } from '@lib/isMouseWithinBounds';
+import { compareItemEquality, itemIncludes, removeItem } from '@lib/itemEquality';
 
 import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '@lib/types';
 
@@ -58,14 +64,16 @@ export function SelectItem(componentProps: SelectItem.Props) {
         valuesRef,
         registerItemIndex,
         keyboardActiveRef,
-        highlightTimeout,
         multiple
     } = useSelectRootContext();
+
+    const highlightTimeout = useTimeout();
 
     const highlighted = useStore(store, selectors.isActive, listItem.index);
     const selected = useStore(store, selectors.isSelected, listItem.index, value);
     const rootValue = useStore(store, selectors.value);
     const selectedByFocus = useStore(store, selectors.isSelectedByFocus, listItem.index);
+    const isItemEqualToValue = useStore(store, selectors.isItemEqualToValue);
 
     const itemRef = React.useRef<HTMLDivElement | null>(null);
     const indexRef = useLatestRef(listItem.index);
@@ -93,12 +101,13 @@ export function SelectItem(componentProps: SelectItem.Props) {
     useIsoLayoutEffect(() => {
         if (hasRegistered) {
             if (multiple) {
-                const isValueSelected = Array.isArray(rootValue) && rootValue.includes(value);
+                const isValueSelected
+                    = Array.isArray(rootValue) && itemIncludes(rootValue, value, isItemEqualToValue);
                 if (isValueSelected) {
                     registerItemIndex(listItem.index);
                 }
             }
-            else if (value === rootValue) {
+            else if (compareItemEquality(rootValue, value, isItemEqualToValue)) {
                 registerItemIndex(listItem.index);
             }
         }
@@ -108,7 +117,8 @@ export function SelectItem(componentProps: SelectItem.Props) {
         registerItemIndex,
         value,
         rootValue,
-        multiple
+        multiple,
+        isItemEqualToValue
     ]);
 
     const state: SelectItem.State = React.useMemo(
@@ -140,17 +150,19 @@ export function SelectItem(componentProps: SelectItem.Props) {
         if (multiple) {
             const currentValue = Array.isArray(rootValue) ? rootValue : [];
             const nextValue = selected
-                ? currentValue.filter((v) => v !== value)
+                ? removeItem(currentValue, value, isItemEqualToValue)
                 : [...currentValue, value];
-            setValue(nextValue, event);
+            setValue(nextValue, createChangeEventDetails('item-press', event));
         }
         else {
-            setValue(value, event);
-            setOpen(false, event, 'item-press');
+            setValue(value, createChangeEventDetails('item-press', event));
+            setOpen(false, createChangeEventDetails('item-press', event));
         }
     }
 
     const defaultProps: HTMLProps = {
+        'role': 'option',
+        'aria-selected': selected,
         'aria-disabled': disabled || undefined,
         'tabIndex': highlighted ? 0 : -1,
         onFocus() {
@@ -178,12 +190,10 @@ export function SelectItem(componentProps: SelectItem.Props) {
         onTouchStart() {
             selectionRef.current = {
                 allowSelectedMouseUp: false,
-                allowUnselectedMouseUp: false,
-                allowSelect: true
+                allowUnselectedMouseUp: false
             };
         },
         onKeyDown(event) {
-            selectionRef.current.allowSelect = true;
             lastKeyRef.current = event.key;
             store.set('activeIndex', indexRef.current);
         },
@@ -203,10 +213,8 @@ export function SelectItem(componentProps: SelectItem.Props) {
                 return;
             }
 
-            if (selectionRef.current.allowSelect) {
-                lastKeyRef.current = null;
-                commitSelection(event.nativeEvent);
-            }
+            lastKeyRef.current = null;
+            commitSelection(event.nativeEvent);
         },
         onPointerEnter(event) {
             pointerTypeRef.current = event.pointerType;
@@ -236,11 +244,7 @@ export function SelectItem(componentProps: SelectItem.Props) {
                 return;
             }
 
-            if (selectionRef.current.allowSelect || !selected) {
-                commitSelection(event.nativeEvent);
-            }
-
-            selectionRef.current.allowSelect = true;
+            commitSelection(event.nativeEvent);
         }
     };
 
@@ -275,7 +279,7 @@ export function SelectItem(componentProps: SelectItem.Props) {
         ]
     );
 
-    return <SelectItemContext value={contextValue}>{element}</SelectItemContext>;
+    return <SelectItemContext.Provider value={contextValue}>{element}</SelectItemContext.Provider>;
 }
 
 export namespace SelectItem {

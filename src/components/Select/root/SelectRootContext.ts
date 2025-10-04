@@ -1,7 +1,6 @@
 import React from 'react';
 
 import type { Timeout } from '@flippo-ui/hooks';
-
 import type { HTMLProps } from '@lib/types';
 import type { FloatingRootContext, useFloatingRootContext } from '@packages/floating-ui-react';
 
@@ -17,14 +16,13 @@ export type TSelectRootContext = {
     readOnly: boolean;
     required: boolean;
     multiple: boolean;
-    setValue: (nextValue: any, event?: Event) => void;
-    setOpen: (
-        open: boolean,
-        event: Event | undefined,
-        reason: SelectRoot.OpenChangeReason | undefined,
-    ) => void;
+    setValue: (nextValue: any, eventDetails: SelectRoot.ChangeEventDetails) => void;
+    setOpen: (open: boolean, eventDetails: SelectRoot.ChangeEventDetails) => void;
     listRef: React.RefObject<Array<HTMLElement | null>>;
     popupRef: React.RefObject<HTMLDivElement | null>;
+    scrollHandlerRef: React.RefObject<((el: HTMLDivElement) => void) | null>;
+    handleScrollArrowVisibility: () => void;
+    scrollArrowsMountedCountRef: React.RefObject<number>;
     getItemProps: (
         props?: HTMLProps & { active?: boolean; selected?: boolean },
     ) => Record<string, unknown>; // PREVENT_COMMIT
@@ -36,7 +34,6 @@ export type TSelectRootContext = {
     selectionRef: React.RefObject<{
         allowUnselectedMouseUp: boolean;
         allowSelectedMouseUp: boolean;
-        allowSelect: boolean;
     }>;
     selectedItemTextRef: React.RefObject<HTMLSpanElement | null>;
     fieldControlValidation: ReturnType<typeof useFieldControlValidation>;
@@ -46,9 +43,9 @@ export type TSelectRootContext = {
      */
     registerItemIndex: (index: number) => void;
     onOpenChangeComplete?: (open: boolean) => void;
-    keyboardActiveRef: React.MutableRefObject<boolean>;
+    keyboardActiveRef: React.RefObject<boolean>;
     alignItemWithTriggerActiveRef: React.RefObject<boolean>;
-    highlightTimeout: Timeout;
+    initialValueRef: React.RefObject<any>;
 };
 
 export const SelectRootContext = React.createContext<TSelectRootContext | null>(null);

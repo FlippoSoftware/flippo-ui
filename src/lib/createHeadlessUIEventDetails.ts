@@ -20,7 +20,7 @@ export type ReasonToEvent<Reason extends string> = Reason extends 'trigger-press
 /**
  * Details of custom events emitted by Base UI components.
  */
-export type HeadlessUIEventDetails<Reason extends string> = {
+export type HeadlessUIChangeEventDetails<Reason extends string> = {
     [K in Reason]: {
         /**
          * The reason for the event.
@@ -53,10 +53,10 @@ export type HeadlessUIEventDetails<Reason extends string> = {
  * Creates a Base UI event details object with the given reason and utilities
  * for preventing Base UI's internal event handling.
  */
-export function createHeadlessUiEventDetails<Reason extends string>(
+export function createChangeEventDetails<Reason extends string>(
     reason: Reason,
     event?: ReasonToEvent<Reason>
-): HeadlessUIEventDetails<Reason> {
+): HeadlessUIChangeEventDetails<Reason> {
     let canceled = false;
     let allowPropagation = false;
     return {

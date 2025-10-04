@@ -5,6 +5,7 @@ import type {
     UseFloatingOptions as UsePositionOptions,
     VirtualElement
 } from '@floating-ui/react-dom';
+import type { HeadlessUIChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 
 import type { ExtendedUserProps } from './hooks/useInteractions';
 
@@ -132,9 +133,9 @@ export type ContextData = {
 };
 
 export type FloatingRootContext<RT extends ReferenceType = ReferenceType> = {
-    dataRef: React.RefObject<ContextData>;
+    dataRef: React.MutableRefObject<ContextData>;
     open: boolean;
-    onOpenChange: (open: boolean, event?: Event, reason?: OpenChangeReason) => void;
+    onOpenChange: (open: boolean, eventDetails: HeadlessUIChangeEventDetails<string>) => void;
     elements: {
         domReference: Element | null;
         reference: RT | null;
@@ -149,10 +150,10 @@ export type FloatingRootContext<RT extends ReferenceType = ReferenceType> = {
 
 export type FloatingContext<RT extends ReferenceType = ReferenceType> = Omit<
     UsePositionFloatingReturn<RT>,
-  'refs' | 'elements'
+    'refs' | 'elements'
 > & {
     open: boolean;
-    onOpenChange: (open: boolean, event?: Event, reason?: OpenChangeReason) => void;
+    onOpenChange: (open: boolean, eventDetails: HeadlessUIChangeEventDetails<string>) => void;
     events: FloatingEvents;
     dataRef: React.RefObject<ContextData>;
     nodeId: string | undefined;

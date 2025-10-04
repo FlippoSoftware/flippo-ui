@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import { useRenderElement } from '@lib/hooks';

@@ -8,19 +8,20 @@ import {
     useScrollLock,
     useStore
 } from '@flippo-ui/hooks';
-
 import { DROPDOWN_COLLISION_AVOIDANCE } from '@lib/constants';
+import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import { useAnchorPositioning, useRenderElement } from '@lib/hooks';
 import { InternalBackdrop } from '@lib/InternalBackdrop';
+import { findItemIndex, itemIncludes } from '@lib/itemEquality';
 import { popupStateMapping } from '@lib/popupStateMapping';
 
-import type { TAlign, TSide, UseAnchorPositioning } from '@lib/hooks';
+import type { TAlign, TSide } from '@lib/hooks';
 import type { HeadlessUIComponentProps } from '@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
 import { useSelectFloatingContext, useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';
-import { clearPositionerStyles } from '../utils/clearPositionerStyles';
+import { clearStyles } from '../utils/clearStyles';
 
 import { SelectPositionerContext } from './SelectPositionerContext';
 
@@ -62,9 +63,11 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
         listRef,
         labelsRef,
         alignItemWithTriggerActiveRef,
-        valuesRef
-    }
-        = useSelectRootContext();
+        valuesRef,
+        initialValueRef,
+        popupRef,
+        setValue
+    } = useSelectRootContext();
     const floatingRootContext = useSelectFloatingContext();
 
     const open = useStore(store, selectors.open);
@@ -74,6 +77,10 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
     const touchModality = useStore(store, selectors.touchModality);
     const positionerElement = useStore(store, selectors.positionerElement);
     const triggerElement = useStore(store, selectors.triggerElement);
+    const isItemEqualToValue = useStore(store, selectors.isItemEqualToValue);
+
+    const scrollUpArrowRef = React.useRef<HTMLDivElement | null>(null);
+    const scrollDownArrowRef = React.useRef<HTMLDivElement | null>(null);
 
     const [controlledAlignItemWithTrigger, setControlledAlignItemWithTrigger]
         = React.useState(alignItemWithTrigger);
@@ -84,7 +91,7 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
     }
 
     useIsoLayoutEffect(() => {
-        if (!alignItemWithTrigger || !mounted) {
+        if (!mounted) {
             if (selectors.scrollUpArrowVisible(store.state)) {
                 store.set('scrollUpArrowVisible', false);
             }
@@ -92,7 +99,7 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
                 store.set('scrollDownArrowVisible', false);
             }
         }
-    }, [store, mounted, alignItemWithTrigger]);
+    }, [store, mounted]);
 
     React.useImperativeHandle(alignItemWithTriggerActiveRef, () => alignItemWithTriggerActive);
 
@@ -185,13 +192,26 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
             return;
         }
 
-        if (!store.state.multiple && value !== null) {
-            const valueIndex = valuesRef.current.indexOf(value);
+        const eventDetails = createChangeEventDetails('none');
+
+        if (prevSize !== 0 && !store.state.multiple && value !== null) {
+            const valueIndex = findItemIndex(valuesRef.current, value, isItemEqualToValue);
             if (valueIndex === -1) {
-                store.apply({
-                    label: '',
-                    selectedIndex: null
-                });
+                const initial = initialValueRef.current;
+                const hasInitial
+                    = initial != null && itemIncludes(valuesRef.current, initial, isItemEqualToValue);
+                const nextValue = hasInitial ? initial : null;
+                setValue(nextValue, eventDetails);
+            }
+        }
+
+        if (prevSize !== 0 && store.state.multiple && Array.isArray(value)) {
+            const nextValue = value.filter((v) => itemIncludes(valuesRef.current, v, isItemEqualToValue));
+            if (
+                nextValue.length !== value.length
+                || nextValue.some((v) => !itemIncludes(value, v, isItemEqualToValue))
+            ) {
+                setValue(nextValue, eventDetails);
             }
         }
 
@@ -201,9 +221,9 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
                 scrollDownArrowVisible: false
             });
 
-            if (positionerElement) {
-                clearPositionerStyles(positionerElement, { height: '' });
-            }
+            const stylesToClear: React.CSSProperties = { height: '' };
+            clearStyles(positionerElement, stylesToClear);
+            clearStyles(popupRef.current, stylesToClear);
         }
     });
 
@@ -212,7 +232,9 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
             ...positioning,
             side: renderedSide,
             alignItemWithTriggerActive,
-            setControlledAlignItemWithTrigger
+            setControlledAlignItemWithTrigger,
+            scrollUpArrowRef,
+            scrollDownArrowRef
         }),
         [
             positioning,
@@ -247,5 +269,5 @@ export namespace SelectPositioner {
          * @default true
          */
         alignItemWithTrigger?: boolean;
-    } & UseAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', State>;
+    } & useAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', State>;
 }

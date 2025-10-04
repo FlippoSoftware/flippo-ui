@@ -1,9 +1,6 @@
-'use client';
-
 import React from 'react';
 
 import { useStore } from '@flippo-ui/hooks';
-
 import { useRenderElement } from '@lib/hooks';
 import { popupStateMapping as baseMapping } from '@lib/popupStateMapping';
 import { transitionStatusMapping } from '@lib/styleHookMapping';
