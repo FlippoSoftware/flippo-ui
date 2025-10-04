@@ -1,0 +1,18 @@
+@use 'mixins/_common.scss' as common;
+
+.SelectIcon {
+  @include common.reset-appearance();
+
+  display: flex;
+
+  [data-popup-open] & {
+    transform: rotate(180deg);
+    color: var(--f-color-text-4);
+  }
+}
+
+.ChevronIcon {
+  display: block;
+  width: var(--f-spacing-5);
+  height: var(--f-spacing-5);
+}

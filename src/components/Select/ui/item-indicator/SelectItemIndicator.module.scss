@@ -1,0 +1,19 @@
+@use 'mixins/_common.scss' as common;
+
+.SelectItemIndicator {
+  @include common.reset-appearance();
+
+  grid-column-start: 1;
+
+  [data-selected] & {
+    color: var(--f-color-brand-light);
+  }
+}
+
+.CheckIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--f-spacing-5);
+  height: var(--f-spacing-5);
+}

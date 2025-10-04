@@ -1,0 +1,38 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.SelectTrigger {
+  @include common.reset-appearance();
+  @include font.bodyMinus(default);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--f-spacing-2);
+  height: var(--f-spacing-10);
+  background-color: transparent;
+  padding: calc(var(--f-spacing-5) / 2) calc(var(--f-spacing-9) / 2);
+  border-radius: var(--f-border-radius-button);
+  font-family: inherit;
+  color: var(--f-color-text-4);
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+  min-width: 9rem;
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--f-color-text-white);
+    }
+  }
+
+  &[data-popup-open] {
+    background-color: var(--f-color-bg-2);
+    color: var(--f-color-text-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: -1px;
+  }
+}

@@ -1,0 +1,11 @@
+@use 'mixins/_common.scss' as common;
+
+.SelectItemText {
+  @include common.reset-appearance();
+
+  grid-column-start: 2;
+
+  [data-selected] {
+    color: var(--f-color-text-white);
+  }
+}

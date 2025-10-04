@@ -1,0 +1,9 @@
+@use 'mixins/_common.scss' as common;
+
+.SelectGroup {
+  @include common.reset-appearance();
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--f-spacing-0);
+}

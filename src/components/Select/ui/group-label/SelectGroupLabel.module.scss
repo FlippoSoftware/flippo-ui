@@ -1,0 +1,13 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.SelectGroupLabel {
+  @include common.reset-appearance;
+  @include font.label(default);
+
+  display: flex;
+  align-items: center;
+  padding: var(--f-spacing-0) 0 var(--f-spacing-0) var(--f-spacing-5);
+  color: var(--f-color-text-5);
+  height: var(--f-spacing-7);
+}
