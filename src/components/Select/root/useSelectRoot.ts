@@ -10,14 +10,12 @@ import {
     useOnFirstRender,
     useOpenChangeComplete,
     useStore,
-    useTimeout,
     useTransitionStatus
 } from '@flippo-ui/hooks';
 import { EMPTY_ARRAY } from '@lib/constants';
 import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import { useHeadlessUiId } from '@lib/hooks';
 import { defaultItemEquality, findItemIndex } from '@lib/itemEquality';
-import { translateOpenChangeReason } from '@lib/translateOpenChangeReason';
 import { warn } from '@lib/warn';
 import {
     useClick,

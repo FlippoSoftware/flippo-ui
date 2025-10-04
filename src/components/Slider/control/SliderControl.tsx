@@ -76,8 +76,10 @@ function getFingerCoords(
  */
 export function SliderControl(componentProps: SliderControl.Props) {
     const {
-        render: renderProp,
+        /* eslint-disable unused-imports/no-unused-vars */
         className,
+        render,
+        /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
     } = componentProps;

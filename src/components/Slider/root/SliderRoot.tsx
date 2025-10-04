@@ -6,15 +6,13 @@ import {
     useControlledState,
     useEventCallback,
     useIsoLayoutEffect,
-    useLatestRef,
-    useMergedRef
+    useLatestRef
 } from '@flippo-ui/hooks';
 import { areArraysEqual } from '@lib/areArraysEqual';
 import { clamp } from '@lib/clamp';
 import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
 import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 import { ownerDocument } from '@lib/owner';
-import { visuallyHidden } from '@lib/visuallyHidden';
 import { warn } from '@lib/warn';
 import { activeElement } from '@packages/floating-ui-react/utils';
 
@@ -70,7 +68,6 @@ export function SliderRoot<
         defaultValue,
         disabled: disabledProp = false,
         id: idProp,
-        inputRef: inputRefProp,
         format,
         largeStep = 10,
         locale,
@@ -436,10 +433,6 @@ export namespace SliderRoot {
          * Options to format the input value.
          */
         format?: Intl.NumberFormatOptions;
-        /**
-         * A ref to access the hidden input element.
-         */
-        inputRef?: React.Ref<HTMLInputElement>;
         /**
          * The locale used by `Intl.NumberFormat` when formatting the value.
          * Defaults to the user's runtime locale.

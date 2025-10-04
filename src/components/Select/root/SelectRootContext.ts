@@ -1,6 +1,5 @@
 import React from 'react';
 
-import type { Timeout } from '@flippo-ui/hooks';
 import type { HTMLProps } from '@lib/types';
 import type { FloatingRootContext, useFloatingRootContext } from '@packages/floating-ui-react';
 

@@ -13,7 +13,7 @@ import {
     useFloatingTree
 } from '@packages/floating-ui-react';
 
-import type { TAlign, TSide, UseAnchorPositioning } from '@lib/hooks';
+import type { TAlign, TSide } from '@lib/hooks';
 import type { HeadlessUIComponentProps } from '@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
@@ -313,5 +313,5 @@ export namespace MenuPositioner {
         nested: boolean;
     };
 
-    export type Props = UseAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', State>;
+    export type Props = useAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', State>;
 }

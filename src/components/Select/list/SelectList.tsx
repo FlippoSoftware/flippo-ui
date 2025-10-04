@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { useEventCallback, useStore } from '@flippo-ui/hooks';
 import { useRenderElement } from '@lib/hooks/';
 import { styleDisableScrollbar } from '@lib/styles';
