@@ -1,5 +1,3 @@
-'use client';
-
 import { useLazyRef } from './useLazyRef';
 import { useOnMount } from './useOnMount';
 
@@ -62,7 +60,7 @@ class Scheduler {
          * but there's no guarantee that the animation frame will actually run before the fake
          * timers are teared, which leaves `isScheduled` set, but won't run our `tick()`. */
         const didRAFChange
-            // eslint-disable-next-line node/prefer-global/process
+
             = process.env.NODE_ENV === 'test'
               && LAST_RAF !== requestAnimationFrame
               && ((LAST_RAF = requestAnimationFrame), true);

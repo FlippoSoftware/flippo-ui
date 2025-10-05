@@ -1,6 +1,6 @@
-import { isIOS, isWebKit } from '@lib/detectBrowser';
-import { NOOP } from '@lib/noop';
-import { ownerDocument, ownerWindow } from '@lib/owner';
+import { isIOS, isWebKit } from '~@lib/detectBrowser';
+import { NOOP } from '~@lib/noop';
+import { ownerDocument, ownerWindow } from '~@lib/owner';
 
 import { AnimationFrame } from './useAnimationFrame';
 import { useIsoLayoutEffect } from './useIsoLayoutEffect';

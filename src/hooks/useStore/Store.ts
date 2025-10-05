@@ -20,31 +20,31 @@ export class Store<State> {
      * @param fn The listener function to be called on state changes.
      * @returns A function to unsubscribe the listener.
      */
-    public subscribe = (fn: Listener<State>) => {
+    public subscribe(fn: Listener<State>) {
         this.listeners.add(fn);
         return () => {
             this.listeners.delete(fn);
         };
-    };
+    }
 
     /**
      * Returns the current state of the store.
      */
-    public getSnapshot = () => {
+    public getSnapshot() {
         return this.state;
-    };
+    }
 
     /**
      * Updates the entire store's state and notifies all registered listeners.
      *
      * @param newState The new state to set for the store.
      */
-    public update = (newState: State) => {
+    public update(newState: State) {
         if (this.state !== newState) {
             this.state = newState;
             this.listeners.forEach((l) => l(newState));
         }
-    };
+    }
 
     /**
      * Merges the provided changes into the current state and notifies listeners if there are changes.

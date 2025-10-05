@@ -1,12 +1,13 @@
 import * as React from 'react';
+
 import { useEnhancedEffect } from './useEnhancedEffect';
 
 export function useLatestRef<T>(value: T) {
-  const valueRef = React.useRef(value);
+    const valueRef = React.useRef(value);
 
-  useEnhancedEffect(() => {
-    valueRef.current = value;
-  });
+    useEnhancedEffect(() => {
+        valueRef.current = value;
+    });
 
-  return valueRef;
+    return valueRef;
 }

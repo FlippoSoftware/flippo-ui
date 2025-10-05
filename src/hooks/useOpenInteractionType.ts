@@ -1,12 +1,14 @@
-import type { TInteraction } from './useEnhancedClickHandler';
-import * as React from 'react';
+import React from 'react';
+
 import { useEnhancedClickHandler } from './useEnhancedClickHandler';
 import { useEventCallback } from './useEventCallback';
 
-export function useOpenInteractionType(open: boolean) {
-    const [openMethod, setOpenMethod] = React.useState<TInteraction | null>(null);
+import type { Interaction } from './useEnhancedClickHandler';
 
-    const triggerClick = React.useCallback((_: React.MouseEvent | React.PointerEvent, interactionType: TInteraction) => {
+export function useOpenInteractionType(open: boolean) {
+    const [openMethod, setOpenMethod] = React.useState<Interaction | null>(null);
+
+    const triggerClick = React.useCallback((_: React.MouseEvent | React.PointerEvent, interactionType: Interaction) => {
         if (!open)
             setOpenMethod(interactionType);
     }, [open, setOpenMethod]);

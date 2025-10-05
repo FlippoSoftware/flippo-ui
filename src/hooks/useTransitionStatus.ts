@@ -1,7 +1,6 @@
-'use client';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import { AnimationFrame } from './useAnimationFrame';
 import { useIsoLayoutEffect } from './useIsoLayoutEffect';
 
@@ -60,7 +59,6 @@ export function useTransitionStatus(
         }
 
         const frame = AnimationFrame.request(() => {
-            // eslint-disable-next-line react-dom/no-flush-sync
             ReactDOM.flushSync(() => {
                 setTransitionStatus(undefined);
             });
