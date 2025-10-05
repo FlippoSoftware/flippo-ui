@@ -1,28 +1,24 @@
-'use client';
-
 import React from 'react';
 
-import { useMergedRef, useOpenChangeComplete } from '@flippo-ui/hooks';
+import { useEventCallback, useOpenChangeComplete } from '@flippo-ui/hooks';
+import { useRenderElement } from '~@lib/hooks';
+import { InternalBackdrop } from '~@lib/InternalBackdrop';
+import { popupStateMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
+import { FloatingFocusManager } from '~@packages/floating-ui-react';
 
-import type { TInteraction, TransitionStatus } from '@flippo-ui/hooks';
+import type { Interaction, TransitionStatus } from '@flippo-ui/hooks';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useRenderElement } from '@lib/hooks';
-import { InternalBackdrop } from '@lib/InternalBackdrop';
-import { popupStateMapping } from '@lib/popupStateMapping';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
-import { FloatingFocusManager } from '@packages/floating-ui-react';
-
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
-
+import { COMPOSITE_KEYS } from '../../Composite/composite';
 import { useDialogPortalContext } from '../portal/DialogPortalContext';
 import { useDialogRootContext } from '../root/DialogRootContext';
 
 import { DialogPopupCssVars } from './DialogPopupCssVars';
 import { DialogPopupDataAttributes } from './DialogPopupDataAttributes';
-import { useDialogPopup } from './useDialogPopup';
 
-const customStyleHookMapping: CustomStyleHookMapping<DialogPopup.State> = {
+const customStyleHookMapping: StateAttributesMapping<DialogPopup.State> = {
     ...popupStateMapping,
     ...transitionStatusMapping,
     nestedDialogOpen(value) {
@@ -48,50 +44,44 @@ export function DialogPopup(componentProps: DialogPopup.Props) {
         ...elementProps
     } = componentProps;
 
-    const {
-        descriptionElementId,
-        dismissible,
-        floatingRootContext,
-        getPopupProps,
-        modal,
-        mounted,
-        nested,
-        nestedOpenDialogCount,
-        setOpen,
-        open,
-        openMethod,
-        popupRef,
-        setPopupElement,
-        titleElementId,
-        transitionStatus,
-        onOpenChangeComplete,
-        internalBackdropRef
-    } = useDialogRootContext();
+    const { store } = useDialogRootContext();
+
+    const descriptionElementId = store.useState('descriptionElementId');
+    const dismissible = store.useState('dismissible');
+    const floatingRootContext = store.useState('floatingRootContext');
+    const rootPopupProps = store.useState('popupProps');
+    const modal = store.useState('modal');
+    const mounted = store.useState('mounted');
+    const nested = store.useState('nested');
+    const nestedOpenDialogCount = store.useState('nestedOpenDialogCount');
+    const open = store.useState('open');
+    const openMethod = store.useState('openMethod');
+    const titleElementId = store.useState('titleElementId');
+    const transitionStatus = store.useState('transitionStatus');
 
     useDialogPortalContext();
 
     useOpenChangeComplete({
         open,
-        ref: popupRef,
+        ref: store.context.popupRef,
         onComplete() {
             if (open) {
-                onOpenChangeComplete?.(true);
+                store.context.openChangeComplete?.(true);
             }
         }
     });
 
-    const mergedRef = useMergedRef(ref, popupRef);
-
-    const { popupProps, resolvedInitialFocus } = useDialogPopup({
-        descriptionElementId,
-        initialFocus,
-        mounted,
-        setOpen,
-        openMethod,
-        ref: mergedRef,
-        setPopupElement,
-        titleElementId
+    // Default initial focus logic:
+    // If opened by touch, focus the popup element to prevent the virtual keyboard from opening
+    // (this is required for Android specifically as iOS handles this automatically).
+    const defaultInitialFocus = useEventCallback((interactionType: Interaction) => {
+        if (interactionType === 'touch') {
+            return store.context.popupRef.current;
+        }
+        return true;
     });
+
+    const resolvedInitialFocus = initialFocus === undefined ? defaultInitialFocus : initialFocus;
 
     const nestedDialogOpen = nestedOpenDialogCount > 0;
 
@@ -112,26 +102,33 @@ export function DialogPopup(componentProps: DialogPopup.Props) {
 
     const element = useRenderElement('div', componentProps, {
         state,
-        props: [
-            getPopupProps(),
-            popupProps,
-            {
-                style: {
-                    [DialogPopupCssVars.nestedDialogs]: nestedOpenDialogCount
-                } as React.CSSProperties
+        props: [rootPopupProps, {
+            'aria-labelledby': titleElementId ?? undefined,
+            'aria-describedby': descriptionElementId ?? undefined,
+            'role': 'dialog',
+            'tabIndex': -1,
+            'hidden': !mounted,
+            onKeyDown(event: React.KeyboardEvent) {
+                if (COMPOSITE_KEYS.has(event.key)) {
+                    event.stopPropagation();
+                }
             },
-            elementProps
-        ],
+            'style': {
+                [DialogPopupCssVars.nestedDialogs]: nestedOpenDialogCount
+            } as React.CSSProperties
+        }, elementProps],
+        ref: [ref, store.context.popupRef, store.getElementSetter('popupElement')],
         customStyleHookMapping
     });
 
     return (
         <React.Fragment>
             {mounted && modal === true && (
-                <InternalBackdrop ref={internalBackdropRef} inert={!open} />
+                <InternalBackdrop ref={store.context.internalBackdropRef} inert={!open} />
             )}
             <FloatingFocusManager
                 context={floatingRootContext}
+                openInteractionType={openMethod}
                 disabled={!mounted}
                 closeOnFocusOut={dismissible}
                 initialFocus={resolvedInitialFocus}
@@ -165,15 +162,29 @@ export namespace DialogPopup {
     export type Props = {
         /**
          * Determines the element to focus when the dialog is opened.
-         * By default, the first focusable element is focused.
+         *
+         * - `false`: Do not move focus.
+         * - `true`: Move focus based on the default behavior (first tabbable element or popup).
+         * - `RefObject`: Move focus to the ref element.
+         * - `function`: Called with the interaction type (`mouse`, `touch`, `pen`, or `keyboard`).
+         *   Return an element to focus, `true` to use the default behavior, or `false`/`undefined` to do nothing.
          */
         initialFocus?:
+          | boolean
           | React.RefObject<HTMLElement | null>
-          | ((interactionType: TInteraction) => React.RefObject<HTMLElement | null>);
+          | ((openType: Interaction) => boolean | HTMLElement | null | void);
         /**
          * Determines the element to focus when the dialog is closed.
-         * By default, focus returns to the trigger.
+         *
+         * - `false`: Do not move focus.
+         * - `true`: Move focus based on the default behavior (trigger or previously focused element).
+         * - `RefObject`: Move focus to the ref element.
+         * - `function`: Called with the interaction type (`mouse`, `touch`, `pen`, or `keyboard`).
+         *   Return an element to focus, `true` to use the default behavior, or `false`/`undefined` to do nothing.
          */
-        finalFocus?: React.RefObject<HTMLElement | null>;
+        finalFocus?:
+          | boolean
+          | React.RefObject<HTMLElement | null>
+          | ((closeType: Interaction) => boolean | HTMLElement | null | void);
     } & HeadlessUIComponentProps<'div', State>;
 }

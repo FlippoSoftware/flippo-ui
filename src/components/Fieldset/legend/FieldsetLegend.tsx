@@ -1,11 +1,11 @@
-'use client';
+
 import * as React from 'react';
 
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useFieldsetRootContext } from '../root/FieldsetRootContext';
 

@@ -1,13 +1,13 @@
-'use client';
+
 
 import React from 'react';
 
 import { useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
+import { useRenderElement } from '~@lib/hooks';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectItemContext } from '../item/SelectItemContext';
 

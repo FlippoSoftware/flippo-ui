@@ -1,16 +1,13 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback, useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
+import { EMPTY_ARRAY } from '~@lib/constants';
+import { isElementDisabled } from '~@lib/isElementDisabled';
+import { ownerDocument } from '~@lib/owner';
+import { activeElement } from '~@packages/floating-ui-react/utils';
 
-import { EMPTY_ARRAY } from '@lib/constants';
-import { isElementDisabled } from '@lib/isElementDisabled';
-import { ownerDocument } from '@lib/owner';
-import { activeElement } from '@packages/floating-ui-react/utils';
-
-import type { TTextDirection } from '@lib/hooks';
-import type { HTMLProps } from '@lib/types';
+import type { TextDirection } from '~@lib/hooks';
+import type { HTMLProps } from '~@lib/types';
 
 import {
     ALL_KEYS,
@@ -50,7 +47,7 @@ export type UseCompositeRootParameters = {
     highlightedIndex?: number;
     onHighlightedIndexChange?: (index: number) => void;
     dense?: boolean;
-    direction: TTextDirection;
+    direction: TextDirection;
     itemSizes?: Array<Dimensions>;
     rootRef?: React.Ref<Element>;
     /**

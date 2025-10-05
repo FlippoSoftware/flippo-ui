@@ -1,44 +1,23 @@
-'use client';
-
 import React from 'react';
 
-import { DialogContext } from '../utils/DialogContext';
+import type { DialogStore } from '../store';
 
-export type TDialogRootContext = {
-    /**
-     * Determines whether the dialog should close on outside clicks.
-     */
-    dismissible: boolean;
+export type DialogRootContextValue = {
+    store: DialogStore;
 };
 
-export const DialogRootContext = React.createContext<TDialogRootContext | undefined>(undefined);
+export const DialogRootContext = React.createContext<DialogRootContextValue | undefined>(undefined);
 
-export function useOptionalDialogRootContext() {
+export function useDialogRootContext(optional?: false): DialogRootContextValue;
+export function useDialogRootContext(optional: true): DialogRootContextValue | undefined;
+export function useDialogRootContext(optional?: boolean) {
     const dialogRootContext = React.use(DialogRootContext);
-    const dialogContext = React.use(DialogContext);
 
-    if (dialogContext === undefined && dialogRootContext === undefined) {
-        return undefined;
-    }
-
-    return {
-        ...dialogRootContext,
-        ...dialogContext
-    };
-}
-
-export function useDialogRootContext() {
-    const dialogRootContext = React.use(DialogRootContext);
-    const dialogContext = React.use(DialogContext);
-
-    if (dialogContext === undefined) {
+    if (optional === false && dialogRootContext === undefined) {
         throw new Error(
-            'Headless UI: DialogRootContext is missing. Dialog parts must be placed within <Dialog.Root>.'
+            'Base UI: DialogRootContext is missing. Dialog parts must be placed within <Dialog.Root>.'
         );
     }
 
-    return {
-        ...dialogRootContext,
-        ...dialogContext
-    };
+    return dialogRootContext;
 }

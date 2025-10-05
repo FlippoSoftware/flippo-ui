@@ -1,8 +1,8 @@
-'use client';
+
 
 import React from 'react';
 
-import { FloatingPortalLite } from '@lib/FloatingPortalLite';
+import { FloatingPortalLite } from '~@lib/FloatingPortalLite';
 
 export function ToastPortal(props: ToastPortal.Props) {
     const { children, container } = props;

@@ -1,15 +1,14 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback, useTimeout } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useRenderElement } from '~@lib/hooks';
+import { ownerDocument } from '~@lib/owner';
+import { contains, getTarget, stopEvent } from '~@packages/floating-ui-react/utils';
 
-import { useRenderElement } from '@lib/hooks';
-import { ownerDocument } from '@lib/owner';
-import { contains, getTarget, stopEvent } from '@packages/floating-ui-react/utils';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
-
+import { findRootOwnerId } from '../../Menu/utils/findRootOwnerId';
 import { useContextMenuRootContext } from '../root/ContextMenuRootContext';
 
 const LONG_PRESS_DELAY = 500;
@@ -36,7 +35,8 @@ export function ContextMenuTrigger(componentProps: ContextMenuTrigger.Props) {
         internalBackdropRef,
         backdropRef,
         positionerRef,
-        allowMouseUpTriggerRef
+        allowMouseUpTriggerRef,
+        rootId
     } = useContextMenuRootContext(false);
 
     const triggerRef = React.useRef<HTMLDivElement | null>(null);
@@ -45,27 +45,29 @@ export function ContextMenuTrigger(componentProps: ContextMenuTrigger.Props) {
     const allowMouseUpTimeout = useTimeout();
     const allowMouseUpRef = React.useRef(false);
 
-    const handleLongPress = useEventCallback((x: number, y: number, event: Event) => {
-        const isTouchEvent = event.type.startsWith('touch');
+    const handleLongPress = useEventCallback(
+        (x: number, y: number, event: MouseEvent | TouchEvent) => {
+            const isTouchEvent = event.type.startsWith('touch');
 
-        setAnchor({
-            getBoundingClientRect() {
-                return DOMRect.fromRect({
-                    width: isTouchEvent ? 10 : 0,
-                    height: isTouchEvent ? 10 : 0,
-                    x,
-                    y
-                });
-            }
-        });
+            setAnchor({
+                getBoundingClientRect() {
+                    return DOMRect.fromRect({
+                        width: isTouchEvent ? 10 : 0,
+                        height: isTouchEvent ? 10 : 0,
+                        x,
+                        y
+                    });
+                }
+            });
 
-        allowMouseUpRef.current = false;
-        actionsRef.current?.setOpen(true, event);
+            allowMouseUpRef.current = false;
+            actionsRef.current?.setOpen(true, createChangeEventDetails('trigger-press', event));
 
-        allowMouseUpTimeout.start(LONG_PRESS_DELAY, () => {
-            allowMouseUpRef.current = true;
-        });
-    });
+            allowMouseUpTimeout.start(LONG_PRESS_DELAY, () => {
+                allowMouseUpRef.current = true;
+            });
+        }
+    );
 
     const handleContextMenu = useEventCallback((event: React.MouseEvent) => {
         allowMouseUpTriggerRef.current = true;
@@ -85,11 +87,17 @@ export function ContextMenuTrigger(componentProps: ContextMenuTrigger.Props) {
                 allowMouseUpTimeout.clear();
                 allowMouseUpRef.current = false;
 
-                if (contains(positionerRef.current, getTarget(mouseEvent) as Element | null)) {
+                const mouseUpTarget = getTarget(mouseEvent) as Element | null;
+
+                if (contains(positionerRef.current, mouseUpTarget)) {
                     return;
                 }
 
-                actionsRef.current?.setOpen(false, mouseEvent, 'cancel-open');
+                if (rootId && mouseUpTarget && findRootOwnerId(mouseUpTarget) === rootId) {
+                    return;
+                }
+
+                actionsRef.current?.setOpen(false, createChangeEventDetails('cancel-open', mouseEvent));
             },
             { once: true }
         );

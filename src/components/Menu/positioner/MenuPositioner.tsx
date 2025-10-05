@@ -1,20 +1,19 @@
-'use client';
-
 import React from 'react';
 
-import { DROPDOWN_COLLISION_AVOIDANCE } from '@lib/constants';
-import { useAnchorPositioning, useRenderElement } from '@lib/hooks';
-import { InternalBackdrop } from '@lib/InternalBackdrop';
-import { popupStateMapping } from '@lib/popupStateMapping';
+import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useAnchorPositioning, useRenderElement } from '~@lib/hooks';
+import { InternalBackdrop } from '~@lib/InternalBackdrop';
+import { popupStateMapping } from '~@lib/popupStateMapping';
 import {
     FloatingNode,
     useFloatingNodeId,
     useFloatingParentNodeId,
     useFloatingTree
-} from '@packages/floating-ui-react';
+} from '~@packages/floating-ui-react';
 
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
 import { useContextMenuRootContext } from '../../ContextMenu/root/ContextMenuRootContext';
@@ -22,10 +21,11 @@ import { useMenuPortalContext } from '../portal/MenuPortalContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
 
 import type { MenuRoot } from '../root/MenuRoot';
+import type { MenuOpenEventDetails } from '../utils/types';
 
 import { MenuPositionerContext } from './MenuPositionerContext';
 
-import type { TMenuPositionerContext } from './MenuPositionerContext';
+import type { MenuPositionerContextValue } from './MenuPositionerContext';
 
 /**
  * Positions the menu popup against the trigger.
@@ -81,9 +81,11 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
     let align = alignProp;
     if (parent.type === 'context-menu') {
         anchor = parent.context?.anchor ?? anchorProp;
-        align = componentProps.align ?? 'start';
-        alignOffset = componentProps.alignOffset ?? 2;
-        sideOffset = componentProps.sideOffset ?? -5;
+        align = align ?? 'start';
+        if (!side && align !== 'center') {
+            alignOffset = componentProps.alignOffset ?? 2;
+            sideOffset = componentProps.sideOffset ?? -5;
+        }
     }
 
     let computedSide = side;
@@ -139,35 +141,30 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
     }, [open, mounted, positioner.positionerStyles]);
 
     React.useEffect(() => {
-        function onMenuOpenChange(event: {
-            open: boolean;
-            nodeId: string;
-            parentNodeId: string;
-            reason?: MenuRoot.OpenChangeReason;
-        }) {
-            if (event.open) {
-                if (event.parentNodeId === nodeId) {
+        function onMenuOpenChange(details: MenuOpenEventDetails) {
+            if (details.open) {
+                if (details.parentNodeId === nodeId) {
                     setHoverEnabled(false);
                 }
-                if (event.nodeId !== nodeId && event.parentNodeId === parentNodeId) {
-                    setOpen(false, undefined, 'sibling-open');
+                if (details.nodeId !== nodeId && details.parentNodeId === parentNodeId) {
+                    setOpen(false, createChangeEventDetails('sibling-open'));
                 }
             }
-            else if (event.parentNodeId === nodeId) {
+            else if (details.parentNodeId === nodeId) {
                 // Re-enable hover on the parent when a child closes, except when the child
                 // closed due to hovering a different sibling item in this parent (sibling-open).
                 // Keeping hover disabled in that scenario prevents the parent from closing
                 // immediately when the pointer then leaves it.
-                if (event.reason !== 'sibling-open') {
+                if (details.reason !== 'sibling-open') {
                     setHoverEnabled(true);
                 }
             }
         }
 
-        menuEvents.on('openchange', onMenuOpenChange);
+        menuEvents.on('menuopenchange', onMenuOpenChange);
 
         return () => {
-            menuEvents.off('openchange', onMenuOpenChange);
+            menuEvents.off('menuopenchange', onMenuOpenChange);
         };
     }, [
         menuEvents,
@@ -176,6 +173,27 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
         setOpen,
         setHoverEnabled
     ]);
+
+    React.useEffect(() => {
+        if (parentNodeId == null) {
+            return undefined;
+        }
+
+        function onParentClose(details: MenuOpenEventDetails) {
+            if (details.open || details.nodeId !== parentNodeId) {
+                return;
+            }
+
+            const reason: MenuRoot.ChangeEventReason = details.reason ?? 'sibling-open';
+            setOpen(false, createChangeEventDetails(reason));
+        }
+
+        menuEvents.on('menuopenchange', onParentClose);
+
+        return () => {
+            menuEvents.off('menuopenchange', onParentClose);
+        };
+    }, [menuEvents, parentNodeId, setOpen]);
 
     // Close unrelated child submenus when hovering a different item in the parent menu.
     React.useEffect(() => {
@@ -187,7 +205,7 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
             }
 
             if (triggerElement && event.target && triggerElement !== event.target) {
-                setOpen(false, undefined, 'sibling-open');
+                setOpen(false, createChangeEventDetails('sibling-open'));
             }
         }
 
@@ -204,12 +222,14 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
     ]);
 
     React.useEffect(() => {
-        menuEvents.emit('openchange', {
+        const eventDetails: MenuOpenEventDetails = {
             open,
             nodeId,
             parentNodeId,
             reason: lastOpenChangeReason
-        });
+        };
+
+        menuEvents.emit('menuopenchange', eventDetails);
     }, [
         menuEvents,
         open,
@@ -235,7 +255,7 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
         ]
     );
 
-    const contextValue: TMenuPositionerContext = React.useMemo(
+    const contextValue: MenuPositionerContextValue = React.useMemo(
         () => ({
             side: positioner.side,
             align: positioner.align,
@@ -255,20 +275,20 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
     );
 
     const element = useRenderElement('div', componentProps, {
-        state,
-        customStyleHookMapping: popupStateMapping,
         ref: [ref, setPositionerElement],
+        state,
         props: {
             ...positionerProps,
             ...elementProps
-        }
+        },
+        customStyleHookMapping: popupStateMapping
     });
 
     const shouldRenderBackdrop
-    = mounted
-      && parent.type !== 'menu'
-      && ((parent.type !== 'menubar' && modal && lastOpenChangeReason !== 'trigger-hover')
-        || (parent.type === 'menubar' && parent.context.modal));
+        = mounted
+          && parent.type !== 'menu'
+          && ((parent.type !== 'menubar' && modal && lastOpenChangeReason !== 'trigger-hover')
+            || (parent.type === 'menubar' && parent.context.modal));
 
     // cuts a hole in the backdrop to allow pointer interaction with the menubar or dropdown menu trigger element
     let backdropCutout: HTMLElement | null = null;
@@ -280,7 +300,7 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
     }
 
     return (
-        <MenuPositionerContext value={contextValue}>
+        <MenuPositionerContext.Provider value={contextValue}>
             {shouldRenderBackdrop && (
                 <InternalBackdrop
                     ref={
@@ -297,7 +317,7 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
                     {element}
                 </CompositeList>
             </FloatingNode>
-        </MenuPositionerContext>
+        </MenuPositionerContext.Provider>
     );
 }
 
@@ -307,8 +327,8 @@ export namespace MenuPositioner {
      * Whether the menu is currently open.
      */
         open: boolean;
-        side: TSide;
-        align: TAlign;
+        side: Side;
+        align: Align;
         anchorHidden: boolean;
         nested: boolean;
     };

@@ -1,15 +1,13 @@
-'use client';
-
 import React from 'react';
 
-import { POPUP_COLLISION_AVOIDANCE } from '@lib/constants';
-import { useAnchorPositioning, useRenderElement } from '@lib/hooks';
-import { InternalBackdrop } from '@lib/InternalBackdrop';
-import { popupStateMapping } from '@lib/popupStateMapping';
-import { FloatingNode, useFloatingNodeId } from '@packages/floating-ui-react';
+import { POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { useAnchorPositioning, useRenderElement } from '~@lib/hooks';
+import { InternalBackdrop } from '~@lib/InternalBackdrop';
+import { popupStateMapping } from '~@lib/popupStateMapping';
+import { FloatingNode, useFloatingNodeId } from '~@packages/floating-ui-react';
 
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { usePopoverPortalContext } from '../portal/PopoverPortalContext';
 import { usePopoverRootContext } from '../root/PopoverRootContext';
@@ -128,9 +126,9 @@ export function PopoverPositioner(componentProps: PopoverPositioner.Props) {
         <PopoverPositionerContext value={positioner}>
             {mounted && modal === true && openReason !== 'trigger-hover' && openMethod !== 'touch' && (
                 <InternalBackdrop
-                  ref={internalBackdropRef}
-                  inert={!open}
-                  cutout={triggerElement}
+                    ref={internalBackdropRef}
+                    inert={!open}
+                    cutout={triggerElement}
                 />
             )}
             <FloatingNode id={nodeId}>{element}</FloatingNode>
@@ -144,8 +142,8 @@ export namespace PopoverPositioner {
          * Whether the popover is currently open.
          */
         open: boolean;
-        side: TSide;
-        align: TAlign;
+        side: Side;
+        align: Align;
         anchorHidden: boolean;
     };
 

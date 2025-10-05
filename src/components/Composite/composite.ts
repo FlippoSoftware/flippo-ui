@@ -1,4 +1,4 @@
-import type { TTextDirection } from '@lib/hooks/useDirection';
+import type { TextDirection } from '~@lib/hooks/useDirection';
 
 export {
     createGridCellMap,
@@ -11,7 +11,7 @@ export {
     isIndexOutOfListBounds,
     isListIndexDisabled,
     stopEvent
-} from '@packages/floating-ui-react/utils';
+} from '~@packages/floating-ui-react/utils';
 
 export type Dimensions = {
     width: number;
@@ -77,7 +77,7 @@ export function isNativeInput(
 export function scrollIntoViewIfNeeded(
     scrollContainer: HTMLElement | null,
     element: HTMLElement | null,
-    direction: TTextDirection,
+    direction: TextDirection,
     orientation: 'horizontal' | 'vertical' | 'both'
 ) {
     if (!scrollContainer || !element || !element.scrollTo) {

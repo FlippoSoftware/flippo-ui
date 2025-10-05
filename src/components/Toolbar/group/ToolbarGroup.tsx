@@ -1,10 +1,8 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useToolbarRootContext } from '../root/ToolbarRootContext';
 
@@ -12,7 +10,7 @@ import type { ToolbarRoot } from '../root/ToolbarRoot';
 
 import { ToolbarGroupContext } from './ToolbarGroupContext';
 
-import type { TToolbarGroupContext } from './ToolbarGroupContext';
+import type { ToolbarGroupContextValue } from './ToolbarGroupContext';
 
 /**
  * Groups several toolbar items or toggles.
@@ -35,7 +33,7 @@ export function ToolbarGroup(componentProps: ToolbarGroup.Props) {
 
     const disabled = toolbarDisabled || disabledProp;
 
-    const contextValue: TToolbarGroupContext = React.useMemo(
+    const contextValue: ToolbarGroupContextValue = React.useMemo(
         () => ({
             disabled
         }),

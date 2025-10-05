@@ -1,5 +1,5 @@
-import { clamp } from '@lib/clamp';
-import { getFormatter } from '@lib/formatNumber';
+import { clamp } from '~@lib/clamp';
+import { getFormatter } from '~@lib/formatNumber';
 
 export function removeFloatingPointErrors(value: number, format: Intl.NumberFormatOptions = {}) {
     return Number.parseFloat(

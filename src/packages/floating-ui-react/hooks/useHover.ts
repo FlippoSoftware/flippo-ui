@@ -7,6 +7,9 @@ import {
     useTimeout
 } from '@flippo-ui/hooks';
 import { isElement } from '@floating-ui/utils/dom';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+
+import type { FloatingUIOpenChangeDetails } from '~@lib/types';
 
 import { useFloatingParentNodeId, useFloatingTree } from '../components/FloatingTree';
 import { contains, getDocument, isMouseLikePointerType } from '../utils';
@@ -18,7 +21,6 @@ import type {
     FloatingContext,
     FloatingRootContext,
     FloatingTreeType,
-    OpenChangeReason,
     SafePolygonOptions
 } from '../types';
 
@@ -155,8 +157,8 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
             return undefined;
         }
 
-        function onOpenChangeLocal({ open: newOpen }: { open: boolean }) {
-            if (!newOpen) {
+        function onOpenChangeLocal(details: FloatingUIOpenChangeDetails) {
+            if (!details.open) {
                 timeout.clear();
                 restTimeout.clear();
                 blockMouseMoveRef.current = true;
@@ -188,7 +190,7 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
 
         function onLeave(event: MouseEvent) {
             if (isHoverOpen()) {
-                onOpenChange(false, event, 'hover');
+                onOpenChange(false, createChangeEventDetails('trigger-hover', event));
             }
         }
 
@@ -207,14 +209,15 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
     ]);
 
     const closeWithDelay = React.useCallback(
-        (event: Event, runElseBranch = true, reason: OpenChangeReason = 'hover') => {
+        (event: MouseEvent, runElseBranch = true) => {
             const closeDelay = getDelay(delayRef.current, 'close', pointerTypeRef.current);
             if (closeDelay && !handlerRef.current) {
-                timeout.start(closeDelay, () => onOpenChange(false, event, reason));
+                timeout.start(closeDelay, () =>
+                    onOpenChange(false, createChangeEventDetails('trigger-hover', event)));
             }
             else if (runElseBranch) {
                 timeout.clear();
-                onOpenChange(false, event, reason);
+                onOpenChange(false, createChangeEventDetails('trigger-hover', event));
             }
         },
         [delayRef, onOpenChange, timeout]
@@ -264,12 +267,12 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
             if (openDelay) {
                 timeout.start(openDelay, () => {
                     if (!openRef.current) {
-                        onOpenChange(true, event, 'hover');
+                        onOpenChange(true, createChangeEventDetails('trigger-hover', event));
                     }
                 });
             }
             else if (!open) {
-                onOpenChange(true, event, 'hover');
+                onOpenChange(true, createChangeEventDetails('trigger-hover', event));
             }
         }
 
@@ -300,7 +303,7 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
                         clearPointerEvents();
                         cleanupMouseMoveHandler();
                         if (!isClickLikeOpenEvent()) {
-                            closeWithDelay(event, true, 'safe-polygon');
+                            closeWithDelay(event, true);
                         }
                     }
                 });
@@ -319,9 +322,9 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
             // pointer, a short close delay is an alternative, so it should work
             // consistently.
             const shouldClose
-        = pointerTypeRef.current === 'touch'
-            ? !contains(elements.floating, event.relatedTarget as Element | null)
-            : true;
+                = pointerTypeRef.current === 'touch'
+                    ? !contains(elements.floating, event.relatedTarget as Element | null)
+                    : true;
             if (shouldClose) {
                 closeWithDelay(event);
             }
@@ -491,16 +494,18 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
             cleanupMouseMoveHandler();
             timeout.clear();
             restTimeout.clear();
-            clearPointerEvents();
         };
     }, [
         enabled,
         elements.domReference,
         cleanupMouseMoveHandler,
-        clearPointerEvents,
         timeout,
         restTimeout
     ]);
+
+    React.useEffect(() => {
+        return clearPointerEvents;
+    }, [clearPointerEvents]);
 
     const reference: ElementProps['reference'] = React.useMemo(() => {
         function setPointerRef(event: React.PointerEvent) {
@@ -515,7 +520,7 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
 
                 function handleMouseMove() {
                     if (!blockMouseMoveRef.current && !openRef.current) {
-                        onOpenChange(true, nativeEvent, 'hover');
+                        onOpenChange(true, createChangeEventDetails('trigger-hover', nativeEvent));
                     }
                 }
 

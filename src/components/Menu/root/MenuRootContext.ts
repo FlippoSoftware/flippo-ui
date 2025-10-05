@@ -1,15 +1,12 @@
-'use client';
-
 import React from 'react';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-
-import type { HTMLProps } from '@lib/types';
-import type { FloatingRootContext } from '@packages/floating-ui-react';
+import type { HTMLProps } from '~@lib/types';
+import type { FloatingRootContext } from '~@packages/floating-ui-react';
 
 import type { MenuParent, MenuRoot } from './MenuRoot';
 
-export type TMenuRootContext = {
+export type MenuRootContextValue = {
     disabled: boolean;
     typingRef: React.RefObject<boolean>;
     modal: boolean;
@@ -18,23 +15,19 @@ export type TMenuRootContext = {
     itemProps: HTMLProps;
     popupProps: HTMLProps;
     triggerProps: HTMLProps;
-    itemDomElements: React.MutableRefObject<(HTMLElement | null)[]>;
-    itemLabels: React.MutableRefObject<(string | null)[]>;
+    itemDomElements: React.RefObject<(HTMLElement | null)[]>;
+    itemLabels: React.RefObject<(string | null)[]>;
     mounted: boolean;
     open: boolean;
     popupRef: React.RefObject<HTMLElement | null>;
-    setOpen: (
-        open: boolean,
-        event: Event | undefined,
-        reason: MenuRoot.OpenChangeReason | undefined,
-    ) => void;
+    setOpen: (open: boolean, eventDetails: MenuRoot.ChangeEventDetails) => void;
     positionerRef: React.RefObject<HTMLElement | null>;
     setPositionerElement: (element: HTMLElement | null) => void;
     triggerElement: HTMLElement | null;
     setTriggerElement: (element: HTMLElement | null) => void;
     transitionStatus: TransitionStatus;
     allowMouseUpTriggerRef: React.RefObject<boolean>;
-    lastOpenChangeReason: MenuRoot.OpenChangeReason | null;
+    lastOpenChangeReason: MenuRoot.ChangeEventReason | null;
     instantType: 'dismiss' | 'click' | 'group' | undefined;
     onOpenChangeComplete: ((open: boolean) => void) | undefined;
     setHoverEnabled: React.Dispatch<React.SetStateAction<boolean>>;
@@ -45,16 +38,15 @@ export type TMenuRootContext = {
     setAllowMouseEnter: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const MenuRootContext = React.createContext<TMenuRootContext | undefined>(undefined);
+export const MenuRootContext = React.createContext<MenuRootContextValue | undefined>(undefined);
 
-export function useMenuRootContext(optional?: false): TMenuRootContext;
-export function useMenuRootContext(optional: true): TMenuRootContext | undefined;
+export function useMenuRootContext(optional?: false): MenuRootContextValue;
+export function useMenuRootContext(optional: true): MenuRootContextValue | undefined;
 export function useMenuRootContext(optional?: boolean) {
     const context = React.use(MenuRootContext);
-
     if (context === undefined && !optional) {
         throw new Error(
-            'Headless UI: MenuRootContext is missing. Menu parts must be placed within <Menu.Root>.'
+            'Base UI: MenuRootContext is missing. Menu parts must be placed within <Menu.Root>.'
         );
     }
 

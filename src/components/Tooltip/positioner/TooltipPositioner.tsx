@@ -1,13 +1,11 @@
-'use client';
-
 import React from 'react';
 
-import { POPUP_COLLISION_AVOIDANCE } from '@lib/constants';
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
+import { POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
 
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useTooltipPortalContext } from '../portal/TooltipPortalContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
@@ -15,7 +13,7 @@ import { useTooltipRootContext } from '../root/TooltipRootContext';
 import { TooltipPositionerContext } from './TooltipPositionerContext';
 import { useTooltipPositioner } from './useTooltipPositioner';
 
-import type { TTooltipPositionerContext } from './TooltipPositionerContext';
+import type { TooltipPositionerContextValue } from './TooltipPositionerContext';
 import type { UseTooltipPositioner } from './useTooltipPositioner';
 
 /**
@@ -86,7 +84,7 @@ export function TooltipPositioner({ ref: forwardedRef, ...componentProps }: Tool
         ]
     );
 
-    const contextValue: TTooltipPositionerContext = React.useMemo(
+    const contextValue: TooltipPositionerContextValue = React.useMemo(
         () => ({
             ...state,
             arrowRef: positioner.arrowRef,
@@ -118,8 +116,8 @@ export function TooltipPositioner({ ref: forwardedRef, ...componentProps }: Tool
 export namespace TooltipPositioner {
     export type State = {
         open: boolean;
-        side: TSide;
-        align: TAlign;
+        side: Side;
+        align: Align;
         anchorHidden: boolean;
     };
 

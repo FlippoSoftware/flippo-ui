@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { useDirection, useHeadlessUiId, useRenderElement } from '@lib/hooks';
+import { useDirection, useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCompositeListItem } from '../../Composite';
 import { isModifierKeySet } from '../../Composite/composite';

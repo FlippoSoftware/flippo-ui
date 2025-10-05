@@ -25,11 +25,11 @@ relative to an anchor element. It handles:
 type Parameters = {
     anchor?: Element | VirtualElement | RefObject<Element | null> | (() => Element |               VirtualElement | null);
     positionMethod?: 'absolute' | 'fixed'; // CSS positioning method
-    side?: TSide; // Positioning side (top/bottom/left/right/inline-start/inline-end)
+    side?: Side; // Positioning side (top/bottom/left/right/inline-start/inline-end)
     sideOffset?: number | OffsetFunction; // Distance from anchor
     align?: 'start' | 'end' | 'center'; // Alignment relative to anchor
     alignOffset?: number | OffsetFunction; // Offset along alignment axis
-    collisionBoundary?: TBoundary; // Boundary for collision detection
+    collisionBoundary?: Boundary; // Boundary for collision detection
     collisionPadding?: Padding; // Padding from collision boundary
     sticky?: boolean; // Maintain position when anchor scrolls out of view
     arrowPadding?: number; // Minimum padding between arrow and floating element edges
@@ -46,8 +46,8 @@ type Parameters = {
     arrowStyles: React.CSSProperties; // Styles for arrow element
     arrowRef: RefObject<Element | null>; // Ref for arrow element
     arrowUncentered: boolean; // If arrow is offset due to collisions
-    side: TSide; // Actual rendered side after collision avoidance
-    align: TAlign; // Actual rendered alignment
+    side: Side; // Actual rendered side after collision avoidance
+    align: Align; // Actual rendered alignment
     anchorHidden: boolean; // If anchor is hidden (off-screen)
     refs: FloatingRefs; // Refs for floating elements
     context: FloatingContext; // Floating UI context
@@ -107,7 +107,6 @@ function Tooltip() {
 ## Key Implementation Details
 
 1. **Middleware Pipeline**:
-
    - `offset`: Handles main/cross axis offsets
    - `flip`: Handles collision avoidance
    - `shift`: Ensures content stays in viewport
@@ -117,11 +116,9 @@ function Tooltip() {
    - Custom `transformOrigin`: Calculates transform origin
 
 2. **RTL Handling**:
-
    - Converts logical directions (`inline-start`/`inline-end`) to physical directions based on text direction
 
 3. **Dynamic Updates**:
-
    - Uses `autoUpdate` from Floating UI to reposition on:
      - Anchor resizing
      - Viewport changes

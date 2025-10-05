@@ -80,6 +80,11 @@
       "import": "./dist/components/Input/index.es.js",
       "require": "./dist/components/Input/index.cjs.js"
     },
+    "./list": {
+      "types": "./dist/components/List/index.d.ts",
+      "import": "./dist/components/List/index.es.js",
+      "require": "./dist/components/List/index.cjs.js"
+    },
     "./menu": {
       "types": "./dist/components/Menu/index.d.ts",
       "import": "./dist/components/Menu/index.es.js",
@@ -114,6 +119,11 @@
       "types": "./dist/components/Progress/index.d.ts",
       "import": "./dist/components/Progress/index.es.js",
       "require": "./dist/components/Progress/index.cjs.js"
+    },
+    "./qr-code": {
+      "types": "./dist/components/QrCode/index.d.ts",
+      "import": "./dist/components/QrCode/index.es.js",
+      "require": "./dist/components/QrCode/index.cjs.js"
     },
     "./radio": {
       "types": "./dist/components/Radio/index.d.ts",
@@ -230,6 +240,8 @@
     "@floating-ui/react-dom": "catalog:",
     "@floating-ui/utils": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "qr-code-styling": "catalog:",
+    "qrcode": "catalog:",
     "tabbable": "catalog:",
     "vite": "catalog:"
   },
@@ -241,6 +253,7 @@
     "@testing-library/react": "catalog:",
     "@testing-library/user-event": "catalog:",
     "@types/node": "catalog:",
+    "@types/qrcode": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitest/ui": "catalog:",

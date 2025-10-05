@@ -1,14 +1,12 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { FieldsetRootContext } from './FieldsetRootContext';
 
-import type { TFieldsetRootContext } from './FieldsetRootContext';
+import type { FieldsetRootContextValue } from './FieldsetRootContext';
 
 /**
  * Groups the fieldset legend and the associated fields.
@@ -44,7 +42,7 @@ export function FieldsetRoot(componentProps: FieldsetRoot.Props) {
         }, elementProps]
     });
 
-    const contextValue: TFieldsetRootContext = React.useMemo(
+    const contextValue: FieldsetRootContextValue = React.useMemo(
         () => ({
             legendId,
             setLegendId,

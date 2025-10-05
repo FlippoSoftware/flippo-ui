@@ -1,7 +1,7 @@
-import { getEventKey, isComposingEvent } from '@lib/event';
-import { ARABIC_RE, HAN_RE } from '@lib/parseNumeric';
+import { getEventKey, isComposingEvent } from '~@lib/event';
+import { ARABIC_RE, HAN_RE } from '~@lib/parseNumeric';
 
-import type { EventKeyMap } from '@lib/types';
+import type { EventKeyMap } from '~@lib/types';
 
 import { testPattern } from '../utils/testPattern';
 

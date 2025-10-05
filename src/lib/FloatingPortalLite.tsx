@@ -1,4 +1,4 @@
-'use client';
+
 import * as ReactDOM from 'react-dom';
 
 import { useFloatingPortalNode } from '@floating-ui/react';

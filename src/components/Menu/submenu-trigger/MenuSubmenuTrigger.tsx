@@ -1,11 +1,10 @@
-'use client';
 import React from 'react';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { triggerOpenStateMapping } from '@lib/popupStateMapping';
-import { useFloatingTree } from '@packages/floating-ui-react';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { triggerOpenStateMapping } from '~@lib/popupStateMapping';
+import { useFloatingTree } from '~@packages/floating-ui-react';
 
-import type { HeadlessUIComponentProps, NonNativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NonNativeButtonProps } from '~@lib/types';
 
 import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
 import { useMenuItem } from '../item/useMenuItem';
@@ -84,7 +83,7 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
         [disabled, highlighted, open]
     );
 
-    return useRenderElement('div', componentProps, {
+    const element = useRenderElement('div', componentProps, {
         state,
         ref: [
             ref,
@@ -108,6 +107,8 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
             }
         ]
     });
+
+    return element;
 }
 
 export namespace MenuSubmenuTrigger {

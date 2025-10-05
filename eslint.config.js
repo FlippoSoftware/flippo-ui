@@ -24,7 +24,8 @@ export default createEslintConfig(
                     format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
                     leadingUnderscore: 'allow',
                     trailingUnderscore: 'allow'
-                }]
+                }],
+                'ts/no-empty-object-type': 'off'
             }
         },
         stylistic: {

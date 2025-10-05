@@ -1,12 +1,10 @@
-'use client';
-
 import React from 'react';
 
 import { useControlledState, useEventCallback } from '@flippo-ui/hooks';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { PARENT_CHECKBOX } from '../Checkbox/root/CheckboxRoot';
 import { useFieldControlValidation } from '../Field/control/useFieldControlValidation';
@@ -19,7 +17,7 @@ import type { FieldRoot } from '../Field/root/FieldRoot';
 import { CheckboxGroupContext } from './CheckboxGroupContext';
 import { useCheckboxGroupParent } from './useCheckboxGroupParent';
 
-import type { TCheckboxGroupContext } from './CheckboxGroupContext';
+import type { CheckboxGroupContextValue } from './CheckboxGroupContext';
 
 /**
  * Provides a shared state to a series of checkboxes.
@@ -59,10 +57,17 @@ export function CheckboxGroup(componentProps: CheckboxGroup.Props) {
         caller: 'CheckboxGroup'
     });
 
-    const setValue = useEventCallback((v: string[], event: Event) => {
-        setValueUnwrapped(v);
-        onValueChange?.(v, event);
-    });
+    const setValue = useEventCallback(
+        (v: string[], eventDetails: CheckboxGroup.ChangeEventDetails) => {
+            onValueChange?.(v, eventDetails);
+
+            if (eventDetails.isCanceled) {
+                return;
+            }
+
+            setValueUnwrapped(v);
+        }
+    );
 
     const parent = useCheckboxGroupParent({
         allValues,
@@ -97,7 +102,7 @@ export function CheckboxGroup(componentProps: CheckboxGroup.Props) {
         [fieldState, disabled]
     );
 
-    const contextValue: TCheckboxGroupContext = React.useMemo(
+    const contextValue: CheckboxGroupContextValue = React.useMemo(
         () => ({
             allValues,
             value,
@@ -131,7 +136,7 @@ export function CheckboxGroup(componentProps: CheckboxGroup.Props) {
     });
 
     return (
-        <CheckboxGroupContext value={contextValue}>{element}</CheckboxGroupContext>
+        <CheckboxGroupContext.Provider value={contextValue}>{element}</CheckboxGroupContext.Provider>
     );
 }
 
@@ -160,7 +165,7 @@ export namespace CheckboxGroup {
          * Event handler called when a checkbox in the group is ticked or unticked.
          * Provides the new value as an argument.
          */
-        onValueChange?: (value: string[], event: Event) => void;
+        onValueChange?: (value: string[], eventDetails: ChangeEventDetails) => void;
         /**
          * Names of all checkboxes in the group. Use this when creating a parent checkbox.
          */
@@ -171,4 +176,7 @@ export namespace CheckboxGroup {
          */
         disabled?: boolean;
     } & HeadlessUIComponentProps<'div', State>;
+
+    export type ChangeEventReason = 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 }

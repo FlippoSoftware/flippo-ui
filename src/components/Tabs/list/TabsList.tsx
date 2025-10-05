@@ -1,12 +1,9 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { EMPTY_ARRAY } from '~@lib/constants';
 
-import { EMPTY_ARRAY } from '@lib/constants';
-
-import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '~@lib/types';
 
 import { CompositeRoot } from '../../Composite/root/CompositeRoot';
 import { tabsStyleHookMapping } from '../root/styleHooks';
@@ -17,7 +14,7 @@ import type { TabsTab } from '../tab/TabsTab';
 
 import { TabsListContext } from './TabsListContext';
 
-import type { TTabsListContext } from './TabsListContext';
+import type { TabsListContextValue } from './TabsListContext';
 
 /**
  * Groups the individual tab buttons.
@@ -55,12 +52,15 @@ export function TabsList(componentProps: TabsList.Props) {
         getTabElementBySelectedValue
     );
 
-    const onTabActivation = useEventCallback((newValue: any, event: Event) => {
-        if (newValue !== value) {
-            const activationDirection = detectActivationDirection(newValue);
-            onValueChange(newValue, activationDirection, event);
+    const onTabActivation = useEventCallback(
+        (newValue: TabsTab.Value, eventDetails: TabsRoot.ChangeEventDetails) => {
+            if (newValue !== value) {
+                const activationDirection = detectActivationDirection(newValue);
+                eventDetails.activationDirection = activationDirection;
+                onValueChange(newValue, eventDetails);
+            }
         }
-    });
+    );
 
     const state: TabsList.State = React.useMemo(
         () => ({
@@ -75,7 +75,7 @@ export function TabsList(componentProps: TabsList.Props) {
         'role': 'tablist'
     };
 
-    const tabsListContextValue: TTabsListContext = React.useMemo(
+    const tabsListContextValue: TabsListContextValue = React.useMemo(
         () => ({
             activateOnFocus,
             highlightedTabIndex,
@@ -95,23 +95,23 @@ export function TabsList(componentProps: TabsList.Props) {
     );
 
     return (
-        <TabsListContext value={tabsListContextValue}>
+        <TabsListContext.Provider value={tabsListContextValue}>
             <CompositeRoot
-                render={render}
-                className={className}
-                state={state}
-                refs={[ref, tabsListRef]}
-                props={[defaultProps, elementProps]}
-                customStyleHookMapping={tabsStyleHookMapping}
-                highlightedIndex={highlightedTabIndex}
-                enableHomeAndEndKeys
-                loop={loop}
-                orientation={orientation}
-                onHighlightedIndexChange={setHighlightedTabIndex}
-                onMapChange={setTabMap}
-                disabledIndices={EMPTY_ARRAY}
+              render={render}
+              className={className}
+              state={state}
+              refs={[ref, tabsListRef]}
+              props={[defaultProps, elementProps]}
+              customStyleHookMapping={tabsStyleHookMapping}
+              highlightedIndex={highlightedTabIndex}
+              enableHomeAndEndKeys
+              loop={loop}
+              orientation={orientation}
+              onHighlightedIndexChange={setHighlightedTabIndex}
+              onMapChange={setTabMap}
+              disabledIndices={EMPTY_ARRAY}
             />
-        </TabsListContext>
+        </TabsListContext.Provider>
     );
 }
 

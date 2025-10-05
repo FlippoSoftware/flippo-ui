@@ -1,4 +1,4 @@
-import { ownerWindow } from '@lib/owner';
+import { ownerWindow } from '~@lib/owner';
 
 // Calculates the viewport rect for the virtual cursor.
 export function getViewportRect(teleportDistance: number | undefined, scrubAreaEl: HTMLElement) {

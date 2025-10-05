@@ -1,9 +1,8 @@
-'use client';
-import * as React from 'react';
+import React from 'react';
 
 import { ToastContext } from './provider/ToastProviderContext';
 
-import type { TToastContext } from './provider/ToastProviderContext';
+import type { ToastContextValue } from './provider/ToastProviderContext';
 
 /**
  * Returns the array of toasts and methods to manage them.
@@ -43,7 +42,7 @@ export function useToastManager(): useToastManager.ReturnValue {
 
 export namespace useToastManager {
     export type ReturnValue = {
-        toasts: TToastContext<any>['toasts'];
+        toasts: ToastContextValue<any>['toasts'];
         add: <Data extends object>(options: AddOptions<Data>) => string;
         close: (toastId: string) => void;
         update: <Data extends object>(toastId: string, options: UpdateOptions<Data>) => void;

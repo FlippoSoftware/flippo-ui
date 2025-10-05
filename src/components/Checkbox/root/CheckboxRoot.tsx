@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -8,12 +6,13 @@ import {
     useIsoLayoutEffect,
     useMergedRef
 } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
+import { visuallyHidden } from '~@lib/visuallyHidden';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-import { visuallyHidden } from '@lib/visuallyHidden';
-
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useCheckboxGroupContext } from '../../CheckboxGroup/CheckboxGroupContext';
 import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
@@ -217,12 +216,18 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
                 }
 
                 const nextChecked = event.target.checked;
+                const details = createChangeEventDetails('none', event.nativeEvent);
 
+                groupOnChange?.(nextChecked, details);
+                onCheckedChange(nextChecked, details);
+
+                if (details.isCanceled) {
+                    return;
+                }
+
+                clearErrors(name);
                 setDirty(nextChecked !== validityData.initialValue);
                 setCheckedState(nextChecked);
-                groupOnChange?.(nextChecked, event.nativeEvent);
-                onCheckedChange(nextChecked, event.nativeEvent);
-                clearErrors(name);
 
                 if (!groupContext) {
                     setFilled(nextChecked);
@@ -240,7 +245,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
                         ? [...groupValue, value]
                         : groupValue.filter((item) => item !== value);
 
-                    setGroupValue(nextGroupValue, event.nativeEvent);
+                    setGroupValue(nextGroupValue, details);
                     setFilled(nextGroupValue.length > 0);
 
                     if (validationMode === 'onChange') {
@@ -395,7 +400,7 @@ export namespace CheckboxRoot {
          * @param {boolean} checked The new checked state.
          * @param {Event} event The corresponding event that initiated the change.
          */
-        onCheckedChange?: (checked: boolean, event: Event) => void;
+        onCheckedChange?: (checked: boolean, eventDetails: ChangeEventDetails) => void;
         /**
          * Whether the user should be unable to tick or untick the checkbox.
          * @default false
@@ -427,4 +432,7 @@ export namespace CheckboxRoot {
          */
         value?: string;
     } & NativeButtonProps & Omit<HeadlessUIComponentProps<'button', State>, 'onChange' | 'value'>;
+
+    export type ChangeEventReason = 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 }

@@ -1,8 +1,8 @@
-'use client';
 
-import { useRenderElement } from '@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import { useRenderElement } from '~@lib/hooks';
+
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import type { MeterRoot } from '../root/MeterRoot';
 

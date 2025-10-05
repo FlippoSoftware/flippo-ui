@@ -1,12 +1,10 @@
-'use client';
-
 import React from 'react';
 
 import { useControlledState, useEventCallback } from '@flippo-ui/hooks';
+import { useDirection, useRenderElement } from '~@lib/hooks';
 
-import { useDirection, useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps, Orientation } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
 
@@ -17,7 +15,7 @@ import type { TabsTab } from '../tab/TabsTab';
 import { tabsStyleHookMapping } from './styleHooks';
 import { TabsRootContext } from './TabsRootContext';
 
-import type { TTabsRootContext } from './TabsRootContext';
+import type { TabsRootContextValue } from './TabsRootContext';
 
 export function TabsRoot(componentProps: TabsRoot.Props) {
     const {
@@ -54,41 +52,47 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
         = React.useState<TabsTab.ActivationDirection>('none');
 
     const onValueChange = useEventCallback(
-        (
-            newValue: TabsTab.Value,
-            activationDirection: TabsTab.ActivationDirection,
-            event: Event | undefined
-        ) => {
+        (newValue: TabsTab.Value, eventDetails: TabsRoot.ChangeEventDetails) => {
+            onValueChangeProp?.(newValue, eventDetails);
+
+            if (eventDetails.isCanceled) {
+                return;
+            }
+
             setValue(newValue);
-            setTabActivationDirection(activationDirection);
-            onValueChangeProp?.(newValue, event);
+            setTabActivationDirection(eventDetails.activationDirection);
         }
     );
 
-    const getTabPanelIdByTabValueOrIndex = React.useCallback((
-        tabValue: TabsTab.Value | undefined,
-        index: number
-    ) => {
-        if (tabValue === undefined && index < 0)
+    // get the `id` attribute of <Tabs.Panel> to set as the value of `aria-controls` on <Tabs.Tab>
+    const getTabPanelIdByTabValueOrIndex = React.useCallback(
+        (tabValue: TabsTab.Value | undefined, index: number) => {
+            if (tabValue === undefined && index < 0) {
+                return undefined;
+            }
+
+            for (const tabPanelMetadata of tabPanelMap.values()) {
+                // find by tabValue
+                if (tabValue !== undefined && tabPanelMetadata && tabValue === tabPanelMetadata?.value) {
+                    return tabPanelMetadata.id;
+                }
+
+                // find by index
+                if (
+                    tabValue === undefined
+                    && tabPanelMetadata?.index
+                    && tabPanelMetadata?.index === index
+                ) {
+                    return tabPanelMetadata.id;
+                }
+            }
+
             return undefined;
+        },
+        [tabPanelMap]
+    );
 
-        for (const tabPanelMetadata of tabPanelMap.values()) {
-            if (tabValue !== undefined && tabPanelMetadata && tabValue === tabPanelMetadata?.value) {
-                return tabPanelMetadata.id;
-            }
-
-            if (
-                tabValue === undefined
-                && tabPanelMetadata?.index
-                && tabPanelMetadata?.index === index
-            ) {
-                return tabPanelMetadata.id;
-            }
-        }
-
-        return undefined;
-    }, [tabPanelMap]);
-
+    // get the `id` attribute of <Tabs.Tab> to set as the value of `aria-labelledby` on <Tabs.Panel>
     const getTabIdByPanelValueOrIndex = React.useCallback(
         (tabPanelValue: TabsTab.Value | undefined, index: number) => {
             if (tabPanelValue === undefined && index < 0) {
@@ -96,6 +100,7 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
             }
 
             for (const tabMetadata of tabMap.values()) {
+                // find by tabPanelValue
                 if (
                     tabPanelValue !== undefined
                     && index > -1
@@ -104,6 +109,7 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
                     return tabMetadata?.id;
                 }
 
+                // find by index
                 if (
                     tabPanelValue === undefined
                     && index > -1
@@ -118,6 +124,7 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
         [tabMap]
     );
 
+    // used in `useActivationDirectionDetector` for setting data-activation-direction
     const getTabElementBySelectedValue = React.useCallback(
         (selectedValue: TabsTab.Value | undefined): HTMLElement | null => {
             if (selectedValue === undefined) {
@@ -135,7 +142,7 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
         [tabMap]
     );
 
-    const tabsContextValue: TTabsRootContext = React.useMemo(
+    const tabsContextValue: TabsRootContextValue = React.useMemo(
         () => ({
             direction,
             getTabElementBySelectedValue,
@@ -160,10 +167,10 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
         ]
     );
 
-    const state: TabsRoot.State = React.useMemo(() => ({
+    const state: TabsRoot.State = {
         orientation,
         tabActivationDirection
-    }), [orientation, tabActivationDirection]);
+    };
 
     const element = useRenderElement('div', componentProps, {
         state,
@@ -173,11 +180,11 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
     });
 
     return (
-        <TabsRootContext value={tabsContextValue}>
+        <TabsRootContext.Provider value={tabsContextValue}>
             <CompositeList<TabsPanel.Metadata> elementsRef={tabPanelRefs} onMapChange={setTabPanelMap}>
                 {element}
             </CompositeList>
-        </TabsRootContext>
+        </TabsRootContext.Provider>
     );
 }
 
@@ -207,6 +214,12 @@ export namespace TabsRoot {
         /**
          * Callback invoked when new value is being set.
          */
-        onValueChange?: (value: TabsTab.Value, event?: Event) => void;
+        onValueChange?: (value: TabsTab.Value, eventDetails: ChangeEventDetails) => void;
     } & HeadlessUIComponentProps<'div', State>;
+
+    export type ChangeEventReason = 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<
+        ChangeEventReason,
+        { activationDirection: TabsTab.ActivationDirection }
+    >;
 }

@@ -1,11 +1,10 @@
-'use client';
 import React from 'react';
 
 import { useControlledState, useEventCallback } from '@flippo-ui/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import { useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '~@lib/types';
 
 import { CompositeRoot } from '../Composite/root/CompositeRoot';
 import { useToolbarRootContext } from '../Toolbar/root/ToolbarRootContext';
@@ -13,7 +12,9 @@ import { useToolbarRootContext } from '../Toolbar/root/ToolbarRootContext';
 import { ToggleGroupContext } from './ToggleGroupContext';
 import { ToggleGroupDataAttributes } from './ToggleGroupDataAttributes';
 
-import type { TToggleGroupContext } from './ToggleGroupContext';
+import type { ToggleGroupContextValue } from './ToggleGroupContext';
+
+const DEFAULT_VALUE: readonly any[] = [];
 
 const customStyleHookMapping = {
     multiple(value: boolean) {
@@ -32,7 +33,7 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
         orientation = 'horizontal',
         loop = true,
         ref,
-        toggleMultiple = false,
+        multiple = false,
         className,
         render,
         onValueChange,
@@ -46,45 +47,50 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
             return defaultValueProp ?? [];
         }
 
-        return [];
+        return undefined;
     }, [valueProp, defaultValueProp]);
 
     const disabled = (toolbarContext?.disabled ?? false) || disabledProp;
 
     const [groupValue, setValueState] = useControlledState({
         prop: valueProp,
-        defaultProp: defaultValue,
+        defaultProp: defaultValue ?? DEFAULT_VALUE,
         caller: 'ToggleGroup'
     });
 
-    const setGroupValue = useEventCallback((newValue: string, nextPressed: boolean, event: Event) => {
-        let newGroupValue: string[] | undefined;
-
-        if (toggleMultiple) {
-            newGroupValue = groupValue.slice();
-            if (nextPressed) {
-                newGroupValue.push(newValue);
+    const setGroupValue = useEventCallback(
+        (newValue: string, nextPressed: boolean, eventDetails: HeadlessUIChangeEventDetails<'none'>) => {
+            let newGroupValue: any[] | undefined;
+            if (multiple) {
+                newGroupValue = groupValue.slice();
+                if (nextPressed) {
+                    newGroupValue.push(newValue);
+                }
+                else {
+                    newGroupValue.splice(groupValue.indexOf(newValue), 1);
+                }
             }
             else {
-                newGroupValue.splice(groupValue?.indexOf(newValue), 1);
+                newGroupValue = nextPressed ? [newValue] : [];
+            }
+            if (Array.isArray(newGroupValue)) {
+                onValueChange?.(newGroupValue, eventDetails);
+
+                if (eventDetails.isCanceled) {
+                    return;
+                }
+
+                setValueState(newGroupValue);
             }
         }
-        else {
-            newGroupValue = nextPressed ? [newValue] : [];
-        }
-
-        if (Array.isArray(newGroupValue)) {
-            setValueState(newGroupValue);
-            onValueChange?.(newGroupValue, event);
-        }
-    });
-
-    const state: ToggleGroup.State = React.useMemo(
-        () => ({ disabled, multiple: toggleMultiple, orientation }),
-        [disabled, orientation, toggleMultiple]
     );
 
-    const contextValue: TToggleGroupContext = React.useMemo(
+    const state: ToggleGroup.State = React.useMemo(
+        () => ({ disabled, multiple, orientation }),
+        [disabled, orientation, multiple]
+    );
+
+    const contextValue: ToggleGroupContextValue = React.useMemo(
         () => ({
             disabled,
             orientation,
@@ -99,9 +105,9 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
         ]
     );
 
-    const defaultProps: HTMLProps = React.useMemo(() => ({
+    const defaultProps: HTMLProps = {
         role: 'group'
-    }), []);
+    };
 
     const element = useRenderElement('div', componentProps, {
         enabled: Boolean(toolbarContext),
@@ -112,7 +118,7 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
     });
 
     return (
-        <ToggleGroupContext value={contextValue}>
+        <ToggleGroupContext.Provider value={contextValue}>
             {toolbarContext
                 ? (
                     element
@@ -126,10 +132,9 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
                         props={[defaultProps, elementProps]}
                         customStyleHookMapping={customStyleHookMapping}
                         loop={loop}
-                        stopEventPropagation
                     />
                 )}
-        </ToggleGroupContext>
+        </ToggleGroupContext.Provider>
     );
 }
 
@@ -161,7 +166,7 @@ export namespace ToggleGroup {
          * @param {any[]} groupValue An array of the `value`s of all the pressed items.
          * @param {Event} event The corresponding event that initiated the change.
          */
-        onValueChange?: (groupValue: any[], event: Event) => void;
+        onValueChange?: (groupValue: any[], eventDetails: ChangeEventDetails) => void;
         /**
          * Whether the toggle group should ignore user interaction.
          * @default false
@@ -183,6 +188,9 @@ export namespace ToggleGroup {
          * When `true` multiple items can be pressed.
          * @default false
          */
-        toggleMultiple?: boolean;
+        multiple?: boolean;
     } & HeadlessUIComponentProps<'div', State>;
+
+    export type ChangeEventReason = 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 }

@@ -1,12 +1,14 @@
 import React from 'react';
 
-export type TMenuRadioGroupContext = {
+import type { MenuRoot } from '../root/MenuRoot';
+
+export type MenuRadioGroupContextValue = {
     value: any;
-    setValue: (newValue: any, event: Event) => void;
+    setValue: (newValue: any, eventDetails: MenuRoot.ChangeEventDetails) => void;
     disabled: boolean;
 };
 
-export const MenuRadioGroupContext = React.createContext<TMenuRadioGroupContext | undefined>(
+export const MenuRadioGroupContext = React.createContext<MenuRadioGroupContextValue | undefined>(
     undefined
 );
 

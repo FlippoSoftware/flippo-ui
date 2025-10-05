@@ -1,4 +1,4 @@
-import { CommonTriggerDataAttributes } from '@lib/popupStateMapping';
+import { CommonTriggerDataAttributes } from '~@lib/popupStateMapping';
 
 export enum SelectTriggerDataAttributes {
     /**

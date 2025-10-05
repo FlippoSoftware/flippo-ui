@@ -1,10 +1,8 @@
-'use client';
-
 import React from 'react';
 
 import type { ProgressRoot } from './ProgressRoot';
 
-export type TProgressRootContext = {
+export type ProgressRootContextValue = {
     /**
      * Formatted value of the component.
      */
@@ -26,7 +24,7 @@ export type TProgressRootContext = {
     status: ProgressRoot.Status;
 };
 
-export const ProgressRootContext = React.createContext<TProgressRootContext | undefined>(undefined);
+export const ProgressRootContext = React.createContext<ProgressRootContextValue | undefined>(undefined);
 
 export function useProgressRootContext() {
     const context = React.use(ProgressRootContext);

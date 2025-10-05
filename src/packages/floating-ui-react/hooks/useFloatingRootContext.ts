@@ -3,8 +3,8 @@ import React from 'react';
 import { useEventCallback, useId } from '@flippo-ui/hooks';
 import { isElement } from '@floating-ui/utils/dom';
 
-import type { HeadlessUIChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import type { FloatingUIOpenChangeDetails } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { FloatingUIOpenChangeDetails } from '~@lib/types';
 
 import { useFloatingParentNodeId } from '../components/FloatingTree';
 import { createEventEmitter } from '../utils/createEventEmitter';
@@ -15,9 +15,9 @@ import type {
     ReferenceElement
 } from '../types';
 
-export type UseFloatingRootContextOptions = {
+export type UseFloatingRootContextOptions<Reason extends string> = {
     open?: boolean;
-    onOpenChange?: (open: boolean, eventDetails: HeadlessUIChangeEventDetails<string>) => void;
+    onOpenChange?: (open: boolean, eventDetails: HeadlessUIChangeEventDetails<Reason>) => void;
     elements: {
         reference: Element | null;
         floating: HTMLElement | null;
@@ -28,8 +28,8 @@ export type UseFloatingRootContextOptions = {
     noEmit?: boolean;
 };
 
-export function useFloatingRootContext(
-    options: UseFloatingRootContextOptions
+export function useFloatingRootContext<Reason extends string>(
+    options: UseFloatingRootContextOptions<Reason>
 ): FloatingRootContext {
     const { open = false, onOpenChange: onOpenChangeProp, elements: elementsProp } = options;
 
@@ -65,7 +65,7 @@ export function useFloatingRootContext(
                 };
                 events.emit('openchange', details);
             }
-            onOpenChangeProp?.(newOpen, eventDetails);
+            onOpenChangeProp?.(newOpen, eventDetails as HeadlessUIChangeEventDetails<Reason>);
         }
     );
 

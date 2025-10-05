@@ -1,8 +1,8 @@
-'use client';
+
 
 import React from 'react';
 
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
+import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
 
 import { CheckboxRootDataAttributes } from '../root/CheckboxRootDataAttributes';
 

@@ -1,8 +1,7 @@
-'use client';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useRenderElement } from '~@lib/hooks';
 
-import { useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useButton } from '../../use-button';
 import { usePopoverRootContext } from '../root/PopoverRootContext';
@@ -37,7 +36,7 @@ export function PopoverClose(componentProps: PopoverClose.Props) {
         ref: [ref, buttonRef],
         props: [{
             onClick(event) {
-                setOpen(false, event.nativeEvent, 'close-press');
+                setOpen(false, createChangeEventDetails('close-press', event.nativeEvent));
             }
         }, elementProps, getButtonProps]
     });

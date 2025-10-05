@@ -1,8 +1,6 @@
-'use client';
+import { useRenderElement } from '~@lib/hooks';
 
-import { useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
 import { styleHookMapping } from '../utils/styleHooks';

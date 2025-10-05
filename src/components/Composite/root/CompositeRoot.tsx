@@ -1,14 +1,11 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback } from '@flippo-ui/hooks';
+import { EMPTY_ARRAY, EMPTY_OBJECT } from '~@lib/constants';
+import { useDirection, useRenderElement } from '~@lib/hooks';
 
-import { EMPTY_ARRAY, EMPTY_OBJECT } from '@lib/constants';
-import { useDirection, useRenderElement } from '@lib/hooks';
-
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CompositeList } from '../list/CompositeList';
 
@@ -18,7 +15,7 @@ import type { CompositeMetadata } from '../list/CompositeList';
 import { CompositeRootContext } from './CompositeRootContext';
 import { useCompositeRoot } from './useCompositeRoot';
 
-import type { TCompositeRootContext } from './CompositeRootContext';
+import type { CompositeRootContextValue } from './CompositeRootContext';
 
 /**
  * @internal
@@ -90,7 +87,7 @@ export function CompositeRoot<Metadata extends object, State extends Record<stri
         customStyleHookMapping
     });
 
-    const contextValue: TCompositeRootContext = React.useMemo(
+    const contextValue: CompositeRootContextValue = React.useMemo(
         () => ({ highlightedIndex, onHighlightedIndexChange, highlightItemOnHover }),
         [highlightedIndex, onHighlightedIndexChange, highlightItemOnHover]
     );

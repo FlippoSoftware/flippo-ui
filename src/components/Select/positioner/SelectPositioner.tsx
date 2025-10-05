@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -8,15 +6,15 @@ import {
     useScrollLock,
     useStore
 } from '@flippo-ui/hooks';
-import { DROPDOWN_COLLISION_AVOIDANCE } from '@lib/constants';
-import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import { useAnchorPositioning, useRenderElement } from '@lib/hooks';
-import { InternalBackdrop } from '@lib/InternalBackdrop';
-import { findItemIndex, itemIncludes } from '@lib/itemEquality';
-import { popupStateMapping } from '@lib/popupStateMapping';
+import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useAnchorPositioning, useRenderElement } from '~@lib/hooks';
+import { InternalBackdrop } from '~@lib/InternalBackdrop';
+import { findItemIndex, itemIncludes } from '~@lib/itemEquality';
+import { popupStateMapping } from '~@lib/popupStateMapping';
 
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
 import { useSelectFloatingContext, useSelectRootContext } from '../root/SelectRootContext';
@@ -25,7 +23,7 @@ import { clearStyles } from '../utils/clearStyles';
 
 import { SelectPositionerContext } from './SelectPositionerContext';
 
-import type { TSelectPositionerContext } from './SelectPositionerContext';
+import type { SelectPositionerContextValue } from './SelectPositionerContext';
 
 const FIXED: React.CSSProperties = { position: 'fixed' };
 
@@ -227,7 +225,7 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
         }
     });
 
-    const contextValue: TSelectPositionerContext = React.useMemo(
+    const contextValue: SelectPositionerContextValue = React.useMemo(
         () => ({
             ...positioning,
             side: renderedSide,
@@ -257,8 +255,8 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
 export namespace SelectPositioner {
     export type State = {
         open: boolean;
-        side: TSide | 'none';
-        align: TAlign;
+        side: Side | 'none';
+        align: Align;
         anchorHidden: boolean;
     };
 

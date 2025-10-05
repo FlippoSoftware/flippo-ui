@@ -1,15 +1,13 @@
-'use client';
-
 import React from 'react';
 
-export type TRadioRootContext = {
+export type RadioRootContextValue = {
     disabled: boolean;
     readOnly: boolean;
     checked: boolean;
     required: boolean;
 };
 
-export const RadioRootContext = React.createContext<TRadioRootContext | undefined>(undefined);
+export const RadioRootContext = React.createContext<RadioRootContextValue | undefined>(undefined);
 
 export function useRadioRootContext() {
     const value = React.use(RadioRootContext);

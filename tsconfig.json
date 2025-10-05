@@ -6,8 +6,8 @@
     "lib": ["dom", "ES2024"],
 
     "paths": {
-      "@lib/*": ["./src/lib/*"],
-      "@packages/*": ["./src/packages/*"]
+      "~@lib/*": ["./src/lib/*"],
+      "~@packages/*": ["./src/packages/*"]
     },
     "types": ["react", "react-dom", "node"]
   },

@@ -1,12 +1,12 @@
 import React from 'react';
 
-export type TMenuRadioItemContext = {
+export type MenuRadioItemContextValue = {
     checked: boolean;
     highlighted: boolean;
     disabled: boolean;
 };
 
-export const MenuRadioItemContext = React.createContext<TMenuRadioItemContext | undefined>(
+export const MenuRadioItemContext = React.createContext<MenuRadioItemContextValue | undefined>(
     undefined
 );
 

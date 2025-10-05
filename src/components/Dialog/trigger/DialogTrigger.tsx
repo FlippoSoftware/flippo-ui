@@ -1,11 +1,10 @@
-'use client';
 import * as React from 'react';
 
-import { CLICK_TRIGGER_IDENTIFIER } from '@lib/constants';
-import { useRenderElement } from '@lib/hooks';
-import { triggerOpenStateMapping } from '@lib/popupStateMapping';
+import { CLICK_TRIGGER_IDENTIFIER } from '~@lib/constants';
+import { useRenderElement } from '~@lib/hooks';
+import { triggerOpenStateMapping } from '~@lib/popupStateMapping';
 
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useButton } from '../../use-button/useButton';
 import { useDialogRootContext } from '../root/DialogRootContext';
@@ -28,7 +27,9 @@ export function DialogTrigger(componentProps: DialogTrigger.Props) {
         ...elementProps
     } = componentProps;
 
-    const { open, setTriggerElement, triggerProps } = useDialogRootContext();
+    const { store } = useDialogRootContext();
+    const open = store.useState('open');
+    const triggerProps = store.useState('triggerProps');
 
     const state: DialogTrigger.State = React.useMemo(
         () => ({
@@ -45,7 +46,7 @@ export function DialogTrigger(componentProps: DialogTrigger.Props) {
 
     const element = useRenderElement('button', componentProps, {
         state,
-        ref: [buttonRef, ref, setTriggerElement],
+        ref: [buttonRef, ref, store.getElementSetter('triggerElement')],
         props: [
             triggerProps,
             { [CLICK_TRIGGER_IDENTIFIER as string]: '' },

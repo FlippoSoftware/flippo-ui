@@ -65,8 +65,8 @@ export default defineConfig({
     envPrefix: 'HEADLESS_',
     resolve: {
         alias: {
-            '@lib': path.resolve(__dirname, './src/lib'),
-            '@packages': path.resolve(__dirname, './src/packages')
+            '~@lib': path.resolve(__dirname, './src/lib'),
+            '~@packages': path.resolve(__dirname, './src/packages')
         }
     },
     server: {

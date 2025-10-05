@@ -1,10 +1,8 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useButton } from '../../use-button';
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
@@ -52,7 +50,9 @@ export function NumberFieldDecrement(componentProps: NumberFieldDecrement.Props)
         stopAutoChange,
         value,
         valueRef,
-        locale
+        locale,
+        lastChangedValueRef,
+        onValueCommitted
     } = useNumberFieldRootContext();
 
     const disabled = disabledProp || contextDisabled;
@@ -78,7 +78,9 @@ export function NumberFieldDecrement(componentProps: NumberFieldDecrement.Props)
         isPressedRef,
         intentionalTouchCheckTimeout,
         movesAfterTouchRef,
-        locale
+        locale,
+        lastChangedValueRef,
+        onValueCommitted
     });
 
     const { getButtonProps, buttonRef } = useButton({

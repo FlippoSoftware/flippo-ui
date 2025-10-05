@@ -1,16 +1,13 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback } from '@flippo-ui/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import { useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { FormContext } from './FormContext';
 
-import type { TFormContext } from './FormContext';
+import type { FormContextValue } from './FormContext';
 
 const EMPTY = {};
 
@@ -33,7 +30,7 @@ export function Form(componentProps: Form.Props) {
         ...elementProps
     } = componentProps;
 
-    const formRef = React.useRef<TFormContext['formRef']['current']>({
+    const formRef = React.useRef<FormContextValue['formRef']['current']>({
         fields: new Map()
     });
     const submittedRef = React.useRef(false);
@@ -101,7 +98,7 @@ export function Form(componentProps: Form.Props) {
         }
     });
 
-    const contextValue: TFormContext = React.useMemo(
+    const contextValue: FormContextValue = React.useMemo(
         () => ({
             formRef,
             errors: errors ?? {},
@@ -121,10 +118,10 @@ export namespace Form {
          * An object where the keys correspond to the `name` attribute of the form fields,
          * and the values correspond to the error(s) related to that field.
          */
-        errors?: TFormContext['errors'];
+        errors?: FormContextValue['errors'];
         /**
          * Event handler called when the `errors` object is cleared.
          */
-        onClearErrors?: (errors: TFormContext['errors']) => void;
+        onClearErrors?: (errors: FormContextValue['errors']) => void;
     } & HeadlessUIComponentProps<'form', State>;
 }

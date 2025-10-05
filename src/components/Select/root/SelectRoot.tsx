@@ -1,14 +1,12 @@
-'use client';
-
 import React from 'react';
 
 import { useMergedRef } from '@flippo-ui/hooks';
-import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import { stringifyAsValue } from '@lib/resolveValueLabel';
-import { visuallyHidden } from '@lib/visuallyHidden';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { stringifyAsValue } from '~@lib/resolveValueLabel';
+import { visuallyHidden } from '~@lib/visuallyHidden';
 
-import type { HeadlessUIChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import type { TBaseOpenChangeReason } from '@lib/translateOpenChangeReason';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { BaseOpenChangeReason } from '~@lib/translateOpenChangeReason';
 
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { serializeValue } from '../utils/serialize';
@@ -98,10 +96,10 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
             const currentSerializedValue = stringifyAsValue(v, itemToStringValue);
             return (
                 <input
-                  key={currentSerializedValue}
-                  type={'hidden'}
-                  name={rootContext.name}
-                  value={currentSerializedValue}
+                    key={currentSerializedValue}
+                    type={'hidden'}
+                    name={rootContext.name}
+                    value={currentSerializedValue}
                 />
             );
         });
@@ -117,7 +115,7 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
             <SelectFloatingContext value={floatingContext}>
                 {children}
                 <input
-                    {...rootContext.fieldControlValidation.getInputValidationProps({
+                  {...rootContext.fieldControlValidation.getInputValidationProps({
                         onFocus() {
                             // Move focus to the trigger element when the hidden input is focused.
                             store.state.triggerElement?.focus();
@@ -348,7 +346,7 @@ export namespace SelectRoot {
 
     export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 
-    export type OpenChangeReason = TBaseOpenChangeReason | 'window-resize';
+    export type OpenChangeReason = BaseOpenChangeReason | 'window-resize';
 
     export type State = object;
 

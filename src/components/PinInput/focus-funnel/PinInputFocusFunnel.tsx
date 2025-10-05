@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCompositeListContext } from '../../Composite/list/CompositeListContext';
 import { usePinInputRootContext } from '../root/PinInputRootContext';

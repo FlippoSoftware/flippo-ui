@@ -1,6 +1,6 @@
-import { transitionStatusMapping } from '@lib/styleHookMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
+import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
 
 import { MenuCheckboxItemDataAttributes } from '../checkbox-item/MenuCheckboxItemDataAttributes';
 

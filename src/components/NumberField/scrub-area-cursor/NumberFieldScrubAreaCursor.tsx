@@ -1,13 +1,11 @@
-'use client';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { isWebKit } from '@lib/detectBrowser';
-import { useRenderElement } from '@lib/hooks';
-import { ownerDocument } from '@lib/owner';
+import { isWebKit } from '~@lib/detectBrowser';
+import { useRenderElement } from '~@lib/hooks';
+import { ownerDocument } from '~@lib/owner';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
 import { useNumberFieldScrubAreaContext } from '../scrub-area/NumberFieldScrubAreaContext';
@@ -41,7 +39,7 @@ export function NumberFieldScrubAreaCursor(componentProps: NumberFieldScrubAreaC
         isPointerLockDenied,
         scrubAreaCursorRef
     }
-    = useNumberFieldScrubAreaContext();
+        = useNumberFieldScrubAreaContext();
 
     const [domElement, setDomElement] = React.useState<Element | null>(null);
 

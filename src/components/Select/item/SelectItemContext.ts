@@ -1,15 +1,13 @@
-'use client';
-
 import React from 'react';
 
-export type TSelectItemContext = {
+export type SelectItemContextValue = {
     selected: boolean;
     indexRef: React.RefObject<number>;
     textRef: React.RefObject<HTMLElement | null>;
     selectedByFocus: boolean;
 };
 
-export const SelectItemContext = React.createContext<TSelectItemContext | undefined>(undefined);
+export const SelectItemContext = React.createContext<SelectItemContextValue | undefined>(undefined);
 
 export function useSelectItemContext() {
     const context = React.use(SelectItemContext);

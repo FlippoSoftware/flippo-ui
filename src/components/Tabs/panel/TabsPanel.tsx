@@ -1,10 +1,8 @@
-'use client';
-
 import React from 'react';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
 import { tabsStyleHookMapping } from '../root/styleHooks';

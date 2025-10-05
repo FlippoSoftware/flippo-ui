@@ -1,11 +1,9 @@
-'use client';
-
 import React from 'react';
 
-import { useAnchorPositioning } from '@lib/hooks';
+import { useAnchorPositioning } from '~@lib/hooks';
 
-import type { TSide } from '@lib/hooks';
-import type { HTMLProps } from '@lib/types';
+import type { Side } from '~@lib/hooks';
+import type { HTMLProps } from '~@lib/types';
 
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
@@ -57,7 +55,7 @@ export namespace UseTooltipPositioner {
     export type Parameters = {} & useAnchorPositioning.Parameters;
 
     export type SharedParameters = {
-        side?: TSide;
+        side?: Side;
     } & useAnchorPositioning.SharedParameters;
 
     export type ReturnValue = {

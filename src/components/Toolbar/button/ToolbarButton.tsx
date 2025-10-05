@@ -1,8 +1,8 @@
-'use client';
+
 
 import React from 'react';
 
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { CompositeItem } from '../../Composite/item/CompositeItem';
 import { useButton } from '../../use-button';

@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -9,11 +7,11 @@ import {
     useTimeout,
     useTransitionStatus
 } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectPositionerContext } from '../positioner/SelectPositionerContext';
 import { useSelectRootContext } from '../root/SelectRootContext';
@@ -241,7 +239,7 @@ export namespace SelectScrollArrow {
     export type State = {
         direction: 'up' | 'down';
         visible: boolean;
-        side: TSide | 'none';
+        side: Side | 'none';
         transitionStatus: TransitionStatus;
     };
 

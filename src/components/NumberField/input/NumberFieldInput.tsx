@@ -1,20 +1,25 @@
-'use client';
-
 import React from 'react';
 
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
-
-import { formatNumber, formatNumberMaxPrecision } from '@lib/formatNumber';
-import { useRenderElement } from '@lib/hooks';
+import { createChangeEventDetails, createGenericEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { formatNumber, formatNumberMaxPrecision } from '~@lib/formatNumber';
+import { useRenderElement } from '~@lib/hooks';
 import {
-    ARABIC_RE,
+    ANY_MINUS_DETECT_RE,
+    ANY_MINUS_RE,
+    ANY_PLUS_DETECT_RE,
+    ANY_PLUS_RE,
+    ARABIC_DETECT_RE,
+    FULLWIDTH_DETECT_RE,
     getNumberLocaleDetails,
-    HAN_RE,
-    parseNumber
-} from '@lib/parseNumeric';
-import { stopEvent } from '@packages/floating-ui-react/utils';
+    HAN_DETECT_RE,
+    parseNumber,
+    PERSIAN_DETECT_RE
+} from '~@lib/parseNumeric';
+import { stopEvent } from '~@packages/floating-ui-react/utils';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails, HeadlessUIGenericEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
@@ -78,7 +83,11 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
         setInputValue,
         locale,
         inputRef,
-        value
+        value,
+        onValueCommitted,
+        lastChangedValueRef,
+        hasPendingCommitRef,
+        valueRef
     } = useNumberFieldRootContext();
 
     const { clearErrors } = useFormContext();
@@ -187,6 +196,9 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
             setTouched(true);
             setFocused(false);
 
+            const hadManualInput = !allowInputSyncRef.current;
+            const hadPendingProgrammaticChange = hasPendingCommitRef.current;
+
             allowInputSyncRef.current = true;
 
             if (inputValue.trim() === '') {
@@ -194,50 +206,51 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
                 if (validationMode === 'onBlur') {
                     commitValidation(null);
                 }
+                onValueCommitted(null, createGenericEventDetails('none', event.nativeEvent));
                 return;
             }
 
             const formatOptions = formatOptionsRef.current;
             const parsedValue = parseNumber(inputValue, locale, formatOptions);
-            const canonicalText = formatNumber(parsedValue, locale, formatOptions);
-            const maxPrecisionText = formatNumberMaxPrecision(parsedValue, locale, formatOptions);
-            const canonical = parseNumber(canonicalText, locale, formatOptions);
-            const maxPrecision = parseNumber(maxPrecisionText, locale, formatOptions);
-
             if (parsedValue === null) {
                 return;
             }
 
             blockRevalidationRef.current = true;
 
-            if (validationMode === 'onBlur') {
-                commitValidation(canonical);
-            }
-
+            // If an explicit precision is requested, round the committed numeric value.
             const hasExplicitPrecision
-        = formatOptions?.maximumFractionDigits != null
-          || formatOptions?.minimumFractionDigits != null;
+                = formatOptions?.maximumFractionDigits != null
+                  || formatOptions?.minimumFractionDigits != null;
 
-            if (hasExplicitPrecision) {
-                // When the consumer explicitly requests a precision, always round the number to that
-                // precision and normalize the displayed text accordingly.
-                if (value !== canonical) {
-                    setValue(canonical, event.nativeEvent);
-                }
-                if (inputValue !== canonicalText) {
-                    setInputValue(canonicalText);
-                }
+            const maxFrac = formatOptions?.maximumFractionDigits;
+            const committed
+                = hasExplicitPrecision && typeof maxFrac === 'number'
+                    ? Number(parsedValue.toFixed(maxFrac))
+                    : parsedValue;
+
+            const nextEventDetails = createGenericEventDetails('none', event.nativeEvent);
+            const shouldUpdateValue = value !== committed;
+            const shouldCommit = hadManualInput || shouldUpdateValue || hadPendingProgrammaticChange;
+
+            if (validationMode === 'onBlur') {
+                commitValidation(committed);
             }
-            else if (value !== maxPrecision) {
-                // Default behaviour: preserve max precision until it differs from canonical
-                setValue(canonical, event.nativeEvent);
+            if (shouldUpdateValue) {
+                setValue(committed, event.nativeEvent);
             }
-            else {
-                const shouldPreserveFullPrecision
-          = parsedValue === value && inputValue === maxPrecisionText;
-                if (!shouldPreserveFullPrecision && inputValue !== canonicalText) {
-                    setInputValue(canonicalText);
-                }
+            if (shouldCommit) {
+                onValueCommitted(committed, nextEventDetails as unknown as HeadlessUIChangeEventDetails<'none'>);
+            }
+
+            // Normalize only the displayed text
+            const canonicalText = formatNumber(committed, locale, formatOptions);
+            const maxPrecisionText = formatNumberMaxPrecision(parsedValue, locale, formatOptions);
+            const shouldPreserveFullPrecision
+                = !hasExplicitPrecision && parsedValue === value && inputValue === maxPrecisionText;
+
+            if (!shouldPreserveFullPrecision && inputValue !== canonicalText) {
+                setInputValue(canonicalText);
             }
         },
         onChange(event) {
@@ -255,8 +268,38 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
                 return;
             }
 
+            // For trusted user typing, update the input text immediately and only fire onValueChange
+            // if the typed value is currently parseable into a number. This preserves good UX for IME
+            // composition/partial input while still providing live numeric updates when possible.
+            const allowedNonNumericKeys = getAllowedNonNumericKeys();
+            const isValidCharacterString = Array.from(targetValue).every((ch) => {
+                const isAsciiDigit = ch >= '0' && ch <= '9';
+                const isArabicNumeral = ARABIC_DETECT_RE.test(ch);
+                const isHanNumeral = HAN_DETECT_RE.test(ch);
+                const isPersianNumeral = PERSIAN_DETECT_RE.test(ch);
+                const isFullwidthNumeral = FULLWIDTH_DETECT_RE.test(ch);
+                const isMinus = ANY_MINUS_DETECT_RE.test(ch);
+                return (
+                    isAsciiDigit
+                    || isArabicNumeral
+                    || isHanNumeral
+                    || isPersianNumeral
+                    || isFullwidthNumeral
+                    || isMinus
+                    || allowedNonNumericKeys.has(ch)
+                );
+            });
+
+            if (!isValidCharacterString) {
+                return;
+            }
+
             if (event.isTrusted) {
                 setInputValue(targetValue);
+                const parsedValue = parseNumber(targetValue, locale, formatOptionsRef.current);
+                if (parsedValue !== null) {
+                    setValue(parsedValue, event.nativeEvent);
+                }
                 return;
             }
 
@@ -281,7 +324,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
             let isAllowedNonNumericKey = allowedNonNumericKeys.has(event.key);
 
             const { decimal, currency, percentSign } = getNumberLocaleDetails(
-                [],
+                locale,
                 formatOptionsRef.current
             );
 
@@ -289,12 +332,34 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
             const selectionEnd = event.currentTarget.selectionEnd;
             const isAllSelected = selectionStart === 0 && selectionEnd === inputValue.length;
 
-            // Allow the minus key only if there isn't already a plus or minus sign, or if all the text
-            // is selected, or if only the minus sign is highlighted.
-            if (event.key === '-' && allowedNonNumericKeys.has('-')) {
-                const isMinusHighlighted
-          = selectionStart === 0 && selectionEnd === 1 && inputValue[0] === '-';
-                isAllowedNonNumericKey = !inputValue.includes('-') || isAllSelected || isMinusHighlighted;
+            // Normalize handling of plus/minus signs via precomputed regexes
+            const selectionIsExactlyCharAt = (index: number) =>
+                selectionStart === index && selectionEnd === index + 1;
+
+            if (
+                ANY_MINUS_DETECT_RE.test(event.key)
+                && Array.from(allowedNonNumericKeys).some((k) => ANY_MINUS_DETECT_RE.test(k || ''))
+            ) {
+                // Only allow one sign unless replacing the existing one or all text is selected
+                const existingIndex = inputValue.search(ANY_MINUS_RE);
+                const isReplacingExisting
+                    = existingIndex != null && existingIndex !== -1 && selectionIsExactlyCharAt(existingIndex);
+                isAllowedNonNumericKey
+                    = !(ANY_MINUS_DETECT_RE.test(inputValue) || ANY_PLUS_DETECT_RE.test(inputValue))
+                      || isAllSelected
+                      || isReplacingExisting;
+            }
+            if (
+                ANY_PLUS_DETECT_RE.test(event.key)
+                && Array.from(allowedNonNumericKeys).some((k) => ANY_PLUS_DETECT_RE.test(k || ''))
+            ) {
+                const existingIndex = inputValue.search(ANY_PLUS_RE);
+                const isReplacingExisting
+                    = existingIndex != null && existingIndex !== -1 && selectionIsExactlyCharAt(existingIndex);
+                isAllowedNonNumericKey
+                    = !(ANY_MINUS_DETECT_RE.test(inputValue) || ANY_PLUS_DETECT_RE.test(inputValue))
+                      || isAllSelected
+                      || isReplacingExisting;
             }
 
             // Only allow one of each symbol.
@@ -302,28 +367,30 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
                 if (event.key === symbol) {
                     const symbolIndex = inputValue.indexOf(symbol);
                     const isSymbolHighlighted
-            = selectionStart === symbolIndex && selectionEnd === symbolIndex + 1;
+                        = selectionStart === symbolIndex && selectionEnd === symbolIndex + 1;
                     isAllowedNonNumericKey
-            = !inputValue.includes(symbol) || isAllSelected || isSymbolHighlighted;
+                        = !inputValue.includes(symbol) || isAllSelected || isSymbolHighlighted;
                 }
             });
 
-            const isLatinNumeral = /^\d$/.test(event.key);
-            const isArabicNumeral = ARABIC_RE.test(event.key);
-            const isHanNumeral = HAN_RE.test(event.key);
+            const isAsciiDigit = event.key >= '0' && event.key <= '9';
+            const isArabicNumeral = ARABIC_DETECT_RE.test(event.key);
+            const isHanNumeral = HAN_DETECT_RE.test(event.key);
+            const isFullwidthNumeral = FULLWIDTH_DETECT_RE.test(event.key);
             const isNavigateKey = NAVIGATE_KEYS.has(event.key);
 
             if (
-            // Allow composition events (e.g., pinyin)
-            // event.nativeEvent.isComposing does not work in Safari:
-            // https://bugs.webkit.org/show_bug.cgi?id=165004
+                // Allow composition events (e.g., pinyin)
+                // event.nativeEvent.isComposing does not work in Safari:
+                // https://bugs.webkit.org/show_bug.cgi?id=165004
                 event.which === 229
                 || event.altKey
                 || event.ctrlKey
                 || event.metaKey
                 || isAllowedNonNumericKey
-                || isLatinNumeral
+                || isAsciiDigit
                 || isArabicNumeral
+                || isFullwidthNumeral
                 || isHanNumeral
                 || isNavigateKey
             ) {
@@ -338,17 +405,23 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
             // Prevent insertion of text or caret from moving.
             stopEvent(event);
 
+            const details = createChangeEventDetails('none', nativeEvent);
+
             if (event.key === 'ArrowUp') {
                 incrementValue(amount, 1, parsedValue, nativeEvent);
+                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, details);
             }
             else if (event.key === 'ArrowDown') {
                 incrementValue(amount, -1, parsedValue, nativeEvent);
+                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, details);
             }
             else if (event.key === 'Home' && min != null) {
                 setValue(min, nativeEvent);
+                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, details);
             }
             else if (event.key === 'End' && max != null) {
                 setValue(max, nativeEvent);
+                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, details);
             }
         },
         onPaste(event) {

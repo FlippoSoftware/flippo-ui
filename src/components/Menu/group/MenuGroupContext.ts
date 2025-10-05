@@ -1,10 +1,10 @@
 import React from 'react';
 
-export type TMenuGroupContext = {
+export type MenuGroupContextValue = {
     setLabelId: (id: string | undefined) => void;
 };
 
-export const MenuGroupContext = React.createContext<TMenuGroupContext | undefined>(undefined);
+export const MenuGroupContext = React.createContext<MenuGroupContextValue | undefined>(undefined);
 
 export function useMenuGroupRootContext() {
     const context = React.use(MenuGroupContext);

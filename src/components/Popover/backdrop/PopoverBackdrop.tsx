@@ -1,19 +1,16 @@
-'use client';
-
 import React from 'react';
 
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
+
 import type { TransitionStatus } from '@flippo-ui/hooks';
-
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
-
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { usePopoverRootContext } from '../root/PopoverRootContext';
 
-const customStyleHookMapping: CustomStyleHookMapping<PopoverBackdrop.State> = {
+const customStyleHookMapping: StateAttributesMapping<PopoverBackdrop.State> = {
     ...popupStateMapping,
     ...transitionStatusMapping
 };

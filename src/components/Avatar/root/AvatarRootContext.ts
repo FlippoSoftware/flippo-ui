@@ -1,15 +1,13 @@
-'use client';
-
 import React from 'react';
 
 import type { ImageLoadingStatus } from './AvatarRoot';
 
-export type TAvatarRootContext = {
+export type AvatarRootContextValue = {
     imageLoadingStatus: ImageLoadingStatus;
     setImageLoadingStatus: React.Dispatch<React.SetStateAction<ImageLoadingStatus>>;
 };
 
-export const AvatarRootContext = React.createContext<TAvatarRootContext | undefined>(undefined);
+export const AvatarRootContext = React.createContext<AvatarRootContextValue | undefined>(undefined);
 
 export function useAvatarRootContext() {
     const context = React.use(AvatarRootContext);

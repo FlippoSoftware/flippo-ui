@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
@@ -7,13 +5,13 @@ import type { TransitionStatus } from '@flippo-ui/hooks';
 import type { CollapsibleRoot } from './CollapsibleRoot';
 import type { useCollapsibleRoot } from './useCollapsibleRoot';
 
-export type TCollapsibleRootContext = {
-    onOpenChange: (open: boolean) => void;
+export type CollapsibleRootContextValue = {
+    onOpenChange: (open: boolean, eventDetails: CollapsibleRoot.ChangeEventDetails) => void;
     state: CollapsibleRoot.State;
     transitionStatus: TransitionStatus;
 } & useCollapsibleRoot.ReturnValue;
 
-export const CollapsibleRootContext = React.createContext<TCollapsibleRootContext | undefined>(
+export const CollapsibleRootContext = React.createContext<CollapsibleRootContextValue | undefined>(
     undefined
 );
 

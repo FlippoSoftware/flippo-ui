@@ -1,12 +1,9 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback, useTimeout } from '@flippo-ui/hooks';
+import { mergeProps } from '~@lib/merge';
 
-import { mergeProps } from '@lib/merge';
-
-import type { HTMLProps } from '@lib/types';
+import type { HTMLProps } from '~@lib/types';
 
 import { useFormContext } from '../../Form/FormContext';
 import { useFieldRootContext } from '../root/FieldRootContext';

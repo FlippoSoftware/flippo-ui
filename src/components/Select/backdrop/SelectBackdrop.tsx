@@ -1,13 +1,13 @@
 import React from 'react';
 
 import { useStore } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { StateAttributesMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';

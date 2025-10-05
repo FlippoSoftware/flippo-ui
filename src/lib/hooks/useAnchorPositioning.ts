@@ -1,4 +1,3 @@
-'use client';
 import React from 'react';
 
 import { useEnhancedEffect, useEventCallback, useLatestRef } from '@flippo-ui/hooks';
@@ -16,10 +15,10 @@ import {
     shift,
     size,
     useFloating
-} from '@packages/floating-ui-react/index';
+} from '~@packages/floating-ui-react/index';
 import {
     arrow
-} from '@packages/floating-ui-react/middleware/arrow';
+} from '~@packages/floating-ui-react/middleware/arrow';
 
 import type { Rect } from '@floating-ui/utils';
 import type {
@@ -33,13 +32,13 @@ import type {
     Placement,
     UseFloatingOptions,
     VirtualElement
-} from '@packages/floating-ui-react';
+} from '~@packages/floating-ui-react';
 
 import { ownerDocument } from '../owner';
 
 import { useDirection } from './useDirection';
 
-function getLogicalSide(sideParam: TSide, renderedSide: PhysicalSide, isRtl: boolean): TSide {
+function getLogicalSide(sideParam: Side, renderedSide: PhysicalSide, isRtl: boolean): Side {
     const isLogicalSideParam = sideParam === 'inline-start' || sideParam === 'inline-end';
     const logicalRight = isRtl ? 'inline-start' : 'inline-end';
     const logicalLeft = isRtl ? 'inline-end' : 'inline-start';
@@ -50,11 +49,11 @@ function getLogicalSide(sideParam: TSide, renderedSide: PhysicalSide, isRtl: boo
             right: isLogicalSideParam ? logicalRight : 'right',
             bottom: 'bottom',
             left: isLogicalSideParam ? logicalLeft : 'left'
-        } satisfies Record<PhysicalSide, TSide>
+        } satisfies Record<PhysicalSide, Side>
     )[renderedSide];
 }
 
-function getOffsetData(state: MiddlewareState, sideParam: TSide, isRtl: boolean) {
+function getOffsetData(state: MiddlewareState, sideParam: Side, isRtl: boolean) {
     const { rects, placement } = state;
     const data = {
         side: getLogicalSide(sideParam, getSide(placement), isRtl),
@@ -66,12 +65,12 @@ function getOffsetData(state: MiddlewareState, sideParam: TSide, isRtl: boolean)
     return data;
 }
 
-export type TSide = 'top' | 'bottom' | 'left' | 'right' | 'inline-end' | 'inline-start';
-export type TAlign = 'start' | 'center' | 'end';
-export type TBoundary = 'clipping-ancestors' | Element | Element[] | Rect;
+export type Side = 'top' | 'bottom' | 'left' | 'right' | 'inline-end' | 'inline-start';
+export type Align = 'start' | 'center' | 'end';
+export type Boundary = 'clipping-ancestors' | Element | Element[] | Rect;
 export type OffsetFunction = (data: {
-    side: TSide;
-    align: TAlign;
+    side: Side;
+    align: Align;
     anchor: { width: number; height: number };
     positioner: { width: number; height: number };
 }) => number;
@@ -145,7 +144,7 @@ export function useAnchorPositioning(
                 'left': 'left',
                 'inline-end': isRtl ? 'left' : 'right',
                 'inline-start': isRtl ? 'right' : 'left'
-            } satisfies Record<TSide, PhysicalSide>
+            } satisfies Record<Side, PhysicalSide>
           )[sideParam];
 
     const placement = align === 'center' ? side : (`${side}-${align}` as Placement);
@@ -597,7 +596,7 @@ export namespace useAnchorPositioning {
          * May automatically change to avoid collisions.
          * @default 'bottom'
          */
-        side?: TSide;
+        side?: Side;
         /**
          * Distance between the anchor and the popup in pixels.
          * Also accepts a function that returns the distance to read the dimensions of the anchor
@@ -627,7 +626,7 @@ export namespace useAnchorPositioning {
          * How to align the popup relative to the specified side.
          * @default 'center'
          */
-        align?: TAlign;
+        align?: Align;
         /**
          * Additional offset along the alignment axis in pixels.
          * Also accepts a function that returns the offset to read the dimensions of the anchor
@@ -657,7 +656,7 @@ export namespace useAnchorPositioning {
          * An element or a rectangle that delimits the area that the popup is confined to.
          * @default 'clipping-ancestors'
          */
-        collisionBoundary?: TBoundary;
+        collisionBoundary?: Boundary;
         /**
          * Additional space to maintain from the edge of the collision boundary.
          * @default 5
@@ -717,8 +716,8 @@ export namespace useAnchorPositioning {
         arrowStyles: React.CSSProperties;
         arrowRef: React.RefObject<Element | null>;
         arrowUncentered: boolean;
-        side: TSide;
-        align: TAlign;
+        side: Side;
+        align: Align;
         physicalSide: PhysicalSide;
         anchorHidden: boolean;
         refs: ReturnType<typeof useFloating>['refs'];

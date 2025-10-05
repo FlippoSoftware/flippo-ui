@@ -1,4 +1,4 @@
-import { CommonCollapsibleTriggerDataAttributes } from '@lib/collapsibleOpenStateMapping';
+import { CommonCollapsibleTriggerDataAttributes } from '~@lib/collapsibleOpenStateMapping';
 
 export enum CollapsibleTriggerDataAttributes {
     /**

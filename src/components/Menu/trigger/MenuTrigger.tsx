@@ -1,23 +1,20 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback, useMergedRef, useTimeout } from '@flippo-ui/hooks';
-import { getParentNode, isHTMLElement, isLastTraversableNode } from '@floating-ui/utils/dom';
+import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
+import { useRenderElement } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
+import { ownerDocument } from '~@lib/owner';
+import { pressableTriggerOpenStateMapping } from '~@lib/popupStateMapping';
+import { useFloatingTree } from '~@packages/floating-ui-react/index';
+import { contains } from '~@packages/floating-ui-react/utils';
 
-import { getPseudoElementBounds } from '@lib/getPseudoElementBounds';
-import { useRenderElement } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-import { ownerDocument } from '@lib/owner';
-import { pressableTriggerOpenStateMapping } from '@lib/popupStateMapping';
-import { useFloatingTree } from '@packages/floating-ui-react/index';
-import { contains } from '@packages/floating-ui-react/utils';
-
-import type { HeadlessUIComponentProps, HTMLProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps, NativeButtonProps } from '~@lib/types';
 
 import { CompositeItem } from '../../Composite/item/CompositeItem';
 import { useButton } from '../../use-button/useButton';
 import { useMenuRootContext } from '../root/MenuRootContext';
+import { findRootOwnerId } from '../utils/findRootOwnerId';
 
 const BOUNDARY_OFFSET = 2;
 
@@ -162,22 +159,22 @@ export function MenuTrigger(componentProps: MenuTrigger.Props) {
 
     const element = useRenderElement('button', componentProps, {
         enabled: !isMenubar,
+        customStyleHookMapping: pressableTriggerOpenStateMapping,
         state,
         ref,
-        props,
-        customStyleHookMapping: pressableTriggerOpenStateMapping
+        props
     });
 
     if (isMenubar) {
         return (
             <CompositeItem
-                tag={'button'}
-                render={render}
-                className={className}
-                state={state}
-                refs={ref}
-                props={props}
-                customStyleHookMapping={pressableTriggerOpenStateMapping}
+              tag={'button'}
+              render={render}
+              className={className}
+              state={state}
+              refs={ref}
+              props={props}
+              customStyleHookMapping={pressableTriggerOpenStateMapping}
             />
         );
     }
@@ -201,16 +198,4 @@ export namespace MenuTrigger {
          */
         disabled?: boolean;
     } & NativeButtonProps & HeadlessUIComponentProps<'button', State>;
-}
-
-function findRootOwnerId(node: Node): string | undefined {
-    if (isHTMLElement(node) && node.hasAttribute('data-rootownerid')) {
-        return node.getAttribute('data-rootownerid') ?? undefined;
-    }
-
-    if (isLastTraversableNode(node)) {
-        return undefined;
-    }
-
-    return findRootOwnerId(getParentNode(node));
 }

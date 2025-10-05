@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -8,12 +6,12 @@ import {
     useStore,
     useTimeout
 } from '@flippo-ui/hooks';
-import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import { useRenderElement } from '@lib/hooks';
-import { isMouseWithinBounds } from '@lib/isMouseWithinBounds';
-import { compareItemEquality, itemIncludes, removeItem } from '@lib/itemEquality';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useRenderElement } from '~@lib/hooks';
+import { isMouseWithinBounds } from '~@lib/isMouseWithinBounds';
+import { compareItemEquality, itemIncludes, removeItem } from '~@lib/itemEquality';
 
-import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '~@lib/types';
 
 import {
     IndexGuessBehavior,
@@ -25,7 +23,7 @@ import { selectors } from '../store';
 
 import { SelectItemContext } from './SelectItemContext';
 
-import type { TSelectItemContext } from './SelectItemContext';
+import type { SelectItemContextValue } from './SelectItemContext';
 
 /**
  * An individual option in the select menu.
@@ -264,7 +262,7 @@ export function SelectItem(componentProps: SelectItem.Props) {
         ]
     });
 
-    const contextValue: TSelectItemContext = React.useMemo(
+    const contextValue: SelectItemContextValue = React.useMemo(
         () => ({
             selected,
             indexRef,

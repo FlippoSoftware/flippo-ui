@@ -1,19 +1,16 @@
-'use client';
-
 import React from 'react';
 
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
+
 import type { TransitionStatus } from '@flippo-ui/hooks';
-
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
-
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useDialogRootContext } from '../root/DialogRootContext';
 
-const customStyleHookMapping: CustomStyleHookMapping<DialogBackdrop.State> = {
+const customStyleHookMapping: StateAttributesMapping<DialogBackdrop.State> = {
     ...popupStateMapping,
     ...transitionStatusMapping
 };
@@ -35,13 +32,12 @@ export function DialogBackdrop(componentProps: DialogBackdrop.Props) {
         ...elementProps
     } = componentProps;
 
-    const {
-        open,
-        nested,
-        mounted,
-        transitionStatus,
-        backdropRef
-    } = useDialogRootContext();
+    const { store } = useDialogRootContext();
+
+    const open = store.useState('open');
+    const nested = store.useState('nested');
+    const mounted = store.useState('mounted');
+    const transitionStatus = store.useState('transitionStatus');
 
     const state: DialogBackdrop.State = React.useMemo(
         () => ({
@@ -53,7 +49,7 @@ export function DialogBackdrop(componentProps: DialogBackdrop.Props) {
 
     return useRenderElement('div', componentProps, {
         state,
-        ref: [backdropRef, ref],
+        ref: [store.context.backdropRef, ref],
         customStyleHookMapping,
         props: [{
             role: 'presentation',

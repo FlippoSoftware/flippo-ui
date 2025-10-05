@@ -1,9 +1,9 @@
 import type React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { StateAttributesMapping } from '@lib/getStyleHookProps';
-import type { ComponentRenderFn, HTMLProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { ComponentRenderFn, HTMLProps } from '~@lib/types';
 
 /**
  * Renders a Base UI element.

@@ -1,12 +1,10 @@
-'use client';
-
 import React from 'react';
 
 import { useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useMenuCheckboxItemContext } from '../checkbox-item/MenuCheckboxItemContext';
 import { itemMapping } from '../utils/styleHookMapping';

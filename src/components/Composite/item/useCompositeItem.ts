@@ -1,10 +1,10 @@
-'use client';
+
 
 import React from 'react';
 
 import { useMergedRef } from '@flippo-ui/hooks';
 
-import type { HTMLProps } from '@lib/types';
+import type { HTMLProps } from '~@lib/types';
 
 import { useCompositeListItem } from '../list/useCompositeListItem';
 import { useCompositeRootContext } from '../root/CompositeRootContext';

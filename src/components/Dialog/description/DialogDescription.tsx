@@ -1,10 +1,7 @@
-'use client';
-
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useDialogRootContext } from '../root/DialogRootContext';
 
@@ -24,16 +21,11 @@ export function DialogDescription(componentProps: DialogDescription.Props) {
         ref,
         ...elementProps
     } = componentProps;
-    const { setDescriptionElementId } = useDialogRootContext();
+    const { store } = useDialogRootContext();
 
     const id = useHeadlessUiId(idProp);
 
-    useIsoLayoutEffect(() => {
-        setDescriptionElementId(id);
-        return () => {
-            setDescriptionElementId(undefined);
-        };
-    }, [id, setDescriptionElementId]);
+    store.useSyncedValueWithCleanup('descriptionElementId', id);
 
     const element = useRenderElement('p', componentProps, {
         ref,

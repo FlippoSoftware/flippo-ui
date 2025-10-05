@@ -1,11 +1,11 @@
-'use client';
+
 
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
-import { valueToPercent } from '@lib/valueToPercent';
+import { useRenderElement } from '~@lib/hooks';
+import { valueToPercent } from '~@lib/valueToPercent';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useMeterRootContext } from '../root/MeterRootContext';
 

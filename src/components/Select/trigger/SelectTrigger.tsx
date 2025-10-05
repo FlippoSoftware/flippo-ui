@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -9,16 +7,16 @@ import {
     useStore,
     useTimeout
 } from '@flippo-ui/hooks';
-import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import { getPseudoElementBounds } from '@lib/getPseudoElementBounds';
-import { useRenderElement } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-import { ownerDocument } from '@lib/owner';
-import { pressableTriggerOpenStateMapping } from '@lib/popupStateMapping';
-import { contains, getFloatingFocusElement } from '@packages/floating-ui-react/utils';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
+import { useRenderElement } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
+import { ownerDocument } from '~@lib/owner';
+import { pressableTriggerOpenStateMapping } from '~@lib/popupStateMapping';
+import { contains, getFloatingFocusElement } from '~@packages/floating-ui-react/utils';
 
-import type { StateAttributesMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '~@lib/types';
 
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { fieldValidityMapping } from '../../Field/utils/constants';

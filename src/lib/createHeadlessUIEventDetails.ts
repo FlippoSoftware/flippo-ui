@@ -1,3 +1,5 @@
+import { EMPTY_OBJECT } from './constants';
+
 /**
  * Maps an open-change `reason` string to the corresponding native event type.
  */
@@ -18,9 +20,12 @@ export type ReasonToEvent<Reason extends string> = Reason extends 'trigger-press
                             : Event;
 
 /**
- * Details of custom events emitted by Base UI components.
+ * Details of custom change events emitted by Base UI components.
  */
-export type HeadlessUIChangeEventDetails<Reason extends string> = {
+export type HeadlessUIChangeEventDetails<
+    Reason extends string,
+    CustomProperties extends object = {}
+> = {
     [K in Reason]: {
         /**
          * The reason for the event.
@@ -46,19 +51,42 @@ export type HeadlessUIChangeEventDetails<Reason extends string> = {
          * Indicates whether the event is allowed to propagate.
          */
         isPropagationAllowed: boolean;
-    };
+    } & CustomProperties;
 }[Reason];
+
+/**
+ * Details of custom generic events emitted by Base UI components.
+ */
+export type HeadlessUIGenericEventDetails<
+    Reason extends string,
+    EventType extends Event = Event,
+    CustomProperties extends object = {}
+> = {
+    /**
+     * The reason for the event.
+     */
+    reason: Reason;
+    /**
+     * The native event associated with the custom event.
+     */
+    event: EventType;
+} & CustomProperties;
 
 /**
  * Creates a Base UI event details object with the given reason and utilities
  * for preventing Base UI's internal event handling.
  */
-export function createChangeEventDetails<Reason extends string>(
+export function createChangeEventDetails<
+    Reason extends string,
+    CustomProperties extends object = {}
+>(
     reason: Reason,
-    event?: ReasonToEvent<Reason>
-): HeadlessUIChangeEventDetails<Reason> {
+    event?: ReasonToEvent<Reason>,
+    customProperties?: CustomProperties
+): HeadlessUIChangeEventDetails<Reason, CustomProperties> {
     let canceled = false;
     let allowPropagation = false;
+    const custom = customProperties ?? (EMPTY_OBJECT as CustomProperties);
     return {
         reason,
         event: (event ?? new Event('base-ui')) as ReasonToEvent<Reason>,
@@ -73,6 +101,24 @@ export function createChangeEventDetails<Reason extends string>(
         },
         get isPropagationAllowed() {
             return allowPropagation;
-        }
+        },
+        ...custom
+    };
+}
+
+export function createGenericEventDetails<
+    Reason extends string,
+    EventType extends Event = Event,
+    CustomProperties extends object = {}
+>(
+    reason: Reason,
+    event?: EventType,
+    custom?: CustomProperties
+): HeadlessUIGenericEventDetails<Reason, EventType, CustomProperties> {
+    const customProperties = custom ?? (EMPTY_OBJECT as CustomProperties);
+    return {
+        reason,
+        event: (event ?? new Event('base-ui')) as EventType,
+        ...customProperties
     };
 }

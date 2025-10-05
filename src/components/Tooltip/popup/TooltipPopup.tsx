@@ -1,24 +1,20 @@
-'use client';
-
 import React from 'react';
 
 import { useOpenChangeComplete } from '@flippo-ui/hooks';
+import { DISABLED_TRANSITIONS_STYLE, EMPTY_OBJECT } from '~@lib/constants';
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-
-import { DISABLED_TRANSITIONS_STYLE, EMPTY_OBJECT } from '@lib/constants';
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping as baseMapping } from '@lib/popupStateMapping';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
-
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useTooltipPositionerContext } from '../positioner/TooltipPositionerContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
-const customStyleHookMapping: CustomStyleHookMapping<TooltipPopup.State> = {
+const customStyleHookMapping: StateAttributesMapping<TooltipPopup.State> = {
     ...baseMapping,
     ...transitionStatusMapping
 };
@@ -84,8 +80,8 @@ export function TooltipPopup(componentProps: TooltipPopup.Props) {
 export namespace TooltipPopup {
     export type State = {
         open: boolean;
-        side: TSide;
-        align: TAlign;
+        side: Side;
+        align: Align;
         instant: 'delay' | 'focus' | 'dismiss' | undefined;
         transitionStatus: TransitionStatus;
     };

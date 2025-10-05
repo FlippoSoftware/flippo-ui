@@ -1,8 +1,8 @@
 import { useEventCallback, useStore } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks/';
-import { styleDisableScrollbar } from '@lib/styles';
+import { useRenderElement } from '~@lib/hooks/';
+import { styleDisableScrollbar } from '~@lib/styles';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { useSelectPositionerContext } from '../positioner/SelectPositionerContext';
 import { useSelectRootContext } from '../root/SelectRootContext';

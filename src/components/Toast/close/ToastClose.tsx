@@ -1,9 +1,9 @@
-'use client';
+
 import * as React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useButton } from '../../use-button/useButton';
 import { useToastContext } from '../provider/ToastProviderContext';

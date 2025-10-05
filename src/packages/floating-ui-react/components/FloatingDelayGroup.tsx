@@ -1,6 +1,9 @@
 import React from 'react';
 
 import { Timeout, useIsoLayoutEffect, useTimeout } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 
 import { getDelay } from '../hooks/useHover';
 
@@ -14,7 +17,7 @@ type ContextValue = {
     timeout: Timeout;
     currentIdRef: React.RefObject<any>;
     currentContextRef: React.RefObject<{
-        onOpenChange: (open: boolean) => void;
+        onOpenChange: (open: boolean, eventDetails: HeadlessUIChangeEventDetails<any>) => void;
         setIsInstantPhase: (value: boolean) => void;
     } | null>;
 };
@@ -65,7 +68,7 @@ export function FloatingDelayGroup(props: FloatingDelayGroupProps): React.JSX.El
 
     return (
         <FloatingDelayGroupContext
-            value={React.useMemo(
+          value={React.useMemo(
                 () => ({
                     hasProvider: true,
                     delayRef,
@@ -196,7 +199,7 @@ export function useDelayGroup(
             timeout.clear();
             setIsInstantPhase(true);
             prevContext?.setIsInstantPhase(true);
-            prevContext?.onOpenChange(false);
+            prevContext?.onOpenChange(false, createChangeEventDetails('none'));
         }
         else {
             setIsInstantPhase(false);

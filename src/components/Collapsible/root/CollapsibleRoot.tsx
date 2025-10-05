@@ -1,18 +1,16 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback } from '@flippo-ui/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import { useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CollapsibleRootContext } from './CollapsibleRootContext';
 import { collapsibleStyleHookMapping } from './styleHooks';
 import { useCollapsibleRoot } from './useCollapsibleRoot';
 
-import type { TCollapsibleRootContext } from './CollapsibleRootContext';
+import type { CollapsibleRootContextValue } from './CollapsibleRootContext';
 
 /**
  * Groups all parts of the collapsible.
@@ -52,7 +50,7 @@ export function CollapsibleRoot(componentProps: CollapsibleRoot.Props) {
         [collapsible.open, collapsible.disabled, collapsible.transitionStatus]
     );
 
-    const contextValue: TCollapsibleRootContext = React.useMemo(
+    const contextValue: CollapsibleRootContextValue = React.useMemo(
         () => ({
             ...collapsible,
             onOpenChange,
@@ -104,7 +102,7 @@ export namespace CollapsibleRoot {
         /**
          * Event handler called when the panel is opened or closed.
          */
-        onOpenChange?: (open: boolean) => void;
+        onOpenChange?: (open: boolean, eventDetails: ChangeEventDetails) => void;
         /**
          * Whether the component should ignore user interaction.
          * @default false
@@ -112,4 +110,7 @@ export namespace CollapsibleRoot {
         disabled?: boolean;
         render?: HeadlessUIComponentProps<'div', State>['render'] | null;
     } & Omit<HeadlessUIComponentProps<'div', State>, 'render'>;
+
+    export type ChangeEventReason = 'trigger-press' | 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 }

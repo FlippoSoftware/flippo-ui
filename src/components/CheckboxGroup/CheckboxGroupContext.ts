@@ -1,15 +1,15 @@
-'use client';
-
 import React from 'react';
+
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 
 import type { useFieldControlValidation } from '../Field/control/useFieldControlValidation';
 
 import type { useCheckboxGroupParent } from './useCheckboxGroupParent';
 
-export type TCheckboxGroupContext = {
+export type CheckboxGroupContextValue = {
     value: string[] | undefined;
     defaultValue: string[] | undefined;
-    setValue: (value: string[], event: Event) => void;
+    setValue: (value: string[], eventDetails: HeadlessUIChangeEventDetails<'none'>) => void;
     allValues: string[] | undefined;
     parent: useCheckboxGroupParent.ReturnValue;
     disabled: boolean;
@@ -17,12 +17,12 @@ export type TCheckboxGroupContext = {
     registerControlRef: (element: HTMLButtonElement | null) => void;
 };
 
-export const CheckboxGroupContext = React.createContext<TCheckboxGroupContext | undefined>(
+export const CheckboxGroupContext = React.createContext<CheckboxGroupContextValue | undefined>(
     undefined
 );
 
-export function useCheckboxGroupContext(optional: false): TCheckboxGroupContext;
-export function useCheckboxGroupContext(optional?: true): TCheckboxGroupContext | undefined;
+export function useCheckboxGroupContext(optional: false): CheckboxGroupContextValue;
+export function useCheckboxGroupContext(optional?: true): CheckboxGroupContextValue | undefined;
 export function useCheckboxGroupContext(optional = true) {
     const context = React.use(CheckboxGroupContext);
 

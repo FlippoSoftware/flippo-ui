@@ -1,10 +1,10 @@
-'use client';
+
 
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps, Orientation } from '@lib/types';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
 export function Separator(componentProps: Separator.Props) {
     const {

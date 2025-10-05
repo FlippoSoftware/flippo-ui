@@ -1,16 +1,15 @@
-'use client';
-
 import React from 'react';
 
 import { useControlledState, useEventCallback } from '@flippo-ui/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import { useRenderElement } from '@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { MenuRoot } from '../root/MenuRoot';
 
 import { MenuRadioGroupContext } from './MenuRadioGroupContext';
 
-import type { TMenuRadioGroupContext } from './MenuRadioGroupContext';
+import type { MenuRadioGroupContextValue } from './MenuRadioGroupContext';
 
 /**
  * Groups related radio items.
@@ -44,12 +43,16 @@ export const InnerMenuRadioGroup = React.memo(
 
         const onValueChange = useEventCallback(onValueChangeProp);
 
-        const setValue = React.useCallback(
-            (newValue: any, event: Event) => {
+        const setValue = useEventCallback(
+            (newValue: any, eventDetails: MenuRadioGroup.ChangeEventDetails) => {
+                onValueChange?.(newValue, eventDetails);
+
+                if (eventDetails.isCanceled) {
+                    return;
+                }
+
                 setValueUnwrapped(newValue);
-                onValueChange?.(newValue, event);
-            },
-            [onValueChange, setValueUnwrapped]
+            }
         );
 
         const state = React.useMemo(() => ({ disabled }), [disabled]);
@@ -64,7 +67,7 @@ export const InnerMenuRadioGroup = React.memo(
             }
         });
 
-        const context: TMenuRadioGroupContext = React.useMemo(
+        const context: MenuRadioGroupContextValue = React.useMemo(
             () => ({
                 value,
                 setValue,
@@ -110,7 +113,7 @@ export namespace MenuRadioGroup {
          *
          * @default () => {}
          */
-        onValueChange?: (value: any, event: Event) => void;
+        onValueChange?: (value: any, eventDetails: ChangeEventDetails) => void;
         /**
          * Whether the component should ignore user interaction.
          *
@@ -118,4 +121,7 @@ export namespace MenuRadioGroup {
          */
         disabled?: boolean;
     } & HeadlessUIComponentProps<'div', State>;
+
+    export type ChangeEventReason = MenuRoot.ChangeEventReason;
+    export type ChangeEventDetails = MenuRoot.ChangeEventDetails;
 }

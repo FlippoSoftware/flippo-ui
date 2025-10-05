@@ -1,11 +1,11 @@
-'use client';
+
 
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { getTarget } from '@packages/floating-ui-react/utils';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { getTarget } from '~@packages/floating-ui-react/utils';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useFieldRootContext } from '../root/FieldRootContext';
 import { fieldValidityMapping } from '../utils/constants';

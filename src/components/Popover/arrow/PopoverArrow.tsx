@@ -1,12 +1,10 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
 
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { usePopoverPositionerContext } from '../positioner/PopoverPositionerContext';
 import { usePopoverRootContext } from '../root/PopoverRootContext';
@@ -67,8 +65,8 @@ export namespace PopoverArrow {
          * Whether the popover is currently open.
          */
         open: boolean;
-        side: TSide;
-        align: TAlign;
+        side: Side;
+        align: Align;
         uncentered: boolean;
     };
 

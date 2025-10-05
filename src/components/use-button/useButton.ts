@@ -1,14 +1,11 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { error } from '~@lib/error';
+import { useFocusableWhenDisabled } from '~@lib/hooks';
+import { makeEventPreventable, mergeProps } from '~@lib/merge';
 
-import { error } from '@lib/error';
-import { useFocusableWhenDisabled } from '@lib/hooks';
-import { makeEventPreventable, mergeProps } from '@lib/merge';
-
-import type { HeadlessUIEvent, HTMLProps } from '@lib/types';
+import type { HeadlessUIEvent, HTMLProps } from '~@lib/types';
 
 import { useCompositeRootContext } from '../Composite/root/CompositeRootContext';
 

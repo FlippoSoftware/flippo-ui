@@ -27,7 +27,7 @@ export function useFloating<RT extends ReferenceType = ReferenceType>(
 ): UseFloatingReturn<RT> {
     const { nodeId } = options;
 
-    const internalRootContext = useFloatingRootContext<RT>({
+    const internalRootContext = useFloatingRootContext({
         ...options,
         elements: {
             reference: null,

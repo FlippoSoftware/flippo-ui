@@ -1,4 +1,3 @@
-'use client';
 import React from 'react';
 
 import {
@@ -7,12 +6,13 @@ import {
     useIsoLayoutEffect,
     useMergedRef
 } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
+import { visuallyHidden } from '~@lib/visuallyHidden';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-import { visuallyHidden } from '@lib/visuallyHidden';
-
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
@@ -47,6 +47,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
         required = false,
         disabled: disabledProp = false,
         ref,
+        name: nameProp,
         ...elementProps
     } = componentProps;
 
@@ -66,7 +67,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
     } = useFieldRootContext();
 
     const disabled = fieldDisabled || disabledProp;
-    const name = fieldName ?? elementProps.name;
+    const name = fieldName ?? nameProp;
 
     const {
         getValidationProps,
@@ -195,12 +196,18 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
                         }
 
                         const nextChecked = event.target.checked;
+                        const eventDetails = createChangeEventDetails('none', event.nativeEvent);
 
+                        onCheckedChange?.(nextChecked, eventDetails);
+
+                        if (eventDetails.isCanceled) {
+                            return;
+                        }
+
+                        clearErrors(name);
                         setDirty(nextChecked !== validityData.initialValue);
                         setFilled(nextChecked);
                         setCheckedState(nextChecked);
-                        onCheckedChange?.(nextChecked, event.nativeEvent);
-                        clearErrors(name);
 
                         if (validationMode === 'onChange') {
                             commitValidation(nextChecked);
@@ -261,13 +268,11 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
     });
 
     return (
-        <SwitchRootContext value={state}>
+        <SwitchRootContext.Provider value={state}>
             {element}
-            {!checked && elementProps.name && (
-                <input type={'hidden'} name={elementProps.name} value={'off'} />
-            )}
+            {!checked && nameProp && <input type={'hidden'} name={nameProp} value={'off'} />}
             <input {...inputProps} />
-        </SwitchRootContext>
+        </SwitchRootContext.Provider>
     );
 }
 
@@ -328,7 +333,7 @@ export namespace SwitchRoot {
          * @param {boolean} checked The new checked state.
          * @param {Event} event The corresponding event that initiated the change.
          */
-        onCheckedChange?: (checked: boolean, event: Event) => void;
+        onCheckedChange?: (checked: boolean, eventDetails: ChangeEventDetails) => void;
         /**
          * Whether the user should be unable to activate or deactivate the switch.
          * @default false
@@ -340,4 +345,7 @@ export namespace SwitchRoot {
          */
         required?: boolean;
     } & NativeButtonProps & Omit<HeadlessUIComponentProps<'button', SwitchRoot.State>, 'onChange'>;
+
+    export type ChangeEventReason = 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 }

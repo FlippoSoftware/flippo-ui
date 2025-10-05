@@ -1,5 +1,5 @@
-import { clamp } from '@lib/clamp';
-import { valueToPercent } from '@lib/valueToPercent';
+import { clamp } from '~@lib/clamp';
+import { valueToPercent } from '~@lib/valueToPercent';
 
 export function valueArrayToPercentages(values: number[], min: number, max: number) {
     const output = [];

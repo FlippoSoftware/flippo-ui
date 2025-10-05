@@ -1,10 +1,10 @@
-'use client';
-
 import React from 'react';
 
 import type { TabsTab } from '../tab/TabsTab';
 
-export type TTabsRootContext = {
+import type { TabsRoot } from './TabsRoot';
+
+export type TabsRootContextValue = {
     /**
      * The currently selected tab's value.
      */
@@ -12,11 +12,8 @@ export type TTabsRootContext = {
     /**
      * Callback for setting new value.
      */
-    onValueChange: (
-        value: TabsTab.Value,
-        activationDirection: TabsTab.ActivationDirection,
-        event: Event,
-    ) => void;
+    onValueChange: (value: TabsTab.Value, eventDetails: TabsRoot.ChangeEventDetails) => void;
+
     /**
      * The component orientation (layout flow direction).
      */
@@ -48,7 +45,7 @@ export type TTabsRootContext = {
     tabActivationDirection: TabsTab.ActivationDirection;
 };
 
-export const TabsRootContext = React.createContext<TTabsRootContext | undefined>(undefined);
+export const TabsRootContext = React.createContext<TabsRootContextValue | undefined>(undefined);
 
 export function useTabsRootContext() {
     const context = React.use(TabsRootContext);

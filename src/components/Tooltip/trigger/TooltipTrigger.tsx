@@ -1,11 +1,11 @@
-'use client';
+
 
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks/';
-import { triggerOpenStateMapping } from '@lib/popupStateMapping';
+import { useRenderElement } from '~@lib/hooks/';
+import { triggerOpenStateMapping } from '~@lib/popupStateMapping';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 

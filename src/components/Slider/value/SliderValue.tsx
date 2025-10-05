@@ -1,11 +1,11 @@
-'use client';
+
 
 import React from 'react';
 
-import { formatNumber } from '@lib/formatNumber';
-import { useRenderElement } from '@lib/hooks';
+import { formatNumber } from '~@lib/formatNumber';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSliderRootContext } from '../root/SliderRootContext';
 import { sliderStyleHookMapping } from '../root/styleHooks';

@@ -1,10 +1,8 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useDialogRootContext } from '../root/DialogRootContext';
 
@@ -27,11 +25,13 @@ export function DialogClose(componentProps: DialogClose.Props) {
         ref,
         ...elementProps
     } = componentProps;
-    const { open, setOpen } = useDialogRootContext();
+    const { store } = useDialogRootContext();
+    const open = store.useState('open');
+
     const { getRootProps, buttonRef } = useDialogClose({
         disabled,
         open,
-        setOpen,
+        setOpen: store.setOpen,
         nativeButton
     });
 

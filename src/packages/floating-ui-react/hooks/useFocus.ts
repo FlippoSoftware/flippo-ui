@@ -2,8 +2,10 @@ import React from 'react';
 
 import { useTimeout } from '@flippo-ui/hooks';
 import { getWindow, isElement, isHTMLElement } from '@floating-ui/utils/dom';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { isMac, isSafari } from '~@lib/detectBrowser';
 
-import { isMac, isSafari } from '@lib/detectBrowser';
+import type { FloatingUIOpenChangeDetails } from '~@lib/types';
 
 import {
     activeElement,
@@ -15,7 +17,7 @@ import {
 } from '../utils';
 import { createAttribute } from '../utils/createAttribute';
 
-import type { ElementProps, FloatingRootContext, OpenChangeReason } from '../types';
+import type { ElementProps, FloatingRootContext } from '../types';
 
 const isMacSafari = isMac && isSafari;
 
@@ -103,8 +105,8 @@ export function useFocus(context: FloatingRootContext, props: UseFocusProps = {}
             return undefined;
         }
 
-        function onOpenChangeLocal({ reason }: { reason: OpenChangeReason }) {
-            if (reason === 'reference-press' || reason === 'escape-key') {
+        function onOpenChangeLocal(details: FloatingUIOpenChangeDetails) {
+            if (details.reason === 'trigger-press' || details.reason === 'escape-key') {
                 blockFocusRef.current = true;
             }
         }
@@ -140,7 +142,7 @@ export function useFocus(context: FloatingRootContext, props: UseFocusProps = {}
                     }
                 }
 
-                onOpenChange(true, event.nativeEvent, 'focus');
+                onOpenChange(true, createChangeEventDetails('trigger-focus', event.nativeEvent));
             },
             onBlur(event) {
                 blockFocusRef.current = false;
@@ -150,9 +152,9 @@ export function useFocus(context: FloatingRootContext, props: UseFocusProps = {}
                 // Hit the non-modal focus management portal guard. Focus will be
                 // moved into the floating element immediately after.
                 const movedToFocusGuard
-          = isElement(relatedTarget)
-            && relatedTarget.hasAttribute(createAttribute('focus-guard'))
-            && relatedTarget.getAttribute('data-type') === 'outside';
+                    = isElement(relatedTarget)
+                      && relatedTarget.hasAttribute(createAttribute('focus-guard'))
+                      && relatedTarget.getAttribute('data-type') === 'outside';
 
                 // Wait for the window blur listener to fire.
                 timeout.start(0, () => {
@@ -180,7 +182,7 @@ export function useFocus(context: FloatingRootContext, props: UseFocusProps = {}
                         return;
                     }
 
-                    onOpenChange(false, nativeEvent, 'focus');
+                    onOpenChange(false, createChangeEventDetails('trigger-focus', nativeEvent));
                 });
             }
         }),

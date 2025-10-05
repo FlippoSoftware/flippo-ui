@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -8,16 +6,16 @@ import {
     useIsoLayoutEffect,
     useLatestRef
 } from '@flippo-ui/hooks';
-import { areArraysEqual } from '@lib/areArraysEqual';
-import { clamp } from '@lib/clamp';
-import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { ownerDocument } from '@lib/owner';
-import { warn } from '@lib/warn';
-import { activeElement } from '@packages/floating-ui-react/utils';
+import { areArraysEqual } from '~@lib/areArraysEqual';
+import { clamp } from '~@lib/clamp';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { ownerDocument } from '~@lib/owner';
+import { warn } from '~@lib/warn';
+import { activeElement } from '~@packages/floating-ui-react/utils';
 
-import type { HeadlessUIChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import type { HeadlessUIComponentProps, Orientation } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
 import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
@@ -35,7 +33,7 @@ import type { ThumbMetadata } from '../thumb/SliderThumb';
 import { SliderRootContext } from './SliderRootContext';
 import { sliderStyleHookMapping } from './styleHooks';
 
-import type { TSliderRootContext } from './SliderRootContext';
+import type { SliderRootContextValue } from './SliderRootContext';
 
 function areValuesEqual(
     newValue: number | readonly number[],
@@ -294,7 +292,7 @@ export function SliderRoot<
         ]
     );
 
-    const contextValue: TSliderRootContext = React.useMemo(
+    const contextValue: SliderRootContextValue = React.useMemo(
         () => ({
             name,
             active,

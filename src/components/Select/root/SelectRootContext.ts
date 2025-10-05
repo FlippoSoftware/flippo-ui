@@ -1,14 +1,14 @@
 import React from 'react';
 
-import type { HTMLProps } from '@lib/types';
-import type { FloatingRootContext, useFloatingRootContext } from '@packages/floating-ui-react';
+import type { HTMLProps } from '~@lib/types';
+import type { FloatingRootContext, useFloatingRootContext } from '~@packages/floating-ui-react';
 
 import type { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
 import type { SelectStore } from '../store';
 
 import type { SelectRoot } from './SelectRoot';
 
-export type TSelectRootContext = {
+export type SelectRootContextValue = {
     store: SelectStore;
     name: string | undefined;
     disabled: boolean;
@@ -47,7 +47,7 @@ export type TSelectRootContext = {
     initialValueRef: React.RefObject<any>;
 };
 
-export const SelectRootContext = React.createContext<TSelectRootContext | null>(null);
+export const SelectRootContext = React.createContext<SelectRootContextValue | null>(null);
 export const SelectFloatingContext = React.createContext<FloatingRootContext | null>(null);
 
 export function useSelectRootContext() {

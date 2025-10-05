@@ -1,8 +1,6 @@
-'use client';
-
 import React from 'react';
 
-import type { Orientation } from '@lib/types';
+import type { Orientation } from '~@lib/types';
 
 import type { CompositeMetadata } from '../../Composite/list/CompositeList';
 import type { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
@@ -10,7 +8,7 @@ import type { ThumbMetadata } from '../thumb/SliderThumb';
 
 import type { SliderRoot } from './SliderRoot';
 
-export type TSliderRootContext = {
+export type SliderRootContextValue = {
     /**
      * The index of the active thumb.
      */
@@ -89,7 +87,7 @@ export type TSliderRootContext = {
     values: readonly number[];
 };
 
-export const SliderRootContext = React.createContext<TSliderRootContext | undefined>(undefined);
+export const SliderRootContext = React.createContext<SliderRootContextValue | undefined>(undefined);
 
 export function useSliderRootContext() {
     const context = React.use(SliderRootContext);

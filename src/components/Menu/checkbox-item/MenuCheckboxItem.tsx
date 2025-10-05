@@ -1,20 +1,20 @@
-'use client';
-
 import React from 'react';
 
 import { useControlledState, useMergedRef } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { useFloatingTree } from '~@packages/floating-ui-react';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { useFloatingTree } from '@packages/floating-ui-react';
-
-import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '@lib/types';
-import type { FloatingEvents } from '@packages/floating-ui-react';
+import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '~@lib/types';
+import type { FloatingEvents } from '~@packages/floating-ui-react';
 
 import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
 import { REGULAR_ITEM, useMenuItem } from '../item/useMenuItem';
 import { useMenuPositionerContext } from '../positioner/MenuPositionerContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
 import { itemMapping } from '../utils/styleHookMapping';
+
+import type { MenuRoot } from '../root/MenuRoot';
 
 import { MenuCheckboxItemContext } from './MenuCheckboxItemContext';
 
@@ -80,9 +80,16 @@ const InnerMenuCheckboxItem = React.memo(
                 {
                     'role': 'menuitemcheckbox',
                     'aria-checked': checked,
-                    'onClick': (event: React.MouseEvent) => {
+                    onClick(event: React.MouseEvent) {
+                        const details = createChangeEventDetails('item-press', event.nativeEvent);
+
+                        onCheckedChange?.(!checked, details);
+
+                        if (details.isCanceled) {
+                            return;
+                        }
+
                         setChecked((currentlyChecked) => !currentlyChecked);
-                        onCheckedChange?.(!checked, event.nativeEvent);
                     }
                 },
                 elementProps,
@@ -136,17 +143,17 @@ export function MenuCheckboxItem(props: MenuCheckboxItem.Props) {
 
     return (
         <InnerMenuCheckboxItem
-          {...other}
-          id={id}
-          ref={mergedRef}
-          highlighted={highlighted}
-          menuEvents={menuEvents}
-          itemProps={itemProps}
-          allowMouseUpTriggerRef={allowMouseUpTriggerRef}
-          typingRef={typingRef}
-          closeOnClick={closeOnClick}
-          nativeButton={nativeButton}
-          nodeId={menuPositionerContext?.floatingContext.nodeId}
+            {...other}
+            id={id}
+            ref={mergedRef}
+            highlighted={highlighted}
+            menuEvents={menuEvents}
+            itemProps={itemProps}
+            allowMouseUpTriggerRef={allowMouseUpTriggerRef}
+            typingRef={typingRef}
+            closeOnClick={closeOnClick}
+            nativeButton={nativeButton}
+            nodeId={menuPositionerContext?.floatingContext.nodeId}
         />
     );
 }
@@ -195,7 +202,7 @@ export namespace MenuCheckboxItem {
         /**
          * Event handler called when the checkbox item is ticked or unticked.
          */
-        onCheckedChange?: (checked: boolean, event: Event) => void;
+        onCheckedChange?: (checked: boolean, eventDetails: ChangeEventDetails) => void;
         children?: React.ReactNode;
         /**
          * The click handler for the menu item.
@@ -220,4 +227,7 @@ export namespace MenuCheckboxItem {
          */
         closeOnClick?: boolean;
     } & NonNativeButtonProps & HeadlessUIComponentProps<'div', State>;
+
+    export type ChangeEventReason = MenuRoot.ChangeEventReason;
+    export type ChangeEventDetails = MenuRoot.ChangeEventDetails;
 }

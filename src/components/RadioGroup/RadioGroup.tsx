@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -8,13 +6,13 @@ import {
     useIsoLayoutEffect,
     useMergedRef
 } from '@flippo-ui/hooks';
+import { useHeadlessUiId } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
+import { visuallyHidden } from '~@lib/visuallyHidden';
+import { contains } from '~@packages/floating-ui-react/utils';
 
-import { useHeadlessUiId } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-import { visuallyHidden } from '@lib/visuallyHidden';
-import { contains } from '@packages/floating-ui-react/utils';
-
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { SHIFT } from '../Composite/composite';
 import { CompositeRoot } from '../Composite/root/CompositeRoot';
@@ -28,7 +26,7 @@ import type { FieldRoot } from '../Field/root/FieldRoot';
 
 import { RadioGroupContext } from './RadioGroupContext';
 
-import type { TRadioGroupContext } from './RadioGroupContext';
+import type { RadioGroupContextValue } from './RadioGroupContext';
 
 const MODIFIER_KEYS = [SHIFT];
 
@@ -71,11 +69,25 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
     const name = fieldName ?? nameProp;
     const id = useHeadlessUiId(idProp);
 
-    const [checkedValue, setCheckedValue] = useControlledState({
+    const [checkedValue, setCheckedValueUnwrapped] = useControlledState({
         prop: externalValue,
         defaultProp: defaultValue,
         caller: 'RadioGroup'
     });
+
+    const onValueChange = useEventCallback(onValueChangeProp);
+
+    const setCheckedValue = useEventCallback(
+        (value: unknown, eventDetails: RadioGroup.ChangeEventDetails) => {
+            onValueChange(value, eventDetails);
+
+            if (eventDetails.isCanceled) {
+                return;
+            }
+
+            setCheckedValueUnwrapped(value);
+        }
+    );
 
     const controlRef = React.useRef<HTMLElement>(null);
     const registerControlRef = useEventCallback((element: HTMLElement | null) => {
@@ -141,8 +153,6 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
         }
     });
 
-    const onValueChange = useEventCallback(onValueChangeProp);
-
     const serializedCheckedValue = React.useMemo(() => {
         if (checkedValue == null) {
             return ''; // avoid uncontrolled -> controlled error
@@ -189,7 +199,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
         ]
     );
 
-    const contextValue: TRadioGroupContext = React.useMemo(
+    const contextValue: RadioGroupContextValue = React.useMemo(
         () => ({
             ...fieldState,
             checkedValue,
@@ -232,20 +242,19 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
     };
 
     return (
-        <RadioGroupContext value={contextValue}>
+        <RadioGroupContext.Provider value={contextValue}>
             <CompositeRoot
-                render={render}
-                className={className}
-                state={state}
-                props={[defaultProps, fieldControlValidation.getValidationProps, elementProps]}
-                refs={[ref]}
-                customStyleHookMapping={fieldValidityMapping}
-                enableHomeAndEndKeys={false}
-                modifierKeys={MODIFIER_KEYS}
-                stopEventPropagation
+              render={render}
+              className={className}
+              state={state}
+              props={[defaultProps, fieldControlValidation.getValidationProps, elementProps]}
+              refs={[ref]}
+              customStyleHookMapping={fieldValidityMapping}
+              enableHomeAndEndKeys={false}
+              modifierKeys={MODIFIER_KEYS}
             />
             <input {...inputProps} />
-        </RadioGroupContext>
+        </RadioGroupContext.Provider>
     );
 }
 
@@ -292,10 +301,13 @@ export namespace RadioGroup {
         /**
          * Callback fired when the value changes.
          */
-        onValueChange?: (value: unknown, event: Event) => void;
+        onValueChange?: (value: unknown, eventDetails: ChangeEventDetails) => void;
         /**
          * A ref to access the hidden input element.
          */
         inputRef?: React.Ref<HTMLInputElement>;
     } & Omit<HeadlessUIComponentProps<'div', State>, 'value'>;
+
+    export type ChangeEventReason = 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 }

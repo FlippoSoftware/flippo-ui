@@ -1,19 +1,18 @@
-'use client';
-
 import React from 'react';
 
 import { useControlledState, useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useDirection, useRenderElement } from '~@lib/hooks';
+import { warn } from '~@lib/warn';
 
-import { useDirection, useRenderElement } from '@lib/hooks';
-import { warn } from '@lib/warn';
-
-import type { HeadlessUIComponentProps, Orientation } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
 
 import { AccordionRootContext } from './AccordionRootContext';
 
-import type { TAccordionRootContext } from './AccordionRootContext';
+import type { AccordionRootContextValue } from './AccordionRootContext';
 
 const rootStyleHookMapping = {
     value: () => null
@@ -36,7 +35,7 @@ export function AccordionRoot(componentProps: AccordionRoot.Props) {
         keepMounted: keepMountedProp,
         loop = true,
         onValueChange: onValueChangeProp,
-        openMultiple = true,
+        multiple = true,
         orientation = 'vertical',
         value: valueProp,
         defaultValue: defaultValueProp,
@@ -79,26 +78,36 @@ export function AccordionRoot(componentProps: AccordionRoot.Props) {
 
     const handleValueChange = React.useCallback(
         (newValue: number | string, nextOpen: boolean) => {
-            if (!openMultiple) {
+            const details = createChangeEventDetails('none');
+            if (!multiple) {
                 const nextValue = value[0] === newValue ? [] : [newValue];
+                onValueChange(nextValue, details);
+                if (details.isCanceled) {
+                    return;
+                }
                 setValue(nextValue);
-                onValueChange(nextValue);
             }
             else if (nextOpen) {
                 const nextOpenValues = value.slice();
                 nextOpenValues.push(newValue);
+                onValueChange(nextOpenValues, details);
+                if (details.isCanceled) {
+                    return;
+                }
                 setValue(nextOpenValues);
-                onValueChange(nextOpenValues);
             }
             else {
                 const nextOpenValues = value.filter((v) => v !== newValue);
+                onValueChange(nextOpenValues, details);
+                if (details.isCanceled) {
+                    return;
+                }
                 setValue(nextOpenValues);
-                onValueChange(nextOpenValues);
             }
         },
         [
+            multiple,
             onValueChange,
-            openMultiple,
             setValue,
             value
         ]
@@ -113,7 +122,7 @@ export function AccordionRoot(componentProps: AccordionRoot.Props) {
         [value, disabled, orientation]
     );
 
-    const contextValue: TAccordionRootContext = React.useMemo(
+    const contextValue: AccordionRootContextValue = React.useMemo(
         () => ({
             accordionItemRefs,
             direction,
@@ -210,12 +219,12 @@ export namespace AccordionRoot {
          * Event handler called when an accordion item is expanded or collapsed.
          * Provides the new value as an argument.
          */
-        onValueChange?: (value: AccordionValue) => void;
+        onValueChange?: (value: AccordionValue, eventDetails: ChangeEventDetails) => void;
         /**
          * Whether multiple items can be open at the same time.
          * @default true
          */
-        openMultiple?: boolean;
+        multiple?: boolean;
         /**
          * The visual orientation of the accordion.
          * Controls whether roving focus uses left/right or up/down arrow keys.
@@ -223,4 +232,7 @@ export namespace AccordionRoot {
          */
         orientation?: Orientation;
     } & HeadlessUIComponentProps<'div', State>;
+
+    export type ChangeEventReason = 'trigger-press' | 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 }

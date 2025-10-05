@@ -1,19 +1,19 @@
 import type { OpenChangeReason as FloatingUIOpenChangeReason } from '@floating-ui/react';
 
-export type TBaseOpenChangeReason =
-  | 'trigger-press'
-  | 'trigger-hover'
-  | 'trigger-focus'
-  | 'focus-out'
-  | 'escape-key'
-  | 'outside-press'
-  | 'list-navigation'
-  | 'item-press'
-  | 'cancel-open';
+export type BaseOpenChangeReason
+  = | 'trigger-press'
+    | 'trigger-hover'
+    | 'trigger-focus'
+    | 'focus-out'
+    | 'escape-key'
+    | 'outside-press'
+    | 'list-navigation'
+    | 'item-press'
+    | 'cancel-open';
 
 export function translateOpenChangeReason(
     nativeReason?: FloatingUIOpenChangeReason
-): TBaseOpenChangeReason | undefined {
+): BaseOpenChangeReason | undefined {
     if (!nativeReason) {
         return undefined;
     }

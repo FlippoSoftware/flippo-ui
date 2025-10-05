@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { NOOP } from '@lib/noop';
+import { NOOP } from '~@lib/noop';
 
 import type { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
 

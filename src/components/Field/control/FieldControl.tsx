@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -8,11 +6,12 @@ import {
     useIsoLayoutEffect,
     useMergedRef
 } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useHeadlessUiId } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
 
-import { useHeadlessUiId } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useFieldRootContext } from '../root/FieldRootContext';
 import { FieldControlSlot } from '../slot/FieldControlSlot';
@@ -24,7 +23,7 @@ import { FieldControlContext } from './FieldControlContext';
 import { useFieldControl } from './useFieldControl';
 import { useFieldControlValidation } from './useFieldControlValidation';
 
-import type { TFieldControlContext } from './FieldControlContext';
+import type { FieldControlContextValue } from './FieldControlContext';
 
 /**
  * The form control to label and validate.
@@ -113,10 +112,17 @@ export function FieldControl(componentProps: FieldControl.Props) {
         caller: 'FieldControl'
     });
 
-    const setValue = useEventCallback((nextValue: string, event: Event) => {
-        setValueUnwrapped(nextValue);
-        onValueChange?.(nextValue, event);
-    });
+    const setValue = useEventCallback(
+        (nextValue: string, eventDetails: FieldControl.ChangeEventDetails) => {
+            onValueChange?.(nextValue, eventDetails);
+
+            if (eventDetails.isCanceled) {
+                return;
+            }
+
+            setValueUnwrapped(nextValue);
+        }
+    );
 
     useField({
         id,
@@ -138,10 +144,11 @@ export function FieldControl(componentProps: FieldControl.Props) {
             'aria-labelledby': labelId,
             value,
             onChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-                setValue(event.currentTarget.value, event.nativeEvent);
+                const inputValue = event.currentTarget.value;
+                setValue(inputValue, createChangeEventDetails('none', event.nativeEvent));
 
-                setDirty(event.currentTarget.value !== validityData.initialValue);
-                setFilled(event.currentTarget.value !== '');
+                setDirty(inputValue !== validityData.initialValue);
+                setFilled(inputValue !== '');
             },
             onFocus() {
                 setFocused(true);
@@ -188,7 +195,7 @@ export function FieldControl(componentProps: FieldControl.Props) {
         commitValidation
     ]);
 
-    const context: TFieldControlContext = React.useMemo(() => ({
+    const context: FieldControlContextValue = React.useMemo(() => ({
         state,
         controlRef: mergedRef,
         setValue,
@@ -223,10 +230,13 @@ export namespace FieldControl {
 
     export type InputProps = HeadlessUIComponentProps<'input', State> & {
         control: 'input';
-        onValueChange?: (value: string, event: Event) => void;
+        onValueChange?: (value: string, eventDetails: ChangeEventDetails) => void;
         defaultValue?: React.ComponentProps<'input'>['defaultValue'];
     };
-    export type TextAreaProps = HeadlessUIComponentProps<'textarea', State> & { control: 'textarea'; onValueChange?: (value: string, event: Event) => void; defaultValue?: React.ComponentProps<'textarea'>['defaultValue'] };
+    export type TextAreaProps = HeadlessUIComponentProps<'textarea', State> & { control: 'textarea'; onValueChange?: (value: string, eventDetails: ChangeEventDetails) => void; defaultValue?: React.ComponentProps<'textarea'>['defaultValue'] };
 
     export type Props = (InputProps | TextAreaProps);
+
+    export type ChangeEventReason = 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 }

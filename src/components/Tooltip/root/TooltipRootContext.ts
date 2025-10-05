@@ -1,21 +1,14 @@
-'use client';
-
 import React from 'react';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { FloatingRootContext } from '@floating-ui/react';
+import type { HTMLProps } from '~@lib/types';
+import type { FloatingRootContext } from '~@packages/floating-ui-react';
 
-import type { HTMLProps } from '@lib/types';
+import type { TooltipRoot } from './TooltipRoot';
 
-import type { TTooltipOpenChangeReason } from './useTooltipRoot';
-
-export type TTooltipRootContext = {
+export type TooltipRootContextValue = {
     open: boolean;
-    setOpen: (
-        open: boolean,
-        event: Event | undefined,
-        reason: TTooltipOpenChangeReason | undefined,
-    ) => void;
+    setOpen: (open: boolean, eventDetails: TooltipRoot.ChangeEventDetails) => void;
     setTriggerElement: (el: Element | null) => void;
     positionerElement: HTMLElement | null;
     setPositionerElement: (el: HTMLElement | null) => void;
@@ -34,7 +27,7 @@ export type TTooltipRootContext = {
     hoverable: boolean;
 };
 
-export const TooltipRootContext = React.createContext<TTooltipRootContext | undefined>(undefined);
+export const TooltipRootContext = React.createContext<TooltipRootContextValue | undefined>(undefined);
 
 export function useTooltipRootContext() {
     const context = React.use(TooltipRootContext);

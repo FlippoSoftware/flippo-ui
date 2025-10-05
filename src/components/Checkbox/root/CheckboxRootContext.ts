@@ -1,12 +1,10 @@
-'use client';
-
 import React from 'react';
 
 import type { CheckboxRoot } from './CheckboxRoot';
 
-export type TCheckboxRootContext = CheckboxRoot.State;
+export type CheckboxRootContextValue = CheckboxRoot.State;
 
-export const CheckboxRootContext = React.createContext<TCheckboxRootContext | undefined>(undefined);
+export const CheckboxRootContext = React.createContext<CheckboxRootContextValue | undefined>(undefined);
 
 export function useCheckboxRootContext() {
     const context = React.use(CheckboxRootContext);

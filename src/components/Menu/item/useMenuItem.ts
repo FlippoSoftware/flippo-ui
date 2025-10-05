@@ -1,13 +1,10 @@
-'use client';
-
 import React from 'react';
 
 import { useMergedRef } from '@flippo-ui/hooks';
+import { mergeProps } from '~@lib/merge';
 
-import { mergeProps } from '@lib/merge';
-
-import type { HeadlessUIEvent, HTMLProps } from '@lib/types';
-import type { FloatingEvents } from '@packages/floating-ui-react';
+import type { HeadlessUIEvent, HTMLProps } from '~@lib/types';
+import type { FloatingEvents } from '~@packages/floating-ui-react';
 
 import { useButton } from '../../use-button';
 

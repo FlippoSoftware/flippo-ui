@@ -1,8 +1,6 @@
-'use client';
-
 import React from 'react';
 
-export type TMeterRootContext = {
+export type MeterRootContextValue = {
     /**
      * Formatted value of the component.
      */
@@ -22,7 +20,7 @@ export type TMeterRootContext = {
     setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const MeterRootContext = React.createContext<TMeterRootContext | undefined>(undefined);
+export const MeterRootContext = React.createContext<MeterRootContextValue | undefined>(undefined);
 
 export function useMeterRootContext() {
     const context = React.use(MeterRootContext);

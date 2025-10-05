@@ -1,13 +1,11 @@
-'use client';
-
 import React from 'react';
 
 import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
-import { warn } from '@lib/warn';
+import { useRenderElement } from '~@lib/hooks';
+import { warn } from '~@lib/warn';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCollapsiblePanel } from '../../Collapsible/panel/useCollapsiblePanel';
 import { useCollapsibleRootContext } from '../../Collapsible/root/CollapsibleRootContext';

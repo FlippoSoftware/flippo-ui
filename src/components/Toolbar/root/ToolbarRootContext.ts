@@ -1,14 +1,12 @@
-'use client';
-
 import React from 'react';
 
-import type { Orientation } from '@lib/types';
+import type { Orientation } from '~@lib/types';
 
 import type { CompositeMetadata } from '../../Composite/list/CompositeList';
 
 import type { ToolbarRoot } from './ToolbarRoot';
 
-export type TToolbarRootContext = {
+export type ToolbarRootContextValue = {
     disabled: boolean;
     orientation: Orientation;
     setItemMap: React.Dispatch<
@@ -16,10 +14,10 @@ export type TToolbarRootContext = {
     >;
 };
 
-export const ToolbarRootContext = React.createContext<TToolbarRootContext | undefined>(undefined);
+export const ToolbarRootContext = React.createContext<ToolbarRootContextValue | undefined>(undefined);
 
-export function useToolbarRootContext(optional?: false): TToolbarRootContext;
-export function useToolbarRootContext(optional: true): TToolbarRootContext | undefined;
+export function useToolbarRootContext(optional?: false): ToolbarRootContextValue;
+export function useToolbarRootContext(optional: true): ToolbarRootContextValue | undefined;
 export function useToolbarRootContext(optional?: boolean) {
     const context = React.use(ToolbarRootContext);
 

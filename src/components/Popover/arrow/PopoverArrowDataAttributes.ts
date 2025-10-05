@@ -1,4 +1,4 @@
-import { CommonPopupDataAttributes } from '@lib/popupStateMapping';
+import { CommonPopupDataAttributes } from '~@lib/popupStateMapping';
 
 export enum PopoverArrowDataAttributes {
     /**

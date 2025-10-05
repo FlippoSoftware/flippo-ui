@@ -1,12 +1,10 @@
-'use client'
-;
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
 
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useTooltipPositionerContext } from '../positioner/TooltipPositionerContext';
 
@@ -63,8 +61,8 @@ export function TooltipArrow({ ref: forwardedRef, ...componentProps }: TooltipAr
 export namespace TooltipArrow {
     export type State = {
         open: boolean;
-        side: TSide;
-        align: TAlign;
+        side: Side;
+        align: Align;
         uncentered: boolean;
     };
 

@@ -1,12 +1,10 @@
-'use client';
-
 import React from 'react';
 
-import { useAnimationFrame } from '@flippo-ui/hooks';
+import { useAnimationFrame, useTimeout } from '@flippo-ui/hooks';
+import { EMPTY_OBJECT } from '~@lib/constants';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 
-import { EMPTY_OBJECT } from '@lib/constants';
-
-import { isMouseLikePointerType } from '../utils';
+import { isMouseLikePointerType, isTypeableElement } from '../utils';
 
 import type { ElementProps, FloatingRootContext } from '../types';
 
@@ -22,7 +20,7 @@ export type UseClickProps = {
      * Keyboard clicks work as normal.
      * @default 'click'
      */
-    event?: 'click' | 'mousedown';
+    event?: 'click' | 'mousedown' | 'mousedown-only';
     /**
      * Whether to toggle the open state with repeated clicks.
      * @default true
@@ -41,6 +39,11 @@ export type UseClickProps = {
      * @default true
      */
     stickIfOpen?: boolean;
+    /**
+     * Touch-only delay (ms) before opening. Useful to allow mobile viewport/keyboard to settle.
+     * @default 0
+     */
+    touchOpenDelay?: number;
 };
 
 /**
@@ -54,11 +57,13 @@ export function useClick(context: FloatingRootContext, props: UseClickProps = {}
         event: eventOption = 'click',
         toggle = true,
         ignoreMouse = false,
-        stickIfOpen = true
+        stickIfOpen = true,
+        touchOpenDelay = 0
     } = props;
 
     const pointerTypeRef = React.useRef<'mouse' | 'pen' | 'touch'>(undefined);
     const frame = useAnimationFrame();
+    const touchOpenTimeout = useTimeout();
 
     const reference: ElementProps['reference'] = React.useMemo(
         () => ({
@@ -88,13 +93,41 @@ export function useClick(context: FloatingRootContext, props: UseClickProps = {}
                         ? openEventType === 'click' || openEventType === 'mousedown'
                         : true)
                 );
+
+                // Animations sometimes won't run on a typeable element if using a rAF.
+                // Focus is always set on these elements. For touch, we may delay opening.
+                if (isTypeableElement(nativeEvent.target)) {
+                    const details = createChangeEventDetails('trigger-press', nativeEvent);
+                    if (nextOpen && pointerType === 'touch' && touchOpenDelay > 0) {
+                        touchOpenTimeout.start(touchOpenDelay, () => {
+                            onOpenChange(true, details);
+                        });
+                    }
+                    else {
+                        onOpenChange(nextOpen, details);
+                    }
+                    return;
+                }
+
                 // Wait until focus is set on the element. This is an alternative to
                 // `event.preventDefault()` to avoid :focus-visible from appearing when using a pointer.
                 frame.request(() => {
-                    onOpenChange(nextOpen, nativeEvent, 'click');
+                    const details = createChangeEventDetails('trigger-press', nativeEvent);
+                    if (nextOpen && pointerType === 'touch' && touchOpenDelay > 0) {
+                        touchOpenTimeout.start(touchOpenDelay, () => {
+                            onOpenChange(true, details);
+                        });
+                    }
+                    else {
+                        onOpenChange(nextOpen, details);
+                    }
                 });
             },
             onClick(event) {
+                if (eventOption === 'mousedown-only') {
+                    return;
+                }
+
                 const pointerType = pointerTypeRef.current;
 
                 if (eventOption === 'mousedown' && pointerType) {
@@ -118,21 +151,32 @@ export function useClick(context: FloatingRootContext, props: UseClickProps = {}
                         || openEventType === 'keyup'
                         : true)
                 );
-                onOpenChange(nextOpen, event.nativeEvent, 'click');
+                const details = createChangeEventDetails('trigger-press', event.nativeEvent);
+
+                if (nextOpen && pointerType === 'touch' && touchOpenDelay > 0) {
+                    touchOpenTimeout.start(touchOpenDelay, () => {
+                        onOpenChange(true, details);
+                    });
+                }
+                else {
+                    onOpenChange(nextOpen, details);
+                }
             },
             onKeyDown() {
                 pointerTypeRef.current = undefined;
             }
         }),
         [
-            dataRef,
             eventOption,
             ignoreMouse,
-            onOpenChange,
+            dataRef,
             open,
-            stickIfOpen,
             toggle,
-            frame
+            stickIfOpen,
+            frame,
+            touchOpenDelay,
+            touchOpenTimeout,
+            onOpenChange
         ]
     );
 

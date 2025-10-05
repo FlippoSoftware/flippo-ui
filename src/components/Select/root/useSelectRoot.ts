@@ -12,11 +12,11 @@ import {
     useStore,
     useTransitionStatus
 } from '@flippo-ui/hooks';
-import { EMPTY_ARRAY } from '@lib/constants';
-import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import { useHeadlessUiId } from '@lib/hooks';
-import { defaultItemEquality, findItemIndex } from '@lib/itemEquality';
-import { warn } from '@lib/warn';
+import { EMPTY_ARRAY } from '~@lib/constants';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useHeadlessUiId } from '~@lib/hooks';
+import { defaultItemEquality, findItemIndex } from '~@lib/itemEquality';
+import { warn } from '~@lib/warn';
 import {
     useClick,
     useDismiss,
@@ -25,10 +25,10 @@ import {
     useListNavigation,
     useRole,
     useTypeahead
-} from '@packages/floating-ui-react';
+} from '~@packages/floating-ui-react';
 
-import type { HeadlessUIChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import type { FloatingRootContext } from '@packages/floating-ui-react';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { FloatingRootContext } from '~@packages/floating-ui-react';
 
 import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
@@ -39,7 +39,7 @@ import { selectors } from '../store';
 import type { State } from '../store';
 
 import type { SelectRoot, SelectRootConditionalProps } from './SelectRoot';
-import type { TSelectRootContext } from './SelectRootContext';
+import type { SelectRootContextValue } from './SelectRootContext';
 
 export function useSelectRoot<Value, Multiple extends boolean | undefined>(
     params: useSelectRoot.Parameters<Value, Multiple>
@@ -514,7 +514,7 @@ export function useSelectRoot<Value, Multiple extends boolean | undefined>(
         isItemEqualToValue
     ]);
 
-    const rootContext: TSelectRootContext = React.useMemo(
+    const rootContext: SelectRootContextValue = React.useMemo(
         () => ({
             store,
             name,
@@ -587,7 +587,7 @@ export namespace useSelectRoot {
     export type Parameters<Value, Multiple extends boolean | undefined = false> = {} & Omit<SelectRootConditionalProps<Value, Multiple>, 'children' | 'inputRef'>;
 
     export type ReturnValue = {
-        rootContext: TSelectRootContext;
+        rootContext: SelectRootContextValue;
         floatingContext: FloatingRootContext;
         value: any;
     };

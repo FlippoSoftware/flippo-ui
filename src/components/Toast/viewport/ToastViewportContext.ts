@@ -1,10 +1,10 @@
 import React from 'react';
 
-export type TToastViewportContext = {
+export type ToastViewportContextValue = {
     viewportRef: React.RefObject<HTMLElement | null>;
 };
 
-export const ToastViewportContext = React.createContext<TToastViewportContext | undefined>(
+export const ToastViewportContext = React.createContext<ToastViewportContextValue | undefined>(
     undefined
 );
 

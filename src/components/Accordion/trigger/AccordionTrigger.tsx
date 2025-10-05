@@ -1,14 +1,11 @@
-'use client';
-
 import React from 'react';
 
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { triggerOpenStateMapping } from '~@lib/collapsibleOpenStateMapping';
+import { useRenderElement } from '~@lib/hooks';
+import { isElementDisabled } from '~@lib/isElementDisabled';
 
-import { triggerOpenStateMapping } from '@lib/collapsibleOpenStateMapping';
-import { useRenderElement } from '@lib/hooks';
-import { isElementDisabled } from '@lib/isElementDisabled';
-
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useCollapsibleRootContext } from '../../Collapsible/root/CollapsibleRootContext';
 import {

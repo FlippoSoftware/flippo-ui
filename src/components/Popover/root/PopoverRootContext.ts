@@ -1,23 +1,15 @@
-'use client';
-
 import React from 'react';
 
-import type { TInteraction, TransitionStatus } from '@flippo-ui/hooks';
+import type { Interaction, TransitionStatus } from '@flippo-ui/hooks/';
+import type { HTMLProps } from '~@lib/types';
+import type { FloatingRootContext } from '~@packages/floating-ui-react';
 
-import type { TBaseOpenChangeReason } from '@lib/translateOpenChangeReason';
-import type { HTMLProps } from '@lib/types';
-import type { FloatingRootContext } from '@packages/floating-ui-react';
+import type { PopoverRoot } from './PopoverRoot';
 
-export type PopoverOpenChangeReason = TBaseOpenChangeReason | 'close-press';
-
-export type TPopoverRootContext = {
+export type PopoverRootContextValue = {
     open: boolean;
     openOnHover: boolean;
-    setOpen: (
-        open: boolean,
-        event: Event | undefined,
-        reason: PopoverOpenChangeReason | undefined,
-    ) => void;
+    setOpen: (open: boolean, eventDetails: PopoverRoot.ChangeEventDetails) => void;
     triggerElement: Element | null;
     setTriggerElement: (el: Element | null) => void;
     positionerElement: HTMLElement | null;
@@ -38,16 +30,16 @@ export type TPopoverRootContext = {
     floatingRootContext: FloatingRootContext;
     triggerProps: HTMLProps;
     popupProps: HTMLProps;
-    openMethod: TInteraction | null;
-    openReason: PopoverOpenChangeReason | null;
+    openMethod: Interaction | null;
+    openReason: PopoverRoot.ChangeEventReason | null;
     onOpenChangeComplete: ((open: boolean) => void) | undefined;
     modal: boolean | 'trap-focus';
 };
 
-export const PopoverRootContext = React.createContext<TPopoverRootContext | undefined>(undefined);
+export const PopoverRootContext = React.createContext<PopoverRootContextValue | undefined>(undefined);
 
-export function usePopoverRootContext(optional?: false): TPopoverRootContext;
-export function usePopoverRootContext(optional: true): TPopoverRootContext | undefined;
+export function usePopoverRootContext(optional?: false): PopoverRootContextValue;
+export function usePopoverRootContext(optional: true): PopoverRootContextValue | undefined;
 export function usePopoverRootContext(optional?: boolean) {
     const context = React.use(PopoverRootContext);
     if (context === undefined && !optional) {

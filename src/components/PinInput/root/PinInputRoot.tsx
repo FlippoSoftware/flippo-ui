@@ -7,12 +7,12 @@ import {
     useMergedRef
 } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-import { visuallyHidden } from '@lib/visuallyHidden';
-import { contains } from '@packages/floating-ui-react/utils';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
+import { visuallyHidden } from '~@lib/visuallyHidden';
+import { contains } from '~@packages/floating-ui-react/utils';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { CompositeList } from '../../Composite';
 import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';

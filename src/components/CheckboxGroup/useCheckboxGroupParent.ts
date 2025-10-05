@@ -1,10 +1,9 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback } from '@flippo-ui/hooks';
+import { useHeadlessUiId } from '~@lib/hooks';
 
-import { useHeadlessUiId } from '@lib/hooks';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 
 const EMPTY: string[] = [];
 
@@ -30,7 +29,7 @@ export function useCheckboxGroupParent(
             indeterminate,
             checked,
             'aria-controls': allValues.map((v) => `${id}-${v}`).join(' '),
-            onCheckedChange(_, event) {
+            onCheckedChange(_, eventDetails) {
                 const uncontrolledState = uncontrolledStateRef.current;
 
                 // None except the disabled ones that are checked, which can't be changed.
@@ -51,24 +50,24 @@ export function useCheckboxGroupParent(
 
                 if (allOnOrOff) {
                     if (value.length === all.length) {
-                        onValueChange(none, event);
+                        onValueChange(none, eventDetails);
                     }
                     else {
-                        onValueChange(all, event);
+                        onValueChange(all, eventDetails);
                     }
                     return;
                 }
 
                 if (status === 'mixed') {
-                    onValueChange(all, event);
+                    onValueChange(all, eventDetails);
                     setStatus('on');
                 }
                 else if (status === 'on') {
-                    onValueChange(none, event);
+                    onValueChange(none, eventDetails);
                     setStatus('off');
                 }
                 else if (status === 'off') {
-                    onValueChange(uncontrolledState, event);
+                    onValueChange(uncontrolledState, eventDetails);
                     setStatus('mixed');
                 }
             }
@@ -126,7 +125,7 @@ export namespace useCheckboxGroupParent {
     export type Parameters = {
         allValues?: string[];
         value?: string[];
-        onValueChange?: (value: string[], event: Event) => void;
+        onValueChange?: (value: string[], eventDetails: HeadlessUIChangeEventDetails<'none'>) => void;
     };
 
     export type ReturnValue = {
@@ -138,13 +137,13 @@ export namespace useCheckboxGroupParent {
             'indeterminate': boolean;
             'checked': boolean;
             'aria-controls': string;
-            'onCheckedChange': (checked: boolean, event: Event) => void;
+            'onCheckedChange': (checked: boolean, eventDetails: HeadlessUIChangeEventDetails<'none'>) => void;
         };
         getChildProps: (name: string) => {
             name: string;
             id: string;
             checked: boolean;
-            onCheckedChange: (checked: boolean, event: Event) => void;
+            onCheckedChange: (checked: boolean, eventDetails: HeadlessUIChangeEventDetails<'none'>) => void;
         };
     };
 }

@@ -1,20 +1,17 @@
-'use client';
-
 import React from 'react';
 
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
+
 import type { TransitionStatus } from '@flippo-ui/hooks';
-
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
-
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useContextMenuRootContext } from '../../ContextMenu/root/ContextMenuRootContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
 
-const customStyleHookMapping: CustomStyleHookMapping<MenuBackdrop.State> = {
+const customStyleHookMapping: StateAttributesMapping<MenuBackdrop.State> = {
     ...popupStateMapping,
     ...transitionStatusMapping
 };

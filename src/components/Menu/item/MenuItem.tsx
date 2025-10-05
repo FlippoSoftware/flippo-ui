@@ -1,14 +1,11 @@
-'use client';
-
 import React from 'react';
 
 import { useMergedRef } from '@flippo-ui/hooks';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { useFloatingTree } from '~@packages/floating-ui-react';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { useFloatingTree } from '@packages/floating-ui-react';
-
-import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '@lib/types';
-import type { FloatingEvents } from '@packages/floating-ui-react';
+import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '~@lib/types';
+import type { FloatingEvents } from '~@packages/floating-ui-react';
 
 import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
 import { useMenuPositionerContext } from '../positioner/MenuPositionerContext';
@@ -105,16 +102,16 @@ export function MenuItem(props: MenuItem.Props) {
 
     return (
         <InnerMenuItem
-          {...other}
-          id={id}
-          ref={mergedRef}
-          highlighted={highlighted}
-          menuEvents={menuEvents}
-          itemProps={itemProps}
-          allowMouseUpTriggerRef={allowMouseUpTriggerRef}
-          typingRef={typingRef}
-          nativeButton={nativeButton}
-          nodeId={menuPositionerContext?.floatingContext.nodeId}
+            {...other}
+            id={id}
+            ref={mergedRef}
+            highlighted={highlighted}
+            menuEvents={menuEvents}
+            itemProps={itemProps}
+            allowMouseUpTriggerRef={allowMouseUpTriggerRef}
+            typingRef={typingRef}
+            nativeButton={nativeButton}
+            nodeId={menuPositionerContext?.floatingContext.nodeId}
         />
     );
 }

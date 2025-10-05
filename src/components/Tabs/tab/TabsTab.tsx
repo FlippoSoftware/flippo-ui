@@ -1,13 +1,12 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { ownerDocument } from '~@lib/owner';
+import { activeElement, contains } from '~@packages/floating-ui-react/utils';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { ownerDocument } from '@lib/owner';
-
-import type { HeadlessUIComponentProps, NativeButtonProps, Orientation } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps, Orientation } from '~@lib/types';
 
 import { ACTIVE_COMPOSITE_ITEM } from '../../Composite/constants';
 import { useCompositeItem } from '../../Composite/item/useCompositeItem';
@@ -45,7 +44,8 @@ export function TabsTab(componentProps: TabsTab.Props) {
         activateOnFocus,
         highlightedTabIndex,
         onTabActivation,
-        setHighlightedTabIndex
+        setHighlightedTabIndex,
+        tabsListRef
     } = useTabsListContext();
 
     const id = useHeadlessUiId(idProp);
@@ -85,15 +85,27 @@ export function TabsTab(componentProps: TabsTab.Props) {
             return;
         }
 
-        if (selected && index > -1 && highlightedTabIndex !== index) {
-            setHighlightedTabIndex(index);
+        if (!(selected && index > -1 && highlightedTabIndex !== index)) {
+            return;
         }
+
+        // If focus is currently within the tabs list, don't override the roving
+        // focus highlight. This keeps keyboard navigation relative to the focused
+        // item after an external/asynchronous selection change.
+        const listElement = tabsListRef.current;
+        const activeEl = activeElement(ownerDocument(listElement));
+        if (listElement && activeEl && contains(listElement, activeEl)) {
+            return;
+        }
+
+        setHighlightedTabIndex(index);
     }, [
         selected,
         index,
         highlightedTabIndex,
         setHighlightedTabIndex,
-        disabled
+        disabled,
+        tabsListRef
     ]);
 
     const { getButtonProps, buttonRef } = useButton({
@@ -112,7 +124,10 @@ export function TabsTab(componentProps: TabsTab.Props) {
             return;
         }
 
-        onTabActivation(tabValue, event.nativeEvent);
+        onTabActivation(
+            tabValue,
+            createChangeEventDetails('none', event.nativeEvent, { activationDirection: 'none' })
+        );
     });
 
     const onFocus = useEventCallback((event: React.FocusEvent<HTMLButtonElement>) => {
@@ -129,10 +144,13 @@ export function TabsTab(componentProps: TabsTab.Props) {
         }
 
         if (
-            (activateOnFocus && !isPressingRef.current) // keyboard focus
-            || (isPressingRef.current && isMainButtonRef.current) // focus caused by pointerdown
+            (activateOnFocus && !isPressingRef.current) // keyboard or touch focus
+            || (isPressingRef.current && isMainButtonRef.current) // mouse focus
         ) {
-            onTabActivation(tabValue, event.nativeEvent);
+            onTabActivation(
+                tabValue,
+                createChangeEventDetails('none', event.nativeEvent, { activationDirection: 'none' })
+            );
         }
     });
 

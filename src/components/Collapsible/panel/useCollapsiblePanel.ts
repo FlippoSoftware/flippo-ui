@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -9,10 +7,12 @@ import {
     useMergedRef,
     useOnMount
 } from '@flippo-ui/hooks';
-import { warn } from '@lib/warn';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { warn } from '~@lib/warn';
 
-import type { HTMLProps } from '@lib/types';
+import type { HTMLProps } from '~@lib/types';
 
+import type { CollapsibleRoot } from '../root/CollapsibleRoot';
 import type { AnimationType, Dimensions } from '../root/useCollapsibleRoot';
 
 import { CollapsiblePanelDataAttributes } from './CollapsiblePanelDataAttributes';
@@ -379,10 +379,10 @@ export function useCollapsiblePanel(
                 return undefined;
             }
 
-            function handleBeforeMatch() {
+            function handleBeforeMatch(event: Event) {
                 isBeforeMatchRef.current = true;
                 setOpen(true);
-                onOpenChange(true);
+                onOpenChange(true, createChangeEventDetails('none', event));
             }
 
             panel.addEventListener('beforematch', handleBeforeMatch);
@@ -435,7 +435,7 @@ export namespace useCollapsiblePanel {
          * Whether the collapsible panel is currently mounted.
          */
         mounted: boolean;
-        onOpenChange: (open: boolean) => void;
+        onOpenChange: (open: boolean, eventDetails: CollapsibleRoot.ChangeEventDetails) => void;
         /**
          * Whether the collapsible panel is currently open.
          */

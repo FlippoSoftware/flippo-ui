@@ -5,9 +5,11 @@ import ReactDOM from 'react-dom';
 
 import { useId, useIsoLayoutEffect } from '@flippo-ui/hooks';
 import { isNode } from '@floating-ui/utils/dom';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { FocusGuard } from '~@lib/FocusGuard';
+import { visuallyHidden } from '~@lib/visuallyHidden';
 
-import { FocusGuard } from '@lib/FocusGuard';
-import { visuallyHidden } from '@lib/visuallyHidden';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 
 import {
     disableFocusInside,
@@ -18,12 +20,10 @@ import {
 } from '../utils';
 import { createAttribute } from '../utils/createAttribute';
 
-import type { OpenChangeReason } from '../types';
-
 type FocusManagerState = {
     modal: boolean;
     open: boolean;
-    onOpenChange: (open: boolean, event?: Event, reason?: OpenChangeReason) => void;
+    onOpenChange: (open: boolean, data?: HeadlessUIChangeEventDetails<string>) => void;
     domReference: Element | null;
     closeOnFocusOut: boolean;
 } | null;
@@ -237,7 +237,7 @@ export function FloatingPortal(props: FloatingPortalProps): React.JSX.Element {
 
     return (
         <PortalContext
-            value={React.useMemo(
+          value={React.useMemo(
                 () => ({
                     preserveTabOrder,
                     beforeOutsideRef,
@@ -252,9 +252,9 @@ export function FloatingPortal(props: FloatingPortalProps): React.JSX.Element {
         >
             {shouldRenderGuards && portalNode && (
                 <FocusGuard
-                    data-type={'outside'}
-                    ref={beforeOutsideRef}
-                    onFocus={(event) => {
+                  data-type={'outside'}
+                  ref={beforeOutsideRef}
+                  onFocus={(event) => {
                         if (isOutsideEvent(event, portalNode)) {
                             beforeInsideRef.current?.focus();
                         }
@@ -272,9 +272,9 @@ export function FloatingPortal(props: FloatingPortalProps): React.JSX.Element {
             {portalNode && ReactDOM.createPortal(children, portalNode)}
             {shouldRenderGuards && portalNode && (
                 <FocusGuard
-                    data-type={'outside'}
-                    ref={afterOutsideRef}
-                    onFocus={(event) => {
+                  data-type={'outside'}
+                  ref={afterOutsideRef}
+                  onFocus={(event) => {
                         if (isOutsideEvent(event, portalNode)) {
                             afterInsideRef.current?.focus();
                         }
@@ -284,7 +284,10 @@ export function FloatingPortal(props: FloatingPortalProps): React.JSX.Element {
                             nextTabbable?.focus();
 
                             if (focusManagerState?.closeOnFocusOut) {
-                                focusManagerState?.onOpenChange(false, event.nativeEvent, 'focus-out');
+                                focusManagerState?.onOpenChange(
+                                    false,
+                                    createChangeEventDetails('focus-out', event.nativeEvent)
+                                );
                             }
                         }
                     }}

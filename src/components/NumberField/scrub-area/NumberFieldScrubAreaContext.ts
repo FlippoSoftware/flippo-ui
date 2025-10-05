@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type TNumberFieldScrubAreaContext = {
+export type NumberFieldScrubAreaContextValue = {
     isScrubbing: boolean;
     isTouchInput: boolean;
     isPointerLockDenied: boolean;
@@ -12,7 +12,7 @@ export type TNumberFieldScrubAreaContext = {
 };
 
 export const NumberFieldScrubAreaContext = React.createContext<
-  TNumberFieldScrubAreaContext | undefined
+    NumberFieldScrubAreaContextValue | undefined
 >(undefined);
 
 export function useNumberFieldScrubAreaContext() {

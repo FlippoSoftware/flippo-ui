@@ -1,12 +1,12 @@
-'use client';
+
 
 import type React from 'react';
 
-import { EMPTY_ARRAY, EMPTY_OBJECT } from '@lib/constants';
-import { useRenderElement } from '@lib/hooks';
+import { EMPTY_ARRAY, EMPTY_OBJECT } from '~@lib/constants';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCompositeItem } from './useCompositeItem';
 

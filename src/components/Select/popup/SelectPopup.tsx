@@ -9,21 +9,21 @@ import {
     useStore,
     useTimeout
 } from '@flippo-ui/hooks';
-import { DISABLED_TRANSITIONS_STYLE } from '@lib/constants';
-import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import { isWebKit } from '@lib/detectBrowser';
-import { useRenderElement } from '@lib/hooks';
-import { isMouseWithinBounds } from '@lib/isMouseWithinBounds';
-import { ownerDocument, ownerWindow } from '@lib/owner';
-import { popupStateMapping } from '@lib/popupStateMapping';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
-import { styleDisableScrollbar } from '@lib/styles';
-import { FloatingFocusManager } from '@packages/floating-ui-react';
+import { DISABLED_TRANSITIONS_STYLE } from '~@lib/constants';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { isWebKit } from '~@lib/detectBrowser';
+import { useRenderElement } from '~@lib/hooks';
+import { isMouseWithinBounds } from '~@lib/isMouseWithinBounds';
+import { ownerDocument, ownerWindow } from '~@lib/owner';
+import { popupStateMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
+import { styleDisableScrollbar } from '~@lib/styles';
+import { FloatingFocusManager } from '~@packages/floating-ui-react';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { StateAttributesMapping } from '@lib/getStyleHookProps';
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { COMPOSITE_KEYS } from '../../Composite/composite';
 import { useToolbarRootContext } from '../../Toolbar/root/ToolbarRootContext';
@@ -459,8 +459,8 @@ export namespace SelectPopup {
     } & HeadlessUIComponentProps<'div', State>;
 
     export type State = {
-        side: TSide | 'none';
-        align: TAlign;
+        side: Side | 'none';
+        align: Align;
         open: boolean;
         transitionStatus: TransitionStatus;
     };

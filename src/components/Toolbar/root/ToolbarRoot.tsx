@@ -1,8 +1,6 @@
-'use client';
-
 import React from 'react';
 
-import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '~@lib/types';
 
 import { CompositeRoot } from '../../Composite/root/CompositeRoot';
 
@@ -10,7 +8,7 @@ import type { CompositeMetadata } from '../../Composite/list/CompositeList';
 
 import { ToolbarRootContext } from './ToolbarRootContext';
 
-import type { TToolbarRootContext } from './ToolbarRootContext';
+import type { ToolbarRootContextValue } from './ToolbarRootContext';
 
 /**
  * A container for grouping a set of controls, such as buttons, toggle groups, or menus.
@@ -44,7 +42,7 @@ export function ToolbarRoot(componentProps: ToolbarRoot.Props) {
         return output;
     }, [itemMap]);
 
-    const toolbarRootContext: TToolbarRootContext = React.useMemo(
+    const toolbarRootContext: ToolbarRootContextValue = React.useMemo(
         () => ({
             disabled,
             orientation,
@@ -63,16 +61,16 @@ export function ToolbarRoot(componentProps: ToolbarRoot.Props) {
     return (
         <ToolbarRootContext value={toolbarRootContext}>
             <CompositeRoot
-                render={render}
-                className={className}
-                state={state}
-                refs={[ref]}
-                props={[defaultProps, elementProps]}
-                cols={cols}
-                disabledIndices={disabledIndices}
-                loop={loop}
-                onMapChange={setItemMap}
-                orientation={orientation}
+              render={render}
+              className={className}
+              state={state}
+              refs={[ref]}
+              props={[defaultProps, elementProps]}
+              cols={cols}
+              disabledIndices={disabledIndices}
+              loop={loop}
+              onMapChange={setItemMap}
+              orientation={orientation}
             />
         </ToolbarRootContext>
     );

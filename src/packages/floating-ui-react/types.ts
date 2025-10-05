@@ -5,7 +5,7 @@ import type {
     UseFloatingOptions as UsePositionOptions,
     VirtualElement
 } from '@floating-ui/react-dom';
-import type { HeadlessUIChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 
 import type { ExtendedUserProps } from './hooks/useInteractions';
 
@@ -15,7 +15,7 @@ export type { FloatingFocusManagerProps } from './components/FloatingFocusManage
 export type { FloatingPortalProps, UseFloatingPortalNodeProps } from './components/FloatingPortal';
 export type { FloatingNodeProps, FloatingTreeProps } from './components/FloatingTree';
 export type { UseClientPointProps } from './hooks/useClientPoint';
-export type { PressType, UseDismissProps } from './hooks/useDismiss';
+export type { UseDismissProps } from './hooks/useDismiss';
 export type { UseFloatingRootContextOptions } from './hooks/useFloatingRootContext';
 export type { UseFocusProps } from './hooks/useFocus';
 export type { HandleClose, HandleCloseContext, UseHoverProps } from './hooks/useHover';
@@ -133,7 +133,7 @@ export type ContextData = {
 };
 
 export type FloatingRootContext<RT extends ReferenceType = ReferenceType> = {
-    dataRef: React.MutableRefObject<ContextData>;
+    dataRef: React.RefObject<ContextData>;
     open: boolean;
     onOpenChange: (open: boolean, eventDetails: HeadlessUIChangeEventDetails<string>) => void;
     elements: {
@@ -220,7 +220,7 @@ export type UseFloatingOptions<RT extends ReferenceType = ReferenceType> = {
      * An event callback that is invoked when the floating element is opened or
      * closed.
      */
-    onOpenChange?: (open: boolean, event?: Event, reason?: OpenChangeReason) => void;
+    onOpenChange?: (open: boolean, eventDetails: HeadlessUIChangeEventDetails<string>) => void;
     /**
      * Unique node id when using `FloatingTree`.
      */

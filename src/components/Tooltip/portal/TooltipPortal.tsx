@@ -1,8 +1,6 @@
-'use client';
-
 import React from 'react';
 
-import { FloatingPortalLite } from '@lib/FloatingPortalLite';
+import { FloatingPortalLite } from '~@lib/FloatingPortalLite';
 
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 

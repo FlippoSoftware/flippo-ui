@@ -1,14 +1,13 @@
-'use client';
-import * as React from 'react';
+import React from 'react';
 
-import type { TTextDirection } from '@lib/hooks';
-import type { Orientation } from '@lib/types';
+import type { TextDirection } from '~@lib/hooks';
+import type { Orientation } from '~@lib/types';
 
 import type { AccordionRoot, AccordionValue } from './AccordionRoot';
 
-export type TAccordionRootContext = {
+export type AccordionRootContextValue = {
     accordionItemRefs: React.RefObject<(HTMLElement | null)[]>;
-    direction: TTextDirection;
+    direction: TextDirection;
     disabled: boolean;
     handleValueChange: (newValue: number | string, nextOpen: boolean) => void;
     hiddenUntilFound: boolean;
@@ -19,7 +18,7 @@ export type TAccordionRootContext = {
     value: AccordionValue;
 };
 
-export const AccordionRootContext = React.createContext<TAccordionRootContext | undefined>(
+export const AccordionRootContext = React.createContext<AccordionRootContextValue | undefined>(
     undefined
 );
 

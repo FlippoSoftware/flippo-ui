@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 export const TooltipPortalContext = React.createContext<boolean | undefined>(undefined);

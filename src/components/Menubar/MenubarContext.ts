@@ -1,11 +1,10 @@
-'use client';
-
 import React from 'react';
 
 import type { MenuRoot } from '../Menu/root/MenuRoot';
 
-export type TMenubarContext = {
+export type MenubarContextValue = {
     modal: boolean;
+    disabled?: boolean;
     contentElement: HTMLElement | null;
     setContentElement: (element: HTMLElement | null) => void;
     hasSubmenuOpen: boolean;
@@ -15,13 +14,12 @@ export type TMenubarContext = {
     rootId: string | undefined;
 };
 
-export const MenubarContext = React.createContext<TMenubarContext | null>(null);
+export const MenubarContext = React.createContext<MenubarContextValue | null>(null);
 
-export function useMenubarContext(optional?: false): TMenubarContext;
-export function useMenubarContext(optional: true): TMenubarContext | null;
+export function useMenubarContext(optional?: false): MenubarContextValue;
+export function useMenubarContext(optional: true): MenubarContextValue | null;
 export function useMenubarContext(optional?: boolean) {
     const context = React.use(MenubarContext);
-
     if (context === null && !optional) {
         throw new Error(
             'Headless UI: MenubarContext is missing. Menubar parts must be placed within <Menubar>.'

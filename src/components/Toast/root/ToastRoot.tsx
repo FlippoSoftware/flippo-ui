@@ -1,17 +1,17 @@
-'use client';
+
 import React from 'react';
 
 import { useOpenChangeComplete } from '@flippo-ui/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
-import { useRenderElement } from '@lib/hooks';
-import { ownerDocument } from '@lib/owner';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
-import { activeElement, contains, getTarget } from '@packages/floating-ui-react/utils';
+import { useRenderElement } from '~@lib/hooks';
+import { ownerDocument } from '~@lib/owner';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
+import { activeElement, contains, getTarget } from '~@packages/floating-ui-react/utils';
 
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { useToastContext } from '../provider/ToastProviderContext';
 

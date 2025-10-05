@@ -1,4 +1,4 @@
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
+import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
 
 import { ProgressRootDataAttributes } from './ProgressRootDataAttributes';
 

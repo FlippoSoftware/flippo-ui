@@ -10,6 +10,7 @@ import {
     isLastTraversableNode,
     isWebKit
 } from '@floating-ui/utils/dom';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 
 import { useFloatingTree } from '../components/FloatingTree';
 import {
@@ -25,7 +26,7 @@ import { createAttribute } from '../utils/createAttribute';
 
 import type { ElementProps, FloatingRootContext } from '../types';
 
-export type PressType = 'intentional' | 'sloppy';
+type PressType = 'intentional' | 'sloppy';
 
 const bubbleHandlerKeys = {
     intentional: 'onClick',
@@ -37,9 +38,9 @@ export function normalizeProp(
 ) {
     return {
         escapeKey:
-      typeof normalizable === 'boolean' ? normalizable : (normalizable?.escapeKey ?? false),
+            typeof normalizable === 'boolean' ? normalizable : (normalizable?.escapeKey ?? false),
         outsidePress:
-      typeof normalizable === 'boolean' ? normalizable : (normalizable?.outsidePress ?? true)
+            typeof normalizable === 'boolean' ? normalizable : (normalizable?.outsidePress ?? true)
     };
 }
 
@@ -86,9 +87,9 @@ export type UseDismissProps = {
     /**
      * The type of event to use to determine an outside "press".
      * - `intentional` requires the user to click outside intentionally, firing on `pointerup` for mouse,
-     *   and requiring minimal `touchmove`s for touch.
+     *    and requiring minimal `touchmove`s for touch.
      * - `sloppy` fires on `pointerdown` for mouse, while for touch it fires on `touchend` (within 1 second)
-     *   or while scrolling away after `touchstart`.
+     *    or while scrolling away after `touchstart`.
      */
     outsidePressEvent?:
       | PressType
@@ -178,7 +179,7 @@ export function useDismiss(
         const computedType = type === 'pen' || !type ? 'mouse' : type;
 
         const resolved
-      = typeof outsidePressEvent === 'function' ? outsidePressEvent() : outsidePressEvent;
+            = typeof outsidePressEvent === 'function' ? outsidePressEvent() : outsidePressEvent;
 
         if (typeof resolved === 'string') {
             return resolved;
@@ -204,8 +205,6 @@ export function useDismiss(
             const children = tree ? getNodeChildren(tree.nodesRef.current, nodeId) : [];
 
             if (!escapeKeyBubbles) {
-                event.stopPropagation();
-
                 if (children.length > 0) {
                     let shouldDismiss = true;
 
@@ -221,7 +220,14 @@ export function useDismiss(
                 }
             }
 
-            onOpenChange(false, isReactEvent(event) ? event.nativeEvent : event, 'escape-key');
+            const native = isReactEvent(event) ? event.nativeEvent : event;
+            const eventDetails = createChangeEventDetails('escape-key', native);
+
+            onOpenChange(false, eventDetails);
+
+            if (!escapeKeyBubbles && !eventDetails.isPropagationAllowed) {
+                event.stopPropagation();
+            }
         }
     );
 
@@ -302,9 +308,9 @@ export function useDismiss(
                 const isScrollableY = lastTraversableNode || scrollRe.test(style.overflowY);
 
                 const canScrollX
-          = isScrollableX && target.clientWidth > 0 && target.scrollWidth > target.clientWidth;
+                    = isScrollableX && target.clientWidth > 0 && target.scrollWidth > target.clientWidth;
                 const canScrollY
-          = isScrollableY && target.clientHeight > 0 && target.scrollHeight > target.clientHeight;
+                    = isScrollableY && target.clientHeight > 0 && target.scrollHeight > target.clientHeight;
 
                 const isRTL = style.direction === 'rtl';
 
@@ -314,10 +320,10 @@ export function useDismiss(
                 // check for. Plus, for modal dialogs with backdrops, it is more
                 // important that the backdrop is checked but not so much the window.
                 const pressedVerticalScrollbar
-          = canScrollY
-            && (isRTL
-                ? event.offsetX <= target.offsetWidth - target.clientWidth
-                : event.offsetX > target.clientWidth);
+                    = canScrollY
+                      && (isRTL
+                          ? event.offsetX <= target.offsetWidth - target.clientWidth
+                          : event.offsetX > target.clientWidth);
 
                 const pressedHorizontalScrollbar = canScrollX && event.offsetY > target.clientHeight;
 
@@ -329,10 +335,10 @@ export function useDismiss(
             const nodeId = dataRef.current.floatingContext?.nodeId;
 
             const targetIsInsideChildren
-        = tree
-          && getNodeChildren(tree.nodesRef.current, nodeId).some((node) =>
-              isEventTargetWithin(event, node.context?.elements.floating)
-          );
+                = tree
+                  && getNodeChildren(tree.nodesRef.current, nodeId).some((node) =>
+                      isEventTargetWithin(event, node.context?.elements.floating)
+                  );
 
             if (
                 isEventTargetWithin(event, elements.floating)
@@ -357,7 +363,7 @@ export function useDismiss(
                 }
             }
 
-            onOpenChange(false, event, 'outside-press');
+            onOpenChange(false, createChangeEventDetails('outside-press', event));
         }
     );
 
@@ -394,10 +400,10 @@ export function useDismiss(
     });
 
     const closeOnPressOutsideCapture = useEventCallback((event: PointerEvent | MouseEvent) => {
-    // When click outside is lazy (`up` event), handle dragging.
-    // Don't close if:
-    // - The click started inside the floating element.
-    // - The click ended inside the floating element.
+        // When click outside is lazy (`up` event), handle dragging.
+        // Don't close if:
+        // - The click started inside the floating element.
+        // - The click ended inside the floating element.
         const endedOrStartedInside = endedOrStartedInsideRef.current;
         endedOrStartedInsideRef.current = false;
 
@@ -483,7 +489,7 @@ export function useDismiss(
         const compositionTimeout = new Timeout();
 
         function onScroll(event: Event) {
-            onOpenChange(false, event, 'ancestor-scroll');
+            onOpenChange(false, createChangeEventDetails('none', event));
         }
 
         function handleCompositionStart() {
@@ -629,11 +635,11 @@ export function useDismiss(
             onKeyDown: closeOnEscapeKeyDown,
             ...(referencePress && {
                 [bubbleHandlerKeys[referencePressEvent]]: (event: React.SyntheticEvent) => {
-                    onOpenChange(false, event.nativeEvent, 'reference-press');
+                    onOpenChange(false, createChangeEventDetails('trigger-press', event.nativeEvent as any));
                 },
                 ...(referencePressEvent !== 'intentional' && {
                     onClick(event) {
-                        onOpenChange(false, event.nativeEvent, 'reference-press');
+                        onOpenChange(false, createChangeEventDetails('trigger-press', event.nativeEvent));
                     }
                 })
             })

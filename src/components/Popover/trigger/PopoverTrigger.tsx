@@ -1,15 +1,14 @@
-'use client';
 import * as React from 'react';
 
-import { CLICK_TRIGGER_IDENTIFIER } from '@lib/constants';
-import { useRenderElement } from '@lib/hooks';
+import { CLICK_TRIGGER_IDENTIFIER } from '~@lib/constants';
+import { useRenderElement } from '~@lib/hooks';
 import {
     pressableTriggerOpenStateMapping,
     triggerOpenStateMapping
-} from '@lib/popupStateMapping';
+} from '~@lib/popupStateMapping';
 
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useButton } from '../../use-button/useButton';
 import { usePopoverRootContext } from '../root/PopoverRootContext';
@@ -52,7 +51,7 @@ export function PopoverTrigger(componentProps: PopoverTrigger.Props) {
         native: nativeButton
     });
 
-    const customStyleHookMapping: CustomStyleHookMapping<{ open: boolean }> = React.useMemo(
+    const customStyleHookMapping: StateAttributesMapping<{ open: boolean }> = React.useMemo(
         () => ({
             open(value) {
                 if (value && openReason === 'trigger-press') {

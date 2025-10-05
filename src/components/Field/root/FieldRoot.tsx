@@ -1,12 +1,9 @@
-'use client';
-
 import React from 'react';
 
 import { useEventCallback } from '@flippo-ui/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import { useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useFieldsetRootContext } from '../../Fieldset/root/FieldsetRootContext';
 import { useFormContext } from '../../Form/FormContext';
@@ -14,7 +11,7 @@ import { DEFAULT_VALIDITY_STATE, fieldValidityMapping } from '../utils/constants
 
 import { FieldRootContext } from './FieldRootContext';
 
-import type { TFieldRootContext } from './FieldRootContext';
+import type { FieldRootContextValue } from './FieldRootContext';
 
 /**
  * Groups all parts of the field.
@@ -97,7 +94,7 @@ export function FieldRoot(componentProps: FieldRoot.Props) {
         ]
     );
 
-    const contextValue: TFieldRootContext = React.useMemo(
+    const contextValue: FieldRootContextValue = React.useMemo(
         () => ({
             invalid,
             controlId,

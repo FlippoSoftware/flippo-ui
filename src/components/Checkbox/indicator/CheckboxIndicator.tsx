@@ -1,4 +1,4 @@
-'use client';
+
 
 import React from 'react';
 
@@ -6,11 +6,11 @@ import { useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
-import { useRenderElement } from '@lib/hooks';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
+import { useRenderElement } from '~@lib/hooks';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { fieldValidityMapping } from '../../Field/utils/constants';
 import { useCheckboxRootContext } from '../root/CheckboxRootContext';

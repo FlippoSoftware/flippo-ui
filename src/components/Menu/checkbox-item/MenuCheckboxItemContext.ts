@@ -1,12 +1,12 @@
 import React from 'react';
 
-export type TMenuCheckboxItemContext = {
+export type MenuCheckboxItemContextValue = {
     checked: boolean;
     highlighted: boolean;
     disabled: boolean;
 };
 
-export const MenuCheckboxItemContext = React.createContext<TMenuCheckboxItemContext | undefined>(
+export const MenuCheckboxItemContext = React.createContext<MenuCheckboxItemContextValue | undefined>(
     undefined
 );
 

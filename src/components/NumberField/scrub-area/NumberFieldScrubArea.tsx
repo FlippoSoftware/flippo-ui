@@ -1,15 +1,13 @@
-'use client';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { useEventCallback, useLatestRef } from '@flippo-ui/hooks';
+import { createGenericEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { isWebKit } from '~@lib/detectBrowser';
+import { useRenderElement } from '~@lib/hooks';
+import { ownerDocument, ownerWindow } from '~@lib/owner';
 
-import { isWebKit } from '@lib/detectBrowser';
-import { useRenderElement } from '@lib/hooks';
-import { ownerDocument, ownerWindow } from '@lib/owner';
-
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
 import { DEFAULT_STEP } from '../utils/constants';
@@ -21,7 +19,7 @@ import type { NumberFieldRoot } from '../root/NumberFieldRoot';
 
 import { NumberFieldScrubAreaContext } from './NumberFieldScrubAreaContext';
 
-import type { TNumberFieldScrubAreaContext } from './NumberFieldScrubAreaContext';
+import type { NumberFieldScrubAreaContextValue } from './NumberFieldScrubAreaContext';
 
 /**
  * An interactive area where the user can click and drag to change the field value.
@@ -52,7 +50,10 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
         value,
         inputRef,
         incrementValue,
-        getStepAmount
+        getStepAmount,
+        onValueCommitted,
+        lastChangedValueRef,
+        valueRef
     } = useNumberFieldRootContext();
 
     const latestValueRef = useLatestRef(value);
@@ -147,7 +148,8 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
 
     React.useEffect(
         () => {
-            if (!inputRef.current || disabled || readOnly) {
+            // Only listen while actively scrubbing; avoids unrelated pointerup events committing.
+            if (!inputRef.current || disabled || readOnly || !isScrubbing) {
                 return undefined;
             }
 
@@ -164,6 +166,10 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
                 finally {
                     isScrubbingRef.current = false;
                     onScrubbingChange(false, event);
+                    onValueCommitted(
+                        lastChangedValueRef.current ?? valueRef.current,
+                        createGenericEventDetails('none', event)
+                    );
                 }
             }
 
@@ -201,6 +207,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
         [
             disabled,
             readOnly,
+            isScrubbing,
             incrementValue,
             latestValueRef,
             getStepAmount,
@@ -208,7 +215,10 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
             onScrubbingChange,
             onScrub,
             direction,
-            pixelSensitivity
+            pixelSensitivity,
+            lastChangedValueRef,
+            onValueCommitted,
+            valueRef
         ]
     );
 
@@ -268,13 +278,15 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
                     await ownerDocument(scrubAreaRef.current).body.requestPointerLock();
                     setIsPointerLockDenied(false);
                 }
-                catch (_error) {
+                catch (error) {
                     setIsPointerLockDenied(true);
                 }
                 finally {
-                    ReactDOM.flushSync(() => {
-                        onScrubbingChange(true, event.nativeEvent);
-                    });
+                    if (isScrubbingRef.current) {
+                        ReactDOM.flushSync(() => {
+                            onScrubbingChange(true, event.nativeEvent);
+                        });
+                    }
                 }
             }
         }
@@ -287,7 +299,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
         customStyleHookMapping: styleHookMapping
     });
 
-    const contextValue: TNumberFieldScrubAreaContext = React.useMemo(
+    const contextValue: NumberFieldScrubAreaContextValue = React.useMemo(
         () => ({
             isScrubbing,
             isTouchInput,
@@ -309,9 +321,9 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
     );
 
     return (
-        <NumberFieldScrubAreaContext value={contextValue}>
+        <NumberFieldScrubAreaContext.Provider value={contextValue}>
             {element}
-        </NumberFieldScrubAreaContext>
+        </NumberFieldScrubAreaContext.Provider>
     );
 }
 

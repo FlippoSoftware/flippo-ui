@@ -1,10 +1,10 @@
-'use client';
+
 
 import type React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps, Orientation } from '@lib/types';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
 import { useSliderRootContext } from '../root/SliderRootContext';
 import { sliderStyleHookMapping } from '../root/styleHooks';

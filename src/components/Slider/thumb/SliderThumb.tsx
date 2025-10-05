@@ -1,16 +1,16 @@
-'use client';
+
 
 import React from 'react';
 
 import { useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
-import { formatNumber } from '@lib/formatNumber';
-import { getStyleHookProps } from '@lib/getStyleHookProps';
-import { useDirection, useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-import { resolveClassName } from '@lib/resolveClassName';
-import { visuallyHidden } from '@lib/visuallyHidden';
+import { formatNumber } from '~@lib/formatNumber';
+import { getStyleHookProps } from '~@lib/getStyleHookProps';
+import { useDirection, useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
+import { resolveClassName } from '~@lib/resolveClassName';
+import { visuallyHidden } from '~@lib/visuallyHidden';
 
-import type { HeadlessUIComponentProps, HeadlessUIEvent, Orientation } from '@lib/types';
+import type { HeadlessUIComponentProps, HeadlessUIEvent, Orientation } from '~@lib/types';
 
 import {
     ARROW_DOWN,

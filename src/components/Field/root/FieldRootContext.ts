@@ -1,14 +1,12 @@
-'use client';
-
 import React from 'react';
 
-import { NOOP } from '@lib/noop';
+import { NOOP } from '~@lib/noop';
 
 import { DEFAULT_VALIDITY_STATE } from '../utils/constants';
 
 import type { FieldRoot, FieldValidityData } from './FieldRoot';
 
-export type TFieldRootContext = {
+export type FieldRootContextValue = {
     invalid: boolean | undefined;
     /**
      * The `id` of the labelable element that corresponds to the `for` attribute of a `Field.Label`.
@@ -42,7 +40,7 @@ export type TFieldRootContext = {
     markedDirtyRef: React.MutableRefObject<boolean>;
 };
 
-export const FieldRootContext = React.createContext<TFieldRootContext>({
+export const FieldRootContext = React.createContext<FieldRootContextValue>({
     invalid: undefined,
     controlId: undefined,
     setControlId: NOOP,

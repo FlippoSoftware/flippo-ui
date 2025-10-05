@@ -1,17 +1,17 @@
-'use client';
+
 
 import React from 'react';
 
 import { useAnimationFrame, useEventCallback } from '@flippo-ui/hooks';
 import { isElement } from '@floating-ui/utils/dom';
-import { clamp } from '@lib/clamp';
-import { createChangeEventDetails } from '@lib/createHeadlessUIEventDetails';
-import { useDirection, useRenderElement } from '@lib/hooks';
-import { ownerDocument } from '@lib/owner';
-import { activeElement, contains } from '@packages/floating-ui-react/utils';
+import { clamp } from '~@lib/clamp';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useDirection, useRenderElement } from '~@lib/hooks';
+import { ownerDocument } from '~@lib/owner';
+import { activeElement, contains } from '~@packages/floating-ui-react/utils';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
-import type { Coords } from '@packages/floating-ui-react';
+import type { HeadlessUIComponentProps } from '~@lib/types';
+import type { Coords } from '~@packages/floating-ui-react';
 
 import { useSliderRootContext } from '../root/SliderRootContext';
 import { sliderStyleHookMapping } from '../root/styleHooks';

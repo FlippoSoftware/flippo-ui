@@ -1,27 +1,26 @@
-'use client';
-
 import React from 'react';
 
 import { useOpenChangeComplete } from '@flippo-ui/hooks';
+import { DISABLED_TRANSITIONS_STYLE, EMPTY_OBJECT } from '~@lib/constants';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
+import { FloatingFocusManager, useFloatingTree } from '~@packages/floating-ui-react';
 
-import type { TransitionStatus } from '@flippo-ui/hooks';
+import type { Interaction, TransitionStatus } from '@flippo-ui/hooks';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { DISABLED_TRANSITIONS_STYLE, EMPTY_OBJECT } from '@lib/constants';
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
-import { FloatingFocusManager, useFloatingTree } from '@packages/floating-ui-react';
-
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
-
+import { COMPOSITE_KEYS } from '../../Composite/composite';
+import { useToolbarRootContext } from '../../Toolbar/root/ToolbarRootContext';
 import { useMenuPositionerContext } from '../positioner/MenuPositionerContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
 
 import type { MenuRoot } from '../root/MenuRoot';
 
-const customStyleHookMapping: CustomStyleHookMapping<MenuPopup.State> = {
+const customStyleHookMapping: StateAttributesMapping<MenuPopup.State> = {
     ...popupStateMapping,
     ...transitionStatusMapping
 };
@@ -51,12 +50,14 @@ export function MenuPopup(componentProps: MenuPopup.Props) {
         popupProps,
         mounted,
         instantType,
+        triggerElement,
         onOpenChangeComplete,
         parent,
         lastOpenChangeReason,
         rootId
     } = useMenuRootContext();
     const { side, align, floatingContext } = useMenuPositionerContext();
+    const insideToolbar = useToolbarRootContext(true) != null;
 
     useOpenChangeComplete({
         open,
@@ -73,9 +74,9 @@ export function MenuPopup(componentProps: MenuPopup.Props) {
     React.useEffect(() => {
         function handleClose(event: {
             domEvent: Event | undefined;
-            reason: MenuRoot.OpenChangeReason | undefined;
+            reason: MenuRoot.ChangeEventReason;
         }) {
-            setOpen(false, event.domEvent, event.reason);
+            setOpen(false, createChangeEventDetails(event.reason, event.domEvent));
         }
 
         menuEvents.on('close', handleClose);
@@ -107,28 +108,35 @@ export function MenuPopup(componentProps: MenuPopup.Props) {
     const element = useRenderElement('div', componentProps, {
         state,
         ref: [ref, popupRef],
-        customStyleHookMapping,
         props: [
             popupProps,
+            {
+                onKeyDown(event) {
+                    if (insideToolbar && COMPOSITE_KEYS.has(event.key)) {
+                        event.stopPropagation();
+                    }
+                }
+            },
             transitionStatus === 'starting' ? DISABLED_TRANSITIONS_STYLE : EMPTY_OBJECT,
             elementProps,
             { 'data-rootownerid': rootId } as Record<string, string>
-        ]
+        ],
+        customStyleHookMapping
     });
 
     let returnFocus = parent.type === undefined || parent.type === 'context-menu';
-    if (parent.type === 'menubar' && lastOpenChangeReason !== 'outside-press') {
+    if (triggerElement || (parent.type === 'menubar' && lastOpenChangeReason !== 'outside-press')) {
         returnFocus = true;
     }
 
     return (
         <FloatingFocusManager
-          context={floatingContext}
-          modal={false}
-          disabled={!mounted}
-          returnFocus={finalFocus || returnFocus}
-          initialFocus={parent.type === 'menu' ? -1 : 0}
-          restoreFocus
+            context={floatingContext}
+            modal={false}
+            disabled={!mounted}
+            returnFocus={finalFocus === undefined ? returnFocus : finalFocus}
+            initialFocus={parent.type !== 'menu'}
+            restoreFocus
         >
             {element}
         </FloatingFocusManager>
@@ -138,8 +146,8 @@ export function MenuPopup(componentProps: MenuPopup.Props) {
 export namespace MenuPopup {
     export type State = {
         transitionStatus: TransitionStatus;
-        side: TSide;
-        align: TAlign;
+        side: Side;
+        align: Align;
         /**
          * Whether the menu is currently open.
          */
@@ -155,8 +163,16 @@ export namespace MenuPopup {
         id?: string;
         /**
          * Determines the element to focus when the menu is closed.
-         * By default, focus returns to the trigger.
+         *
+         * - `false`: Do not move focus.
+         * - `true`: Move focus based on the default behavior (trigger or previously focused element).
+         * - `RefObject`: Move focus to the ref element.
+         * - `function`: Called with the interaction type (`mouse`, `touch`, `pen`, or `keyboard`).
+         *   Return an element to focus, `true` to use the default behavior, or `false`/`undefined` to do nothing.
          */
-        finalFocus?: React.RefObject<HTMLElement | null>;
+        finalFocus?:
+          | boolean
+          | React.RefObject<HTMLElement | null>
+          | ((closeType: Interaction) => boolean | HTMLElement | null | void);
     } & HeadlessUIComponentProps<'div', State>;
 }

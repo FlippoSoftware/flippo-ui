@@ -1,10 +1,7 @@
-'use client';
-
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useMenuGroupRootContext } from '../group/MenuGroupContext';
 

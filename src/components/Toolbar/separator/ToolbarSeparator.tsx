@@ -1,8 +1,8 @@
-'use client';
+
 
 import React from 'react';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { Separator } from '../../Separator';
 import { useToolbarRootContext } from '../root/ToolbarRootContext';

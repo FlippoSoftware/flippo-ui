@@ -1,26 +1,24 @@
-'use client';
-
 import React from 'react';
 
 import { AnimationFrame, useOpenInteractionType, useScrollLock } from '@flippo-ui/hooks';
-
-import { useHeadlessUiId } from '@lib/hooks';
+import { useHeadlessUiId } from '~@lib/hooks';
 import {
     FloatingNode,
     FloatingTree,
     useFloatingNodeId,
     useFloatingTree
-} from '@packages/floating-ui-react';
+} from '~@packages/floating-ui-react';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CompositeRoot } from '../Composite/root/CompositeRoot';
 
 import type { MenuRoot } from '../Menu/root/MenuRoot';
+import type { MenuOpenEventDetails } from '../Menu/utils/types';
 
 import { MenubarContext, useMenubarContext } from './MenubarContext';
 
-import type { TMenubarContext } from './MenubarContext';
+import type { MenubarContextValue } from './MenubarContext';
 
 /**
  * The container for menus.
@@ -34,6 +32,7 @@ export function Menubar(props: Menubar.Props) {
         render,
         className,
         modal = true,
+        disabled = false,
         id: idProp,
         ref,
         ...elementProps
@@ -74,13 +73,14 @@ export function Menubar(props: Menubar.Props) {
     const contentRef = React.useRef<HTMLDivElement>(null);
     const allowMouseUpTriggerRef = React.useRef(false);
 
-    const context: TMenubarContext = React.useMemo(
+    const context: MenubarContextValue = React.useMemo(
         () => ({
             contentElement,
             setContentElement,
             setHasSubmenuOpen,
             hasSubmenuOpen,
             modal,
+            disabled,
             orientation,
             allowMouseUpTriggerRef,
             rootId: id
@@ -89,28 +89,29 @@ export function Menubar(props: Menubar.Props) {
             contentElement,
             hasSubmenuOpen,
             modal,
+            disabled,
             orientation,
             id
         ]
     );
 
     return (
-        <MenubarContext value={context}>
+        <MenubarContext.Provider value={context}>
             <FloatingTree>
                 <MenubarContent>
                     <CompositeRoot
-                      render={render}
-                      className={className}
-                      state={state}
-                      refs={[ref, setContentElement, contentRef]}
-                      props={[{ role: 'menubar', id }, interactionTypeProps, elementProps]}
-                      orientation={orientation}
-                      loop={loop}
-                      highlightItemOnHover={hasSubmenuOpen}
+                        render={render}
+                        className={className}
+                        state={state}
+                        refs={[ref, setContentElement, contentRef]}
+                        props={[{ role: 'menubar', id }, interactionTypeProps, elementProps]}
+                        orientation={orientation}
+                        loop={loop}
+                        highlightItemOnHover={hasSubmenuOpen}
                     />
                 </MenubarContent>
             </FloatingTree>
-        </MenubarContext>
+        </MenubarContext.Provider>
     );
 }
 
@@ -121,16 +122,16 @@ function MenubarContent(props: React.PropsWithChildren<object>) {
     const rootContext = useMenubarContext();
 
     React.useEffect(() => {
-        function onSubmenuOpenChange(event: { open: boolean; nodeId: string; parentNodeId: string }) {
-            if (event.parentNodeId !== nodeId) {
+        function onSubmenuOpenChange(details: MenuOpenEventDetails) {
+            if (!details.nodeId || details.parentNodeId !== nodeId) {
                 return;
             }
 
-            if (event.open) {
-                openSubmenusRef.current.add(event.nodeId);
+            if (details.open) {
+                openSubmenusRef.current.add(details.nodeId);
             }
             else {
-                openSubmenusRef.current.delete(event.nodeId);
+                openSubmenusRef.current.delete(details.nodeId);
             }
 
             const isAnyOpen = openSubmenusRef.current.size > 0;
@@ -148,10 +149,10 @@ function MenubarContent(props: React.PropsWithChildren<object>) {
             }
         }
 
-        menuEvents.on('openchange', onSubmenuOpenChange);
+        menuEvents.on('menuopenchange', onSubmenuOpenChange);
 
         return () => {
-            menuEvents.off('openchange', onSubmenuOpenChange);
+            menuEvents.off('menuopenchange', onSubmenuOpenChange);
         };
     }, [menuEvents, nodeId, rootContext]);
 

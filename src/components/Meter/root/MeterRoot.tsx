@@ -1,17 +1,14 @@
-'use client';
-
 import React from 'react';
 
 import { useLatestRef } from '@flippo-ui/hooks';
+import { formatNumber } from '~@lib/formatNumber';
+import { useRenderElement } from '~@lib/hooks';
 
-import { formatNumber } from '@lib/formatNumber';
-import { useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { MeterRootContext } from './MeterRootContext';
 
-import type { TMeterRootContext } from './MeterRootContext';
+import type { MeterRootContextValue } from './MeterRootContext';
 
 function formatValue(
     value: number,
@@ -69,7 +66,7 @@ export function MeterRoot(componentProps: MeterRoot.Props) {
         'role': 'meter'
     };
 
-    const contextValue: TMeterRootContext = React.useMemo(
+    const contextValue: MeterRootContextValue = React.useMemo(
         () => ({
             formattedValue,
             max,

@@ -1,12 +1,10 @@
-'use client';
-
 import type React from 'react';
 
 import { useEventCallback } from '@flippo-ui/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { mergeProps } from '~@lib/merge';
 
-import { mergeProps } from '@lib/merge';
-
-import type { HTMLProps } from '@lib/types';
+import type { HTMLProps } from '~@lib/types';
 
 import { useButton } from '../../use-button/useButton';
 
@@ -22,7 +20,7 @@ export function useDialogClose(params: useDialogClose.Parameters): useDialogClos
 
     const handleClick = useEventCallback((event: React.MouseEvent) => {
         if (open) {
-            setOpen(false, event.nativeEvent, 'close-press');
+            setOpen(false, createChangeEventDetails('close-press', event.nativeEvent));
         }
     });
 
@@ -53,11 +51,7 @@ export namespace useDialogClose {
         /**
          * Event handler called when the dialog is opened or closed.
          */
-        setOpen: (
-            open: boolean,
-            event: Event | undefined,
-            reason: DialogRoot.OpenChangeReason | undefined,
-        ) => void;
+        setOpen: (open: boolean, eventDetails: DialogRoot.ChangeEventDetails) => void;
         /**
          * Whether the component renders a native `<button>` element when replacing it
          * via the `render` prop.

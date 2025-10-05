@@ -1,16 +1,16 @@
-'use client';
-
 import React from 'react';
 
-export type TTabsListContext = {
+import type { TabsRoot } from '../root/TabsRoot';
+
+export type TabsListContextValue = {
     activateOnFocus: boolean;
     highlightedTabIndex: number;
-    onTabActivation: (newValue: any, event: Event) => void;
+    onTabActivation: (newValue: any, eventDetails: TabsRoot.ChangeEventDetails) => void;
     setHighlightedTabIndex: (index: number) => void;
     tabsListRef: React.RefObject<HTMLElement | null>;
 };
 
-export const TabsListContext = React.createContext<TTabsListContext | undefined>(undefined);
+export const TabsListContext = React.createContext<TabsListContextValue | undefined>(undefined);
 
 export function useTabsListContext() {
     const context = React.use(TabsListContext);

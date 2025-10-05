@@ -1,10 +1,10 @@
-'use client';
+
 
 import React from 'react';
 
-import { FloatingPortal } from '@packages/floating-ui-react';
+import { FloatingPortal } from '~@packages/floating-ui-react';
 
-import type { FloatingPortalProps } from '@packages/floating-ui-react';
+import type { FloatingPortalProps } from '~@packages/floating-ui-react';
 
 import { usePopoverRootContext } from '../root/PopoverRootContext';
 

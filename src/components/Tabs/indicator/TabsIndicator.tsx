@@ -1,13 +1,10 @@
-'use client';
-
 import React from 'react';
 
 import { useForcedRerendering } from '@flippo-ui/hooks';
+import { generateId } from '~@lib/generateId';
+import { useDirection, useRenderElement } from '~@lib/hooks';
 
-import { generateId } from '@lib/generateId';
-import { useDirection, useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps, Orientation } from '@lib/types';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
 import { useTabsListContext } from '../list/TabsListContext';
 import { tabsStyleHookMapping } from '../root/styleHooks';

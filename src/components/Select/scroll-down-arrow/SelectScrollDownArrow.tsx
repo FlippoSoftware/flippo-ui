@@ -1,8 +1,8 @@
-'use client';
+
 
 import React from 'react';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { SelectScrollArrow } from '../scroll-arrow/SelectScrollArrow';
 

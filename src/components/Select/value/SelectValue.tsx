@@ -1,13 +1,11 @@
-'use client';
-
 import React from 'react';
 
 import { useStore } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
-import { resolveMultipleLabels, resolveSelectedLabel } from '@lib/resolveValueLabel';
+import { useRenderElement } from '~@lib/hooks';
+import { resolveMultipleLabels, resolveSelectedLabel } from '~@lib/resolveValueLabel';
 
-import type { StateAttributesMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';

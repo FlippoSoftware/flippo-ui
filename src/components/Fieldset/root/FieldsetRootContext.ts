@@ -1,14 +1,12 @@
-'use client';
-
 import React from 'react';
 
-export type TFieldsetRootContext = {
+export type FieldsetRootContextValue = {
     legendId: string | undefined;
     setLegendId: React.Dispatch<React.SetStateAction<string | undefined>>;
     disabled: boolean | undefined;
 };
 
-export const FieldsetRootContext = React.createContext<TFieldsetRootContext>({
+export const FieldsetRootContext = React.createContext<FieldsetRootContextValue>({
     legendId: undefined,
     setLegendId: () => {},
     disabled: undefined

@@ -1,15 +1,13 @@
-'use client';
-
 import React from 'react';
 
 import { useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
+import { EMPTY_OBJECT } from '~@lib/constants';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { NOOP } from '~@lib/noop';
+import { visuallyHidden } from '~@lib/visuallyHidden';
 
-import { EMPTY_OBJECT } from '@lib/constants';
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { NOOP } from '@lib/noop';
-import { visuallyHidden } from '@lib/visuallyHidden';
-
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { ACTIVE_COMPOSITE_ITEM } from '../../Composite/constants';
 import { CompositeItem } from '../../Composite/item/CompositeItem';
@@ -22,7 +20,7 @@ import type { FieldRoot } from '../../Field/root/FieldRoot';
 
 import { RadioRootContext } from './RadioRootContext';
 
-import type { TRadioRootContext } from './RadioRootContext';
+import type { RadioRootContextValue } from './RadioRootContext';
 
 /**
  * Represents the radio button itself.
@@ -50,7 +48,6 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
         required: requiredRoot,
         checkedValue,
         setCheckedValue,
-        onValueChange,
         touched,
         setTouched,
         fieldControlValidation,
@@ -154,18 +151,22 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
                     return;
                 }
 
+                const details = createChangeEventDetails('none', event.nativeEvent);
+
+                if (details.isCanceled) {
+                    return;
+                }
+
                 setFieldTouched(true);
                 setDirty(value !== validityData.initialValue);
-                setCheckedValue(value);
                 setFilled(true);
-                onValueChange?.(value, event.nativeEvent);
+                setCheckedValue(value, details);
             }
         }),
         [
             checked,
             disabled,
             id,
-            onValueChange,
             readOnly,
             ref,
             required,
@@ -195,7 +196,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
         ]
     );
 
-    const contextValue: TRadioRootContext = React.useMemo(() => state, [state]);
+    const contextValue: RadioRootContextValue = React.useMemo(() => state, [state]);
 
     const isRadioGroup = setCheckedValue !== NOOP;
 
@@ -216,24 +217,24 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
     });
 
     return (
-        <RadioRootContext value={contextValue}>
+        <RadioRootContext.Provider value={contextValue}>
             {isRadioGroup
                 ? (
                     <CompositeItem
-                        tag={'button'}
-                        render={render}
-                        className={className}
-                        state={state}
-                        refs={refs}
-                        props={props}
-                        customStyleHookMapping={radioStyleHookMapping}
+                      tag={'button'}
+                      render={render}
+                      className={className}
+                      state={state}
+                      refs={refs}
+                      props={props}
+                      customStyleHookMapping={radioStyleHookMapping}
                     />
                 )
                 : (
                     element
                 )}
             <input {...inputProps} />
-        </RadioRootContext>
+        </RadioRootContext.Provider>
     );
 }
 
