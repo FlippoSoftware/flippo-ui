@@ -1,6 +1,6 @@
 /* False positives - ESLint thinks we're calling a hook from a class component. */
 /* eslint-disable react-hooks/rules-of-hooks */
-import * as React from 'react';
+import React from 'react';
 
 import { NOOP } from '~@lib/noop';
 

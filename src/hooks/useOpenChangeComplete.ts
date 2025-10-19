@@ -1,6 +1,5 @@
+import React from 'react';
 
-
-import * as React from 'react';
 import { useAnimationFinished } from './useAnimationFinished';
 import { useEventCallback } from './useEventCallback';
 import { useLatestRef } from './useLatestRef';

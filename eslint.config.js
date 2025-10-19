@@ -18,7 +18,14 @@ export default createEslintConfig(
                 ...overridesTsConfig,
                 'ts/no-namespace': 'off',
                 'ts/prefer-literal-enum-member': 'off',
-                'ts/no-unsafe-function-type': 'off'
+                'ts/no-unsafe-function-type': 'off',
+                'ts/naming-convention': ['warn', {
+                    selector: 'variable',
+                    format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+                    leadingUnderscore: 'allow',
+                    trailingUnderscore: 'allow'
+                }],
+                'ts/no-empty-object-type': 'off'
             }
         },
         stylistic: {
@@ -34,6 +41,7 @@ export default createEslintConfig(
     {
         rules: {
             'react-dom/no-flush-sync': 'off',
+            'react/no-context-provider': 'off',
             'unused-imports/no-unused-vars': ['warn', {
                 varsIgnorePattern: '^_',
                 argsIgnorePattern: '^_',
@@ -44,7 +52,7 @@ export default createEslintConfig(
                 type: 'natural',
                 order: 'asc',
                 newlinesBetween: 'always',
-                internalPattern: ['^~/.+', '^@/.+'],
+                internalPattern: ['^~/.+', '^@/.+', '^~@.+'],
                 groups: [
                     'react',
                     'builtin',

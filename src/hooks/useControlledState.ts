@@ -1,6 +1,4 @@
-
-
-import * as React from 'react';
+import React from 'react';
 
 type TChangeHandler<T> = (state: T, ...args: any[]) => void;
 type TSetState<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -25,7 +23,7 @@ export function useControlledState<T>(params: TUseControlledStateParams<T>): [T,
     const state = isControlled ? prop : uncontrolledProp;
 
     /* eslint-disable react-hooks/rules-of-hooks */
-    // eslint-disable-next-line node/prefer-global/process
+
     if (process.env.NODE_ENV !== 'production') {
         const isControlledRef = React.useRef(prop !== undefined);
         React.useEffect(() => {

@@ -1,10 +1,10 @@
 import React from 'react';
 
-export function useUnmount(callback: ()=> void) {
-  const callbackRef = React.useRef(callback);
-  callbackRef.current = callback;
+export function useUnmount(callback: () => void) {
+    const callbackRef = React.useRef(callback);
+    callbackRef.current = callback;
 
-  React.useEffect(() => () => {
-    callbackRef.current();
-  }, []);
+    React.useEffect(() => () => {
+        callbackRef.current();
+    }, []);
 }

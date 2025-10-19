@@ -18,6 +18,7 @@ export * from './useOnMount';
 export * from './useOpenChangeComplete';
 export * from './useOpenInteractionType';
 export * from './useScrollLock';
+export * from './useStatusTransition';
 export * from './useStore';
 export * from './useTimeout';
 export * from './useTransitionStatus';
