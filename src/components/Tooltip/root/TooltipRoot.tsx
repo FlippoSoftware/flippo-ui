@@ -7,6 +7,7 @@ import {
     useOpenChangeComplete,
     useTransitionStatus
 } from '@flippo-ui/hooks';
+
 import { OPEN_DELAY } from '~@lib/constants';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import {

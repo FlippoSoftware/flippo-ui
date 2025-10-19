@@ -7,10 +7,11 @@ import {
     useIsoLayoutEffect,
     useTransitionStatus
 } from '@flippo-ui/hooks';
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import { useHeadlessUiId } from '~@lib/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
+
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useHeadlessUiId } from '~@lib/hooks';
 
 import type { CollapsibleRoot } from './CollapsibleRoot';
 

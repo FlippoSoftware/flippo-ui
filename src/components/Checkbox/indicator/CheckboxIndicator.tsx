@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 
 import { useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
@@ -9,7 +7,7 @@ import type { TransitionStatus } from '@flippo-ui/hooks';
 import { useRenderElement } from '~@lib/hooks';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
-import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { fieldValidityMapping } from '../../Field/utils/constants';
@@ -63,7 +61,7 @@ export function CheckboxIndicator(componentProps: CheckboxIndicator.Props) {
 
     const baseStyleHookMapping = useCustomStyleHookMapping(rootState);
 
-    const customStyleHookMapping: CustomStyleHookMapping<CheckboxIndicator.State> = React.useMemo(
+    const customStyleHookMapping: StateAttributesMapping<CheckboxIndicator.State> = React.useMemo(
         () => ({
             ...baseStyleHookMapping,
             ...transitionStatusMapping,

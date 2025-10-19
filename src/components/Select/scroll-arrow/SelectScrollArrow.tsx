@@ -7,9 +7,11 @@ import {
     useTimeout,
     useTransitionStatus
 } from '@flippo-ui/hooks';
-import { useRenderElement } from '~@lib/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
+
+import { useRenderElement } from '~@lib/hooks';
+
 import type { Side } from '~@lib/hooks';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 

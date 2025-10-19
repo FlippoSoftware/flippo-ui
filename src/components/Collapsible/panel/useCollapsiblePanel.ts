@@ -7,6 +7,7 @@ import {
     useMergedRef,
     useOnMount
 } from '@flippo-ui/hooks';
+
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { warn } from '~@lib/warn';
 

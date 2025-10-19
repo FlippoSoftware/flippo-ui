@@ -11,6 +11,7 @@ import {
     useTimeout,
     useTransitionStatus
 } from '@flippo-ui/hooks';
+
 import { PATIENT_CLICK_THRESHOLD, TYPEAHEAD_RESET_MS } from '~@lib/constants';
 import { useDirection, useMixedToggleClickHandler } from '~@lib/hooks';
 import { mergeProps } from '~@lib/merge';

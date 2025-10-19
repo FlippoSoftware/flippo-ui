@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useEventCallback, useMergedRef, useTimeout } from '@flippo-ui/hooks';
+
 import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
 import { useRenderElement } from '~@lib/hooks';
 import { mergeProps } from '~@lib/merge';
@@ -168,13 +169,13 @@ export function MenuTrigger(componentProps: MenuTrigger.Props) {
     if (isMenubar) {
         return (
             <CompositeItem
-              tag={'button'}
-              render={render}
-              className={className}
-              state={state}
-              refs={ref}
-              props={props}
-              customStyleHookMapping={pressableTriggerOpenStateMapping}
+                tag={'button'}
+                render={render}
+                className={className}
+                state={state}
+                refs={ref}
+                props={props}
+                customStyleHookMapping={pressableTriggerOpenStateMapping}
             />
         );
     }

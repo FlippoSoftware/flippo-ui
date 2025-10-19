@@ -12,6 +12,7 @@ import {
     useStore,
     useTransitionStatus
 } from '@flippo-ui/hooks';
+
 import { EMPTY_ARRAY } from '~@lib/constants';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { useHeadlessUiId } from '~@lib/hooks';

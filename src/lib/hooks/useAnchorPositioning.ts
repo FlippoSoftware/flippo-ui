@@ -6,6 +6,9 @@ import {
     getSide,
     getSideAxis
 } from '@floating-ui/utils';
+
+import type { Rect } from '@floating-ui/utils';
+
 import {
     autoUpdate,
     flip,
@@ -20,7 +23,6 @@ import {
     arrow
 } from '~@packages/floating-ui-react/middleware/arrow';
 
-import type { Rect } from '@floating-ui/utils';
 import type {
     AutoUpdateOptions,
     FloatingContext,
