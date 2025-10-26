@@ -1,4 +1,5 @@
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';

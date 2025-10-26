@@ -7,6 +7,7 @@ import {
     useStore,
     useTimeout
 } from '@flippo-ui/hooks';
+
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
 import { useRenderElement } from '~@lib/hooks';

@@ -9,6 +9,9 @@ import {
     useStore,
     useTimeout
 } from '@flippo-ui/hooks';
+
+import type { TransitionStatus } from '@flippo-ui/hooks';
+
 import { DISABLED_TRANSITIONS_STYLE } from '~@lib/constants';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { isWebKit } from '~@lib/detectBrowser';
@@ -20,7 +23,6 @@ import { transitionStatusMapping } from '~@lib/styleHookMapping';
 import { styleDisableScrollbar } from '~@lib/styles';
 import { FloatingFocusManager } from '~@packages/floating-ui-react';
 
-import type { TransitionStatus } from '@flippo-ui/hooks';
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { Align, Side } from '~@lib/hooks';
 import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
@@ -170,12 +172,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
             side,
             align
         }),
-        [
-            open,
-            transitionStatus,
-            side,
-            align
-        ]
+        [open, transitionStatus, side, align]
     );
 
     useIsoLayoutEffect(() => {
@@ -211,12 +208,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         maxHeightRef.current = 0;
 
         clearStyles(positionerElement, originalPositionerStylesRef.current);
-    }, [
-        mounted,
-        alignItemWithTriggerActive,
-        positionerElement,
-        popupRef
-    ]);
+    }, [mounted, alignItemWithTriggerActive, positionerElement, popupRef]);
 
     useIsoLayoutEffect(() => {
         const popupElement = popupRef.current;
@@ -373,12 +365,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         return () => {
             win.removeEventListener('resize', handleResize);
         };
-    }, [
-        setOpen,
-        alignItemWithTriggerActive,
-        positionerElement,
-        mounted
-    ]);
+    }, [setOpen, alignItemWithTriggerActive, positionerElement, mounted]);
 
     const defaultProps: HTMLProps = {
         ...(listElement
@@ -427,16 +414,11 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         ref: [ref, popupRef],
         state,
         customStyleHookMapping,
-        props: [
-            popupProps,
-            defaultProps,
-            {
-                style: transitionStatus === 'starting' ? DISABLED_TRANSITIONS_STYLE.style : undefined,
-                className:
+        props: [popupProps, defaultProps, {
+            style: transitionStatus === 'starting' ? DISABLED_TRANSITIONS_STYLE.style : undefined,
+            className:
                     !listElement && alignItemWithTriggerActive ? styleDisableScrollbar.className : undefined
-            },
-            elementProps
-        ]
+        }, elementProps]
     });
 
     return (

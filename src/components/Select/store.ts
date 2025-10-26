@@ -1,6 +1,7 @@
 import { createSelector } from '@flippo-ui/hooks';
 
 import type { Store, TransitionStatus } from '@flippo-ui/hooks';
+
 import type { HTMLProps } from '~@lib/types';
 
 export type State = {

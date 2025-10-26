@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useMergedRef } from '@flippo-ui/hooks';
+
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { stringifyAsValue } from '~@lib/resolveValueLabel';
 import { visuallyHidden } from '~@lib/visuallyHidden';
@@ -96,26 +97,21 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
             const currentSerializedValue = stringifyAsValue(v, itemToStringValue);
             return (
                 <input
-                    key={currentSerializedValue}
-                    type={'hidden'}
-                    name={rootContext.name}
-                    value={currentSerializedValue}
+                  key={currentSerializedValue}
+                  type={'hidden'}
+                  name={rootContext.name}
+                  value={currentSerializedValue}
                 />
             );
         });
-    }, [
-        isMultiple,
-        value,
-        rootContext.name,
-        itemToStringValue
-    ]);
+    }, [isMultiple, value, rootContext.name, itemToStringValue]);
 
     return (
         <SelectRootContext value={rootContext}>
             <SelectFloatingContext value={floatingContext}>
                 {children}
                 <input
-                  {...rootContext.fieldControlValidation.getInputValidationProps({
+                    {...rootContext.fieldControlValidation.getInputValidationProps({
                         onFocus() {
                             // Move focus to the trigger element when the hidden input is focused.
                             store.state.triggerElement?.focus();

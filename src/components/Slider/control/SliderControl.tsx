@@ -1,9 +1,8 @@
-
-
 import React from 'react';
 
 import { useAnimationFrame, useEventCallback } from '@flippo-ui/hooks';
 import { isElement } from '@floating-ui/utils/dom';
+
 import { clamp } from '~@lib/clamp';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { useDirection, useRenderElement } from '~@lib/hooks';
@@ -355,12 +354,7 @@ export function SliderControl(componentProps: SliderControl.Props) {
 
             stopListening();
         };
-    }, [
-        stopListening,
-        handleTouchStart,
-        controlRef,
-        focusFrame
-    ]);
+    }, [stopListening, handleTouchStart, controlRef, focusFrame]);
 
     React.useEffect(() => {
         if (disabled) {
@@ -370,12 +364,7 @@ export function SliderControl(componentProps: SliderControl.Props) {
 
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: [
-            ref,
-            registerFieldControlRef,
-            controlRef,
-            setStylesRef
-        ],
+        ref: [ref, registerFieldControlRef, controlRef, setStylesRef],
         props: [{
             onPointerDown(event) {
                 const control = controlRef.current;

@@ -6,6 +6,7 @@ import {
     useStore,
     useTimeout
 } from '@flippo-ui/hooks';
+
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { useRenderElement } from '~@lib/hooks';
 import { isMouseWithinBounds } from '~@lib/isMouseWithinBounds';
@@ -89,12 +90,7 @@ export function SelectItem(componentProps: SelectItem.Props) {
         return () => {
             delete values[listItem.index];
         };
-    }, [
-        hasRegistered,
-        listItem.index,
-        value,
-        valuesRef
-    ]);
+    }, [hasRegistered, listItem.index, value, valuesRef]);
 
     useIsoLayoutEffect(() => {
         if (hasRegistered) {
@@ -247,19 +243,9 @@ export function SelectItem(componentProps: SelectItem.Props) {
     };
 
     const element = useRenderElement('div', componentProps, {
-        ref: [
-            buttonRef,
-            ref,
-            listItem.ref,
-            itemRef
-        ],
+        ref: [buttonRef, ref, listItem.ref, itemRef],
         state,
-        props: [
-            rootProps,
-            defaultProps,
-            elementProps,
-            getButtonProps
-        ]
+        props: [rootProps, defaultProps, elementProps, getButtonProps]
     });
 
     const contextValue: SelectItemContextValue = React.useMemo(
@@ -269,12 +255,7 @@ export function SelectItem(componentProps: SelectItem.Props) {
             textRef,
             selectedByFocus
         }),
-        [
-            selected,
-            indexRef,
-            textRef,
-            selectedByFocus
-        ]
+        [selected, indexRef, textRef, selectedByFocus]
     );
 
     return <SelectItemContext.Provider value={contextValue}>{element}</SelectItemContext.Provider>;

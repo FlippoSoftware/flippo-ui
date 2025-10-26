@@ -6,6 +6,7 @@ import {
     useIsoLayoutEffect,
     useLatestRef
 } from '@flippo-ui/hooks';
+
 import { areArraysEqual } from '~@lib/areArraysEqual';
 import { clamp } from '~@lib/clamp';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
@@ -166,12 +167,7 @@ export function SliderRoot<
             return [clamp(valueUnwrapped as number, min, max)];
         }
         return valueUnwrapped.slice().sort(asc);
-    }, [
-        max,
-        min,
-        range,
-        valueUnwrapped
-    ]);
+    }, [max, min, range, valueUnwrapped]);
 
     const setValue = useEventCallback(
         (newValue: number | number[], thumbIndex: number, event: Event) => {
@@ -244,12 +240,7 @@ export function SliderRoot<
         if (min >= max) {
             warn('Slider `max` must be greater than `min`');
         }
-    }, [
-        dragging,
-        min,
-        max,
-        valueProp
-    ]);
+    }, [dragging, min, max, valueProp]);
 
     useIsoLayoutEffect(() => {
         const activeEl = activeElement(ownerDocument(sliderRef.current));

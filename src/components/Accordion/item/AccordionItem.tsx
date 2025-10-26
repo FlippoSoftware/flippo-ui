@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useEventCallback, useMergedRef } from '@flippo-ui/hooks';
+
 import { EMPTY_OBJECT } from '~@lib/constants';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
@@ -111,12 +112,7 @@ export function AccordionItem(componentProps: AccordionItem.Props) {
             disabled,
             open: isOpen
         }),
-        [
-            disabled,
-            index,
-            isOpen,
-            rootState
-        ]
+        [disabled, index, isOpen, rootState]
     );
 
     const [triggerId, setTriggerId] = React.useState<string | undefined>(useHeadlessUiId());
@@ -128,12 +124,7 @@ export function AccordionItem(componentProps: AccordionItem.Props) {
             setTriggerId,
             triggerId
         }),
-        [
-            isOpen,
-            state,
-            setTriggerId,
-            triggerId
-        ]
+        [isOpen, state, setTriggerId, triggerId]
     );
 
     const element = useRenderElement('div', componentProps, {

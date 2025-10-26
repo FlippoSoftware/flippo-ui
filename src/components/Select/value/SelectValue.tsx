@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useStore } from '@flippo-ui/hooks';
+
 import { useRenderElement } from '~@lib/hooks';
 import { resolveMultipleLabels, resolveSelectedLabel } from '~@lib/resolveValueLabel';
 

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useLazyRef } from '@flippo-ui/hooks';
+
 import { EMPTY_OBJECT } from '~@lib/constants';
 import { getEmptyContext } from '~@packages/floating-ui-react/hooks/useFloatingRootContext';
 
@@ -87,9 +88,11 @@ export namespace DialogRoot {
         defaultOpen?: boolean;
         /**
          * Determines if the dialog enters a modal state when open.
-         * - `true`: user interaction is limited to just the dialog: focus is trapped, document page scroll is locked, and pointer interactions on outside elements are disabled.
+         * - `true`: user interaction is limited to just the dialog: focus is trapped, document page scroll is locked, and pointer
+         *    interactions on outside elements are disabled.
          * - `false`: user interaction with the rest of the document is allowed.
-         * - `'trap-focus'`: focus is trapped inside the dialog, but document page scroll is not locked and pointer interactions outside of it remain enabled.
+         * - `'trap-focus'`: focus is trapped inside the dialog, but document page scroll is not locked and pointer interactions
+         *     outside of it remain enabled.
          * @default true
          */
         modal?: boolean | 'trap-focus';

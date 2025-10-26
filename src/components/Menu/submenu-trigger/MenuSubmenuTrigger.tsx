@@ -85,12 +85,7 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
 
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: [
-            ref,
-            item.ref,
-            itemRef,
-            setTriggerElement
-        ],
+        ref: [ref, item.ref, itemRef, setTriggerElement],
         customStyleHookMapping: triggerOpenStateMapping,
         props: [
             rootTriggerProps,

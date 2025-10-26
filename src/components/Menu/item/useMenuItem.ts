@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useMergedRef } from '@flippo-ui/hooks';
+
 import { mergeProps } from '~@lib/merge';
 
 import type { HeadlessUIEvent, HTMLProps } from '~@lib/types';

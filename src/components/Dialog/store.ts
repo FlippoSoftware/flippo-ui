@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createSelector, ReactStore } from '@flippo-ui/hooks';
 
 import type { Interaction, TransitionStatus } from '@flippo-ui/hooks';
+
 import type { FloatingUIOpenChangeDetails, HTMLProps } from '~@lib/types';
 import type { FloatingRootContext } from '~@packages/floating-ui-react/types';
 

@@ -154,7 +154,7 @@ export function MenuRoot(props: MenuRoot.Props) {
     if (process.env.NODE_ENV !== 'production') {
         if (parent.type !== undefined && modalProp !== undefined) {
             console.warn(
-                'Base UI: The `modal` prop is not supported on nested menus. It will be ignored.'
+                'Headless UI: The `modal` prop is not supported on nested menus. It will be ignored.'
             );
         }
     }
@@ -494,12 +494,7 @@ export function MenuRoot(props: MenuRoot.Props) {
         );
         delete referenceProps.role;
         return referenceProps;
-    }, [
-        getReferenceProps,
-        mixedToggleHandlers,
-        setAllowMouseEnter,
-        interactionTypeProps
-    ]);
+    }, [getReferenceProps, mixedToggleHandlers, setAllowMouseEnter, interactionTypeProps]);
 
     const popupProps = React.useMemo(
         () =>
@@ -518,12 +513,7 @@ export function MenuRoot(props: MenuRoot.Props) {
                     }
                 }
             }),
-        [
-            getFloatingProps,
-            openOnHover,
-            parent.type,
-            setAllowMouseEnter
-        ]
+        [getFloatingProps, openOnHover, parent.type, setAllowMouseEnter]
     );
 
     const itemProps = React.useMemo(() => getItemProps(), [getItemProps]);

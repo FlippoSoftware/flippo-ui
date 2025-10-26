@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useEventCallback, useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
+
 import { EMPTY_ARRAY } from '~@lib/constants';
 import { isElementDisabled } from '~@lib/isElementDisabled';
 import { ownerDocument } from '~@lib/owner';

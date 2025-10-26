@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
+
 import { error } from '~@lib/error';
 import { useFocusableWhenDisabled } from '~@lib/hooks';
 import { makeEventPreventable, mergeProps } from '~@lib/merge';
@@ -170,12 +171,7 @@ export function useButton(parameters: useButton.Parameters = {}): useButton.Retu
                 otherExternalProps
             );
         },
-        [
-            disabled,
-            focusableWhenDisabledProps,
-            isNativeButton,
-            isValidLink
-        ]
+        [disabled, focusableWhenDisabledProps, isNativeButton, isValidLink]
     );
 
     return {

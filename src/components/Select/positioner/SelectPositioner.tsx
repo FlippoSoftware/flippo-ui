@@ -6,6 +6,7 @@ import {
     useScrollLock,
     useStore
 } from '@flippo-ui/hooks';
+
 import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { useAnchorPositioning, useRenderElement } from '~@lib/hooks';
@@ -153,12 +154,7 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
             align: positioning.align,
             anchorHidden: positioning.anchorHidden
         }),
-        [
-            open,
-            renderedSide,
-            positioning.align,
-            positioning.anchorHidden
-        ]
+        [open, renderedSide, positioning.align, positioning.anchorHidden]
     );
 
     const setPositionerElement = useEventCallback((element) => {
@@ -234,12 +230,7 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
             scrollUpArrowRef,
             scrollDownArrowRef
         }),
-        [
-            positioning,
-            renderedSide,
-            alignItemWithTriggerActive,
-            setControlledAlignItemWithTrigger
-        ]
+        [positioning, renderedSide, alignItemWithTriggerActive, setControlledAlignItemWithTrigger]
     );
 
     return (

@@ -1,8 +1,7 @@
-
-
 import React from 'react';
 
 import { useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
+
 import { formatNumber } from '~@lib/formatNumber';
 import { getStyleHookProps } from '~@lib/getStyleHookProps';
 import { useDirection, useHeadlessUiId, useRenderElement } from '~@lib/hooks';
