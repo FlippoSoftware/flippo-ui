@@ -1,5 +1,6 @@
 export * from './useAnimationFinished';
 export * from './useAnimationFrame';
+export * from './useClipboard';
 export * from './useControlledState';
 export * from './useDidUpdate';
 export * from './useEnhancedClickHandler';
