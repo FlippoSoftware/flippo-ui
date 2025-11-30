@@ -42,6 +42,7 @@ export default createEslintConfig(
         rules: {
             'react-dom/no-flush-sync': 'off',
             'react/no-context-provider': 'off',
+            'no-unreachable-loop': 'off',
             'unused-imports/no-unused-vars': ['warn', {
                 varsIgnorePattern: '^_',
                 argsIgnorePattern: '^_',

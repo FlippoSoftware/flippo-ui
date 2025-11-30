@@ -46,9 +46,9 @@ export function useStore(
     const selectorWithArgs = (state: unknown) => selector(state, a1, a2, a3);
 
     return useSyncExternalStoreWithSelector(
-        store.subscribe,
-        store.getSnapshot,
-        store.getSnapshot,
+        store.subscribe.bind(store),
+        store.getSnapshot.bind(store),
+        store.getSnapshot.bind(store),
         selectorWithArgs
     );
 }
