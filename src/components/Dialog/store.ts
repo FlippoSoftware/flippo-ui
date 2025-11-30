@@ -1,8 +1,9 @@
-import * as React from 'react';
+import React from 'react';
 
-import { createSelector, ReactStore } from '@flippo-ui/hooks';
+import { createSelector, ReactStore } from '@flippo-ui/hooks/use-store';
 
-import type { Interaction, TransitionStatus } from '@flippo-ui/hooks';
+import type { Interaction } from '@flippo-ui/hooks/use-enhanced-click-handler';
+import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
 
 import type { FloatingUIOpenChangeDetails, HTMLProps } from '~@lib/types';
 import type { FloatingRootContext } from '~@packages/floating-ui-react/types';
@@ -30,7 +31,7 @@ export type State = {
     /**
      * Determines whether the dialog should close on outside clicks.
      */
-    dismissible: boolean;
+    disablePointerDismissal: boolean;
     /**
      * Determines what triggered the dialog to open.
      */
@@ -71,6 +72,10 @@ export type State = {
      * The Trigger DOM element.
      */
     triggerElement: HTMLElement | null;
+    /**
+     * The Viewport DOM element.
+     */
+    viewportElement: HTMLElement | null;
 };
 
 type Context = {
@@ -89,7 +94,7 @@ const selectors = {
     modal: createSelector((state: State) => state.modal),
     nested: createSelector((state: State) => state.nested),
     nestedOpenDialogCount: createSelector((state: State) => state.nestedOpenDialogCount),
-    dismissible: createSelector((state: State) => state.dismissible),
+    disablePointerDismissal: createSelector((state: State) => state.disablePointerDismissal),
     openMethod: createSelector((state: State) => state.openMethod),
     descriptionElementId: createSelector((state: State) => state.descriptionElementId),
     titleElementId: createSelector((state: State) => state.titleElementId),
@@ -99,7 +104,8 @@ const selectors = {
     popupProps: createSelector((state: State) => state.popupProps),
     floatingRootContext: createSelector((state: State) => state.floatingRootContext),
     popupElement: createSelector((state: State) => state.popupElement),
-    triggerElement: createSelector((state: State) => state.triggerElement)
+    triggerElement: createSelector((state: State) => state.triggerElement),
+    viewportElement: createSelector((state: State) => state.viewportElement)
 };
 
 export class DialogStore extends ReactStore<State, Context, typeof selectors> {

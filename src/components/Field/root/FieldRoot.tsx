@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useEventCallback } from '@flippo-ui/hooks';
+
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';

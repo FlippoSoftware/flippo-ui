@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { useEventCallback, useId } from '@flippo-ui/hooks';
+import { useId } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 import { isElement } from '@floating-ui/utils/dom';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
@@ -21,6 +22,7 @@ export type UseFloatingRootContextOptions<Reason extends string> = {
     elements: {
         reference: Element | null;
         floating: HTMLElement | null;
+        triggers?: Element[];
     };
     /**
      * Whether to prevent the auto-emitted `openchange` event.
@@ -53,7 +55,7 @@ export function useFloatingRootContext<Reason extends string>(
         elementsProp.reference
     );
 
-    const onOpenChange = useEventCallback(
+    const onOpenChange = useStableCallback(
         (newOpen: boolean, eventDetails: HeadlessUIChangeEventDetails<string>) => {
             dataRef.current.openEvent = newOpen ? eventDetails.event : undefined;
             if (!options.noEmit) {
@@ -61,10 +63,12 @@ export function useFloatingRootContext<Reason extends string>(
                     open: newOpen,
                     reason: eventDetails.reason,
                     nativeEvent: eventDetails.event,
-                    nested
+                    nested,
+                    triggerElement: eventDetails.trigger
                 };
                 events.emit('openchange', details);
             }
+
             onOpenChangeProp?.(newOpen, eventDetails as HeadlessUIChangeEventDetails<Reason>);
         }
     );
@@ -80,9 +84,10 @@ export function useFloatingRootContext<Reason extends string>(
         () => ({
             reference: positionReference || elementsProp.reference || null,
             floating: elementsProp.floating || null,
-            domReference: elementsProp.reference as Element | null
+            domReference: elementsProp.reference as Element | null,
+            triggers: elementsProp.triggers ?? []
         }),
-        [positionReference, elementsProp.reference, elementsProp.floating]
+        [positionReference, elementsProp.reference, elementsProp.floating, elementsProp.triggers]
     );
 
     return React.useMemo<FloatingRootContext>(

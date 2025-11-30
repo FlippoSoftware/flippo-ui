@@ -1,9 +1,9 @@
 import React from 'react';
 
-import type { DialogStore } from '../store';
+import type { DialogStore } from '../store/DialogStore';
 
-export type DialogRootContextValue = {
-    store: DialogStore;
+export type DialogRootContextValue<Payload = unknown> = {
+    store: DialogStore<Payload>;
 };
 
 export const DialogRootContext = React.createContext<DialogRootContextValue | undefined>(undefined);

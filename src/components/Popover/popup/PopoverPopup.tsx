@@ -1,13 +1,15 @@
 import React from 'react';
 
 import { useEventCallback, useOpenChangeComplete } from '@flippo-ui/hooks';
+
+import type { Interaction, TransitionStatus } from '@flippo-ui/hooks';
+
 import { DISABLED_TRANSITIONS_STYLE, EMPTY_OBJECT } from '~@lib/constants';
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 import { FloatingFocusManager } from '~@packages/floating-ui-react';
 
-import type { Interaction, TransitionStatus } from '@flippo-ui/hooks';
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { Align, Side } from '~@lib/hooks';
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -96,26 +98,21 @@ export function PopoverPopup(componentProps: PopoverPopup.Props) {
     const element = useRenderElement('div', componentProps, {
         state,
         ref: [ref, popupRef],
-        props: [
-            popupProps,
-            {
-                'aria-labelledby': titleId,
-                'aria-describedby': descriptionId
-            },
-            transitionStatus === 'starting' ? DISABLED_TRANSITIONS_STYLE : EMPTY_OBJECT,
-            elementProps
-        ],
+        props: [popupProps, {
+            'aria-labelledby': titleId,
+            'aria-describedby': descriptionId
+        }, transitionStatus === 'starting' ? DISABLED_TRANSITIONS_STYLE : EMPTY_OBJECT, elementProps],
         customStyleHookMapping
     });
 
     return (
         <FloatingFocusManager
-            context={positioner.context}
-            modal={modal === 'trap-focus'}
-            disabled={!mounted || openReason === 'trigger-hover'}
-            initialFocus={resolvedInitialFocus}
-            returnFocus={finalFocus}
-            restoreFocus={'popup'}
+          context={positioner.context}
+          modal={modal === 'trap-focus'}
+          disabled={!mounted || openReason === 'trigger-hover'}
+          initialFocus={resolvedInitialFocus}
+          returnFocus={finalFocus}
+          restoreFocus={'popup'}
         >
             {element}
         </FloatingFocusManager>

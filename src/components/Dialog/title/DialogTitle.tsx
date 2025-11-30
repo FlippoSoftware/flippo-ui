@@ -1,4 +1,5 @@
-import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
@@ -26,16 +27,14 @@ export function DialogTitle(componentProps: DialogTitle.Props) {
 
     store.useSyncedValueWithCleanup('titleElementId', id);
 
-    const element = useRenderElement('h2', componentProps, {
+    return useRenderElement('h2', componentProps, {
         ref,
         props: [{ id }, elementProps]
     });
-
-    return element;
 }
 
 export namespace DialogTitle {
-    export type State = object;
+    export type Props = {} & HeadlessUIComponentProps<'h2', DialogTitle.State>;
 
-    export type Props = HeadlessUIComponentProps<'h2', State>;
+    export type State = {};
 }

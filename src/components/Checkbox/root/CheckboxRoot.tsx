@@ -6,6 +6,7 @@ import {
     useIsoLayoutEffect,
     useMergedRef
 } from '@flippo-ui/hooks';
+
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 import { mergeProps } from '~@lib/merge';
@@ -140,12 +141,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
         return () => {
             setControlId(undefined);
         };
-    }, [
-        groupContext,
-        id,
-        idProp,
-        setControlId
-    ]);
+    }, [groupContext, id, idProp, setControlId]);
 
     useField({
         enabled: !groupContext,
@@ -302,12 +298,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
 
     const element = useRenderElement('button', componentProps, {
         state,
-        ref: [
-            buttonRef,
-            controlRef,
-            ref,
-            groupContext?.registerControlRef
-        ],
+        ref: [buttonRef, controlRef, ref, groupContext?.registerControlRef],
         props: [
             {
                 id,

@@ -1,6 +1,5 @@
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
-
-import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
@@ -15,11 +14,11 @@ import { useDialogRootContext } from '../root/DialogRootContext';
 export function DialogDescription(componentProps: DialogDescription.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
-        id: idProp,
         ref,
+        id: idProp,
         ...elementProps
     } = componentProps;
     const { store } = useDialogRootContext();
@@ -28,16 +27,14 @@ export function DialogDescription(componentProps: DialogDescription.Props) {
 
     store.useSyncedValueWithCleanup('descriptionElementId', id);
 
-    const element = useRenderElement('p', componentProps, {
+    return useRenderElement('p', componentProps, {
         ref,
         props: [{ id }, elementProps]
     });
-
-    return element;
 }
 
 export namespace DialogDescription {
-    export type State = object;
+    export type Props = {} & HeadlessUIComponentProps<'p', State>;
 
-    export type Props = HeadlessUIComponentProps<'p', State>;
+    export type State = {};
 }

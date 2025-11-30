@@ -1,17 +1,18 @@
 import React from 'react';
 
-import { useRenderElement } from '~@lib/hooks';
-import { popupStateMapping } from '~@lib/popupStateMapping';
+import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
+
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
+import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
-import type { TransitionStatus } from '@flippo-ui/hooks';
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useDialogRootContext } from '../root/DialogRootContext';
 
-const customStyleHookMapping: StateAttributesMapping<DialogBackdrop.State> = {
-    ...popupStateMapping,
+const stateAttributesMapping: StateAttributesMapping<DialogBackdrop.State> = {
+    ...baseMapping,
     ...transitionStatusMapping
 };
 
@@ -24,14 +25,13 @@ const customStyleHookMapping: StateAttributesMapping<DialogBackdrop.State> = {
 export function DialogBackdrop(componentProps: DialogBackdrop.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         forceRender = false,
         ref,
         ...elementProps
     } = componentProps;
-
     const { store } = useDialogRootContext();
 
     const open = store.useState('open');
@@ -50,7 +50,7 @@ export function DialogBackdrop(componentProps: DialogBackdrop.Props) {
     return useRenderElement('div', componentProps, {
         state,
         ref: [store.context.backdropRef, ref],
-        customStyleHookMapping,
+        customStyleHookMapping: stateAttributesMapping,
         props: [{
             role: 'presentation',
             hidden: !mounted,
@@ -64,19 +64,21 @@ export function DialogBackdrop(componentProps: DialogBackdrop.Props) {
 }
 
 export namespace DialogBackdrop {
+
+    export type Props = {
+    /**
+     * Whether the backdrop is forced to render even when nested.
+     * @default false
+     */
+        forceRender?: boolean;
+    } & HeadlessUIComponentProps<'div', DialogBackdrop.State>;
+
     export type State = {
-        /**
-         * Whether the dialog is currently open.
-         */
+    /**
+     * Whether the dialog is currently open.
+     */
         open: boolean;
         transitionStatus: TransitionStatus;
     };
 
-    export type Props = {
-        /**
-         * Whether the backdrop is forced to render even when nested.
-         * @default false
-         */
-        forceRender?: boolean;
-    } & HeadlessUIComponentProps<'div', State>;
 }

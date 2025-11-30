@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { AnimationFrame, useOpenInteractionType, useScrollLock } from '@flippo-ui/hooks';
+
 import { useHeadlessUiId } from '~@lib/hooks';
 import {
     FloatingNode,
@@ -100,14 +101,14 @@ export function Menubar(props: Menubar.Props) {
             <FloatingTree>
                 <MenubarContent>
                     <CompositeRoot
-                        render={render}
-                        className={className}
-                        state={state}
-                        refs={[ref, setContentElement, contentRef]}
-                        props={[{ role: 'menubar', id }, interactionTypeProps, elementProps]}
-                        orientation={orientation}
-                        loop={loop}
-                        highlightItemOnHover={hasSubmenuOpen}
+                      render={render}
+                      className={className}
+                      state={state}
+                      refs={[ref, setContentElement, contentRef]}
+                      props={[{ role: 'menubar', id }, interactionTypeProps, elementProps]}
+                      orientation={orientation}
+                      loop={loop}
+                      highlightItemOnHover={hasSubmenuOpen}
                     />
                 </MenubarContent>
             </FloatingTree>

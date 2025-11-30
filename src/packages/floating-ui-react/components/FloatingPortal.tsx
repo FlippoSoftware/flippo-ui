@@ -5,11 +5,15 @@ import ReactDOM from 'react-dom';
 
 import { useId, useIsoLayoutEffect } from '@flippo-ui/hooks';
 import { isNode } from '@floating-ui/utils/dom';
+
+import { EMPTY_OBJECT } from '~@lib/constants';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { FocusGuard } from '~@lib/FocusGuard';
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
+import { REASONS } from '~@lib/reason';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 
-import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import {
     disableFocusInside,
@@ -20,16 +24,15 @@ import {
 } from '../utils';
 import { createAttribute } from '../utils/createAttribute';
 
-type FocusManagerState = {
+type FocusManagerState = null | {
     modal: boolean;
     open: boolean;
-    onOpenChange: (open: boolean, data?: HeadlessUIChangeEventDetails<string>) => void;
+    onOpenChange: (open: boolean, data?: { reason?: string; event?: Event }) => void;
     domReference: Element | null;
     closeOnFocusOut: boolean;
-} | null;
+};
 
 const PortalContext = React.createContext<null | {
-    preserveTabOrder: boolean;
     portalNode: HTMLElement | null;
     setFocusManagerState: React.Dispatch<React.SetStateAction<FocusManagerState>>;
     beforeInsideRef: React.RefObject<HTMLSpanElement | null>;
@@ -43,122 +46,102 @@ export const usePortalContext = () => React.use(PortalContext);
 const attr = createAttribute('portal');
 
 export type UseFloatingPortalNodeProps = {
-    id?: string;
-    root?: HTMLElement | ShadowRoot | null | React.RefObject<HTMLElement | ShadowRoot | null>;
+    ref?: React.Ref<HTMLElement>;
+    container?: HTMLElement | ShadowRoot | null | React.RefObject<HTMLElement | ShadowRoot | null>;
+    componentProps?: useRenderElement.ComponentProps<any>;
+    elementProps?: React.HTMLAttributes<HTMLElement>;
+    elementState?: Record<string, unknown>;
 };
 
-/**
- * @see https://floating-ui.com/docs/FloatingPortal#usefloatingportalnode
- */
-export function useFloatingPortalNode(props: UseFloatingPortalNodeProps = {}) {
-    const { id, root } = props;
+export type UseFloatingPortalNodeResult = {
+    portalNode: HTMLElement | null;
+    portalSubtree: React.ReactPortal | null;
+};
+
+export function useFloatingPortalNode(
+    props: UseFloatingPortalNodeProps = {}
+): UseFloatingPortalNodeResult {
+    const {
+        ref,
+        container: containerProp,
+        componentProps = EMPTY_OBJECT,
+        elementProps,
+        elementState
+    } = props;
 
     const uniqueId = useId();
     const portalContext = usePortalContext();
+    const parentPortalNode = portalContext?.portalNode;
 
+    const [containerElement, setContainerElement] = React.useState<HTMLElement | ShadowRoot | null>(
+        null
+    );
     const [portalNode, setPortalNode] = React.useState<HTMLElement | null>(null);
 
-    const portalNodeRef = React.useRef<HTMLDivElement | null>(null);
+    const containerRef = React.useRef<HTMLElement | ShadowRoot | null>(null);
+
+    const setPortalNodeRef = React.useCallback((node: HTMLDivElement | null) => {
+        setPortalNode(node);
+    }, []);
 
     useIsoLayoutEffect(() => {
-        return () => {
-            portalNode?.remove();
-            // Allow the subsequent layout effects to create a new node on updates.
-            // The portal node will still be cleaned up on unmount.
-            // https://github.com/floating-ui/floating-ui/issues/2454
-            queueMicrotask(() => {
-                portalNodeRef.current = null;
-            });
-        };
-    }, [portalNode]);
-
-    useIsoLayoutEffect(() => {
-    // Wait for the uniqueId to be generated before creating the portal node in
-    // React <18 (using `useFloatingId` instead of the native `useId`).
-    // https://github.com/floating-ui/floating-ui/issues/2778
-        if (!uniqueId) {
-            return;
-        }
-        if (portalNodeRef.current) {
-            return;
-        }
-        const existingIdRoot = id ? document.getElementById(id) : null;
-        if (!existingIdRoot) {
+        // Wait for the container to be resolved if explicitly `null`.
+        if (containerProp === null) {
+            if (containerRef.current) {
+                containerRef.current = null;
+                setPortalNode(null);
+                setContainerElement(null);
+            }
             return;
         }
 
-        const subRoot = document.createElement('div');
-        subRoot.id = uniqueId;
-        subRoot.setAttribute(attr, '');
-        existingIdRoot.appendChild(subRoot);
-        portalNodeRef.current = subRoot;
-        setPortalNode(subRoot);
-    }, [id, uniqueId]);
-
-    useIsoLayoutEffect(() => {
-    // Wait for the root to exist before creating the portal node. The root must
-    // be stored in state, not a ref, for this to work reactively.
-        if (root === null) {
-            return;
-        }
-        if (!uniqueId) {
-            return;
-        }
-        if (portalNodeRef.current) {
+        // React 17 does not use React.useId().
+        if (uniqueId == null) {
             return;
         }
 
-        let container = root || portalContext?.portalNode;
-        if (container && !isNode(container)) {
-            container = container.current;
+        const resolvedContainer
+            = (containerProp && (isNode(containerProp) ? containerProp : containerProp.current))
+              ?? parentPortalNode
+              ?? document.body;
+
+        if (resolvedContainer == null) {
+            if (containerRef.current) {
+                containerRef.current = null;
+                setPortalNode(null);
+                setContainerElement(null);
+            }
+            return;
         }
-        container = container || document.body;
 
-        let idWrapper: HTMLDivElement | null = null;
-        if (id) {
-            idWrapper = document.createElement('div');
-            idWrapper.id = id;
-            container.appendChild(idWrapper);
+        if (containerRef.current !== resolvedContainer) {
+            containerRef.current = resolvedContainer;
+            setPortalNode(null);
+            setContainerElement(resolvedContainer);
         }
+    }, [containerProp, parentPortalNode, uniqueId]);
 
-        const subRoot = document.createElement('div');
+    const portalElement = useRenderElement('div', componentProps, {
+        ref: [ref, setPortalNodeRef],
+        state: elementState,
+        props: [{
+            id: uniqueId,
+            [attr]: ''
+        }, elementProps]
+    });
 
-        subRoot.id = uniqueId;
-        subRoot.setAttribute(attr, '');
+    // This `createPortal` call injects `portalElement` into the `container`.
+    // Another call inside `FloatingPortal`/`FloatingPortalLite` then injects the children into `portalElement`.
+    const portalSubtree
+        = containerElement && portalElement
+            ? ReactDOM.createPortal(portalElement, containerElement)
+            : null;
 
-        container = idWrapper || container;
-        container.appendChild(subRoot);
-
-        portalNodeRef.current = subRoot;
-        setPortalNode(subRoot);
-    }, [
-        id,
-        root,
-        uniqueId,
-        portalContext
-    ]);
-
-    return portalNode;
+    return {
+        portalNode,
+        portalSubtree
+    };
 }
-
-export type FloatingPortalProps = {
-    children?: React.ReactNode;
-    /**
-     * Optionally selects the node with the id if it exists, or create it and
-     * append it to the specified `root` (by default `document.body`).
-     */
-    id?: string;
-    /**
-     * Specifies the root node the portal container will be appended to.
-     */
-    root?: UseFloatingPortalNodeProps['root'];
-    /**
-     * When using non-modal focus management using `FloatingFocusManager`, this
-     * will preserve the tab order context based on the React tree instead of the
-     * DOM tree.
-     */
-    preserveTabOrder?: boolean;
-};
 
 /**
  * Portals the floating element into a given container element — by default,
@@ -169,39 +152,44 @@ export type FloatingPortalProps = {
  * @see https://floating-ui.com/docs/FloatingPortal
  * @internal
  */
-export function FloatingPortal(props: FloatingPortalProps): React.JSX.Element {
+export function FloatingPortal(componentProps: FloatingPortal.Props<any>) {
     const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        className,
+        render,
+        /* eslint-enable unused-imports/no-unused-vars */
         children,
-        id,
-        root,
-        preserveTabOrder = true
-    } = props;
+        container,
+        renderGuards,
+        ref,
+        ...elementProps
+    } = componentProps;
 
-    const portalNode = useFloatingPortalNode({ id, root });
-    const [focusManagerState, setFocusManagerState] = React.useState<FocusManagerState>(null);
+    const { portalNode, portalSubtree } = useFloatingPortalNode({
+        container,
+        ref,
+        componentProps,
+        elementProps
+    });
 
     const beforeOutsideRef = React.useRef<HTMLSpanElement>(null);
     const afterOutsideRef = React.useRef<HTMLSpanElement>(null);
     const beforeInsideRef = React.useRef<HTMLSpanElement>(null);
     const afterInsideRef = React.useRef<HTMLSpanElement>(null);
 
+    const [focusManagerState, setFocusManagerState] = React.useState<FocusManagerState>(null);
+
     const modal = focusManagerState?.modal;
     const open = focusManagerState?.open;
 
     const shouldRenderGuards
-    // The FocusManager and therefore floating element are currently open/
-    // rendered.
-    = !!focusManagerState
-    // Guards are only for non-modal focus management.
-      && !focusManagerState.modal
-    // Don't render if unmount is transitioning.
-      && focusManagerState.open
-      && preserveTabOrder
-      && !!(root || portalNode);
+        = typeof renderGuards === 'boolean'
+            ? renderGuards
+            : !!focusManagerState && !focusManagerState.modal && focusManagerState.open && !!portalNode;
 
     // https://codesandbox.io/s/tabbable-portal-f4tng?file=/src/TabbablePortal.tsx
     React.useEffect(() => {
-        if (!portalNode || !preserveTabOrder || modal) {
+        if (!portalNode || modal) {
             return undefined;
         }
 
@@ -215,6 +203,7 @@ export function FloatingPortal(props: FloatingPortalProps): React.JSX.Element {
                 manageFocus(portalNode);
             }
         }
+
         // Listen to the event on the capture phase so they run before the focus
         // trap elements onFocus prop is called.
         portalNode.addEventListener('focusin', onFocus, true);
@@ -223,76 +212,86 @@ export function FloatingPortal(props: FloatingPortalProps): React.JSX.Element {
             portalNode.removeEventListener('focusin', onFocus, true);
             portalNode.removeEventListener('focusout', onFocus, true);
         };
-    }, [portalNode, preserveTabOrder, modal]);
+    }, [portalNode, modal]);
 
     React.useEffect(() => {
-        if (!portalNode) {
-            return;
-        }
-        if (open) {
+        if (!portalNode || open) {
             return;
         }
         enableFocusInside(portalNode);
     }, [open, portalNode]);
 
-    return (
-        <PortalContext
-          value={React.useMemo(
-                () => ({
-                    preserveTabOrder,
-                    beforeOutsideRef,
-                    afterOutsideRef,
-                    beforeInsideRef,
-                    afterInsideRef,
-                    portalNode,
-                    setFocusManagerState
-                }),
-                [preserveTabOrder, portalNode]
-            )}
-        >
-            {shouldRenderGuards && portalNode && (
-                <FocusGuard
-                  data-type={'outside'}
-                  ref={beforeOutsideRef}
-                  onFocus={(event) => {
-                        if (isOutsideEvent(event, portalNode)) {
-                            beforeInsideRef.current?.focus();
-                        }
-                        else {
-                            const domReference = focusManagerState ? focusManagerState.domReference : null;
-                            const prevTabbable = getPreviousTabbable(domReference);
-                            prevTabbable?.focus();
-                        }
-                    }}
-                />
-            )}
-            {shouldRenderGuards && portalNode && (
-                <span aria-owns={portalNode.id} style={visuallyHidden} />
-            )}
-            {portalNode && ReactDOM.createPortal(children, portalNode)}
-            {shouldRenderGuards && portalNode && (
-                <FocusGuard
-                  data-type={'outside'}
-                  ref={afterOutsideRef}
-                  onFocus={(event) => {
-                        if (isOutsideEvent(event, portalNode)) {
-                            afterInsideRef.current?.focus();
-                        }
-                        else {
-                            const domReference = focusManagerState ? focusManagerState.domReference : null;
-                            const nextTabbable = getNextTabbable(domReference);
-                            nextTabbable?.focus();
-
-                            if (focusManagerState?.closeOnFocusOut) {
-                                focusManagerState?.onOpenChange(
-                                    false,
-                                    createChangeEventDetails('focus-out', event.nativeEvent)
-                                );
-                            }
-                        }
-                    }}
-                />
-            )}
-        </PortalContext>
+    const portalContextValue = React.useMemo(
+        () => ({
+            beforeOutsideRef,
+            afterOutsideRef,
+            beforeInsideRef,
+            afterInsideRef,
+            portalNode,
+            setFocusManagerState
+        }),
+        [portalNode]
     );
+
+    return (
+        <React.Fragment>
+            {portalSubtree}
+            <PortalContext.Provider value={portalContextValue}>
+                {shouldRenderGuards && portalNode && (
+                    <FocusGuard
+                        data-type={'outside'}
+                        ref={beforeOutsideRef}
+                        onFocus={(event) => {
+                            if (isOutsideEvent(event, portalNode)) {
+                                beforeInsideRef.current?.focus();
+                            }
+                            else {
+                                const domReference = focusManagerState ? focusManagerState.domReference : null;
+                                const prevTabbable = getPreviousTabbable(domReference);
+                                prevTabbable?.focus();
+                            }
+                        }}
+                    />
+                )}
+                {shouldRenderGuards && portalNode && (
+                    <span aria-owns={portalNode.id} style={visuallyHidden} />
+                )}
+                {portalNode && ReactDOM.createPortal(children, portalNode)}
+                {shouldRenderGuards && portalNode && (
+                    <FocusGuard
+                        data-type={'outside'}
+                        ref={afterOutsideRef}
+                        onFocus={(event) => {
+                            if (isOutsideEvent(event, portalNode)) {
+                                afterInsideRef.current?.focus();
+                            }
+                            else {
+                                const domReference = focusManagerState ? focusManagerState.domReference : null;
+                                const nextTabbable = getNextTabbable(domReference);
+                                nextTabbable?.focus();
+
+                                if (focusManagerState?.closeOnFocusOut) {
+                                    focusManagerState?.onOpenChange(
+                                        false,
+                                        createChangeEventDetails(REASONS.focusOut, event.nativeEvent)
+                                    );
+                                }
+                            }
+                        }}
+                    />
+                )}
+            </PortalContext.Provider>
+        </React.Fragment>
+    );
+}
+
+export namespace FloatingPortal {
+    export type Props<State> = {
+        /**
+         * A parent element to render the portal element into.
+         */
+        container?: UseFloatingPortalNodeProps['container'];
+
+        renderGuards?: boolean;
+    } & HeadlessUIComponentProps<'div', State>;
 }

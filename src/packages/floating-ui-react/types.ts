@@ -5,14 +5,16 @@ import type {
     UseFloatingOptions as UsePositionOptions,
     VirtualElement
 } from '@floating-ui/react-dom';
+
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 
+import type { FloatingTreeStore } from './components/FloatingTree';
 import type { ExtendedUserProps } from './hooks/useInteractions';
 
 export * from '.';
 export type { FloatingDelayGroupProps } from './components/FloatingDelayGroup';
 export type { FloatingFocusManagerProps } from './components/FloatingFocusManager';
-export type { FloatingPortalProps, UseFloatingPortalNodeProps } from './components/FloatingPortal';
+export type { FloatingPortal, UseFloatingPortalNodeProps } from './components/FloatingPortal';
 export type { FloatingNodeProps, FloatingTreeProps } from './components/FloatingTree';
 export type { UseClientPointProps } from './hooks/useClientPoint';
 export type { UseDismissProps } from './hooks/useDismiss';
@@ -140,6 +142,7 @@ export type FloatingRootContext<RT extends ReferenceType = ReferenceType> = {
         domReference: Element | null;
         reference: RT | null;
         floating: HTMLElement | null;
+        triggers?: Element[];
     };
     events: FloatingEvents;
     floatingId: string | undefined;
@@ -168,12 +171,7 @@ export type FloatingNodeType<RT extends ReferenceType = ReferenceType> = {
     context?: FloatingContext<RT>;
 };
 
-export type FloatingTreeType<RT extends ReferenceType = ReferenceType> = {
-    nodesRef: React.RefObject<Array<FloatingNodeType<RT>>>;
-    events: FloatingEvents;
-    addNode: (node: FloatingNodeType) => void;
-    removeNode: (node: FloatingNodeType) => void;
-};
+export type FloatingTreeType<RT extends ReferenceType = ReferenceType> = FloatingTreeStore<RT>;
 
 export type ElementProps = {
     reference?: React.HTMLProps<Element>;
@@ -181,6 +179,7 @@ export type ElementProps = {
     item?:
       | React.HTMLProps<HTMLElement>
       | ((props: ExtendedUserProps) => React.HTMLProps<HTMLElement>);
+    trigger?: React.HTMLProps<Element>;
 };
 
 export type ReferenceType = Element | VirtualElement;

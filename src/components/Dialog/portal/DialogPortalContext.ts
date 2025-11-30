@@ -8,5 +8,6 @@ export function useDialogPortalContext() {
     if (value === undefined) {
         throw new Error('Headless UI: <Dialog.Portal> is missing.');
     }
+
     return value;
 }

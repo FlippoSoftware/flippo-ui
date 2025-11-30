@@ -1,8 +1,8 @@
 import type React from 'react';
 
-import { useEventCallback } from '@flippo-ui/hooks';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { mergeProps } from '~@lib/merge';
+import { REASONS } from '~@lib/reason';
 
 import type { HTMLProps } from '~@lib/types';
 
@@ -18,11 +18,11 @@ export function useDialogClose(params: useDialogClose.Parameters): useDialogClos
         nativeButton
     } = params;
 
-    const handleClick = useEventCallback((event: React.MouseEvent) => {
+    function handleClick(event: React.MouseEvent) {
         if (open) {
-            setOpen(false, createChangeEventDetails('close-press', event.nativeEvent));
+            setOpen(false, createChangeEventDetails(REASONS.closePress, event.nativeEvent));
         }
-    });
+    }
 
     const { getButtonProps, buttonRef } = useButton({
         disabled,
@@ -34,15 +34,15 @@ export function useDialogClose(params: useDialogClose.Parameters): useDialogClos
 
     return {
         getRootProps,
-        buttonRef
+        ref: buttonRef
     };
 }
 
 export namespace useDialogClose {
     export type Parameters = {
-        /**
-         * Whether the button is currently disabled.
-         */
+    /**
+     * Whether the button is currently disabled.
+     */
         disabled: boolean;
         /**
          * Whether the dialog is currently open.
@@ -62,10 +62,10 @@ export namespace useDialogClose {
     };
 
     export type ReturnValue = {
-        /**
-         * Resolver for the root element props.
-         */
+    /**
+     * Resolver for the root element props.
+     */
         getRootProps: (externalProps: React.HTMLAttributes<any>) => React.HTMLAttributes<any>;
-        buttonRef: React.RefObject<HTMLElement | null>;
+        ref: React.Ref<HTMLElement>;
     };
 }

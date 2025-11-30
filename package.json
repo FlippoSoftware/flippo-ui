@@ -30,6 +30,11 @@
       "import": "./dist/components/Avatar/index.es.js",
       "require": "./dist/components/Avatar/index.cjs.js"
     },
+    "./button": {
+      "types": "./dist/components/Button/index.d.ts",
+      "import": "./dist/components/Button/index.es.js",
+      "require": "./dist/components/Button/index.cjs.js"
+    },
     "./checkbox": {
       "types": "./dist/components/Checkbox/index.d.ts",
       "import": "./dist/components/Checkbox/index.es.js",
@@ -59,6 +64,11 @@
       "types": "./dist/components/Dialog/index.d.ts",
       "import": "./dist/components/Dialog/index.es.js",
       "require": "./dist/components/Dialog/index.cjs.js"
+    },
+    "./drawer": {
+      "types": "./dist/components/Drawer/index.d.ts",
+      "import": "./dist/components/Drawer/index.es.js",
+      "require": "./dist/components/Drawer/index.cjs.js"
     },
     "./field": {
       "types": "./dist/components/Field/index.d.ts",
@@ -155,6 +165,11 @@
       "import": "./dist/components/Slot/index.es.js",
       "require": "./dist/components/Slot/index.cjs.js"
     },
+    "./snippet": {
+      "types": "./dist/components/Snippet/index.d.ts",
+      "import": "./dist/components/Snippet/index.es.js",
+      "require": "./dist/components/Snippet/index.cjs.js"
+    },
     "./switch": {
       "types": "./dist/components/Switch/index.d.ts",
       "import": "./dist/components/Switch/index.es.js",
@@ -233,9 +248,11 @@
     "test:ui": "vitest --ui"
   },
   "peerDependencies": {
-    "@flippo-ui/hooks": "workspace:*"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "dependencies": {
+    "@flippo-ui/hooks": "workspace:*",
     "@floating-ui/react": "catalog:",
     "@floating-ui/react-dom": "catalog:",
     "@floating-ui/utils": "catalog:",
@@ -263,8 +280,6 @@
     "eslint-plugin-react-refresh": "catalog:",
     "glob": "catalog:",
     "jsdom": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
     "typescript": "catalog:",
     "vite-plugin-dts": "catalog:",
     "vitest": "catalog:"

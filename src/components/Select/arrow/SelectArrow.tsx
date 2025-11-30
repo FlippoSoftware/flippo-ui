@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useStore } from '@flippo-ui/hooks';
+
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -54,12 +55,7 @@ export function SelectArrow(componentProps: SelectArrow.Props) {
             align,
             uncentered: arrowUncentered
         }),
-        [
-            open,
-            side,
-            align,
-            arrowUncentered
-        ]
+        [open, side, align, arrowUncentered]
     );
 
     const element = useRenderElement('div', componentProps, {
