@@ -1,0 +1,13 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.DrawerTitle {
+  @include common.reset-appearance();
+  @include font.title-3(default);
+
+  color: var(--f-color-text-primary);
+  margin: 0;
+  margin-bottom: var(--f-spacing-6);
+}
+
+

@@ -82,6 +82,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@base-ui-components/react": "catalog:",
     "@flippo-ui/headless-components": "workspace:*",
     "@flippo-ui/icons": "workspace:*",
     "class-variance-authority": "catalog:"

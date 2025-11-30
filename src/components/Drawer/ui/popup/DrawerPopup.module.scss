@@ -1,0 +1,101 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_effect.scss' as effect;
+
+.DrawerPopup {
+  @include common.reset-appearance();
+  @include effect.elevation-modal();
+
+  position: fixed;
+  padding: var(--f-spacing-8);
+  border-radius: var(--f-spacing-6);
+  background-color: var(--f-color-bg-1);
+  color: var(--f-color-text-primary);
+  transition: transform 500ms cubic-bezier(0.32, 0.72, 0, 1);
+
+  // Direction-specific positioning
+  &[data-swipe-direction-down] {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+
+    transform: translateY(var(--swipe-movement, 0px));
+  }
+
+  &[data-swipe-direction-up] {
+    top: 0;
+    left: 0;
+    right: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+
+    transform: translateY(var(--swipe-movement, 0px));
+  }
+
+  &[data-swipe-direction-left] {
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+
+    transform: translateX(var(--swipe-movement, 0px));
+  }
+
+  &[data-swipe-direction-right] {
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+
+    transform: translateX(var(--swipe-movement, 0px));
+  }
+
+  &[data-snap-points][data-swipe-direction-down],
+  &[data-snap-points][data-swipe-direction-up] {
+    height: var(--snap-point-max);
+  }
+
+  &[data-snap-points][data-swipe-direction-left],
+  &[data-snap-points][data-swipe-direction-right] {
+    width: var(--snap-point-max);
+  }
+
+  &[data-snap-points][data-swipe-direction-down] {
+    transform: translateY(calc(var(--snap-point-transform, 100%) + var(--swipe-movement, 0px)));
+  }
+  &[data-snap-points][data-swipe-direction-up] {
+    transform: translateY(calc(var(--snap-point-transform, -100%) + var(--swipe-movement, 0px)));
+  }
+
+  &[data-snap-points][data-swipe-direction-left] {
+    transform: translateX(calc(var(--snap-point-transform, -100%) + var(--swipe-movement, 0px)));
+  }
+
+  &[data-snap-points][data-swipe-direction-right] {
+    transform: translateX(calc(var(--snap-point-transform, 100%) + var(--swipe-movement, 0px)));
+  }
+
+  // Closed state transforms
+  &[data-swipe-direction-down][data-ending-style],
+  &[data-swipe-direction-down][data-starting-style] {
+    transform: translateY(100%);
+  }
+
+  &[data-swipe-direction-up][data-ending-style],
+  &[data-swipe-direction-up][data-starting-style] {
+    transform: translateY(-100%);
+  }
+
+  &[data-swipe-direction-left][data-ending-style],
+  &[data-swipe-direction-left][data-starting-style] {
+    transform: translateX(-100%);
+  }
+
+  &[data-swipe-direction-right][data-ending-style],
+  &[data-swipe-direction-right][data-starting-style] {
+    transform: translateX(100%);
+  }
+}

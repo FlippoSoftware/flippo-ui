@@ -1,0 +1,12 @@
+@use 'mixins/_common.scss' as common;
+@use 'mixins/_font.scss' as font;
+
+.DrawerDescription {
+  @include common.reset-appearance();
+  @include font.body(default);
+
+  color: var(--f-color-text-2);
+  margin-bottom: var(--f-spacing-5);
+}
+
+
