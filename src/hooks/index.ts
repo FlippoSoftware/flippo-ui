@@ -1,5 +1,5 @@
-export * from './useAnimationFinished';
 export * from './useAnimationFrame';
+export * from './useAnimationsFinished';
 export * from './useClipboard';
 export * from './useControlledState';
 export * from './useDidUpdate';
@@ -19,7 +19,7 @@ export * from './useOnFirstRender';
 export * from './useOnMount';
 export * from './useOpenChangeComplete';
 export * from './useOpenInteractionType';
-export * from './usePrevious';
+export * from './usePreviousValue';
 export * from './useScrollLock';
 export * from './useStatusTransition';
 export * from './useStore';

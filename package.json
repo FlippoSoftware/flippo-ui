@@ -15,15 +15,15 @@
       "import": "./dist/hooks/index.es.js",
       "require": "./dist/hooks/index.cjs.js"
     },
-    "./use-animation-finished": {
-      "types": "./dist/hooks/useAnimationFinished/index.d.ts",
-      "import": "./dist/hooks/useAnimationFinished/index.es.js",
-      "require": "./dist/hooks/useAnimationFinished/index.cjs.js"
-    },
     "./use-animation-frame": {
       "types": "./dist/hooks/useAnimationFrame/index.d.ts",
       "import": "./dist/hooks/useAnimationFrame/index.es.js",
       "require": "./dist/hooks/useAnimationFrame/index.cjs.js"
+    },
+    "./use-animations-finished": {
+      "types": "./dist/hooks/useAnimationsFinished/index.d.ts",
+      "import": "./dist/hooks/useAnimationsFinished/index.es.js",
+      "require": "./dist/hooks/useAnimationsFinished/index.cjs.js"
     },
     "./use-clipboard": {
       "types": "./dist/hooks/useClipboard/index.d.ts",
@@ -120,10 +120,10 @@
       "import": "./dist/hooks/useOpenInteractionType/index.es.js",
       "require": "./dist/hooks/useOpenInteractionType/index.cjs.js"
     },
-    "./use-previous": {
-      "types": "./dist/hooks/usePrevious/index.d.ts",
-      "import": "./dist/hooks/usePrevious/index.es.js",
-      "require": "./dist/hooks/usePrevious/index.cjs.js"
+    "./use-previous-value": {
+      "types": "./dist/hooks/usePreviousValue/index.d.ts",
+      "import": "./dist/hooks/usePreviousValue/index.es.js",
+      "require": "./dist/hooks/usePreviousValue/index.cjs.js"
     },
     "./use-scroll-lock": {
       "types": "./dist/hooks/useScrollLock/index.d.ts",
@@ -159,6 +159,16 @@
       "types": "./dist/hooks/useUnmount/index.d.ts",
       "import": "./dist/hooks/useUnmount/index.es.js",
       "require": "./dist/hooks/useUnmount/index.cjs.js"
+    },
+    "./use-value-as-ref": {
+      "types": "./dist/hooks/useValueAsRef/index.d.ts",
+      "import": "./dist/hooks/useValueAsRef/index.es.js",
+      "require": "./dist/hooks/useValueAsRef/index.cjs.js"
+    },
+    "./use-value-changed": {
+      "types": "./dist/hooks/useValueChanged/index.d.ts",
+      "import": "./dist/hooks/useValueChanged/index.es.js",
+      "require": "./dist/hooks/useValueChanged/index.cjs.js"
     }
   },
   "main": "./dist/hooks/index.cjs.js",

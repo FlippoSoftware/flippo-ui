@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useAnimationFinished } from '../useAnimationFinished';
+import { useAnimationsFinished } from '../useAnimationsFinished';
 import { useEventCallback } from '../useEventCallback';
 import { useLatestRef } from '../useLatestRef';
 
@@ -21,7 +21,7 @@ export function useOpenChangeComplete(params: TUseOpenChangeCompleteParameters) 
 
     const openRef = useLatestRef(open);
     const onComplete = useEventCallback(onCompleteParam);
-    const runOnAnimationFinished = useAnimationFinished(ref, open);
+    const runOnAnimationFinished = useAnimationsFinished(ref, open);
 
     React.useEffect(() => {
         if (!enabled)
