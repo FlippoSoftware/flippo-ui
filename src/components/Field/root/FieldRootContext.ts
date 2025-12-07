@@ -1,25 +1,19 @@
-'use client';
-
 import React from 'react';
 
-import { NOOP } from '@lib/noop';
+import { EMPTY_OBJECT } from '~@lib/constants';
+import { NOOP } from '~@lib/noop';
+
+import type { HTMLProps } from '~@lib/types';
 
 import { DEFAULT_VALIDITY_STATE } from '../utils/constants';
 
-import type { FieldRoot, FieldValidityData } from './FieldRoot';
+import type { Form } from '../../Form';
 
-export type TFieldRootContext = {
+import type { FieldRoot, FieldValidityData } from './FieldRoot';
+import type { UseFieldValidationReturnValue } from './useFieldValidation';
+
+export type FieldRootContextValue = {
     invalid: boolean | undefined;
-    /**
-     * The `id` of the labelable element that corresponds to the `for` attribute of a `Field.Label`.
-     * When `null` the association is implicit.
-     */
-    controlId: string | null | undefined;
-    setControlId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
-    labelId: string | undefined;
-    setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
-    messageIds: string[];
-    setMessageIds: React.Dispatch<React.SetStateAction<string[]>>;
     name: string | undefined;
     validityData: FieldValidityData;
     setValidityData: React.Dispatch<React.SetStateAction<FieldValidityData>>;
@@ -36,20 +30,16 @@ export type TFieldRootContext = {
         value: unknown,
         formValues: Record<string, unknown>,
     ) => string | string[] | null | Promise<string | string[] | null>;
-    validationMode: 'onBlur' | 'onChange';
+    validationMode: Form.ValidationMode;
     validationDebounceTime: number;
+    shouldValidateOnChange: () => boolean;
     state: FieldRoot.State;
-    markedDirtyRef: React.MutableRefObject<boolean>;
+    markedDirtyRef: React.RefObject<boolean>;
+    validation: UseFieldValidationReturnValue;
 };
 
-export const FieldRootContext = React.createContext<TFieldRootContext>({
+export const FieldRootContext = React.createContext<FieldRootContextValue>({
     invalid: undefined,
-    controlId: undefined,
-    setControlId: NOOP,
-    labelId: undefined,
-    setLabelId: NOOP,
-    messageIds: [],
-    setMessageIds: NOOP,
     name: undefined,
     validityData: {
         state: DEFAULT_VALIDITY_STATE,
@@ -69,8 +59,9 @@ export const FieldRootContext = React.createContext<TFieldRootContext>({
     focused: false,
     setFocused: NOOP,
     validate: () => null,
-    validationMode: 'onBlur',
+    validationMode: 'onSubmit',
     validationDebounceTime: 0,
+    shouldValidateOnChange: () => false,
     state: {
         disabled: false,
         valid: null,
@@ -79,13 +70,19 @@ export const FieldRootContext = React.createContext<TFieldRootContext>({
         filled: false,
         focused: false
     },
-    markedDirtyRef: { current: false }
+    markedDirtyRef: { current: false },
+    validation: {
+        getValidationProps: (props: HTMLProps = EMPTY_OBJECT) => props,
+        getInputValidationProps: (props: HTMLProps = EMPTY_OBJECT) => props,
+        inputRef: { current: null },
+        commit: async () => {}
+    }
 });
 
 export function useFieldRootContext(optional = true) {
     const context = React.use(FieldRootContext);
 
-    if (context.setControlId === NOOP && !optional) {
+    if (context.setValidityData === NOOP && !optional) {
         throw new Error(
             'Headless UI: FieldRootContext is missing. Field parts must be placed within <Field.Root>.'
         );

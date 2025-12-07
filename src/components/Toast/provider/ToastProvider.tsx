@@ -1,11 +1,9 @@
-'use client';
-import * as React from 'react';
+import React from 'react';
 
 import { Timeout, useEventCallback, useLatestRef } from '@flippo-ui/hooks';
-
-import { generateId } from '@lib/generateId';
-import { ownerDocument } from '@lib/owner';
-import { activeElement, contains } from '@packages/floating-ui-react/utils';
+import { generateId } from '~@lib/generateId';
+import { ownerDocument } from '~@lib/owner';
+import { activeElement, contains } from '~@packages/floating-ui-react/utils';
 
 import { isFocusVisible } from '../utils/focusVisible';
 import { resolvePromiseOptions } from '../utils/resolvePromiseOptions';
@@ -15,7 +13,7 @@ import type { ToastObject, useToastManager } from '../useToastManager';
 
 import { ToastContext } from './ToastProviderContext';
 
-import type { TToastContext } from './ToastProviderContext';
+import type { ToastContextValue } from './ToastProviderContext';
 
 type TimerInfo = {
     timeout?: Timeout;
@@ -387,7 +385,7 @@ export function ToastProvider(props: ToastProvider.Props) {
             update,
             hasDifferingHeights
         ]
-    ) as TToastContext<any>;
+    ) as ToastContextValue<any>;
 
     return <ToastContext value={contextValue}>{children}</ToastContext>;
 }

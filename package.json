@@ -25,10 +25,20 @@
       "import": "./dist/components/Accordion/index.es.js",
       "require": "./dist/components/Accordion/index.cjs.js"
     },
+    "./autocomplete": {
+      "types": "./dist/components/Autocomplete/index.d.ts",
+      "import": "./dist/components/Autocomplete/index.es.js",
+      "require": "./dist/components/Autocomplete/index.cjs.js"
+    },
     "./avatar": {
       "types": "./dist/components/Avatar/index.d.ts",
       "import": "./dist/components/Avatar/index.es.js",
       "require": "./dist/components/Avatar/index.cjs.js"
+    },
+    "./button": {
+      "types": "./dist/components/Button/index.d.ts",
+      "import": "./dist/components/Button/index.es.js",
+      "require": "./dist/components/Button/index.cjs.js"
     },
     "./checkbox": {
       "types": "./dist/components/Checkbox/index.d.ts",
@@ -45,6 +55,11 @@
       "import": "./dist/components/Collapsible/index.es.js",
       "require": "./dist/components/Collapsible/index.cjs.js"
     },
+    "./combobox": {
+      "types": "./dist/components/Combobox/index.d.ts",
+      "import": "./dist/components/Combobox/index.es.js",
+      "require": "./dist/components/Combobox/index.cjs.js"
+    },
     "./composite": {
       "types": "./dist/components/Composite/index.d.ts",
       "import": "./dist/components/Composite/index.es.js",
@@ -59,6 +74,11 @@
       "types": "./dist/components/Dialog/index.d.ts",
       "import": "./dist/components/Dialog/index.es.js",
       "require": "./dist/components/Dialog/index.cjs.js"
+    },
+    "./drawer": {
+      "types": "./dist/components/Drawer/index.d.ts",
+      "import": "./dist/components/Drawer/index.es.js",
+      "require": "./dist/components/Drawer/index.cjs.js"
     },
     "./field": {
       "types": "./dist/components/Field/index.d.ts",
@@ -80,6 +100,16 @@
       "import": "./dist/components/Input/index.es.js",
       "require": "./dist/components/Input/index.cjs.js"
     },
+    "./labelable-provider": {
+      "types": "./dist/components/LabelableProvider/index.d.ts",
+      "import": "./dist/components/LabelableProvider/index.es.js",
+      "require": "./dist/components/LabelableProvider/index.cjs.js"
+    },
+    "./list": {
+      "types": "./dist/components/List/index.d.ts",
+      "import": "./dist/components/List/index.es.js",
+      "require": "./dist/components/List/index.cjs.js"
+    },
     "./menu": {
       "types": "./dist/components/Menu/index.d.ts",
       "import": "./dist/components/Menu/index.es.js",
@@ -94,6 +124,11 @@
       "types": "./dist/components/Meter/index.d.ts",
       "import": "./dist/components/Meter/index.es.js",
       "require": "./dist/components/Meter/index.cjs.js"
+    },
+    "./navigation-menu": {
+      "types": "./dist/components/NavigationMenu/index.d.ts",
+      "import": "./dist/components/NavigationMenu/index.es.js",
+      "require": "./dist/components/NavigationMenu/index.cjs.js"
     },
     "./number-field": {
       "types": "./dist/components/NumberField/index.d.ts",
@@ -115,6 +150,11 @@
       "import": "./dist/components/Progress/index.es.js",
       "require": "./dist/components/Progress/index.cjs.js"
     },
+    "./qr-code": {
+      "types": "./dist/components/QrCode/index.d.ts",
+      "import": "./dist/components/QrCode/index.es.js",
+      "require": "./dist/components/QrCode/index.cjs.js"
+    },
     "./radio": {
       "types": "./dist/components/Radio/index.d.ts",
       "import": "./dist/components/Radio/index.es.js",
@@ -124,6 +164,11 @@
       "types": "./dist/components/RadioGroup/index.d.ts",
       "import": "./dist/components/RadioGroup/index.es.js",
       "require": "./dist/components/RadioGroup/index.cjs.js"
+    },
+    "./scroll-area": {
+      "types": "./dist/components/ScrollArea/index.d.ts",
+      "import": "./dist/components/ScrollArea/index.es.js",
+      "require": "./dist/components/ScrollArea/index.cjs.js"
     },
     "./select": {
       "types": "./dist/components/Select/index.d.ts",
@@ -144,6 +189,11 @@
       "types": "./dist/components/Slot/index.d.ts",
       "import": "./dist/components/Slot/index.es.js",
       "require": "./dist/components/Slot/index.cjs.js"
+    },
+    "./snippet": {
+      "types": "./dist/components/Snippet/index.d.ts",
+      "import": "./dist/components/Snippet/index.es.js",
+      "require": "./dist/components/Snippet/index.cjs.js"
     },
     "./switch": {
       "types": "./dist/components/Switch/index.d.ts",
@@ -220,16 +270,21 @@
     "build": "vite build && node scripts/generate-exports.js",
     "build:exports": "node scripts/generate-exports.js",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "inline-scripts": "tsx ./scripts/inlineScripts.mts"
   },
   "peerDependencies": {
-    "@flippo-ui/hooks": "workspace:*"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "dependencies": {
+    "@flippo-ui/hooks": "workspace:*",
     "@floating-ui/react": "catalog:",
     "@floating-ui/react-dom": "catalog:",
     "@floating-ui/utils": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "qr-code-styling": "catalog:",
+    "qrcode": "catalog:",
     "tabbable": "catalog:",
     "vite": "catalog:"
   },
@@ -241,6 +296,7 @@
     "@testing-library/react": "catalog:",
     "@testing-library/user-event": "catalog:",
     "@types/node": "catalog:",
+    "@types/qrcode": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitest/ui": "catalog:",
@@ -249,9 +305,10 @@
     "eslint-plugin-react-hooks": "catalog:",
     "eslint-plugin-react-refresh": "catalog:",
     "glob": "catalog:",
+    "globby": "catalog:",
     "jsdom": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
+    "terser": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:",
     "vite-plugin-dts": "catalog:",
     "vitest": "catalog:"

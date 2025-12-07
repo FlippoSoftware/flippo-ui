@@ -1,7 +1,8 @@
 import { isHTMLElement, isShadowRoot } from '@floating-ui/utils/dom';
 
+import { isJSDOM } from '~@lib/detectBrowser';
+
 import { FOCUSABLE_ATTRIBUTE, TYPEABLE_SELECTOR } from './constants';
-import { isJSDOM } from './detectBrowser';
 
 export function activeElement(doc: Document) {
     let element = doc.activeElement;
@@ -32,9 +33,7 @@ export function contains(parent?: Element | null, child?: Element | null) {
             if (parent === next) {
                 return true;
             }
-
-            // @ts-expect-error if undefined breake from while
-            next = next.parentNode || (next instanceof ShadowRoot && next.host) || undefined;
+            next = (next.parentNode as Element) || (next as unknown as ShadowRoot).host;
         }
     }
 

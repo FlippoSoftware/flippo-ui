@@ -1,13 +1,12 @@
-'use client';
-import * as React from 'react';
+import React from 'react';
 
-export type TTextDirection = 'ltr' | 'rtl';
+export type TextDirection = 'ltr' | 'rtl';
 
-export type TDirectionContext = {
-    direction: TTextDirection;
+export type DirectionContextValue = {
+    direction: TextDirection;
 };
 
-export const DirectionContext = React.createContext<TDirectionContext | undefined>(undefined);
+export const DirectionContext = React.createContext<DirectionContextValue | undefined>(undefined);
 
 export function useDirection(optional = true) {
     const context = React.use(DirectionContext);

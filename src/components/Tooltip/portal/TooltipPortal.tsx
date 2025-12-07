@@ -1,17 +1,16 @@
-'use client';
-
 import React from 'react';
 
-import { FloatingPortalLite } from '@lib/FloatingPortalLite';
+import { FloatingPortalLite } from '~@lib/FloatingPortalLite';
 
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
 import { TooltipPortalContext } from './TooltipPortalContext';
 
-export function TooltipPortal(props: TooltipPortal.Props) {
-    const { children, keepMounted = false, container } = props;
+export function TooltipPortal(props: TooltipPortalProps) {
+    const { keepMounted = false, ...portalProps } = props;
 
-    const { mounted } = useTooltipRootContext();
+    const store = useTooltipRootContext();
+    const mounted = store.useState('mounted');
 
     const shouldRender = mounted || keepMounted;
     if (!shouldRender) {
@@ -19,16 +18,24 @@ export function TooltipPortal(props: TooltipPortal.Props) {
     }
 
     return (
-        <TooltipPortalContext value={keepMounted}>
-            <FloatingPortalLite root={container}>{children}</FloatingPortalLite>
-        </TooltipPortalContext>
+        <TooltipPortalContext.Provider value={keepMounted}>
+            <FloatingPortalLite {...portalProps} />
+        </TooltipPortalContext.Provider>
     );
 }
 
 export namespace TooltipPortal {
-    export type Props = {
-        children?: React.ReactNode;
-        keepMounted?: boolean;
-        container?: HTMLElement | null | React.RefObject<HTMLElement | null>;
-    };
+    export type State = {};
+}
+
+export type TooltipPortalProps = {
+    /**
+     * Whether to keep the portal mounted in the DOM while the popup is hidden.
+     * @default false
+     */
+    keepMounted?: boolean;
+} & FloatingPortalLite.Props<TooltipPortal.State>;
+
+export namespace TooltipPortal {
+    export type Props = TooltipPortalProps;
 }

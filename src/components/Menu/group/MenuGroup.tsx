@@ -1,10 +1,8 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { MenuGroupContext } from './MenuGroupContext';
 
@@ -37,16 +35,19 @@ export function MenuGroup(componentProps: MenuGroup.Props) {
         }
     });
 
-    return <MenuGroupContext value={context}>{element}</MenuGroupContext>;
+    return <MenuGroupContext.Provider value={context}>{element}</MenuGroupContext.Provider>;
 }
 
-export namespace MenuGroup {
-    export type State = object;
-
-    export type Props = {
+export type MenuGroupProps = {
     /**
      * The content of the component.
      */
-        children?: React.ReactNode;
-    } & HeadlessUIComponentProps<'div', State>;
+    children?: React.ReactNode;
+} & HeadlessUIComponentProps<'div', MenuGroup.State>;
+
+export type MenuGroupState = {};
+
+export namespace MenuGroup {
+    export type Props = MenuGroupProps;
+    export type State = MenuGroupState;
 }

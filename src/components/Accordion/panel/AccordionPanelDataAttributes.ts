@@ -1,4 +1,4 @@
-import { TransitionStatusDataAttributes } from '@lib/styleHookMapping';
+import { TransitionStatusDataAttributes } from '~@lib/styleHookMapping';
 
 export enum AccordionPanelDataAttributes {
     /**

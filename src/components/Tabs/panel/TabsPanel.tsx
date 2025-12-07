@@ -1,10 +1,8 @@
-'use client';
-
 import React from 'react';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
 import { tabsStyleHookMapping } from '../root/styleHooks';
@@ -89,27 +87,31 @@ export function TabsPanel(componentProps: TabsPanel.Props) {
     return element;
 }
 
+export type TabsPanelMetadata = {
+    id?: string;
+    value: TabsTab.Value;
+};
+
+export type TabsPanelState = {
+    hidden: boolean;
+} & TabsRoot.State;
+
+export type TabsPanelProps = {
+    /**
+     * The value of the TabPanel. It will be shown when the Tab with the corresponding value is selected.
+     * If not provided, it will fall back to the index of the panel.
+     * It is recommended to explicitly provide it, as it's required for the tab panel to be rendered on the server.
+     */
+    value?: TabsTab.Value;
+    /**
+     * Whether to keep the HTML element in the DOM while the panel is hidden.
+     * @default false
+     */
+    keepMounted?: boolean;
+} & HeadlessUIComponentProps<'div', TabsPanel.State>;
+
 export namespace TabsPanel {
-    export type Metadata = {
-        id?: string;
-        value: TabsTab.Value;
-    };
-
-    export type State = {
-        hidden: boolean;
-    } & TabsRoot.State;
-
-    export type Props = {
-        /**
-         * The value of the TabPanel. It will be shown when the Tab with the corresponding value is selected.
-         * If not provided, it will fall back to the index of the panel.
-         * It is recommended to explicitly provide it, as it's required for the tab panel to be rendered on the server.
-         */
-        value?: TabsTab.Value;
-        /**
-         * Whether to keep the HTML element in the DOM while the panel is hidden.
-         * @default false
-         */
-        keepMounted?: boolean;
-    } & HeadlessUIComponentProps<'div', State>;
+    export type Metadata = TabsPanelMetadata;
+    export type State = TabsPanelState;
+    export type Props = TabsPanelProps;
 }

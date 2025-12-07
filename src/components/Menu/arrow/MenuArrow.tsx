@@ -1,12 +1,10 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
 
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useMenuPositionerContext } from '../positioner/MenuPositionerContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
@@ -27,7 +25,7 @@ export function MenuArrow(componentProps: MenuArrow.Props) {
         ...elementProps
     } = componentProps;
 
-    const { open } = useMenuRootContext();
+    const { store } = useMenuRootContext();
     const {
         arrowRef,
         side,
@@ -35,6 +33,7 @@ export function MenuArrow(componentProps: MenuArrow.Props) {
         arrowUncentered,
         arrowStyles
     } = useMenuPositionerContext();
+    const open = store.useState('open');
 
     const state: MenuArrow.State = React.useMemo(
         () => ({
@@ -43,12 +42,7 @@ export function MenuArrow(componentProps: MenuArrow.Props) {
             align,
             uncentered: arrowUncentered
         }),
-        [
-            open,
-            side,
-            align,
-            arrowUncentered
-        ]
+        [open, side, align, arrowUncentered]
     );
 
     return useRenderElement('div', componentProps, {
@@ -63,16 +57,19 @@ export function MenuArrow(componentProps: MenuArrow.Props) {
     });
 }
 
-export namespace MenuArrow {
-    export type Props = HeadlessUIComponentProps<'div', State>;
-
-    export type State = {
+export type MenuArrowState = {
     /**
      * Whether the menu is currently open.
      */
-        open: boolean;
-        side: TSide;
-        align: TAlign;
-        uncentered: boolean;
-    };
+    open: boolean;
+    side: Side;
+    align: Align;
+    uncentered: boolean;
+};
+
+export type MenuArrowProps = {} & HeadlessUIComponentProps<'div', MenuArrow.State>;
+
+export namespace MenuArrow {
+    export type State = MenuArrowState;
+    export type Props = MenuArrowProps;
 }

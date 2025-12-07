@@ -1,16 +1,12 @@
-'use client';
-
 import React from 'react';
 
-import { useEventCallback, useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
+import { useMergedRef } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 
-import { EMPTY_ARRAY } from '@lib/constants';
-import { isElementDisabled } from '@lib/isElementDisabled';
-import { ownerDocument } from '@lib/owner';
-import { activeElement } from '@packages/floating-ui-react/utils';
+import { isElementDisabled } from '~@lib/isElementDisabled';
 
-import type { TTextDirection } from '@lib/hooks';
-import type { HTMLProps } from '@lib/types';
+import type { TextDirection } from '~@lib/hooks';
+import type { HTMLProps } from '~@lib/types';
 
 import {
     ALL_KEYS,
@@ -32,8 +28,8 @@ import {
     HORIZONTAL_KEYS_WITH_EXTRA_KEYS,
     isIndexOutOfListBounds,
     isListIndexDisabled,
-    isModifierKeySet,
     isNativeInput,
+    MODIFIER_KEYS,
     scrollIntoViewIfNeeded,
     VERTICAL_KEYS,
     VERTICAL_KEYS_WITH_EXTRA_KEYS
@@ -46,11 +42,11 @@ import type { CompositeMetadata } from '../list/CompositeList';
 export type UseCompositeRootParameters = {
     orientation?: 'horizontal' | 'vertical' | 'both';
     cols?: number;
-    loop?: boolean;
+    loopFocus?: boolean;
     highlightedIndex?: number;
     onHighlightedIndexChange?: (index: number) => void;
     dense?: boolean;
-    direction: TTextDirection;
+    direction: TextDirection;
     itemSizes?: Array<Dimensions>;
     rootRef?: React.Ref<Element>;
     /**
@@ -78,11 +74,13 @@ export type UseCompositeRootParameters = {
     modifierKeys?: ModifierKey[];
 };
 
+const EMPTY_ARRAY: never[] = [];
+
 export function useCompositeRoot(params: UseCompositeRootParameters) {
     const {
         itemSizes,
         cols = 1,
-        loop = true,
+        loopFocus = true,
         dense = false,
         orientation = 'both',
         direction,
@@ -106,25 +104,15 @@ export function useCompositeRoot(params: UseCompositeRootParameters) {
     const hasSetDefaultIndexRef = React.useRef(false);
 
     const highlightedIndex = externalHighlightedIndex ?? internalHighlightedIndex;
-    const onHighlightedIndexChange = useEventCallback((index, shouldScrollIntoView = false) => {
+    const onHighlightedIndexChange = useStableCallback((index, shouldScrollIntoView = false) => {
         (externalSetHighlightedIndex ?? internalSetHighlightedIndex)(index);
         if (shouldScrollIntoView) {
-            const newActiveItem = elementsRef.current[index] || null;
-            scrollIntoViewIfNeeded(rootRef.current, newActiveItem, direction, orientation);
+            const newActiveItem = elementsRef.current[index];
+            scrollIntoViewIfNeeded(rootRef.current, newActiveItem ?? null, direction, orientation);
         }
     });
 
-    useIsoLayoutEffect(() => {
-        const activeEl = activeElement(ownerDocument(rootRef.current)) as HTMLDivElement | null;
-        if (elementsRef.current.includes(activeEl)) {
-            const focusedItem = elementsRef.current[highlightedIndex];
-            if (focusedItem && focusedItem !== activeEl) {
-                focusedItem.focus();
-            }
-        }
-    }, [highlightedIndex]);
-
-    const onMapChange = useEventCallback((map: Map<Element, CompositeMetadata<any>>) => {
+    const onMapChange = useStableCallback((map: Map<Element, CompositeMetadata<any>>) => {
         if (map.size === 0 || hasSetDefaultIndexRef.current) {
             return;
         }
@@ -220,21 +208,25 @@ export function useCompositeRoot(params: UseCompositeRootParameters) {
                         (index) => index != null && !isListIndexDisabled(elementsRef, index, disabledIndices)
                     );
                     // last enabled index
-                    const maxGridIndex = cellMap.findLastIndex(
-                        (index) => index != null && !isListIndexDisabled(elementsRef, index, disabledIndices)
+                    const maxGridIndex = cellMap.reduce(
+                        (foundIndex: number, index, cellIndex) =>
+                            index != null && !isListIndexDisabled(elementsRef, index, disabledIndices)
+                                ? cellIndex
+                                : foundIndex,
+                        -1
                     );
 
                     nextIndex = cellMap[
                         getGridNavigatedIndex(
                             {
                                 current: cellMap.map((itemIndex) =>
-                                    itemIndex ? elementsRef.current[itemIndex] || null : null
+                                    itemIndex ? elementsRef.current[itemIndex] ?? null : null
                                 )
                             },
                             {
                                 event,
                                 orientation,
-                                loop,
+                                loopFocus,
                                 cols,
                                 // treat undefined (empty grid spaces) as disabled indices so we
                                 // don't end up in them
@@ -297,10 +289,10 @@ export function useCompositeRoot(params: UseCompositeRootParameters) {
                     nextIndex === highlightedIndex
                     && (forwardKeys.includes(event.key) || backwardKeys.includes(event.key))
                 ) {
-                    if (loop && nextIndex === maxIndex && forwardKeys.includes(event.key)) {
+                    if (loopFocus && nextIndex === maxIndex && forwardKeys.includes(event.key)) {
                         nextIndex = minIndex;
                     }
-                    else if (loop && nextIndex === minIndex && backwardKeys.includes(event.key)) {
+                    else if (loopFocus && nextIndex === minIndex && backwardKeys.includes(event.key)) {
                         nextIndex = maxIndex;
                     }
                     else {
@@ -339,7 +331,7 @@ export function useCompositeRoot(params: UseCompositeRootParameters) {
             highlightedIndex,
             isGrid,
             itemSizes,
-            loop,
+            loopFocus,
             mergedRef,
             modifierKeys,
             onHighlightedIndexChange,
@@ -355,7 +347,8 @@ export function useCompositeRoot(params: UseCompositeRootParameters) {
             onHighlightedIndexChange,
             elementsRef,
             disabledIndices,
-            onMapChange
+            onMapChange,
+            relayKeyboardEvent: props.onKeyDown!
         }),
         [
             props,
@@ -366,4 +359,16 @@ export function useCompositeRoot(params: UseCompositeRootParameters) {
             onMapChange
         ]
     );
+}
+
+function isModifierKeySet(event: React.KeyboardEvent, ignoredModifierKeys: ModifierKey[]) {
+    for (const key of MODIFIER_KEYS.values()) {
+        if (ignoredModifierKeys.includes(key)) {
+            continue;
+        }
+        if (event.getModifierState(key)) {
+            return true;
+        }
+    }
+    return false;
 }

@@ -1,4 +1,4 @@
-import { generateId } from '@lib/generateId';
+import { generateId } from '~@lib/generateId';
 
 import type { ToastObject, useToastManager } from './useToastManager';
 

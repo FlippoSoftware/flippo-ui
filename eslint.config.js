@@ -24,7 +24,8 @@ export default createEslintConfig(
                     format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
                     leadingUnderscore: 'allow',
                     trailingUnderscore: 'allow'
-                }]
+                }],
+                'ts/no-empty-object-type': 'off'
             }
         },
         stylistic: {
@@ -35,7 +36,12 @@ export default createEslintConfig(
         jsx: true,
         formatters: true,
         ...general,
-        ignores: ['**/*.md/*.ts']
+        ignores: [
+            '**/*.md/*.ts',
+            '**/*.md/*.tsx',
+            '**/*.mdx/*.ts',
+            '**/*.mdx/*.tsx'
+        ]
     },
     {
         rules: {
@@ -51,7 +57,7 @@ export default createEslintConfig(
                 type: 'natural',
                 order: 'asc',
                 newlinesBetween: 'always',
-                internalPattern: ['^~/.+', '^@/.+'],
+                internalPattern: ['^~/.+', '^@/.+', '^~@.+'],
                 groups: [
                     'react',
                     'builtin',

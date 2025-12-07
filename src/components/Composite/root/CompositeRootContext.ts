@@ -1,19 +1,24 @@
-'use client';
-
 import React from 'react';
 
-export type TCompositeRootContext = {
+export type CompositeRootContextValue = {
     highlightedIndex: number;
     onHighlightedIndexChange: (index: number, shouldScrollIntoView?: boolean) => void;
     highlightItemOnHover: boolean;
+    /**
+     * Makes it possible to control composite components using events that don't originate from their children.
+     * For example, a Menubar with detached triggers may define its Menu.Root outside of CompositeRoot.
+     * Keyboard events that occur within this menu won't normally be captured by the CompositeRoot,
+     * so they need to be forwarded manually using this function.
+     */
+    relayKeyboardEvent: (event: React.KeyboardEvent<any>) => void;
 };
 
-export const CompositeRootContext = React.createContext<TCompositeRootContext | undefined>(
+export const CompositeRootContext = React.createContext<CompositeRootContextValue | undefined>(
     undefined
 );
 
-export function useCompositeRootContext(optional: true): TCompositeRootContext | undefined;
-export function useCompositeRootContext(optional?: false): TCompositeRootContext;
+export function useCompositeRootContext(optional: true): CompositeRootContextValue | undefined;
+export function useCompositeRootContext(optional?: false): CompositeRootContextValue;
 export function useCompositeRootContext(optional = false) {
     const context = React.use(CompositeRootContext);
 

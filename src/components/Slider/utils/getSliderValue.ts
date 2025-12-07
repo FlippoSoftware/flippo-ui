@@ -1,4 +1,4 @@
-import { clamp } from '@lib/clamp';
+import { clamp } from '~@lib/clamp';
 
 import { replaceArrayItemAtIndex } from './replaceArrayItemAtIndex';
 

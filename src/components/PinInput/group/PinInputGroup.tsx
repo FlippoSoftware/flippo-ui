@@ -1,6 +1,6 @@
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { usePinInputRootContext } from '../root/PinInputRootContext';
 import { pinInputStyleHookMapping } from '../utils/styleHooks';

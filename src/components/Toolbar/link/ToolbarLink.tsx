@@ -1,8 +1,8 @@
-'use client';
+
 
 import React from 'react';
 
-import type { HeadlessUIComponentProps, Orientation } from '@lib/types';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
 import { CompositeItem } from '../../Composite/item/CompositeItem';
 import { useToolbarRootContext } from '../root/ToolbarRootContext';

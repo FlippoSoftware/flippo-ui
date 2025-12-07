@@ -1,14 +1,12 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { FieldsetRootContext } from './FieldsetRootContext';
 
-import type { TFieldsetRootContext } from './FieldsetRootContext';
+import type { FieldsetRootContextValue } from './FieldsetRootContext';
 
 /**
  * Groups the fieldset legend and the associated fields.
@@ -16,11 +14,11 @@ import type { TFieldsetRootContext } from './FieldsetRootContext';
  *
  * Documentation: [Base UI Fieldset](https://base-ui.com/react/components/fieldset)
  */
-export function FieldsetRoot(componentProps: FieldsetRoot.Props) {
+export function FieldsetRoot(componentProps: FieldsetRootProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         disabled = false,
         ref,
@@ -44,7 +42,7 @@ export function FieldsetRoot(componentProps: FieldsetRoot.Props) {
         }, elementProps]
     });
 
-    const contextValue: TFieldsetRootContext = React.useMemo(
+    const contextValue: FieldsetRootContextValue = React.useMemo(
         () => ({
             legendId,
             setLegendId,
@@ -54,17 +52,19 @@ export function FieldsetRoot(componentProps: FieldsetRoot.Props) {
     );
 
     return (
-        <FieldsetRootContext value={contextValue}>{element}</FieldsetRootContext>
+        <FieldsetRootContext.Provider value={contextValue}>{element}</FieldsetRootContext.Provider>
     );
 }
 
-export namespace FieldsetRoot {
-    export type State = {
-        /**
-         * Whether the component should ignore user interaction.
-         */
-        disabled: boolean;
-    };
+export type FieldsetRootState = {
+    /**
+     * Whether the component should ignore user interaction.
+     */
+    disabled: boolean;
+};
+export type FieldsetRootProps = {} & HeadlessUIComponentProps<'fieldset', FieldsetRoot.State>;
 
-    export type Props = HeadlessUIComponentProps<'fieldset', State>;
+export namespace FieldsetRoot {
+    export type State = FieldsetRootState;
+    export type Props = FieldsetRootProps;
 }

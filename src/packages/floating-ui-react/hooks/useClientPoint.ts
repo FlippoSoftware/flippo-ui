@@ -1,11 +1,17 @@
-import React from 'react';
+import * as React from 'react';
 
-import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 import { getWindow } from '@floating-ui/utils/dom';
 
 import { contains, getTarget, isMouseLikePointerType } from '../utils';
 
-import type { ContextData, ElementProps, FloatingRootContext } from '../types';
+import type {
+    ContextData,
+    ElementProps,
+    FloatingContext,
+    FloatingRootContext
+} from '../types';
 
 function createVirtualElement(
     domElement: Element | null | undefined,
@@ -118,15 +124,16 @@ export type UseClientPointProps = {
  * @see https://floating-ui.com/docs/useClientPoint
  */
 export function useClientPoint(
-    context: FloatingRootContext,
+    context: FloatingRootContext<any> | FloatingContext<any>,
     props: UseClientPointProps = {}
 ): ElementProps {
-    const {
-        open,
-        dataRef,
-        elements: { floating, domReference },
-        refs
-    } = context;
+    const store = 'rootStore' in context ? context.rootStore : context;
+
+    const open = store.useState('open');
+    const floating = store.useState('floatingElement');
+    const domReference = store.useState('domReferenceElement');
+    const dataRef = store.context.dataRef;
+
     const {
         enabled = true,
         axis = 'both',
@@ -140,7 +147,7 @@ export function useClientPoint(
     const [pointerType, setPointerType] = React.useState<string | undefined>();
     const [reactive, setReactive] = React.useState([]);
 
-    const setReference = useEventCallback((newX: number | null, newY: number | null) => {
+    const setReference = useStableCallback((newX: number | null, newY: number | null) => {
         if (initialRef.current) {
             return;
         }
@@ -152,7 +159,8 @@ export function useClientPoint(
             return;
         }
 
-        refs.setPositionReference(
+        store.set(
+            'positionReference',
             createVirtualElement(domReference, {
                 x: newX,
                 y: newY,
@@ -163,7 +171,7 @@ export function useClientPoint(
         );
     });
 
-    const handleReferenceEnterOrMove = useEventCallback((event: React.MouseEvent<Element>) => {
+    const handleReferenceEnterOrMove = useStableCallback((event: React.MouseEvent<Element>) => {
         if (x != null || y != null) {
             return;
         }
@@ -215,7 +223,7 @@ export function useClientPoint(
             return cleanup;
         }
 
-        refs.setPositionReference(domReference);
+        store.set('positionReference', domReference);
         return undefined;
     }, [
         openCheck,
@@ -224,8 +232,8 @@ export function useClientPoint(
         y,
         floating,
         dataRef,
-        refs,
         domReference,
+        store,
         setReference
     ]);
 
@@ -250,12 +258,7 @@ export function useClientPoint(
             initialRef.current = false;
             setReference(x, y);
         }
-    }, [
-        enabled,
-        x,
-        y,
-        setReference
-    ]);
+    }, [enabled, x, y, setReference]);
 
     const reference: ElementProps['reference'] = React.useMemo(() => {
         function setPointerTypeRef(event: React.PointerEvent) {

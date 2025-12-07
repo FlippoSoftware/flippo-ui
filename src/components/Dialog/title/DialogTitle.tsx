@@ -1,10 +1,9 @@
-'use client';
+import React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useDialogRootContext } from '../root/DialogRootContext';
 
@@ -14,7 +13,7 @@ import { useDialogRootContext } from '../root/DialogRootContext';
  *
  * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
  */
-export function DialogTitle(componentProps: DialogTitle.Props) {
+export function DialogTitle(componentProps: DialogTitleProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,
@@ -24,27 +23,23 @@ export function DialogTitle(componentProps: DialogTitle.Props) {
         ref,
         ...elementProps
     } = componentProps;
-    const { setTitleElementId } = useDialogRootContext();
+    const { store } = useDialogRootContext();
 
     const id = useHeadlessUiId(idProp);
 
-    useIsoLayoutEffect(() => {
-        setTitleElementId(id);
-        return () => {
-            setTitleElementId(undefined);
-        };
-    }, [id, setTitleElementId]);
+    store.useSyncedValueWithCleanup('titleElementId', id);
 
-    const element = useRenderElement('h2', componentProps, {
+    return useRenderElement('h2', componentProps, {
         ref,
         props: [{ id }, elementProps]
     });
-
-    return element;
 }
 
-export namespace DialogTitle {
-    export type State = object;
+export type DialogTitleProps = {} & HeadlessUIComponentProps<'h2', DialogTitle.State>;
 
-    export type Props = HeadlessUIComponentProps<'h2', State>;
+export type DialogTitleState = {};
+
+export namespace DialogTitle {
+    export type Props = DialogTitleProps;
+    export type State = DialogTitleState;
 }

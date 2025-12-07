@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCompositeListContext } from '../../Composite/list/CompositeListContext';
 import { usePinInputRootContext } from '../root/PinInputRootContext';
@@ -47,12 +47,7 @@ export function PinInputFocusFunnel(componentProps: PinInputFocusFunnel.Props) {
             lastFocusedInputIndex,
             maxIndex
         );
-    }, [
-        focusMode,
-        values,
-        lastFocusedInputIndex,
-        elementsRef
-    ]);
+    }, [focusMode, values, lastFocusedInputIndex, elementsRef]);
 
     /**
      * Handle focus funnel click to direct focus to appropriate input

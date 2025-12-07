@@ -1,4 +1,4 @@
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
+import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
 
 import type { TabsTab } from '../tab/TabsTab';
 

@@ -1,23 +1,46 @@
-'use client';
-
 import React from 'react';
 
-import { useEnhancedEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
 
 import { useCompositeListContext } from './CompositeListContext';
+
+export type UseCompositeListItemParameters<Metadata> = {
+    index?: number;
+    label?: string | null;
+    metadata?: Metadata;
+    textRef?: React.RefObject<HTMLElement | null>;
+    /**
+     * Enables guessing the indexes. This avoids a re-render after mount, which is useful for
+     * large lists. This should be used for lists that are likely flat and vertical, other cases
+     * might trigger a re-render anyway.
+     */
+    indexGuessBehavior?: IndexGuessBehavior;
+};
+
+type UseCompositeListItemReturnValue = {
+    ref: (node: HTMLElement | null) => void;
+    index: number;
+};
 
 export enum IndexGuessBehavior {
     None,
     GuessFromOrder
 }
 
-export function useCompositeListItem<Metadata>(params: NUseCompositeListItem.Params<Metadata> = {}) {
+/**
+ * Used to register a list item and its index (DOM position) in the `CompositeList`.
+ */
+export function useCompositeListItem<Metadata>(
+    params: UseCompositeListItemParameters<Metadata> = {}
+): UseCompositeListItemReturnValue {
     const {
         label,
         metadata,
         textRef,
-        indexGuessBehavior
+        indexGuessBehavior,
+        index: externalIndex
     } = params;
+
     const {
         register,
         unregister,
@@ -30,7 +53,8 @@ export function useCompositeListItem<Metadata>(params: NUseCompositeListItem.Par
 
     const indexRef = React.useRef(-1);
     const [index, setIndex] = React.useState<number>(
-        indexGuessBehavior === IndexGuessBehavior.GuessFromOrder
+        externalIndex
+        ?? (indexGuessBehavior === IndexGuessBehavior.GuessFromOrder
             ? () => {
                 if (indexRef.current === -1) {
                     const newIndex = nextIndexRef.current;
@@ -39,7 +63,7 @@ export function useCompositeListItem<Metadata>(params: NUseCompositeListItem.Par
                 }
                 return indexRef.current;
             }
-            : -1
+            : -1)
     );
 
     const componentRef = React.useRef<Element | null>(null);
@@ -68,7 +92,11 @@ export function useCompositeListItem<Metadata>(params: NUseCompositeListItem.Par
         ]
     );
 
-    useEnhancedEffect(() => {
+    useIsoLayoutEffect(() => {
+        if (externalIndex != null) {
+            return undefined;
+        }
+
         const node = componentRef.current;
         if (node) {
             register(node, metadata);
@@ -76,11 +104,14 @@ export function useCompositeListItem<Metadata>(params: NUseCompositeListItem.Par
                 unregister(node);
             };
         }
-
         return undefined;
-    }, [register, unregister, metadata]);
+    }, [externalIndex, register, unregister, metadata]);
 
-    useEnhancedEffect(() => {
+    useIsoLayoutEffect(() => {
+        if (externalIndex != null) {
+            return undefined;
+        }
+
         return subscribeMapChange((map) => {
             const i = componentRef.current ? map.get(componentRef.current)?.index : null;
 
@@ -88,7 +119,7 @@ export function useCompositeListItem<Metadata>(params: NUseCompositeListItem.Par
                 setIndex(i);
             }
         });
-    }, [subscribeMapChange, setIndex]);
+    }, [externalIndex, subscribeMapChange, setIndex]);
 
     return React.useMemo(
         () => ({
@@ -97,23 +128,4 @@ export function useCompositeListItem<Metadata>(params: NUseCompositeListItem.Par
         }),
         [index, ref]
     );
-}
-
-export namespace NUseCompositeListItem {
-    export type Params<Metadata> = {
-        label?: string | null;
-        metadata?: Metadata;
-        textRef?: React.RefObject<HTMLElement | null>;
-        /**
-         * Enables guessing the indexes. This avoids a re-render after mount, which is useful for
-         * large lists. This should be used for lists that are likely flat and vertical, other cases
-         * might trigger a re-render anyway.
-         */
-        indexGuessBehavior?: IndexGuessBehavior;
-    };
-
-    export type ReturnValue = {
-        ref: (node: HTMLElement | null) => void;
-        index: number;
-    };
 }

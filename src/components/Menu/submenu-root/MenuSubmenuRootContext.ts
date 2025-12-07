@@ -1,7 +1,15 @@
 import React from 'react';
 
-export const MenuSubmenuRootContext = React.createContext(false);
+import type { MenuStore } from '../store/MenuStore';
 
-export function useMenuSubmenuRootContext(): boolean {
+export const MenuSubmenuRootContext = React.createContext<MenuSubmenuRootContextValue | undefined>(
+    undefined
+);
+
+export type MenuSubmenuRootContextValue = {
+    parentMenu: MenuStore<unknown>;
+};
+
+export function useMenuSubmenuRootContext(): MenuSubmenuRootContextValue | undefined {
     return React.use(MenuSubmenuRootContext);
 }

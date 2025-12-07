@@ -1,15 +1,15 @@
-'use client';
+
 import * as React from 'react';
 
 import { useLatestRef } from '@flippo-ui/hooks';
 
-import { FocusGuard } from '@lib/FocusGuard';
-import { useRenderElement } from '@lib/hooks';
-import { ownerDocument, ownerWindow } from '@lib/owner';
-import { visuallyHidden } from '@lib/visuallyHidden';
-import { activeElement, contains, getTarget } from '@packages/floating-ui-react/utils';
+import { FocusGuard } from '~@lib/FocusGuard';
+import { useRenderElement } from '~@lib/hooks';
+import { ownerDocument, ownerWindow } from '~@lib/owner';
+import { visuallyHidden } from '~@lib/visuallyHidden';
+import { activeElement, contains, getTarget } from '~@packages/floating-ui-react/utils';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { useToastContext } from '../provider/ToastProviderContext';
 import { isFocusVisible } from '../utils/focusVisible';

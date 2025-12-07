@@ -1,8 +1,8 @@
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
-import { transitionStatusMapping } from '@lib/styleHookMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 
 import { fieldValidityMapping } from '../../Field/utils/constants';
 import { RadioRootDataAttributes } from '../root/RadioRootDataAttributes';
@@ -16,7 +16,7 @@ export const radioStyleHookMapping = {
     },
     ...transitionStatusMapping,
     ...fieldValidityMapping
-} satisfies CustomStyleHookMapping<{
+} satisfies StateAttributesMapping<{
     checked: boolean;
     transitionStatus: TransitionStatus;
     valid: boolean | null;

@@ -1,11 +1,11 @@
 import React from 'react';
 
-export type TSelectGroupContext = {
+export type SelectGroupContextValue = {
     labelId: string | undefined;
     setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const SelectGroupContext = React.createContext<TSelectGroupContext | undefined>(undefined);
+export const SelectGroupContext = React.createContext<SelectGroupContextValue | undefined>(undefined);
 
 export function useSelectGroupContext() {
     const context = React.use(SelectGroupContext);

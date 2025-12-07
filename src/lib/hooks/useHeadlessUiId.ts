@@ -1,5 +1,3 @@
-'use client';
-
 import { useId } from '@flippo-ui/hooks';
 
 /**

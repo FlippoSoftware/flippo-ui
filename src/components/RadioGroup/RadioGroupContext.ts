@@ -1,26 +1,33 @@
-'use client';
-
 import React from 'react';
 
-import { NOOP } from '@lib/noop';
+import { NOOP } from '~@lib/noop';
 
-import type { useFieldControlValidation } from '../Field/control/useFieldControlValidation';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIEventReasons } from '~@lib/reason';
 
-export type TRadioGroupContext = {
+import type { UseFieldValidationReturnValue } from '../Field/root/useFieldValidation';
+
+export type RadioGroupContextValue = {
     disabled: boolean | undefined;
     readOnly: boolean | undefined;
     required: boolean | undefined;
     name: string | undefined;
     checkedValue: unknown;
-    setCheckedValue: React.Dispatch<React.SetStateAction<unknown>>;
-    onValueChange: (value: unknown, event: Event) => void;
+    setCheckedValue: (
+        value: unknown,
+        eventDetails: HeadlessUIChangeEventDetails<HeadlessUIEventReasons['none']>,
+    ) => void;
+    onValueChange: (
+        value: unknown,
+        eventDetails: HeadlessUIChangeEventDetails<HeadlessUIEventReasons['none']>,
+    ) => void;
     touched: boolean;
     setTouched: React.Dispatch<React.SetStateAction<boolean>>;
-    fieldControlValidation?: ReturnType<typeof useFieldControlValidation>;
+    validation?: UseFieldValidationReturnValue;
     registerControlRef: (element: HTMLElement | null) => void;
 };
 
-export const RadioGroupContext = React.createContext<TRadioGroupContext>({
+export const RadioGroupContext = React.createContext<RadioGroupContextValue>({
     disabled: undefined,
     readOnly: undefined,
     required: undefined,

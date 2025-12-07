@@ -1,14 +1,12 @@
-'use client';
-
 import React from 'react';
 
 import { useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useRadioRootContext } from '../root/RadioRootContext';
 import { radioStyleHookMapping } from '../utils/styleHooks';
@@ -22,8 +20,8 @@ import { radioStyleHookMapping } from '../utils/styleHooks';
 export function RadioIndicator(componentProps: RadioIndicator.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         keepMounted = false,
         ref,
@@ -73,20 +71,23 @@ export function RadioIndicator(componentProps: RadioIndicator.Props) {
     return element;
 }
 
-export namespace RadioIndicator {
-    export type State = {
-        /**
-         * Whether the radio button is currently selected.
-         */
-        checked: boolean;
-        transitionStatus: TransitionStatus;
-    };
+export type RadioIndicatorProps = {
+    /**
+     * Whether to keep the HTML element in the DOM when the radio button is inactive.
+     * @default false
+     */
+    keepMounted?: boolean;
+} & HeadlessUIComponentProps<'span', RadioIndicator.State>;
 
-    export type Props = {
-        /**
-         * Whether to keep the HTML element in the DOM when the radio button is inactive.
-         * @default false
-         */
-        keepMounted?: boolean;
-    } & HeadlessUIComponentProps<'span', State>;
+export type RadioIndicatorState = {
+    /**
+     * Whether the radio button is currently selected.
+     */
+    checked: boolean;
+    transitionStatus: TransitionStatus;
+};
+
+export namespace RadioIndicator {
+    export type Props = RadioIndicatorProps;
+    export type State = RadioIndicatorState;
 }

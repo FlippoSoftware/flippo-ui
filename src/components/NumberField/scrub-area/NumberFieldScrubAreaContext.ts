@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type TNumberFieldScrubAreaContext = {
+export type NumberFieldScrubAreaContextValue = {
     isScrubbing: boolean;
     isTouchInput: boolean;
     isPointerLockDenied: boolean;
@@ -12,12 +12,11 @@ export type TNumberFieldScrubAreaContext = {
 };
 
 export const NumberFieldScrubAreaContext = React.createContext<
-  TNumberFieldScrubAreaContext | undefined
+    NumberFieldScrubAreaContextValue | undefined
 >(undefined);
 
 export function useNumberFieldScrubAreaContext() {
     const context = React.use(NumberFieldScrubAreaContext);
-
     if (context === undefined) {
         throw new Error(
             'Headless UI: NumberFieldScrubAreaContext is missing. NumberFieldScrubArea parts must be placed within <NumberField.ScrubArea>.'

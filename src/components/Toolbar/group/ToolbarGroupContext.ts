@@ -1,15 +1,13 @@
-'use client';
-
 import React from 'react';
 
-export type TToolbarGroupContext = {
+export type ToolbarGroupContextValue = {
     disabled: boolean;
 };
 
-export const ToolbarGroupContext = React.createContext<TToolbarGroupContext | undefined>(undefined);
+export const ToolbarGroupContext = React.createContext<ToolbarGroupContextValue | undefined>(undefined);
 
-export function useToolbarGroupContext(optional?: false): TToolbarGroupContext;
-export function useToolbarGroupContext(optional: true): TToolbarGroupContext | undefined;
+export function useToolbarGroupContext(optional?: false): ToolbarGroupContextValue;
+export function useToolbarGroupContext(optional: true): ToolbarGroupContextValue | undefined;
 export function useToolbarGroupContext(optional?: boolean) {
     const context = React.use(ToolbarGroupContext);
 

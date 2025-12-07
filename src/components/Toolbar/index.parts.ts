@@ -5,4 +5,4 @@ export { ToolbarLink as Link } from './link/ToolbarLink';
 export { ToolbarRoot as Root } from './root/ToolbarRoot';
 export { ToolbarSeparator as Separator } from './separator/ToolbarSeparator';
 
-export type { Orientation } from '@lib/types';
+export type { Orientation } from '~@lib/types';

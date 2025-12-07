@@ -1,12 +1,10 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
 
-import type { TAlign, TSide } from '@lib/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { Align, Side } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { usePopoverPositionerContext } from '../positioner/PopoverPositionerContext';
 import { usePopoverRootContext } from '../root/PopoverRootContext';
@@ -27,7 +25,8 @@ export function PopoverArrow(componentProps: PopoverArrow.Props) {
         ...elementProps
     } = componentProps;
 
-    const { open } = usePopoverRootContext();
+    const { store } = usePopoverRootContext();
+    const open = store.useState('open');
     const {
         arrowRef,
         side,
@@ -43,12 +42,7 @@ export function PopoverArrow(componentProps: PopoverArrow.Props) {
             align,
             uncentered: arrowUncentered
         }),
-        [
-            open,
-            side,
-            align,
-            arrowUncentered
-        ]
+        [open, side, align, arrowUncentered]
     );
 
     const element = useRenderElement('div', componentProps, {
@@ -61,16 +55,19 @@ export function PopoverArrow(componentProps: PopoverArrow.Props) {
     return element;
 }
 
-export namespace PopoverArrow {
-    export type State = {
-        /**
-         * Whether the popover is currently open.
-         */
-        open: boolean;
-        side: TSide;
-        align: TAlign;
-        uncentered: boolean;
-    };
+export type PopoverArrowState = {
+    /**
+     * Whether the popover is currently open.
+     */
+    open: boolean;
+    side: Side;
+    align: Align;
+    uncentered: boolean;
+};
 
-    export type Props = HeadlessUIComponentProps<'div', State>;
+export type PopoverArrowProps = {} & HeadlessUIComponentProps<'div', PopoverArrow.State>;
+
+export namespace PopoverArrow {
+    export type State = PopoverArrowState;
+    export type Props = PopoverArrowProps;
 }

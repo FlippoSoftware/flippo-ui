@@ -1,8 +1,6 @@
-'use client';
+import { useRenderElement } from '~@lib/hooks';
 
-import { useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { useSwitchRootContext } from '../root/SwitchRootContext';

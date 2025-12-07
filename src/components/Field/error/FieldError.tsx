@@ -1,14 +1,13 @@
-'use client';
-
 import React from 'react';
 
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useFormContext } from '../../Form/FormContext';
+import { useLabelableContext } from '../../LabelableProvider';
 import { useFieldRootContext } from '../root/FieldRootContext';
 import { fieldValidityMapping } from '../utils/constants';
 
@@ -34,12 +33,8 @@ export function FieldError(componentProps: FieldError.Props) {
 
     const id = useHeadlessUiId(idProp);
 
-    const {
-        validityData,
-        state,
-        name,
-        setMessageIds
-    } = useFieldRootContext(false);
+    const { validityData, state, name } = useFieldRootContext(false);
+    const { setMessageIds } = useLabelableContext();
 
     const { errors } = useFormContext();
 

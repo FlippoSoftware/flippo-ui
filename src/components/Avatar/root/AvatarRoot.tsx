@@ -1,10 +1,10 @@
-'use client';
+
 
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { AvatarRootContext } from './AvatarRootContext';
 import { avatarStyleHookMapping } from './styleHooks';

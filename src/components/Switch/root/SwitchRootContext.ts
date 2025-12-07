@@ -2,9 +2,9 @@ import React from 'react';
 
 import type { SwitchRoot } from './SwitchRoot';
 
-export type TSwitchRootContext = SwitchRoot.State;
+export type SwitchRootContextValue = SwitchRoot.State;
 
-export const SwitchRootContext = React.createContext<TSwitchRootContext | undefined>(undefined);
+export const SwitchRootContext = React.createContext<SwitchRootContextValue | undefined>(undefined);
 
 export function useSwitchRootContext() {
     const context = React.use(SwitchRootContext);

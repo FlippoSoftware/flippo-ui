@@ -1,9 +1,9 @@
-'use client';
+
 import * as React from 'react';
 
-import { useFocusableWhenDisabled } from '@lib/hooks';
+import { useFocusableWhenDisabled } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { ARROW_LEFT, ARROW_RIGHT, stopEvent } from '../../Composite/composite';
 import { CompositeItem } from '../../Composite/item/CompositeItem';

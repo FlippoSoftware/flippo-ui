@@ -9,6 +9,7 @@ export type FloatingUIOpenChangeDetails = {
     reason: string;
     nativeEvent: Event;
     nested: boolean;
+    triggerElement?: Element | undefined;
 };
 
 export type HeadlessUIEvent<E extends React.SyntheticEvent<Element, Event>> = E & {

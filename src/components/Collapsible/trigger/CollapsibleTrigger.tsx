@@ -1,20 +1,18 @@
-'use client';
-
 import React from 'react';
 
-import { triggerOpenStateMapping } from '@lib/collapsibleOpenStateMapping';
-import { useRenderElement } from '@lib/hooks';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
+import { triggerOpenStateMapping } from '~@lib/collapsibleOpenStateMapping';
+import { useRenderElement } from '~@lib/hooks';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
-import type { CustomStyleHookMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useButton } from '../../use-button';
 import { useCollapsibleRootContext } from '../root/CollapsibleRootContext';
 
 import type { CollapsibleRoot } from '../root/CollapsibleRoot';
 
-const styleHookMapping: CustomStyleHookMapping<CollapsibleRoot.State> = {
+const styleHookMapping: StateAttributesMapping<CollapsibleRoot.State> = {
     ...triggerOpenStateMapping,
     ...transitionStatusMapping
 };
@@ -25,7 +23,7 @@ const styleHookMapping: CustomStyleHookMapping<CollapsibleRoot.State> = {
  *
  * Documentation: [Base UI Collapsible](https://base-ui.com/react/components/collapsible)
  */
-export function CollapsibleTrigger(componentProps: CollapsibleTrigger.Props) {
+export function CollapsibleTrigger(componentProps: CollapsibleTriggerProps) {
     const {
         panelId,
         open,
@@ -59,12 +57,7 @@ export function CollapsibleTrigger(componentProps: CollapsibleTrigger.Props) {
             disabled,
             'onClick': handleTrigger
         }),
-        [
-            panelId,
-            disabled,
-            open,
-            handleTrigger
-        ]
+        [panelId, disabled, open, handleTrigger]
     );
 
     const element = useRenderElement('button', componentProps, {
@@ -77,6 +70,8 @@ export function CollapsibleTrigger(componentProps: CollapsibleTrigger.Props) {
     return element;
 }
 
+export type CollapsibleTriggerProps = {} & NativeButtonProps & HeadlessUIComponentProps<'button', CollapsibleRoot.State>;
+
 export namespace CollapsibleTrigger {
-    export type Props = NativeButtonProps & HeadlessUIComponentProps<'button', CollapsibleRoot.State>;
+    export type Props = CollapsibleTriggerProps;
 }

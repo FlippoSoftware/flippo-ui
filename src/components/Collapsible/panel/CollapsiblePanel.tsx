@@ -1,13 +1,13 @@
-'use client';
-
 import React from 'react';
 
 import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
-import { warn } from '@lib/warn';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+
+import { useRenderElement } from '~@lib/hooks';
+import { warn } from '~@lib/warn';
+
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCollapsibleRootContext } from '../root/CollapsibleRootContext';
 import { collapsibleStyleHookMapping } from '../root/styleHooks';
@@ -23,7 +23,7 @@ import { useCollapsiblePanel } from './useCollapsiblePanel';
  *
  * Documentation: [Base UI Collapsible](https://base-ui.com/react/components/collapsible)
  */
-export function CollapsiblePanel(componentProps: CollapsiblePanel.Props) {
+export function CollapsiblePanel(componentProps: CollapsiblePanelProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
@@ -95,7 +95,7 @@ export function CollapsiblePanel(componentProps: CollapsiblePanel.Props) {
     const { props } = useCollapsiblePanel({
         abortControllerRef,
         animationTypeRef,
-        externalRef: ref as React.RefObject<HTMLElement> | undefined,
+        externalRef: ref,
         height,
         hiddenUntilFound,
         id: panelId,
@@ -157,26 +157,29 @@ export function CollapsiblePanel(componentProps: CollapsiblePanel.Props) {
     return element;
 }
 
-export namespace CollapsiblePanel {
-    export type State = {
-        transitionStatus: TransitionStatus;
-    } & CollapsibleRoot.State;
+export type CollapsiblePanelState = {
+    transitionStatus: TransitionStatus;
+} & CollapsibleRoot.State;
 
-    export type Props = {
-        /**
-         * Allows the browser’s built-in page search to find and expand the panel contents.
-         *
-         * Overrides the `keepMounted` prop and uses `hidden="until-found"`
-         * to hide the element without removing it from the DOM.
-         *
-         * @default false
-         */
-        hiddenUntilFound?: boolean;
-        /**
-         * Whether to keep the element in the DOM while the panel is hidden.
-         * This prop is ignored when `hiddenUntilFound` is used.
-         * @default false
-         */
-        keepMounted?: boolean;
-    } & HeadlessUIComponentProps<'div', CollapsibleRoot.State>;
+export type CollapsiblePanelProps = {
+    /**
+     * Allows the browser’s built-in page search to find and expand the panel contents.
+     *
+     * Overrides the `keepMounted` prop and uses `hidden="until-found"`
+     * to hide the element without removing it from the DOM.
+     *
+     * @default false
+     */
+    hiddenUntilFound?: boolean;
+    /**
+     * Whether to keep the element in the DOM while the panel is hidden.
+     * This prop is ignored when `hiddenUntilFound` is used.
+     * @default false
+     */
+    keepMounted?: boolean;
+} & HeadlessUIComponentProps<'div', CollapsiblePanel.State>;
+
+export namespace CollapsiblePanel {
+    export type State = CollapsiblePanelState;
+    export type Props = CollapsiblePanelProps;
 }

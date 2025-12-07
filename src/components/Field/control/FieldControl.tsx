@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import {
@@ -9,11 +7,14 @@ import {
     useMergedRef
 } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { mergeProps } from '~@lib/merge';
+import { REASONS } from '~@lib/reason';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
+import { useLabelableContext, useLabelableId } from '../../LabelableProvider';
 import { useFieldRootContext } from '../root/FieldRootContext';
 import { FieldControlSlot } from '../slot/FieldControlSlot';
 import { useField } from '../useField';
@@ -22,9 +23,8 @@ import type { FieldRoot } from '../root/FieldRoot';
 
 import { FieldControlContext } from './FieldControlContext';
 import { useFieldControl } from './useFieldControl';
-import { useFieldControlValidation } from './useFieldControlValidation';
 
-import type { TFieldControlContext } from './FieldControlContext';
+import type { FieldControlContextValue } from './FieldControlContext';
 
 /**
  * The form control to label and validate.
@@ -70,42 +70,28 @@ export function FieldControl(componentProps: FieldControl.Props) {
     );
 
     const {
-        setControlId,
-        labelId,
         setTouched,
         setDirty,
         validityData,
         setFocused,
         setFilled,
-        validationMode
-    } = useFieldRootContext();
-
-    const {
-        getValidationProps,
-        getInputValidationProps,
-        commitValidation,
-        inputRef
+        validationMode,
+        validation
     }
-        = useFieldControlValidation();
+        = useFieldRootContext();
+    const { labelId } = useLabelableContext();
 
-    const id = useHeadlessUiId(idProp);
-
-    useIsoLayoutEffect(() => {
-        setControlId(id);
-        return () => {
-            setControlId(undefined);
-        };
-    }, [id, setControlId]);
+    const id = useLabelableId({ id: idProp });
 
     useIsoLayoutEffect(() => {
         const hasExternalValue = valueProp != null;
-        if (inputRef.current?.value || (hasExternalValue && valueProp !== '')) {
+        if (validation.inputRef.current?.value || (hasExternalValue && valueProp !== '')) {
             setFilled(true);
         }
         else if (hasExternalValue && valueProp === '') {
             setFilled(false);
         }
-    }, [inputRef, setFilled, valueProp]);
+    }, [validation.inputRef, setFilled, valueProp]);
 
     const [value, setValueUnwrapped] = useControlledState({
         prop: valueProp,
@@ -113,21 +99,30 @@ export function FieldControl(componentProps: FieldControl.Props) {
         caller: 'FieldControl'
     });
 
-    const setValue = useEventCallback((nextValue: string, event: Event) => {
-        setValueUnwrapped(nextValue);
-        onValueChange?.(nextValue, event);
-    });
+    const isControlled = valueProp !== undefined;
+
+    const setValue = useEventCallback(
+        (nextValue: string, eventDetails: FieldControl.ChangeEventDetails) => {
+            onValueChange?.(nextValue, eventDetails);
+
+            if (eventDetails.isCanceled) {
+                return;
+            }
+
+            setValueUnwrapped(nextValue);
+        }
+    );
 
     useField({
         id,
         name,
-        commitValidation,
+        commit: validation.commit,
         value,
-        getValue: () => inputRef.current?.value,
-        controlRef: inputRef
+        getValue: () => validation.inputRef.current?.value,
+        controlRef: validation.inputRef
     });
 
-    const mergedRef = useMergedRef(ref, inputRef);
+    const mergedRef = useMergedRef(ref, validation.inputRef);
 
     const controlProps = React.useMemo(() => {
         const baseProps = {
@@ -136,12 +131,12 @@ export function FieldControl(componentProps: FieldControl.Props) {
             name,
             'ref': mergedRef,
             'aria-labelledby': labelId,
-            value,
+            ...(isControlled ? { value } : { defaultValue }),
             onChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-                setValue(event.currentTarget.value, event.nativeEvent);
-
-                setDirty(event.currentTarget.value !== validityData.initialValue);
-                setFilled(event.currentTarget.value !== '');
+                const inputValue = event.currentTarget.value;
+                setValue(inputValue, createChangeEventDetails(REASONS.none, event.nativeEvent));
+                setDirty(inputValue !== validityData.initialValue);
+                setFilled(inputValue !== '');
             },
             onFocus() {
                 setFocused(true);
@@ -151,13 +146,13 @@ export function FieldControl(componentProps: FieldControl.Props) {
                 setFocused(false);
 
                 if (validationMode === 'onBlur') {
-                    commitValidation(event.currentTarget.value);
+                    validation.commit(event.currentTarget.value);
                 }
             },
             onKeyDown(event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
-                if ((event.currentTarget.tagName === 'INPUT' || event.currentTarget.tagName === 'TEXTAREA') && event.key === 'Enter') {
+                if (event.currentTarget.tagName === 'INPUT' && event.key === 'Enter') {
                     setTouched(true);
-                    commitValidation(event.currentTarget.value);
+                    validation.commit(event.currentTarget.value);
                 }
             }
         };
@@ -165,8 +160,7 @@ export function FieldControl(componentProps: FieldControl.Props) {
         return mergeProps(
             baseProps,
             elementProps,
-            getValidationProps(),
-            getInputValidationProps()
+            validation.getInputValidationProps()
         );
     }, [
         id,
@@ -174,21 +168,21 @@ export function FieldControl(componentProps: FieldControl.Props) {
         name,
         mergedRef,
         labelId,
+        isControlled,
         value,
+        defaultValue,
         elementProps,
-        getValidationProps,
-        getInputValidationProps,
+        validation,
+        setValue,
         setDirty,
         validityData.initialValue,
         setFilled,
-        setValue,
         setFocused,
         setTouched,
-        validationMode,
-        commitValidation
+        validationMode
     ]);
 
-    const context: TFieldControlContext = React.useMemo(() => ({
+    const context: FieldControlContextValue = React.useMemo(() => ({
         state,
         controlRef: mergedRef,
         setValue,
@@ -223,10 +217,13 @@ export namespace FieldControl {
 
     export type InputProps = HeadlessUIComponentProps<'input', State> & {
         control: 'input';
-        onValueChange?: (value: string, event: Event) => void;
+        onValueChange?: (value: string, eventDetails: ChangeEventDetails) => void;
         defaultValue?: React.ComponentProps<'input'>['defaultValue'];
     };
-    export type TextAreaProps = HeadlessUIComponentProps<'textarea', State> & { control: 'textarea'; onValueChange?: (value: string, event: Event) => void; defaultValue?: React.ComponentProps<'textarea'>['defaultValue'] };
+    export type TextAreaProps = HeadlessUIComponentProps<'textarea', State> & { control: 'textarea'; onValueChange?: (value: string, eventDetails: ChangeEventDetails) => void; defaultValue?: React.ComponentProps<'textarea'>['defaultValue'] };
 
     export type Props = (InputProps | TextAreaProps);
+
+    export type ChangeEventReason = 'none';
+    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
 }

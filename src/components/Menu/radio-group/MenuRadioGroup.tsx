@@ -1,16 +1,17 @@
-'use client';
-
 import React from 'react';
 
-import { useControlledState, useEventCallback } from '@flippo-ui/hooks';
+import { useControlledState } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
+
+import type { MenuRoot } from '../root/MenuRoot';
 
 import { MenuRadioGroupContext } from './MenuRadioGroupContext';
 
-import type { TMenuRadioGroupContext } from './MenuRadioGroupContext';
+import type { MenuRadioGroupContextValue } from './MenuRadioGroupContext';
 
 /**
  * Groups related radio items.
@@ -18,15 +19,14 @@ import type { TMenuRadioGroupContext } from './MenuRadioGroupContext';
  *
  * Documentation: [Base UI Menu](https://base-ui.com/react/components/menu)
  */
-export const InnerMenuRadioGroup = React.memo(
+const Inner = React.memo(
     (
-
         componentProps: MenuRadioGroup.Props
     ) => {
         const {
             /* eslint-disable unused-imports/no-unused-vars */
-            className,
             render,
+            className,
             /* eslint-enable unused-imports/no-unused-vars */
             value: valueProp,
             defaultValue,
@@ -42,14 +42,18 @@ export const InnerMenuRadioGroup = React.memo(
             caller: 'MenuRadioGroup'
         });
 
-        const onValueChange = useEventCallback(onValueChangeProp);
+        const onValueChange = useStableCallback(onValueChangeProp);
 
-        const setValue = React.useCallback(
-            (newValue: any, event: Event) => {
+        const setValue = useStableCallback(
+            (newValue: any, eventDetails: MenuRadioGroup.ChangeEventDetails) => {
+                onValueChange?.(newValue, eventDetails);
+
+                if (eventDetails.isCanceled) {
+                    return;
+                }
+
                 setValueUnwrapped(newValue);
-                onValueChange?.(newValue, event);
-            },
-            [onValueChange, setValueUnwrapped]
+            }
         );
 
         const state = React.useMemo(() => ({ disabled }), [disabled]);
@@ -64,7 +68,7 @@ export const InnerMenuRadioGroup = React.memo(
             }
         });
 
-        const context: TMenuRadioGroupContext = React.useMemo(
+        const context: MenuRadioGroupContextValue = React.useMemo(
             () => ({
                 value,
                 setValue,
@@ -74,48 +78,54 @@ export const InnerMenuRadioGroup = React.memo(
         );
 
         return (
-            <MenuRadioGroupContext value={context}>{element}</MenuRadioGroupContext>
+            <MenuRadioGroupContext.Provider value={context}>{element}</MenuRadioGroupContext.Provider>
         );
     }
 );
 
-export function MenuRadioGroup(props: MenuRadioGroup.Props) {
-    return <InnerMenuRadioGroup {...props} />;
+export function MenuRadioGroup(componentProps: MenuRadioGroup.Props) {
+    return <Inner {...componentProps} />;
 }
 
-export namespace MenuRadioGroup {
-    export type State = {
-        disabled: boolean;
-    };
-
-    export type Props = {
+export type MenuRadioGroupProps = {
     /**
      * The content of the component.
      */
-        children?: React.ReactNode;
-        /**
-         * The controlled value of the radio item that should be currently selected.
-         *
-         * To render an uncontrolled radio group, use the `defaultValue` prop instead.
-         */
-        value?: any;
-        /**
-         * The uncontrolled value of the radio item that should be initially selected.
-         *
-         * To render a controlled radio group, use the `value` prop instead.
-         */
-        defaultValue?: any;
-        /**
-         * Function called when the selected value changes.
-         *
-         * @default () => {}
-         */
-        onValueChange?: (value: any, event: Event) => void;
-        /**
-         * Whether the component should ignore user interaction.
-         *
-         * @default false
-         */
-        disabled?: boolean;
-    } & HeadlessUIComponentProps<'div', State>;
+    children?: React.ReactNode;
+    /**
+     * The controlled value of the radio item that should be currently selected.
+     *
+     * To render an uncontrolled radio group, use the `defaultValue` prop instead.
+     */
+    value?: any;
+    /**
+     * The uncontrolled value of the radio item that should be initially selected.
+     *
+     * To render a controlled radio group, use the `value` prop instead.
+     */
+    defaultValue?: any;
+    /**
+     * Function called when the selected value changes.
+     */
+    onValueChange?: (value: any, eventDetails: MenuRadioGroup.ChangeEventDetails) => void;
+    /**
+     * Whether the component should ignore user interaction.
+     *
+     * @default false
+     */
+    disabled?: boolean;
+} & HeadlessUIComponentProps<'div', MenuRadioGroup.State>;
+
+export type MenuRadioGroupState = {
+    disabled: boolean;
+};
+
+export type MenuRadioGroupChangeEventReason = MenuRoot.ChangeEventReason;
+export type MenuRadioGroupChangeEventDetails = MenuRoot.ChangeEventDetails;
+
+export namespace MenuRadioGroup {
+    export type Props = MenuRadioGroupProps;
+    export type State = MenuRadioGroupState;
+    export type ChangeEventReason = MenuRadioGroupChangeEventReason;
+    export type ChangeEventDetails = MenuRadioGroupChangeEventDetails;
 }

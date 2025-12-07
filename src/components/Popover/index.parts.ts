@@ -6,5 +6,10 @@ export { PopoverPopup as Popup } from './popup/PopoverPopup';
 export { PopoverPortal as Portal } from './portal/PopoverPortal';
 export { PopoverPositioner as Positioner } from './positioner/PopoverPositioner';
 export { PopoverRoot as Root } from './root/PopoverRoot';
+export {
+    createPopoverHandle as createHandle,
+    PopoverHandle as Handle
+} from './store/PopoverHandle';
 export { PopoverTitle as Title } from './title/PopoverTitle';
 export { PopoverTrigger as Trigger } from './trigger/PopoverTrigger';
+export { PopoverViewport as Viewport } from './viewport/PopoverViewport';

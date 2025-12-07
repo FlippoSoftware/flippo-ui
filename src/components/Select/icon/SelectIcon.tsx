@@ -1,9 +1,11 @@
 import React from 'react';
 
 import { useStore } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import { useRenderElement } from '~@lib/hooks';
+import { triggerOpenStateMapping } from '~@lib/popupStateMapping';
+
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';
@@ -35,21 +37,25 @@ export function SelectIcon(componentProps: SelectIcon.Props) {
     );
 
     const element = useRenderElement('span', componentProps, {
-        ref,
         state,
-        props: [{
-            'aria-hidden': true,
-            'children': '▼'
-        }, elementProps]
+        ref,
+        props: [{ 'aria-hidden': true, 'children': '▼' }, elementProps],
+        customStyleHookMapping: triggerOpenStateMapping
     });
 
     return element;
 }
 
-export namespace SelectIcon {
-    export type State = {
-        open: boolean;
-    };
+export type SelectIconState = {
+    /**
+     * Whether the select popup is currently open.
+     */
+    open: boolean;
+};
 
-    export type Props = HeadlessUIComponentProps<'span', State>;
+export type SelectIconProps = {} & HeadlessUIComponentProps<'span', SelectIcon.State>;
+
+export namespace SelectIcon {
+    export type State = SelectIconState;
+    export type Props = SelectIconProps;
 }

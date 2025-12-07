@@ -1,18 +1,16 @@
-'use client';
-
 import React from 'react';
 
 import { useLatestRef } from '@flippo-ui/hooks';
 
-import { formatNumber } from '@lib/formatNumber';
-import { useRenderElement } from '@lib/hooks';
+import { formatNumber } from '~@lib/formatNumber';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { ProgressRootContext } from './ProgressRootContext';
 import { progressStyleHookMapping } from './styleHooks';
 
-import type { TProgressRootContext } from './ProgressRootContext';
+import type { ProgressRootContextValue } from './ProgressRootContext';
 
 function formatValue(
     value: number | null,
@@ -86,7 +84,7 @@ export function ProgressRoot(componentProps: ProgressRoot.Props) {
         'role': 'progressbar'
     };
 
-    const contextValue: TProgressRootContext = React.useMemo(
+    const contextValue: ProgressRootContextValue = React.useMemo(
         () => ({
             formattedValue,
             max,

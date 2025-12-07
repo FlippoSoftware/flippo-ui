@@ -1,13 +1,13 @@
-'use client';
-
 import React from 'react';
 
 import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
-import { warn } from '@lib/warn';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+
+import { useRenderElement } from '~@lib/hooks';
+import { warn } from '~@lib/warn';
+
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCollapsiblePanel } from '../../Collapsible/panel/useCollapsiblePanel';
 import { useCollapsibleRootContext } from '../../Collapsible/root/CollapsibleRootContext';
@@ -26,7 +26,7 @@ import { AccordionPanelCssVars } from './AccordionPanelCssVars';
  *
  * Documentation: [Base UI Accordion](https://base-ui.com/react/components/accordion)
  */
-export function AccordionPanel(componentProps: AccordionPanel.Props) {
+export function AccordionPanel(componentProps: AccordionPanelProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
@@ -112,7 +112,7 @@ export function AccordionPanel(componentProps: AccordionPanel.Props) {
     const { props } = useCollapsiblePanel({
         abortControllerRef,
         animationTypeRef,
-        externalRef: ref as React.RefObject<HTMLElement>,
+        externalRef: ref,
         height,
         hiddenUntilFound,
         id: idProp ?? panelId,
@@ -165,10 +165,13 @@ export function AccordionPanel(componentProps: AccordionPanel.Props) {
     return element;
 }
 
-export namespace AccordionPanel {
-    export type State = {
-        transitionStatus: TransitionStatus;
-    } & AccordionItem.State;
+export type AccordionPanelState = {
+    transitionStatus: TransitionStatus;
+} & AccordionItem.State;
 
-    export type Props = HeadlessUIComponentProps<'div', AccordionItem.State> & Pick<AccordionRoot.Props, 'hiddenUntilFound' | 'keepMounted'>;
+export type AccordionPanelProps = {} & HeadlessUIComponentProps<'div', AccordionPanel.State> & Pick<AccordionRoot.Props, 'hiddenUntilFound' | 'keepMounted'>;
+
+export namespace AccordionPanel {
+    export type State = AccordionPanelState;
+    export type Props = AccordionPanelProps;
 }

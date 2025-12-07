@@ -1,12 +1,12 @@
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { SelectGroupContext } from './SelectGroupContext';
 
-import type { TSelectGroupContext } from './SelectGroupContext';
+import type { SelectGroupContextValue } from './SelectGroupContext';
 
 /**
  * Groups related select items with the corresponding label.
@@ -26,7 +26,7 @@ export function SelectGroup(componentProps: SelectGroup.Props) {
 
     const [labelId, setLabelId] = React.useState<string | undefined>();
 
-    const contextValue: TSelectGroupContext = React.useMemo(
+    const contextValue: SelectGroupContextValue = React.useMemo(
         () => ({
             labelId,
             setLabelId
@@ -42,11 +42,13 @@ export function SelectGroup(componentProps: SelectGroup.Props) {
         }, elementProps]
     });
 
-    return <SelectGroupContext value={contextValue}>{element}</SelectGroupContext>;
+    return <SelectGroupContext.Provider value={contextValue}>{element}</SelectGroupContext.Provider>;
 }
 
-export namespace SelectGroup {
-    export type State = object;
+export type SelectGroupState = {};
+export type SelectGroupProps = {} & HeadlessUIComponentProps<'div', SelectGroup.State>;
 
-    export type Props = HeadlessUIComponentProps<'div', State>;
+export namespace SelectGroup {
+    export type State = SelectGroupState;
+    export type Props = SelectGroupProps;
 }

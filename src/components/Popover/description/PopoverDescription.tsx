@@ -1,10 +1,9 @@
-'use client';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { usePopoverRootContext } from '../root/PopoverRootContext';
 
@@ -17,23 +16,23 @@ import { usePopoverRootContext } from '../root/PopoverRootContext';
 export function PopoverDescription(componentProps: PopoverDescription.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
     } = componentProps;
 
-    const { setDescriptionId } = usePopoverRootContext();
+    const { store } = usePopoverRootContext();
 
     const id = useHeadlessUiId(elementProps.id);
 
     useIsoLayoutEffect(() => {
-        setDescriptionId(id);
+        store.set('descriptionElementId', id);
         return () => {
-            setDescriptionId(undefined);
+            store.set('descriptionElementId', undefined);
         };
-    }, [setDescriptionId, id]);
+    }, [store, id]);
 
     const element = useRenderElement('p', componentProps, {
         ref,
@@ -43,8 +42,11 @@ export function PopoverDescription(componentProps: PopoverDescription.Props) {
     return element;
 }
 
-export namespace PopoverDescription {
-    export type State = object;
+export type PopoverDescriptionState = {};
 
-    export type Props = HeadlessUIComponentProps<'p', State>;
+export type PopoverDescriptionProps = {} & HeadlessUIComponentProps<'p', PopoverDescription.State>;
+
+export namespace PopoverDescription {
+    export type State = PopoverDescriptionState;
+    export type Props = PopoverDescriptionProps;
 }

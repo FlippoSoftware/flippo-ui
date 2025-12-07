@@ -1,10 +1,8 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectItemContext } from '../item/SelectItemContext';
 import { useSelectRootContext } from '../root/SelectRootContext';
@@ -15,49 +13,59 @@ import { useSelectRootContext } from '../root/SelectRootContext';
  *
  * Documentation: [Base UI Select](https://base-ui.com/react/components/select)
  */
-export function SelectItemText(
-    componentProps: SelectItemText.Props
-) {
-    const {
-        /* eslint-disable unused-imports/no-unused-vars */
-        className,
-        render,
-        /* eslint-enable unused-imports/no-unused-vars */
-        ref,
-        ...elementProps
-    } = componentProps;
+export const Inner = React.memo(
+    (
+        componentProps: SelectItemText.Props
+    ) => {
+        const {
+            indexRef,
+            textRef,
+            selectedByFocus,
+            hasRegistered
+        } = useSelectItemContext();
+        const { selectedItemTextRef } = useSelectRootContext();
 
-    const { indexRef, textRef, selectedByFocus } = useSelectItemContext();
-    const { selectedItemTextRef } = useSelectRootContext();
+        const {
+            /* eslint-disable unused-imports/no-unused-vars */
+            className,
+            render,
+            /* eslint-enable unused-imports/no-unused-vars */
+            ref,
+            ...elementProps
+        } = componentProps;
 
-    const localRef = React.useCallback(
-        (node: HTMLElement | null) => {
-            if (!node) {
-                return;
-            }
-            // Wait for the DOM indices to be set.
-            queueMicrotask(() => {
+        const localRef = React.useCallback(
+            (node: HTMLElement | null) => {
+                if (!node || !hasRegistered) {
+                    return;
+                }
                 const hasNoSelectedItemText
-                        = selectedItemTextRef.current === null || !selectedItemTextRef.current.isConnected;
+                    = selectedItemTextRef.current === null || !selectedItemTextRef.current.isConnected;
                 if (selectedByFocus || (hasNoSelectedItemText && indexRef.current === 0)) {
                     selectedItemTextRef.current = node;
                 }
-            });
-        },
-        [selectedItemTextRef, indexRef, selectedByFocus]
-    );
+            },
+            [selectedItemTextRef, indexRef, selectedByFocus, hasRegistered]
+        );
 
-    const element = useRenderElement('div', componentProps, {
-        ref: [localRef, ref, textRef],
-        props: elementProps
-    });
+        const element = useRenderElement('div', componentProps, {
+            ref: [localRef, ref, textRef],
+            props: elementProps
+        });
 
-    return element;
+        return element;
+    }
+);
+
+export function SelectItemText(componentProps: SelectItemTextProps) {
+    return <Inner {...componentProps} />;
 }
 
+export type SelectItemTextState = {};
+
+export type SelectItemTextProps = {} & HeadlessUIComponentProps<'div', SelectItemText.State>;
+
 export namespace SelectItemText {
-    export type State = object;
-
-    export type Props = HeadlessUIComponentProps<'div', State>;
-
+    export type State = SelectItemTextState;
+    export type Props = SelectItemTextProps;
 }

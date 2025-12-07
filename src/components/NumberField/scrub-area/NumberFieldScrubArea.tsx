@@ -1,15 +1,16 @@
-'use client';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { useEventCallback, useLatestRef } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { useValueAsRef } from '@flippo-ui/hooks/use-value-as-ref';
 
-import { isWebKit } from '@lib/detectBrowser';
-import { useRenderElement } from '@lib/hooks';
-import { ownerDocument, ownerWindow } from '@lib/owner';
+import { createGenericEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { isWebKit } from '~@lib/detectBrowser';
+import { useRenderElement } from '~@lib/hooks';
+import { ownerDocument, ownerWindow } from '~@lib/owner';
+import { REASONS } from '~@lib/reason';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
 import { DEFAULT_STEP } from '../utils/constants';
@@ -21,7 +22,7 @@ import type { NumberFieldRoot } from '../root/NumberFieldRoot';
 
 import { NumberFieldScrubAreaContext } from './NumberFieldScrubAreaContext';
 
-import type { TNumberFieldScrubAreaContext } from './NumberFieldScrubAreaContext';
+import type { NumberFieldScrubAreaContextValue } from './NumberFieldScrubAreaContext';
 
 /**
  * An interactive area where the user can click and drag to change the field value.
@@ -32,13 +33,13 @@ import type { TNumberFieldScrubAreaContext } from './NumberFieldScrubAreaContext
 export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
+        ref,
         direction = 'horizontal',
         pixelSensitivity = 2,
         teleportDistance,
-        ref,
         ...elementProps
     } = componentProps;
 
@@ -52,10 +53,13 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
         value,
         inputRef,
         incrementValue,
-        getStepAmount
+        getStepAmount,
+        onValueCommitted,
+        lastChangedValueRef,
+        valueRef
     } = useNumberFieldRootContext();
 
-    const latestValueRef = useLatestRef(value);
+    const latestValueRef = useValueAsRef(value);
 
     const scrubAreaRef = React.useRef<HTMLSpanElement>(null);
 
@@ -75,54 +79,51 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
         return subscribeToVisualViewportResize(scrubAreaCursorRef.current, visualScaleRef);
     }, [isScrubbing]);
 
-    const updateCursorTransform = useEventCallback((x: number, y: number) => {
+    function updateCursorTransform(x: number, y: number) {
         if (scrubAreaCursorRef.current) {
             scrubAreaCursorRef.current.style.transform = `translate3d(${x}px,${y}px,0) scale(${1 / visualScaleRef.current})`;
         }
+    }
+
+    const onScrub = useStableCallback(({ movementX, movementY }: PointerEvent) => {
+        const virtualCursor = scrubAreaCursorRef.current;
+        const scrubAreaEl = scrubAreaRef.current;
+
+        if (!virtualCursor || !scrubAreaEl) {
+            return;
+        }
+
+        const rect = getViewportRect(teleportDistance, scrubAreaEl);
+
+        const coords = virtualCursorCoords.current;
+        const newCoords = {
+            x: Math.round(coords.x + movementX),
+            y: Math.round(coords.y + movementY)
+        };
+
+        const cursorWidth = virtualCursor.offsetWidth;
+        const cursorHeight = virtualCursor.offsetHeight;
+
+        if (newCoords.x + cursorWidth / 2 < rect.x) {
+            newCoords.x = rect.width - cursorWidth / 2;
+        }
+        else if (newCoords.x + cursorWidth / 2 > rect.width) {
+            newCoords.x = rect.x - cursorWidth / 2;
+        }
+
+        if (newCoords.y + cursorHeight / 2 < rect.y) {
+            newCoords.y = rect.height - cursorHeight / 2;
+        }
+        else if (newCoords.y + cursorHeight / 2 > rect.height) {
+            newCoords.y = rect.y - cursorHeight / 2;
+        }
+
+        virtualCursorCoords.current = newCoords;
+
+        updateCursorTransform(newCoords.x, newCoords.y);
     });
 
-    const onScrub = React.useCallback(
-        ({ movementX, movementY }: PointerEvent) => {
-            const virtualCursor = scrubAreaCursorRef.current;
-            const scrubAreaEl = scrubAreaRef.current;
-
-            if (!virtualCursor || !scrubAreaEl) {
-                return;
-            }
-
-            const rect = getViewportRect(teleportDistance, scrubAreaEl);
-
-            const coords = virtualCursorCoords.current;
-            const newCoords = {
-                x: Math.round(coords.x + movementX),
-                y: Math.round(coords.y + movementY)
-            };
-
-            const cursorWidth = virtualCursor.offsetWidth;
-            const cursorHeight = virtualCursor.offsetHeight;
-
-            if (newCoords.x + cursorWidth / 2 < rect.x) {
-                newCoords.x = rect.width - cursorWidth / 2;
-            }
-            else if (newCoords.x + cursorWidth / 2 > rect.width) {
-                newCoords.x = rect.x - cursorWidth / 2;
-            }
-
-            if (newCoords.y + cursorHeight / 2 < rect.y) {
-                newCoords.y = rect.height - cursorHeight / 2;
-            }
-            else if (newCoords.y + cursorHeight / 2 > rect.height) {
-                newCoords.y = rect.y - cursorHeight / 2;
-            }
-
-            virtualCursorCoords.current = newCoords;
-
-            updateCursorTransform(newCoords.x, newCoords.y);
-        },
-        [teleportDistance, updateCursorTransform]
-    );
-
-    const onScrubbingChange = React.useCallback(
+    const onScrubbingChange = useStableCallback(
         (scrubbingValue: boolean, { clientX, clientY }: PointerEvent) => {
             ReactDOM.flushSync(() => {
                 setIsScrubbing(scrubbingValue);
@@ -141,13 +142,13 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
             virtualCursorCoords.current = initialCoords;
 
             updateCursorTransform(initialCoords.x, initialCoords.y);
-        },
-        [setIsScrubbing, updateCursorTransform]
+        }
     );
 
     React.useEffect(
         () => {
-            if (!inputRef.current || disabled || readOnly) {
+            // Only listen while actively scrubbing; avoids unrelated pointerup events committing.
+            if (!inputRef.current || disabled || readOnly || !isScrubbing) {
                 return undefined;
             }
 
@@ -164,6 +165,10 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
                 finally {
                     isScrubbingRef.current = false;
                     onScrubbingChange(false, event);
+                    onValueCommitted(
+                        lastChangedValueRef.current ?? valueRef.current,
+                        createGenericEventDetails(REASONS.scrub, event)
+                    );
                 }
             }
 
@@ -184,7 +189,16 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
                 if (Math.abs(cumulativeDelta) >= pixelSensitivity) {
                     cumulativeDelta = 0;
                     const dValue = direction === 'vertical' ? -movementY : movementX;
-                    incrementValue(dValue * (getStepAmount(event) ?? DEFAULT_STEP), 1);
+                    const stepAmount = getStepAmount(event) ?? DEFAULT_STEP;
+                    const rawAmount = dValue * stepAmount;
+
+                    if (rawAmount !== 0) {
+                        incrementValue(Math.abs(rawAmount), {
+                            direction: rawAmount >= 0 ? 1 : -1,
+                            event,
+                            reason: REASONS.scrub
+                        });
+                    }
                 }
             }
 
@@ -201,6 +215,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
         [
             disabled,
             readOnly,
+            isScrubbing,
             incrementValue,
             latestValueRef,
             getStepAmount,
@@ -208,7 +223,10 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
             onScrubbingChange,
             onScrub,
             direction,
-            pixelSensitivity
+            pixelSensitivity,
+            lastChangedValueRef,
+            onValueCommitted,
+            valueRef
         ]
     );
 
@@ -268,13 +286,15 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
                     await ownerDocument(scrubAreaRef.current).body.requestPointerLock();
                     setIsPointerLockDenied(false);
                 }
-                catch (_error) {
+                catch (error) {
                     setIsPointerLockDenied(true);
                 }
                 finally {
-                    ReactDOM.flushSync(() => {
-                        onScrubbingChange(true, event.nativeEvent);
-                    });
+                    if (isScrubbingRef.current) {
+                        ReactDOM.flushSync(() => {
+                            onScrubbingChange(true, event.nativeEvent);
+                        });
+                    }
                 }
             }
         }
@@ -287,7 +307,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
         customStyleHookMapping: styleHookMapping
     });
 
-    const contextValue: TNumberFieldScrubAreaContext = React.useMemo(
+    const contextValue: NumberFieldScrubAreaContextValue = React.useMemo(
         () => ({
             isScrubbing,
             isTouchInput,
@@ -309,31 +329,34 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
     );
 
     return (
-        <NumberFieldScrubAreaContext value={contextValue}>
+        <NumberFieldScrubAreaContext.Provider value={contextValue}>
             {element}
-        </NumberFieldScrubAreaContext>
+        </NumberFieldScrubAreaContext.Provider>
     );
 }
 
-export namespace NumberFieldScrubArea {
-    export type State = {} & NumberFieldRoot.State;
+export type NumberFieldScrubAreaState = {} & NumberFieldRoot.State;
 
-    export type Props = {
+export type NumberFieldScrubAreaProps = {
     /**
      * Cursor movement direction in the scrub area.
      * @default 'horizontal'
      */
-        direction?: 'horizontal' | 'vertical';
-        /**
-         * Determines how many pixels the cursor must move before the value changes.
-         * A higher value will make scrubbing less sensitive.
-         * @default 2
-         */
-        pixelSensitivity?: number;
-        /**
-         * If specified, determines the distance that the cursor may move from the center
-         * of the scrub area before it will loop back around.
-         */
-        teleportDistance?: number | undefined;
-    } & HeadlessUIComponentProps<'span', State>;
+    direction?: 'horizontal' | 'vertical';
+    /**
+     * Determines how many pixels the cursor must move before the value changes.
+     * A higher value will make scrubbing less sensitive.
+     * @default 2
+     */
+    pixelSensitivity?: number;
+    /**
+     * If specified, determines the distance that the cursor may move from the center
+     * of the scrub area before it will loop back around.
+     */
+    teleportDistance?: number | undefined;
+} & HeadlessUIComponentProps<'span', NumberFieldScrubArea.State>;
+
+export namespace NumberFieldScrubArea {
+    export type State = NumberFieldScrubAreaState;
+    export type Props = NumberFieldScrubAreaProps;
 }

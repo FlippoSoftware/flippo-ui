@@ -1,11 +1,14 @@
-'use client';
 import React from 'react';
 
 import { useControlledState, useEventCallback } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 
-import { useRenderElement } from '@lib/hooks';
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { useRenderElement } from '~@lib/hooks';
+import { REASONS } from '~@lib/reason';
 
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { CompositeItem } from '../Composite/item/CompositeItem';
 import { useToggleGroupContext } from '../ToggleGroup/ToggleGroupContext';
@@ -20,12 +23,12 @@ export function Toggle(componentProps: Toggle.Props) {
         form, // never participates in form validation
         type, // cannot change button type
         /* eslint-enable unused-imports/no-unused-vars */
+        onPressedChange: onPressedChangeProp,
         pressed: pressedProp,
         render,
         value: valueProp,
         nativeButton = true,
         ref,
-        onPressedChange: onPressedChangeProp,
         ...elementProps
     } = componentProps;
 
@@ -41,14 +44,16 @@ export function Toggle(componentProps: Toggle.Props) {
 
     const [pressed, setPressedState] = useControlledState({
         prop: groupContext && value ? groupValue?.indexOf(value) > -1 : pressedProp,
-        defaultProp: Boolean(defaultPressed),
+        defaultProp: defaultPressed,
         caller: 'Toggle'
     });
 
-    const onPressedChange = useEventCallback((nextPressed: boolean, event: Event) => {
-        groupContext?.setGroupValue?.(value, nextPressed, event);
-        onPressedChangeProp?.(nextPressed, event);
-    });
+    const onPressedChange = useStableCallback(
+        (nextPressed: boolean, eventDetails: Toggle.ChangeEventDetails) => {
+            groupContext?.setGroupValue?.(value, nextPressed, eventDetails);
+            onPressedChangeProp?.(nextPressed, eventDetails);
+        }
+    );
 
     const { getButtonProps, buttonRef } = useButton({
         disabled,
@@ -58,7 +63,7 @@ export function Toggle(componentProps: Toggle.Props) {
     const state: Toggle.State = React.useMemo(
         () => ({
             disabled,
-            pressed
+            pressed: Boolean(pressed)
         }),
         [disabled, pressed]
     );
@@ -68,8 +73,15 @@ export function Toggle(componentProps: Toggle.Props) {
         'aria-pressed': pressed,
         onClick(event: React.MouseEvent) {
             const nextPressed = !pressed;
+            const details = createChangeEventDetails(REASONS.none, event.nativeEvent);
+
+            onPressedChange(nextPressed, details);
+
+            if (details.isCanceled) {
+                return;
+            }
+
             setPressedState(nextPressed);
-            onPressedChange(nextPressed, event.nativeEvent);
         }
     }, elementProps, getButtonProps];
 
@@ -96,46 +108,52 @@ export function Toggle(componentProps: Toggle.Props) {
     return element;
 }
 
-export namespace Toggle {
-    export type State = {
-        /**
-         * Whether the toggle is currently pressed.
-         */
-        pressed: boolean;
-        /**
-         * Whether the toggle should ignore user interaction.
-         */
-        disabled: boolean;
-    };
+export type ToggleState = {
+    /**
+     * Whether the toggle is currently pressed.
+     */
+    pressed: boolean;
+    /**
+     * Whether the toggle should ignore user interaction.
+     */
+    disabled: boolean;
+};
 
-    export type Props = {
-        /**
-         * Whether the toggle button is currently pressed.
-         * This is the controlled counterpart of `defaultPressed`.
-         */
-        pressed?: boolean;
-        /**
-         * Whether the toggle button is currently pressed.
-         * This is the uncontrolled counterpart of `pressed`.
-         * @default false
-         */
-        defaultPressed?: boolean;
-        /**
-         * Whether the component should ignore user interaction.
-         * @default false
-         */
-        disabled?: boolean;
-        /**
-         * Callback fired when the pressed state is changed.
-         *
-         * @param {boolean} pressed The new pressed state.
-         * @param {Event} event The corresponding event that initiated the change.
-         */
-        onPressedChange?: (pressed: boolean, event: Event) => void;
-        /**
-         * A unique string that identifies the toggle when used
-         * inside a toggle group.
-         */
-        value?: string;
-    } & NativeButtonProps & HeadlessUIComponentProps<'button', State>;
+export type ToggleProps = {
+    /**
+     * Whether the toggle button is currently pressed.
+     * This is the controlled counterpart of `defaultPressed`.
+     */
+    pressed?: boolean;
+    /**
+     * Whether the toggle button is currently pressed.
+     * This is the uncontrolled counterpart of `pressed`.
+     * @default false
+     */
+    defaultPressed?: boolean;
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * Callback fired when the pressed state is changed.
+     */
+    onPressedChange?: (pressed: boolean, eventDetails: Toggle.ChangeEventDetails) => void;
+    /**
+     * A unique string that identifies the toggle when used
+     * inside a toggle group.
+     */
+    value?: string;
+} & NativeButtonProps & HeadlessUIComponentProps<'button', Toggle.State>;
+
+export type ToggleChangeEventReason = typeof REASONS.none;
+
+export type ToggleChangeEventDetails = HeadlessUIChangeEventDetails<Toggle.ChangeEventReason>;
+
+export namespace Toggle {
+    export type State = ToggleState;
+    export type Props = ToggleProps;
+    export type ChangeEventReason = ToggleChangeEventReason;
+    export type ChangeEventDetails = ToggleChangeEventDetails;
 }

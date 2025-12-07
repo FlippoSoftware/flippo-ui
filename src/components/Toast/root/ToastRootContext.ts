@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { ToastObject } from '../useToastManager';
 
-export type TToastRootContext = {
+export type ToastRootContextValue = {
     toast: ToastObject<any>;
     rootRef: React.RefObject<HTMLElement | null>;
     titleId: string | undefined;
@@ -12,9 +12,9 @@ export type TToastRootContext = {
     swipeDirection: 'up' | 'down' | 'left' | 'right' | undefined;
 };
 
-export const ToastRootContext = React.createContext<TToastRootContext | undefined>(undefined);
+export const ToastRootContext = React.createContext<ToastRootContextValue | undefined>(undefined);
 
-export function useToastRootContext(): TToastRootContext {
+export function useToastRootContext(): ToastRootContextValue {
     const context = React.use(ToastRootContext);
 
     if (!context) {
@@ -22,5 +22,5 @@ export function useToastRootContext(): TToastRootContext {
             'Headless UI: ToastRootContext is missing. Toast parts must be used within <Toast.Root>.'
         );
     }
-    return context as TToastRootContext;
+    return context as ToastRootContextValue;
 }

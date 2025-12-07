@@ -1,35 +1,43 @@
-'use client';
-
 import React from 'react';
 
 import {
     useControlledState,
-    useEventCallback,
-    useIsoLayoutEffect,
     useMergedRef
 } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { useValueChanged } from '@flippo-ui/hooks/use-value-changed';
 
-import { useHeadlessUiId } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-import { visuallyHidden } from '@lib/visuallyHidden';
-import { contains } from '@packages/floating-ui-react/utils';
+import { useHeadlessUiId } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
+import { NOOP } from '~@lib/noop';
+import { visuallyHidden } from '~@lib/visuallyHidden';
+import { contains } from '~@packages/floating-ui-react/utils';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { REASONS } from '~@lib/reason';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { SHIFT } from '../Composite/composite';
 import { CompositeRoot } from '../Composite/root/CompositeRoot';
-import { useFieldControlValidation } from '../Field/control/useFieldControlValidation';
 import { useFieldRootContext } from '../Field/root/FieldRootContext';
 import { useField } from '../Field/useField';
 import { fieldValidityMapping } from '../Field/utils/constants';
+import { useFieldsetRootContext } from '../Fieldset/root/FieldsetRootContext';
 import { useFormContext } from '../Form/FormContext';
+import { useLabelableContext } from '../LabelableProvider';
 
 import type { FieldRoot } from '../Field/root/FieldRoot';
 
 import { RadioGroupContext } from './RadioGroupContext';
 
-import type { TRadioGroupContext } from './RadioGroupContext';
+import type { RadioGroupContextValue } from './RadioGroupContext';
 
+/**
+ * Provides a shared state to a series of radio buttons.
+ * Renders a `<div>` element.
+ *
+ * Documentation: [Base UI Radio Group](https://base-ui.com/react/components/radio)
+ */
 const MODIFIER_KEYS = [SHIFT];
 
 /**
@@ -38,10 +46,10 @@ const MODIFIER_KEYS = [SHIFT];
  *
  * Documentation: [Base UI Radio Group](https://base-ui.com/react/components/radio)
  */
-export function RadioGroup(componentProps: RadioGroup.Props) {
+export function RadioGroup(componentProps: RadioGroupProps) {
     const {
-        className,
         render,
+        className,
         disabled: disabledProp,
         readOnly,
         required,
@@ -56,29 +64,48 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
     } = componentProps;
 
     const {
-        labelId,
         setTouched: setFieldTouched,
         setFocused,
+        shouldValidateOnChange,
         validationMode,
         name: fieldName,
         disabled: fieldDisabled,
-        state: fieldState
+        state: fieldState,
+        validation,
+        setDirty,
+        setFilled,
+        validityData
     } = useFieldRootContext();
-    const fieldControlValidation = useFieldControlValidation();
+    const { labelId } = useLabelableContext();
     const { clearErrors } = useFormContext();
+    const fieldsetContext = useFieldsetRootContext(true);
 
     const disabled = fieldDisabled || disabledProp;
     const name = fieldName ?? nameProp;
     const id = useHeadlessUiId(idProp);
 
-    const [checkedValue, setCheckedValue] = useControlledState({
+    const [checkedValue, setCheckedValueUnwrapped] = useControlledState({
         prop: externalValue,
         defaultProp: defaultValue,
         caller: 'RadioGroup'
     });
 
+    const onValueChange = useStableCallback(onValueChangeProp);
+
+    const setCheckedValue = useStableCallback(
+        (value: unknown, eventDetails: RadioGroup.ChangeEventDetails) => {
+            onValueChange(value, eventDetails);
+
+            if (eventDetails.isCanceled) {
+                return;
+            }
+
+            setCheckedValueUnwrapped(value);
+        }
+    );
+
     const controlRef = React.useRef<HTMLElement>(null);
-    const registerControlRef = useEventCallback((element: HTMLElement | null) => {
+    const registerControlRef = useStableCallback((element: HTMLElement | null) => {
         if (controlRef.current == null && element != null) {
             controlRef.current = element;
         }
@@ -86,62 +113,47 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
 
     useField({
         id,
-        commitValidation: fieldControlValidation.commitValidation,
+        commit: validation.commit,
         value: checkedValue,
         controlRef,
         name,
         getValue: () => checkedValue ?? null
     });
 
-    const prevValueRef = React.useRef(checkedValue);
-
-    useIsoLayoutEffect(() => {
-        if (prevValueRef.current === checkedValue) {
-            return;
-        }
-
+    useValueChanged(checkedValue, () => {
         clearErrors(name);
 
-        if (validationMode === 'onChange') {
-            fieldControlValidation.commitValidation(checkedValue);
+        setDirty(checkedValue !== validityData.initialValue);
+        setFilled(checkedValue != null);
+
+        if (shouldValidateOnChange()) {
+            validation.commit(checkedValue);
         }
         else {
-            fieldControlValidation.commitValidation(checkedValue, true);
+            validation.commit(checkedValue, true);
         }
-    }, [
-        name,
-        clearErrors,
-        validationMode,
-        checkedValue,
-        fieldControlValidation
-    ]);
-
-    useIsoLayoutEffect(() => {
-        prevValueRef.current = checkedValue;
-    }, [checkedValue]);
+    });
 
     const [touched, setTouched] = React.useState(false);
 
-    const onBlur = useEventCallback((event) => {
+    const onBlur = useStableCallback((event) => {
         if (!contains(event.currentTarget, event.relatedTarget)) {
             setFieldTouched(true);
             setFocused(false);
 
             if (validationMode === 'onBlur') {
-                fieldControlValidation.commitValidation(checkedValue);
+                validation.commit(checkedValue);
             }
         }
     });
 
-    const onKeyDownCapture = useEventCallback((event) => {
+    const onKeyDownCapture = useStableCallback((event) => {
         if (event.key.startsWith('Arrow')) {
             setFieldTouched(true);
             setTouched(true);
             setFocused(true);
         }
     });
-
-    const onValueChange = useEventCallback(onValueChangeProp);
 
     const serializedCheckedValue = React.useMemo(() => {
         if (checkedValue == null) {
@@ -153,7 +165,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
         return JSON.stringify(checkedValue);
     }, [checkedValue]);
 
-    const mergedInputRef = useMergedRef(fieldControlValidation.inputRef, inputRefProp);
+    const mergedInputRef = useMergedRef(validation.inputRef, inputRefProp);
 
     const inputProps = mergeProps<'input'>(
         {
@@ -164,14 +176,16 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
             disabled,
             readOnly,
             required,
+            'aria-labelledby': elementProps['aria-labelledby'] ?? fieldsetContext?.legendId,
             'aria-hidden': true,
             'tabIndex': -1,
             'style': visuallyHidden,
+            'onChange': NOOP, // suppress a Next.js error
             onFocus() {
                 controlRef.current?.focus();
             }
         },
-        fieldControlValidation.getInputValidationProps
+        validation.getInputValidationProps
     );
 
     const state: RadioGroup.State = React.useMemo(
@@ -181,19 +195,15 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
             required: required ?? false,
             readOnly: readOnly ?? false
         }),
-        [
-            fieldState,
-            disabled,
-            readOnly,
-            required
-        ]
+        [fieldState, disabled, readOnly, required]
     );
 
-    const contextValue: TRadioGroupContext = React.useMemo(
+    const contextValue: RadioGroupContextValue = React.useMemo(
         () => ({
             ...fieldState,
             checkedValue,
             disabled,
+            validation,
             name,
             onValueChange,
             readOnly,
@@ -206,6 +216,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
         [
             checkedValue,
             disabled,
+            validation,
             fieldState,
             name,
             onValueChange,
@@ -232,70 +243,78 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
     };
 
     return (
-        <RadioGroupContext value={contextValue}>
+        <RadioGroupContext.Provider value={contextValue}>
             <CompositeRoot
                 render={render}
                 className={className}
                 state={state}
-                props={[defaultProps, fieldControlValidation.getValidationProps, elementProps]}
+                props={[defaultProps, validation.getValidationProps, elementProps]}
                 refs={[ref]}
-                customStyleHookMapping={fieldValidityMapping}
+                stateAttributesMapping={fieldValidityMapping}
                 enableHomeAndEndKeys={false}
                 modifierKeys={MODIFIER_KEYS}
-                stopEventPropagation
             />
             <input {...inputProps} />
-        </RadioGroupContext>
+        </RadioGroupContext.Provider>
     );
 }
 
-export namespace RadioGroup {
-    export type State = {
-        /**
-         * Whether the user should be unable to select a different radio button in the group.
-         */
-        readOnly: boolean | undefined;
-    } & FieldRoot.State;
+export type RadioGroupState = {
+    /**
+     * Whether the user should be unable to select a different radio button in the group.
+     */
+    readOnly: boolean | undefined;
+} & FieldRoot.State;
 
-    export type Props = {
-        /**
-         * Whether the component should ignore user interaction.
-         * @default false
-         */
-        disabled?: boolean;
-        /**
-         * Whether the user should be unable to select a different radio button in the group.
-         * @default false
-         */
-        readOnly?: boolean;
-        /**
-         * Whether the user must choose a value before submitting a form.
-         * @default false
-         */
-        required?: boolean;
-        /**
-         * Identifies the field when a form is submitted.
-         */
-        name?: string;
-        /**
-         * The controlled value of the radio item that should be currently selected.
-         *
-         * To render an uncontrolled radio group, use the `defaultValue` prop instead.
-         */
-        value?: unknown;
-        /**
-         * The uncontrolled value of the radio button that should be initially selected.
-         *
-         * To render a controlled radio group, use the `value` prop instead.
-         */
-        defaultValue?: unknown;
-        /**
-         * Callback fired when the value changes.
-         */
-        onValueChange?: (value: unknown, event: Event) => void;
-        /**
-         * A ref to access the hidden input element.
-         */
-        inputRef?: React.Ref<HTMLInputElement>;
-    } & Omit<HeadlessUIComponentProps<'div', State>, 'value'>;
+export type RadioGroupProps = {
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * Whether the user should be unable to select a different radio button in the group.
+     * @default false
+     */
+    readOnly?: boolean;
+    /**
+     * Whether the user must choose a value before submitting a form.
+     * @default false
+     */
+    required?: boolean;
+    /**
+     * Identifies the field when a form is submitted.
+     */
+    name?: string;
+    /**
+     * The controlled value of the radio item that should be currently selected.
+     *
+     * To render an uncontrolled radio group, use the `defaultValue` prop instead.
+     */
+    value?: unknown;
+    /**
+     * The uncontrolled value of the radio button that should be initially selected.
+     *
+     * To render a controlled radio group, use the `value` prop instead.
+     */
+    defaultValue?: unknown;
+    /**
+     * Callback fired when the value changes.
+     */
+    onValueChange?: (value: unknown, eventDetails: RadioGroup.ChangeEventDetails) => void;
+    /**
+     * A ref to access the hidden input element.
+     */
+    inputRef?: React.Ref<HTMLInputElement>;
+} & Omit<HeadlessUIComponentProps<'div', RadioGroup.State>, 'value'>;
+
+export type RadioGroupChangeEventReason = typeof REASONS.none;
+
+export type RadioGroupChangeEventDetails = HeadlessUIChangeEventDetails<RadioGroup.ChangeEventReason>;
+
+export namespace RadioGroup {
+    export type State = RadioGroupState;
+    export type Props = RadioGroupProps;
+    export type ChangeEventReason = RadioGroupChangeEventReason;
+    export type ChangeEventDetails = RadioGroupChangeEventDetails;
 }

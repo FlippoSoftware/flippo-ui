@@ -1,10 +1,7 @@
-'use client';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
-
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useDialogRootContext } from '../root/DialogRootContext';
 
@@ -14,37 +11,33 @@ import { useDialogRootContext } from '../root/DialogRootContext';
  *
  * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
  */
-export function DialogDescription(componentProps: DialogDescription.Props) {
+export function DialogDescription(componentProps: DialogDescriptionProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         id: idProp,
         ref,
         ...elementProps
     } = componentProps;
-    const { setDescriptionElementId } = useDialogRootContext();
+    const { store } = useDialogRootContext();
 
     const id = useHeadlessUiId(idProp);
 
-    useIsoLayoutEffect(() => {
-        setDescriptionElementId(id);
-        return () => {
-            setDescriptionElementId(undefined);
-        };
-    }, [id, setDescriptionElementId]);
+    store.useSyncedValueWithCleanup('descriptionElementId', id);
 
-    const element = useRenderElement('p', componentProps, {
+    return useRenderElement('p', componentProps, {
         ref,
         props: [{ id }, elementProps]
     });
-
-    return element;
 }
 
-export namespace DialogDescription {
-    export type State = object;
+export type DialogDescriptionProps = {} & HeadlessUIComponentProps<'p', DialogDescription.State>;
 
-    export type Props = HeadlessUIComponentProps<'p', State>;
+export type DialogDescriptionState = {};
+
+export namespace DialogDescription {
+    export type Props = DialogDescriptionProps;
+    export type State = DialogDescriptionState;
 }

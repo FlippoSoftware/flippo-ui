@@ -1,8 +1,8 @@
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
-import { transitionStatusMapping } from '@lib/styleHookMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
-import type { StateAttributesMapping } from '@lib/getStyleHookProps';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 
 import { fieldValidityMapping } from '../../Field/utils/constants';
 

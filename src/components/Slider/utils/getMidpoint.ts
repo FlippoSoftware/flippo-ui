@@ -1,4 +1,4 @@
-import type { Coords } from '@packages/floating-ui-react/types';
+import type { Coords } from '~@packages/floating-ui-react/types';
 
 export function getMidpoint(element: HTMLElement): Coords {
     const rect = element.getBoundingClientRect();

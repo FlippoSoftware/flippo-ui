@@ -1,9 +1,8 @@
-'use client';
-
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectGroupContext } from '../group/SelectGroupContext';
 
@@ -18,8 +17,8 @@ export function SelectGroupLabel(componentProps: SelectGroupLabel.Props) {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
         render,
-        /* eslint-enable unused-imports/no-unused-vars */
         id: idProp,
+        /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
     } = componentProps;
@@ -32,7 +31,7 @@ export function SelectGroupLabel(componentProps: SelectGroupLabel.Props) {
         setLabelId(id);
     }, [id, setLabelId]);
 
-    const element = useRenderElement('span', componentProps, {
+    const element = useRenderElement('div', componentProps, {
         ref,
         props: [{ id }, elementProps]
     });
@@ -40,8 +39,11 @@ export function SelectGroupLabel(componentProps: SelectGroupLabel.Props) {
     return element;
 }
 
-export namespace SelectGroupLabel {
-    export type State = object;
+export type SelectGroupLabelState = {};
 
-    export type Props = HeadlessUIComponentProps<'div', State>;
+export type SelectGroupLabelProps = {} & HeadlessUIComponentProps<'div', SelectGroupLabel.State>;
+
+export namespace SelectGroupLabel {
+    export type State = SelectGroupLabelState;
+    export type Props = SelectGroupLabelProps;
 }

@@ -1,13 +1,14 @@
-'use client';
 import * as React from 'react';
 
-import { NOOP } from '@lib/noop';
+import { NOOP } from '~@lib/noop';
 
 import type { FieldValidityData } from '../Field/root/FieldRoot';
 
+import type { Form } from './Form';
+
 export type Errors = Record<string, string | string[]>;
 
-export type TFormContext = {
+export type FormContextValue = {
     errors: Errors;
     clearErrors: (name: string | undefined) => void;
     formRef: React.RefObject<{
@@ -17,21 +18,27 @@ export type TFormContext = {
                 name: string | undefined;
                 validate: () => void;
                 validityData: FieldValidityData;
-                controlRef: React.RefObject<HTMLElement>;
-                getValueRef: React.RefObject<(() => unknown) | undefined>;
+                controlRef: React.RefObject<HTMLElement | null>;
+                getValue: () => unknown;
             }
         >;
     }>;
+    validationMode: Form.ValidationMode;
+    submitAttemptedRef: React.RefObject<boolean>;
 };
 
-export const FormContext = React.createContext<TFormContext>({
+export const FormContext = React.createContext<FormContextValue>({
     formRef: {
         current: {
             fields: new Map()
         }
     },
     errors: {},
-    clearErrors: NOOP
+    clearErrors: NOOP,
+    validationMode: 'onSubmit',
+    submitAttemptedRef: {
+        current: false
+    }
 });
 
 export function useFormContext() {

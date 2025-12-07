@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import type { ToastObject, useToastManager } from '../useToastManager';
 
@@ -27,14 +27,12 @@ export type ToastContextValue<Data extends object> = {
     hasDifferingHeights: boolean;
 };
 
-export type TToastContext<Data extends object> = ToastContextValue<Data>;
-
-export const ToastContext = React.createContext<TToastContext<any> | undefined>(undefined);
+export const ToastContext = React.createContext<ToastContextValue<any> | undefined>(undefined);
 
 export function useToastContext() {
     const context = React.use(ToastContext);
     if (!context) {
-        throw new Error('Base UI: useToast must be used within <Toast.Provider>.');
+        throw new Error('Headless UI: useToast must be used within <Toast.Provider>.');
     }
     return context;
 }

@@ -8,11 +8,22 @@ import dts from 'vite-plugin-dts';
 import type { UserConfig } from 'vite';
 import type { InlineConfig } from 'vitest';
 
-const entryPoints = Object.fromEntries(
-    glob.sync('src/**/*.{ts,tsx}', {
-        ignore: ['src/**/*.test.{ts,tsx}', 'src/**/*.stories.{ts,tsx}']
-    }).map((file) => [file.replace('src/', '').replace(/\.[^/.]+$/, ''), path.resolve(file)])
-);
+// Create entry points only for component indexes (matching package.json exports)
+const componentEntries = glob.sync('src/components/*/index.ts').reduce((acc, file) => {
+    const match = file.match(/src\/components\/(.+)\/index\.ts/);
+    if (match) {
+        acc[`components/${match[1]}/index`] = path.resolve(file);
+    }
+    return acc;
+}, {} as Record<string, string>);
+
+const entryPoints: Record<string, string> = {
+    'index': path.resolve('src/index.ts'),
+    ...componentEntries,
+    // Additional exports
+    'lib/merge': path.resolve('src/lib/merge.ts'),
+    'lib/hooks/useDirection': path.resolve('src/lib/hooks/useDirection.ts')
+};
 
 type VitestConfigExport = {
     test: InlineConfig;
@@ -43,10 +54,9 @@ export default defineConfig({
         rollupOptions: {
             external: ['react', 'react-dom'],
             output: {
-                preserveModules: true,
-                preserveModulesRoot: 'src',
                 entryFileNames: '[name].[format].js',
-                chunkFileNames: '[name].[format].js'
+                chunkFileNames: 'shared/[name]-[hash].[format].js',
+                assetFileNames: 'assets/[name].[ext]'
             }
         }
     },
@@ -65,8 +75,8 @@ export default defineConfig({
     envPrefix: 'HEADLESS_',
     resolve: {
         alias: {
-            '@lib': path.resolve(__dirname, './src/lib'),
-            '@packages': path.resolve(__dirname, './src/packages')
+            '~@lib': path.resolve(__dirname, './src/lib'),
+            '~@packages': path.resolve(__dirname, './src/packages')
         }
     },
     server: {

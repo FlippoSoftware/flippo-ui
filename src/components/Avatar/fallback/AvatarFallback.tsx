@@ -1,12 +1,12 @@
-'use client';
+
 
 import React from 'react';
 
 import { useTimeout } from '@flippo-ui/hooks';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useAvatarRootContext } from '../root/AvatarRootContext';
 import { avatarStyleHookMapping } from '../root/styleHooks';

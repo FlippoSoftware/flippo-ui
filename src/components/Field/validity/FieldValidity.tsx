@@ -1,5 +1,4 @@
-'use client';
-import * as React from 'react';
+import React from 'react';
 
 import { useFieldRootContext } from '../root/FieldRootContext';
 import { getCombinedFieldValidityData } from '../utils/getCombinedFieldValidityData';

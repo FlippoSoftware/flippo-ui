@@ -7,18 +7,18 @@ import {
     useMergedRef
 } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId, useRenderElement } from '@lib/hooks';
-import { mergeProps } from '@lib/merge';
-import { visuallyHidden } from '@lib/visuallyHidden';
-import { contains } from '@packages/floating-ui-react/utils';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { mergeProps } from '~@lib/merge';
+import { visuallyHidden } from '~@lib/visuallyHidden';
+import { contains } from '~@packages/floating-ui-react/utils';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { CompositeList } from '../../Composite';
-import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { useField } from '../../Field/useField';
 import { useFormContext } from '../../Form/FormContext';
+import { useLabelableContext } from '../../LabelableProvider';
 import { pinInputStyleHookMapping } from '../utils/styleHooks';
 
 import type { CompositeMetadata, CompositeRoot } from '../../Composite';
@@ -59,17 +59,18 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
     const [lastFocusedInputIndex, setLastFocusedInputIndex] = React.useState<number | null>(null);
 
     const {
-        labelId,
         setTouched: setFieldTouched,
         validationMode,
         name: fieldName,
         disabled: fieldDisabled,
         state: fieldState,
+        validation,
         setDirty,
         setFilled,
         setFocused
     } = useFieldRootContext();
-    const fieldControlValidation = useFieldControlValidation();
+    const { labelId, getDescriptionProps } = useLabelableContext();
+
     const { clearErrors } = useFormContext();
 
     const disabled = fieldDisabled || disabledProp;
@@ -96,7 +97,7 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
 
     useField({
         id,
-        commitValidation: fieldControlValidation.commitValidation,
+        commit: validation.commit,
         value: checkedValue,
         controlRef,
         name,
@@ -111,17 +112,17 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
         clearErrors(name);
 
         if (validationMode === 'onChange') {
-            fieldControlValidation.commitValidation(checkedValue);
+            validation.commit(checkedValue);
         }
         else {
-            fieldControlValidation.commitValidation(checkedValue, true);
+            validation.commit(checkedValue, true);
         }
     }, [
         name,
         clearErrors,
         validationMode,
         checkedValue,
-        fieldControlValidation
+        validation
     ]);
 
     useIsoLayoutEffect(() => {
@@ -134,7 +135,7 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
             setFocused(false);
 
             if (validationMode === 'onBlur') {
-                fieldControlValidation.commitValidation(checkedValue);
+                validation.commit(checkedValue);
             }
         }
     });
@@ -190,7 +191,7 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
         return JSON.stringify(checkedValue);
     }, [checkedValue]);
 
-    const mergedInputRef = useMergedRef(fieldControlValidation.inputRef, controlRef, inputRefProp);
+    const mergedInputRef = useMergedRef(validation.inputRef, controlRef, inputRefProp);
 
     const inputProps = mergeProps<'input'>(
         {
@@ -208,7 +209,7 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
                 controlRef.current?.focus();
             }
         },
-        fieldControlValidation.getInputValidationProps
+        validation.getInputValidationProps
     );
 
     const state: PinInputRoot.State = React.useMemo(
@@ -218,12 +219,7 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
             required: required ?? false,
             readOnly: readOnly ?? false
         }),
-        [
-            fieldState,
-            disabled,
-            required,
-            readOnly
-        ]
+        [fieldState, disabled, required, readOnly]
     );
 
     const contextValue: PinInputRootContextValue = React.useMemo(
@@ -242,6 +238,7 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
             selectOnFocus,
             pattern,
             type,
+            validation,
             focusedInputIndex,
             lastFocusedInputIndex,
             setLastFocusedInputIndex,
@@ -276,6 +273,7 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
             state,
             touched,
             type,
+            validation,
             values
         ]
     );
@@ -295,7 +293,7 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
     const element = useRenderElement('div', componentProps, {
         ref,
         state,
-        props: [defaultProps, elementProps],
+        props: [defaultProps, elementProps, getDescriptionProps],
         customStyleHookMapping: pinInputStyleHookMapping
     });
 

@@ -1,14 +1,14 @@
 import React from 'react';
 
-import type { HTMLProps } from '@lib/types';
-import type { FloatingRootContext, useFloatingRootContext } from '@packages/floating-ui-react';
+import type { HTMLProps } from '~@lib/types';
+import type { FloatingEvents, FloatingRootContext } from '~@packages/floating-ui-react';
 
-import type { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
+import type { UseFieldValidationReturnValue } from '../../Field/root/useFieldValidation';
 import type { SelectStore } from '../store';
 
 import type { SelectRoot } from './SelectRoot';
 
-export type TSelectRootContext = {
+export type SelectRootContextValue = {
     store: SelectStore;
     name: string | undefined;
     disabled: boolean;
@@ -25,7 +25,7 @@ export type TSelectRootContext = {
     getItemProps: (
         props?: HTMLProps & { active?: boolean; selected?: boolean },
     ) => Record<string, unknown>; // PREVENT_COMMIT
-    events: ReturnType<typeof useFloatingRootContext>['events'];
+    events: FloatingEvents;
     valueRef: React.RefObject<HTMLSpanElement | null>;
     valuesRef: React.RefObject<Array<any>>;
     labelsRef: React.RefObject<Array<string | null>>;
@@ -35,37 +35,32 @@ export type TSelectRootContext = {
         allowSelectedMouseUp: boolean;
     }>;
     selectedItemTextRef: React.RefObject<HTMLSpanElement | null>;
-    fieldControlValidation: ReturnType<typeof useFieldControlValidation>;
-    /**
-     * Called by each <Select.Item> when it knows its stable list index.
-     * Allows the root to map option values to their DOM positions.
-     */
-    registerItemIndex: (index: number) => void;
+    validation: UseFieldValidationReturnValue;
     onOpenChangeComplete?: (open: boolean) => void;
     keyboardActiveRef: React.RefObject<boolean>;
     alignItemWithTriggerActiveRef: React.RefObject<boolean>;
     initialValueRef: React.RefObject<any>;
 };
 
-export const SelectRootContext = React.createContext<TSelectRootContext | null>(null);
+export const SelectRootContext = React.createContext<SelectRootContextValue | null>(null);
 export const SelectFloatingContext = React.createContext<FloatingRootContext | null>(null);
 
 export function useSelectRootContext() {
     const context = React.use(SelectRootContext);
     if (context === null) {
         throw new Error(
-            'Base UI: SelectRootContext is missing. Select parts must be placed within <Select.Root>.'
+            'Headless UI: SelectRootContext is missing. Select parts must be placed within <Select.Root>.'
         );
     }
+
     return context;
 }
 
 export function useSelectFloatingContext() {
     const context = React.use(SelectFloatingContext);
-
     if (context === null) {
         throw new Error(
-            'Base UI: SelectFloatingContext is missing. Select parts must be placed within <Select.Root>.'
+            'Headless UI: SelectFloatingContext is missing. Select parts must be placed within <Select.Root>.'
         );
     }
 

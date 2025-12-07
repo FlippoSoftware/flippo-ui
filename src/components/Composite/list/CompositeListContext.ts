@@ -1,8 +1,6 @@
-'use client';
-
 import React from 'react';
 
-export type TCompositeListContext<Metadata> = {
+export type CompositeListContextValue<Metadata> = {
     register: (node: Element, metadata: Metadata) => void;
     unregister: (node: Element) => void;
     subscribeMapChange: (fn: (map: Map<Element, Metadata | null>) => void) => () => void;
@@ -11,10 +9,12 @@ export type TCompositeListContext<Metadata> = {
     nextIndexRef: React.RefObject<number>;
 };
 
-export const CompositeListContext = React.createContext<TCompositeListContext<any>>({
+export const CompositeListContext = React.createContext<CompositeListContextValue<any>>({
     register: () => {},
     unregister: () => {},
-    subscribeMapChange: () => () => {},
+    subscribeMapChange: () => {
+        return () => {};
+    },
     elementsRef: { current: [] },
     nextIndexRef: { current: 0 }
 });

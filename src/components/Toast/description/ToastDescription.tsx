@@ -1,11 +1,11 @@
-'use client';
+
 import React from 'react';
 
 import { useId, useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useToastRootContext } from '../root/ToastRootContext';
 

@@ -1,13 +1,11 @@
-'use client';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { isWebKit } from '@lib/detectBrowser';
-import { useRenderElement } from '@lib/hooks';
-import { ownerDocument } from '@lib/owner';
+import { isWebKit } from '~@lib/detectBrowser';
+import { useRenderElement } from '~@lib/hooks';
+import { ownerDocument } from '~@lib/owner';
 
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
 import { useNumberFieldScrubAreaContext } from '../scrub-area/NumberFieldScrubAreaContext';
@@ -27,8 +25,8 @@ import type { NumberFieldRoot } from '../root/NumberFieldRoot';
 export function NumberFieldScrubAreaCursor(componentProps: NumberFieldScrubAreaCursor.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
@@ -41,7 +39,7 @@ export function NumberFieldScrubAreaCursor(componentProps: NumberFieldScrubAreaC
         isPointerLockDenied,
         scrubAreaCursorRef
     }
-    = useNumberFieldScrubAreaContext();
+        = useNumberFieldScrubAreaContext();
 
     const [domElement, setDomElement] = React.useState<Element | null>(null);
 
@@ -66,8 +64,11 @@ export function NumberFieldScrubAreaCursor(componentProps: NumberFieldScrubAreaC
     return element && ReactDOM.createPortal(element, ownerDocument(domElement).body);
 }
 
-export namespace NumberFieldScrubAreaCursor {
-    export type State = NumberFieldRoot.State;
+export type NumberFieldScrubAreaCursorState = {} & NumberFieldRoot.State;
 
-    export type Props = HeadlessUIComponentProps<'span', State>;
+export type NumberFieldScrubAreaCursorProps = {} & HeadlessUIComponentProps<'span', NumberFieldScrubAreaCursor.State>;
+
+export namespace NumberFieldScrubAreaCursor {
+    export type State = NumberFieldScrubAreaCursorState;
+    export type Props = NumberFieldScrubAreaCursorProps;
 }

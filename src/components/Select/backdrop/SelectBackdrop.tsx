@@ -1,13 +1,15 @@
 import React from 'react';
 
 import { useStore } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
-import { popupStateMapping } from '@lib/popupStateMapping';
-import { transitionStatusMapping } from '@lib/styleHookMapping';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { StateAttributesMapping } from '@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps } from '@lib/types';
+
+import { useRenderElement } from '~@lib/hooks';
+import { popupStateMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
+
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';
@@ -64,14 +66,14 @@ export function SelectBackdrop(componentProps: SelectBackdrop.Props) {
     return element;
 }
 
-export namespace SelectBackdrop {
-    export type State = {
-        /**
-         * Whether the select menu is currently open.
-         */
-        open: boolean;
-        transitionStatus: TransitionStatus;
-    };
+export type SelectBackdropState = {
+    open: boolean;
+    transitionStatus: TransitionStatus;
+};
 
-    export type Props = HeadlessUIComponentProps<'div', State>;
+export type SelectBackdropProps = {} & HeadlessUIComponentProps<'div', SelectBackdrop.State>;
+
+export namespace SelectBackdrop {
+    export type State = SelectBackdropState;
+    export type Props = SelectBackdropProps;
 }

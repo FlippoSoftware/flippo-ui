@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useMergedRef } from '@flippo-ui/hooks';
 
-import { createSlot } from '@lib/createSlot';
+import { createSlot } from '~@lib/createSlot';
 
 import { EMPTY_OBJECT } from '../constants';
 import { getStyleHookProps } from '../getStyleHookProps';

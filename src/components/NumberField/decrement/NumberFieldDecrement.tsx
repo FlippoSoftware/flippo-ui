@@ -1,10 +1,8 @@
-'use client';
-
 import React from 'react';
 
-import { useRenderElement } from '@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps, NativeButtonProps } from '@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useButton } from '../../use-button';
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
@@ -22,12 +20,12 @@ import type { NumberFieldRoot } from '../root/NumberFieldRoot';
 export function NumberFieldDecrement(componentProps: NumberFieldDecrement.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
+        ref,
         disabled: disabledProp = false,
         nativeButton = true,
-        ref,
         ...elementProps
     } = componentProps;
 
@@ -52,12 +50,14 @@ export function NumberFieldDecrement(componentProps: NumberFieldDecrement.Props)
         stopAutoChange,
         value,
         valueRef,
-        locale
+        locale,
+        lastChangedValueRef,
+        onValueCommitted
     } = useNumberFieldRootContext();
 
     const disabled = disabledProp || contextDisabled;
 
-    const { props } = useNumberFieldButton({
+    const props = useNumberFieldButton({
         isIncrement: false,
         inputRef,
         startAutoChange,
@@ -78,7 +78,9 @@ export function NumberFieldDecrement(componentProps: NumberFieldDecrement.Props)
         isPressedRef,
         intentionalTouchCheckTimeout,
         movesAfterTouchRef,
-        locale
+        locale,
+        lastChangedValueRef,
+        onValueCommitted
     });
 
     const { getButtonProps, buttonRef } = useButton({
@@ -104,8 +106,11 @@ export function NumberFieldDecrement(componentProps: NumberFieldDecrement.Props)
     return element;
 }
 
-export namespace NumberFieldDecrement {
-    export type State = NumberFieldRoot.State;
+export type NumberFieldDecrementState = {} & NumberFieldRoot.State;
 
-    export type Props = NativeButtonProps & HeadlessUIComponentProps<'button', State>;
+export type NumberFieldDecrementProps = {} & NativeButtonProps & HeadlessUIComponentProps<'button', NumberFieldDecrement.State>;
+
+export namespace NumberFieldDecrement {
+    export type State = NumberFieldDecrementState;
+    export type Props = NumberFieldDecrementProps;
 }

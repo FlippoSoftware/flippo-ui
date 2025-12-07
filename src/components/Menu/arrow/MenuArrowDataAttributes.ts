@@ -1,4 +1,4 @@
-import { CommonPopupDataAttributes } from '@lib/popupStateMapping';
+import { CommonPopupDataAttributes } from '~@lib/popupStateMapping';
 
 export enum MenuArrowDataAttributes {
     /**
@@ -9,10 +9,6 @@ export enum MenuArrowDataAttributes {
      * Present when the menu popup is closed.
      */
     closed = CommonPopupDataAttributes.closed,
-    /**
-     * Present when the anchor is hidden.
-     */
-    anchorHidden = CommonPopupDataAttributes.anchorHidden,
     /**
      * Indicates which side the popup is positioned relative to the trigger.
      * @type {'top' | 'bottom' | 'left' | 'right' | 'inline-end' | 'inline-start'}

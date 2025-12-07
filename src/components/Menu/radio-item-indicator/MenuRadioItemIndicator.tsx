@@ -1,15 +1,16 @@
-'use client';
-
 import React from 'react';
 
-import { useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
-import { useRenderElement } from '@lib/hooks';
+import { useOpenChangeComplete } from '@flippo-ui/hooks/use-open-change-complete';
+import { useTransitionStatus } from '@flippo-ui/hooks/use-transition-status';
 
-import type { TransitionStatus } from '@flippo-ui/hooks';
-import type { HeadlessUIComponentProps } from '@lib/types';
+import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
+
+import { useRenderElement } from '~@lib/hooks';
+
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useMenuRadioItemContext } from '../radio-item/MenuRadioItemContext';
-import { itemMapping } from '../utils/styleHookMapping';
+import { itemMapping } from '../utils/stateAttributesMapping';
 
 /**
  * Indicates whether the radio item is selected.
@@ -20,10 +21,10 @@ import { itemMapping } from '../utils/styleHookMapping';
 export function MenuRadioItemIndicator(componentProps: MenuRadioItemIndicator.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
-        keepMounted = true,
+        keepMounted = false,
         ref,
         ...elementProps
     } = componentProps;
@@ -51,12 +52,7 @@ export function MenuRadioItemIndicator(componentProps: MenuRadioItemIndicator.Pr
             highlighted: item.highlighted,
             transitionStatus
         }),
-        [
-            item.checked,
-            item.disabled,
-            item.highlighted,
-            transitionStatus
-        ]
+        [item.checked, item.disabled, item.highlighted, transitionStatus]
     );
 
     const element = useRenderElement('span', componentProps, {
@@ -73,25 +69,28 @@ export function MenuRadioItemIndicator(componentProps: MenuRadioItemIndicator.Pr
     return element;
 }
 
-export namespace MenuRadioItemIndicator {
-    export type State = {
+export type MenuRadioItemIndicatorProps = {
+    /**
+     * Whether to keep the HTML element in the DOM when the radio item is inactive.
+     * @default false
+     */
+    keepMounted?: boolean;
+} & HeadlessUIComponentProps<'span', MenuRadioItemIndicator.State>;
+
+export type MenuRadioItemIndicatorState = {
     /**
      * Whether the radio item is currently selected.
      */
-        checked: boolean;
-        /**
-         * Whether the component should ignore user interaction.
-         */
-        disabled: boolean;
-        highlighted: boolean;
-        transitionStatus: TransitionStatus;
-    };
-
-    export type Props = {
+    checked: boolean;
     /**
-     * Whether to keep the HTML element in the DOM when the radio item is inactive.
-     * @default true
+     * Whether the component should ignore user interaction.
      */
-        keepMounted?: boolean;
-    } & HeadlessUIComponentProps<'span', State>;
+    disabled: boolean;
+    highlighted: boolean;
+    transitionStatus: TransitionStatus;
+};
+
+export namespace MenuRadioItemIndicator {
+    export type Props = MenuRadioItemIndicatorProps;
+    export type State = MenuRadioItemIndicatorState;
 }
