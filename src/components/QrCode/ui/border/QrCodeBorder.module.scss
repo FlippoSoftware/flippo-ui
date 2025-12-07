@@ -1,0 +1,152 @@
+@use 'mixins/_common.scss' as common;
+
+.QrCodeBorder {
+  @include common.reset-appearance();
+
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+  color: var(--f-color-text-6);
+
+  --f-border-color: var(--border-color, var(--f-color-text-6));
+}
+
+.TopLeftCorner {
+  width: var(--corner-length);
+  height: var(--corner-length);
+  border-radius: var(--radius-top-left) 0 0 0;
+  border-top: var(--stroke-width) solid var(--f-border-color);
+  border-left: var(--stroke-width) solid var(--f-border-color);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--stroke-width) * -1);
+    right: calc(var(--stroke-width) * -1);
+    width: var(--stroke-width);
+    height: var(--stroke-width);
+    border-bottom-right-radius: var(--radius-top-left);
+    background-color: var(--f-border-color);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: calc(var(--stroke-width) * -1);
+    left: calc(var(--stroke-width) * -1);
+    width: var(--stroke-width);
+    height: var(--stroke-width);
+    border-bottom-right-radius: var(--radius-top-right);
+    background-color: var(--f-border-color);
+  }
+}
+
+.TopRightCorner {
+  width: var(--corner-length);
+  height: var(--corner-length);
+  border-radius: 0 var(--radius-top-right) 0 0;
+  border-top: var(--stroke-width) solid var(--f-border-color);
+  border-right: var(--stroke-width) solid var(--f-border-color);
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--stroke-width) * -1);
+    left: calc(var(--stroke-width) * -1);
+    width: var(--stroke-width);
+    height: var(--stroke-width);
+    border-bottom-left-radius: var(--radius-top-right);
+    background-color: var(--f-border-color);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: calc(var(--stroke-width) * -1);
+    right: calc(var(--stroke-width) * -1);
+    width: var(--stroke-width);
+    height: var(--stroke-width);
+    border-bottom-left-radius: var(--radius-top-right);
+    background-color: var(--f-border-color);
+  }
+}
+
+.BottomLeftCorner {
+  width: var(--corner-length);
+  height: var(--corner-length);
+  border-radius: 0 0 0 var(--radius-bottom-left);
+  border-bottom: var(--stroke-width) solid var(--f-border-color);
+  border-left: var(--stroke-width) solid var(--f-border-color);
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: calc(var(--stroke-width) * -1);
+    right: calc(var(--stroke-width) * -1);
+    width: var(--stroke-width);
+    height: var(--stroke-width);
+    border-top-right-radius: var(--radius-top-left);
+    background-color: var(--f-border-color);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: calc(var(--stroke-width) * -1);
+    left: calc(var(--stroke-width) * -1);
+    width: var(--stroke-width);
+    height: var(--stroke-width);
+    border-top-right-radius: var(--radius-top-right);
+    background-color: var(--f-border-color);
+  }
+}
+
+.BottomRightCorner {
+  width: var(--corner-length);
+  height: var(--corner-length);
+  border-radius: 0 0 var(--radius-bottom-right) 0;
+  border-bottom: var(--stroke-width) solid var(--f-border-color);
+  border-right: var(--stroke-width) solid var(--f-border-color);
+
+  position: absolute;
+  bottom: 0;
+  right: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: calc(var(--stroke-width) * -1);
+    left: calc(var(--stroke-width) * -1);
+    width: var(--stroke-width);
+    height: var(--stroke-width);
+    border-top-left-radius: var(--radius-top-left);
+    background-color: var(--f-border-color);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: calc(var(--stroke-width) * -1);
+    right: calc(var(--stroke-width) * -1);
+    width: var(--stroke-width);
+    height: var(--stroke-width);
+    border-top-left-radius: var(--radius-top-right);
+    background-color: var(--f-border-color);
+  }
+}

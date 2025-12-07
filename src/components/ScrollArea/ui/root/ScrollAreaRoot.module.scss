@@ -1,0 +1,7 @@
+@use 'mixins/_common.scss' as common;
+
+.ScrollAreaRoot {
+  @include common.reset-appearance();
+
+  max-width: calc(100vw - 8rem);
+}

@@ -24,10 +24,10 @@ export const Default: FormStory = {
     render: (args) => (
         <Form {...args} onSubmit={handleSubmit}>
             <Field.Root>
-                <Field.Label>
-                    {'Name'}
-                </Field.Label>
                 <Input.Root>
+                    <Field.Label>
+                        {'Name'}
+                    </Field.Label>
                     <Input.Body>
                         <Input.Slot />
                     </Input.Body>

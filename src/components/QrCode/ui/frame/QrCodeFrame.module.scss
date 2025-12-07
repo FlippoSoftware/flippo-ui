@@ -1,0 +1,16 @@
+@use 'mixins/_common.scss' as common;
+
+.QrCodeFrame {
+  @include common.reset-appearance();
+
+  position: relative;
+
+  flex: 0 0 auto;
+
+  width: var(--qr-code-width);
+  height: var(--qr-code-height);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

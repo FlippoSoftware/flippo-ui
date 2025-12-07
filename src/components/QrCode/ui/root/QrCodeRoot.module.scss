@@ -1,0 +1,15 @@
+@use 'mixins/_common.scss' as common;
+
+.QrCodeRoot {
+  @include common.reset-appearance();
+
+  position: relative;
+  padding: var(--f-spacing-8);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: var(--f-spacing-4);
+  background-color: var(--f-color-bg-2-hover);
+}

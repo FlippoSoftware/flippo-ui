@@ -1,0 +1,12 @@
+@use 'mixins/_common.scss' as common;
+
+.ScrollAreaContent {
+  @include common.reset-appearance();
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--f-spacing-4);
+  padding-block: var(--f-spacing-3);
+  padding-left: var(--f-spacing-4);
+  padding-right: var(--f-spacing-6);
+}

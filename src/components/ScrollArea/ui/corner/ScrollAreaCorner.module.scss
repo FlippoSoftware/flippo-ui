@@ -1,0 +1,9 @@
+@use 'mixins/_common.scss' as common;
+
+.ScrollAreaCorner {
+  @include common.reset-appearance();
+
+  background-color: transparent;
+}
+
+

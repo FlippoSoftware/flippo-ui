@@ -1,0 +1,24 @@
+@use 'mixins/_common.scss' as common;
+
+.DrawerDrag {
+  @include common.reset-appearance();
+
+  width: 48px;
+  height: 4px;
+  margin: 0 auto var(--f-spacing-4);
+  background-color: var(--f-color-border-2);
+  border-radius: 2px;
+  cursor: grab;
+  transition: background-color 150ms;
+
+  &:hover {
+    background-color: var(--f-color-border-1);
+  }
+
+  &[data-dragging] {
+    cursor: grabbing;
+    background-color: var(--f-color-border-1);
+  }
+}
+
+
