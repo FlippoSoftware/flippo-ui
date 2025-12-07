@@ -1,17 +1,10 @@
-/* eslint-disable react-refresh/only-export-components */
-
-import React from 'react';
+import * as React from 'react';
 
 import { useId, useIsoLayoutEffect, useLazyRef } from '@flippo-ui/hooks';
 
-import { createEventEmitter } from '../utils/createEventEmitter';
+import type { FloatingNodeType, FloatingTreeType } from '../types';
 
-import type {
-    FloatingEvents,
-    FloatingNodeType,
-    FloatingTreeType,
-    ReferenceType
-} from '../types';
+import { FloatingTreeStore } from './FloatingTreeStore';
 
 const FloatingNodeContext = React.createContext<FloatingNodeType | null>(null);
 const FloatingTreeContext = React.createContext<FloatingTreeType | null>(null);
@@ -27,10 +20,8 @@ export function useFloatingParentNodeId(): string | null {
 /**
  * Returns the nearest floating tree context, if available.
  */
-export function useFloatingTree<RT extends ReferenceType = ReferenceType>(externalTree?: FloatingTreeStore<RT>):
-FloatingTreeType<RT> | null {
-    const contextTree = React.use(FloatingTreeContext) as FloatingTreeType<RT> | null;
-
+export function useFloatingTree(externalTree?: FloatingTreeStore): FloatingTreeType | null {
+    const contextTree = React.use(FloatingTreeContext) as FloatingTreeType | null;
     return externalTree ?? contextTree;
 }
 
@@ -85,33 +76,10 @@ export type FloatingTreeProps = {
 };
 
 /**
- * Stores and manages floating elements in a tree structure.
- * This is a backing store for the `FloatingTree` component.
- */
-export class FloatingTreeStore<RT extends ReferenceType = ReferenceType> {
-    public readonly nodesRef: React.RefObject<Array<FloatingNodeType<RT>>> = { current: [] };
-
-    public readonly events: FloatingEvents = createEventEmitter();
-
-    private readonly _id: string = `${Math.random().toString(16).slice(2)}`;
-
-    public addNode(node: FloatingNodeType<RT>) {
-        this.nodesRef.current.push(node);
-    }
-
-    public removeNode(node: FloatingNodeType<RT>) {
-        const index = this.nodesRef.current.findIndex((n) => n === node);
-        if (index !== -1) {
-            this.nodesRef.current.splice(index, 1);
-        }
-    }
-}
-
-/**
  * Provides context for nested floating elements when they are not children of
  * each other on the DOM.
- * This is not necessary in all cases, except when there must be explicit communication between parent and
- child floating elements. It is necessary for:
+ * This is not necessary in all cases, except when there must be explicit communication between parent and child
+ * floating elements. It is necessary for:
  * - The `bubbles` option in the `useDismiss()` Hook
  * - Nested virtual list navigation
  * - Nested floating elements that each open on hover

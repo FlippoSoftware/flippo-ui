@@ -164,7 +164,7 @@ function applyAttributeToOthers(
 }
 
 export function markOthers(avoidElements: Element[], ariaHidden = false, inert = false): Undo {
-    const body = getDocument(avoidElements[0] || null).body;
+    const body = getDocument(avoidElements[0] ?? null).body;
     return applyAttributeToOthers(
         avoidElements.concat(Array.from(body.querySelectorAll('[aria-live]'))),
         body,

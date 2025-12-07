@@ -1,4 +1,4 @@
-import { Timeout } from '@flippo-ui/hooks';
+import { Timeout } from '@flippo-ui/hooks/use-timeout';
 import { isElement } from '@floating-ui/utils/dom';
 
 import { contains, getTarget } from './utils/element';
@@ -182,36 +182,16 @@ export function safePolygon(options: SafePolygonOptions = {}) {
 
             switch (side) {
                 case 'top':
-                    rectPoly = [
-                        [left, refRect.top + 1],
-                        [left, rect.bottom - 1],
-                        [right, rect.bottom - 1],
-                        [right, refRect.top + 1]
-                    ];
+                    rectPoly = [[left, refRect.top + 1], [left, rect.bottom - 1], [right, rect.bottom - 1], [right, refRect.top + 1]];
                     break;
                 case 'bottom':
-                    rectPoly = [
-                        [left, rect.top + 1],
-                        [left, refRect.bottom - 1],
-                        [right, refRect.bottom - 1],
-                        [right, rect.top + 1]
-                    ];
+                    rectPoly = [[left, rect.top + 1], [left, refRect.bottom - 1], [right, refRect.bottom - 1], [right, rect.top + 1]];
                     break;
                 case 'left':
-                    rectPoly = [
-                        [rect.right - 1, bottom],
-                        [rect.right - 1, top],
-                        [refRect.left + 1, top],
-                        [refRect.left + 1, bottom]
-                    ];
+                    rectPoly = [[rect.right - 1, bottom], [rect.right - 1, top], [refRect.left + 1, top], [refRect.left + 1, bottom]];
                     break;
                 case 'right':
-                    rectPoly = [
-                        [refRect.right - 1, bottom],
-                        [refRect.right - 1, top],
-                        [rect.left + 1, top],
-                        [rect.left + 1, bottom]
-                    ];
+                    rectPoly = [[refRect.right - 1, bottom], [refRect.right - 1, top], [rect.left + 1, top], [rect.left + 1, bottom]];
                     break;
                 default:
             }

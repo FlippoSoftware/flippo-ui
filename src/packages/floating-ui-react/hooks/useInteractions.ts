@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { ACTIVE_KEY, FOCUSABLE_ATTRIBUTE, SELECTED_KEY } from '../utils/constants';
 

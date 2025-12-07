@@ -1,15 +1,14 @@
-import React from 'react';
+import * as React from 'react';
 
-import {
-    useEventCallback,
-    useIsoLayoutEffect,
-    useLatestRef,
-    useTimeout
-} from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { useTimeout } from '@flippo-ui/hooks/use-timeout';
+
+import { EMPTY_ARRAY } from '~@lib/constants';
 
 import { stopEvent } from '../utils';
 
-import type { ElementProps, FloatingRootContext } from '../types';
+import type { ElementProps, FloatingContext, FloatingRootContext } from '../types';
 
 export type UseTypeaheadProps = {
     /**
@@ -66,17 +65,22 @@ export type UseTypeaheadProps = {
  * types, often used in tandem with `useListNavigation()`.
  * @see https://floating-ui.com/docs/useTypeahead
  */
-export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadProps): ElementProps {
-    const { open, dataRef } = context;
+export function useTypeahead(
+    context: FloatingRootContext<any> | FloatingContext<any>,
+    props: UseTypeaheadProps
+): ElementProps {
+    const store = 'rootStore' in context ? context.rootStore : context;
+    const open = store.useState('open');
+    const dataRef = store.context.dataRef;
     const {
         listRef,
         activeIndex,
         onMatch: onMatchProp,
-        onTypingChange: onTypingChangeProp,
+        onTypingChange,
         enabled = true,
         findMatch = null,
         resetMs = 750,
-        ignoreKeys = [],
+        ignoreKeys = EMPTY_ARRAY,
         selectedIndex = null
     } = props;
 
@@ -84,12 +88,6 @@ export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadPr
     const stringRef = React.useRef('');
     const prevIndexRef = React.useRef<number | null>(selectedIndex ?? activeIndex ?? -1);
     const matchIndexRef = React.useRef<number | null>(null);
-
-    const onMatch = useEventCallback(onMatchProp);
-    const onTypingChange = useEventCallback(onTypingChangeProp);
-
-    const findMatchRef = useLatestRef(findMatch);
-    const ignoreKeysRef = useLatestRef(ignoreKeys);
 
     useIsoLayoutEffect(() => {
         if (open) {
@@ -106,27 +104,27 @@ export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadPr
         }
     }, [open, selectedIndex, activeIndex]);
 
-    const setTypingChange = useEventCallback((value: boolean) => {
+    const setTypingChange = useStableCallback((value: boolean) => {
         if (value) {
             if (!dataRef.current.typing) {
                 dataRef.current.typing = value;
-                onTypingChange(value);
+                onTypingChange?.(value);
             }
         }
         else if (dataRef.current.typing) {
             dataRef.current.typing = value;
-            onTypingChange(value);
+            onTypingChange?.(value);
         }
     });
 
-    const onKeyDown = useEventCallback((event: React.KeyboardEvent) => {
+    const onKeyDown = useStableCallback((event: React.KeyboardEvent) => {
         function getMatchingIndex(
             list: Array<string | null>,
             orderedList: Array<string | null>,
             string: string
         ) {
-            const str = findMatchRef.current
-                ? findMatchRef.current(orderedList, string)
+            const str = findMatch
+                ? findMatch(orderedList, string)
                 : orderedList.find(
                     (text) => text?.toLocaleLowerCase().indexOf(string.toLocaleLowerCase()) === 0
                 );
@@ -147,7 +145,7 @@ export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadPr
 
         if (
             listContent == null
-            || ignoreKeysRef.current.includes(event.key)
+            || ignoreKeys.includes(event.key)
             // Character key.
             || event.key.length !== 1
             // Modifier key.
@@ -192,7 +190,7 @@ export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadPr
         );
 
         if (index !== -1) {
-            onMatch(index);
+            onMatchProp?.(index);
             matchIndexRef.current = index;
         }
         else if (event.key !== ' ') {

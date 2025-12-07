@@ -1,13 +1,15 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Timeout, useIsoLayoutEffect, useTimeout } from '@flippo-ui/hooks';
+
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { REASONS } from '~@lib/reason';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 
 import { getDelay } from '../hooks/useHover';
 
-import type { Delay, FloatingRootContext } from '../types';
+import type { Delay, FloatingContext, FloatingRootContext } from '../types';
 
 type ContextValue = {
     hasProvider: boolean;
@@ -67,8 +69,8 @@ export function FloatingDelayGroup(props: FloatingDelayGroupProps): React.JSX.El
     const timeout = useTimeout();
 
     return (
-        <FloatingDelayGroupContext
-          value={React.useMemo(
+        <FloatingDelayGroupContext.Provider
+            value={React.useMemo(
                 () => ({
                     hasProvider: true,
                     delayRef,
@@ -82,7 +84,7 @@ export function FloatingDelayGroup(props: FloatingDelayGroupProps): React.JSX.El
             )}
         >
             {children}
-        </FloatingDelayGroupContext>
+        </FloatingDelayGroupContext.Provider>
     );
 }
 
@@ -92,13 +94,17 @@ type UseDelayGroupOptions = {
      * @default true
      */
     enabled?: boolean;
+    /**
+     * Whether the trigger this hook is used in has opened the tooltip.
+     */
+    open: boolean;
 };
 
 type UseDelayGroupReturn = {
     /**
      * The delay reference object.
      */
-    delayRef: React.RefObject<Delay>;
+    delayRef: React.MutableRefObject<Delay>;
     /**
      * Whether animations should be removed.
      */
@@ -115,13 +121,13 @@ type UseDelayGroupReturn = {
  * @see https://floating-ui.com/docs/FloatingDelayGroup
  * @internal
  */
-// eslint-disable-next-line react-refresh/only-export-components
 export function useDelayGroup(
-    context: FloatingRootContext,
-    options: UseDelayGroupOptions = {}
+    context: FloatingRootContext | FloatingContext,
+    options: UseDelayGroupOptions = { open: false }
 ): UseDelayGroupReturn {
-    const { open, onOpenChange, floatingId } = context;
-    const { enabled = true } = options;
+    const store = 'rootStore' in context ? context.rootStore : context;
+    const floatingId = store.useState('floatingId');
+    const { enabled = true, open } = options;
 
     const groupContext = React.use(FloatingDelayGroupContext);
     const {
@@ -188,7 +194,7 @@ export function useDelayGroup(
         const prevContext = currentContextRef.current;
         const prevId = currentIdRef.current;
 
-        currentContextRef.current = { onOpenChange, setIsInstantPhase };
+        currentContextRef.current = { onOpenChange: store.setOpen, setIsInstantPhase };
         currentIdRef.current = floatingId;
         delayRef.current = {
             open: 0,
@@ -199,7 +205,7 @@ export function useDelayGroup(
             timeout.clear();
             setIsInstantPhase(true);
             prevContext?.setIsInstantPhase(true);
-            prevContext?.onOpenChange(false, createChangeEventDetails('none'));
+            prevContext?.onOpenChange(false, createChangeEventDetails(REASONS.none));
         }
         else {
             setIsInstantPhase(false);
@@ -209,7 +215,7 @@ export function useDelayGroup(
         enabled,
         open,
         floatingId,
-        onOpenChange,
+        store,
         currentIdRef,
         delayRef,
         timeoutMs,

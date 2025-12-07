@@ -1,4 +1,4 @@
-import { isAndroid, isJSDOM } from './detectBrowser';
+import { isAndroid, isJSDOM } from '~@lib/detectBrowser';
 
 export function stopEvent(event: Event | React.SyntheticEvent) {
     event.preventDefault();
