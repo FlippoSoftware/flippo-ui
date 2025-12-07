@@ -1,0 +1,9 @@
+@use 'mixins/_common.scss' as common;
+
+.ScrollAreaThumb {
+  @include common.reset-appearance();
+
+  width: 100%;
+  border-radius: inherit;
+  background-color: var(--f-color-neutral-40);
+}

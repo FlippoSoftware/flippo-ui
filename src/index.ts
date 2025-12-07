@@ -21,6 +21,7 @@ export * as Popover from './components/Popover';
 export * as Progress from './components/Progress';
 export * as Radio from './components/Radio';
 export * as RadioGroup from './components/RadioGroup';
+export * as ScrollArea from './components/ScrollArea';
 export * as Select from './components/Select';
 export * as Separator from './components/Separator';
 export * as Slider from './components/Slider';

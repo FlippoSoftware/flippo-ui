@@ -18,7 +18,7 @@ export function InputClear(props: InputClear.Props) {
     const { value, state, setValue } = InputHeadless.useInputControl();
 
     const onClick = React.useCallback<NonNullable<InputClear.Props['onClick']>>((event) => {
-        setValue('', event as unknown as Event);
+        setValue('', { event });
 
         onClickProp?.(event);
     }, [onClickProp, setValue]);
