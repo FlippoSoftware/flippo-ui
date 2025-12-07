@@ -1,8 +1,6 @@
 import React from 'react';
 
-import { NOOP } from '~@lib/noop';
-
-import type { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
+import type { UseFieldValidationReturnValue } from '../../Field/root/useFieldValidation';
 
 import type { PinInputRoot } from './PinInputRoot';
 
@@ -20,7 +18,7 @@ export type PinInputRootContextValue = {
     readOnly: boolean;
     focusedInputIndex: number | null;
     lastFocusedInputIndex: number | null;
-    fieldControlValidation?: ReturnType<typeof useFieldControlValidation>;
+    validation: UseFieldValidationReturnValue;
     values: string[];
     state: PinInputRoot.State;
     controlRef: React.RefObject<HTMLElement | null>;
@@ -36,40 +34,7 @@ export type PinInputRootContextValue = {
     onValueChange: (pinValue: string, index: number, event: Event) => void;
 };
 
-export const PinInputRootContext = React.createContext<PinInputRootContextValue>({
-    mask: false,
-    otp: false,
-    focusedInputIndex: null,
-    readOnly: false,
-    blurOnComplete: false,
-    selectOnFocus: false,
-    name: undefined,
-    checkedValue: '',
-    placeholder: '',
-    values: [],
-    touched: false,
-    state: {
-        readOnly: false,
-        disabled: false,
-        touched: false,
-        dirty: false,
-        valid: null,
-        filled: false,
-        focused: false
-    },
-    lastFocusedInputIndex: null,
-    controlRef: { current: null },
-    setLastFocusedInputIndex: NOOP,
-    setFocused: NOOP,
-    setFocusedInputIndex: NOOP,
-    setDirty: NOOP,
-    setFilled: NOOP,
-    setValues: NOOP,
-    setCheckedValue: NOOP,
-    onValueChange: NOOP,
-    setTouched: NOOP,
-    registerControlRef: NOOP
-});
+export const PinInputRootContext = React.createContext<PinInputRootContextValue | null>(null);
 
 export function usePinInputRootContext() {
     const context = React.use(PinInputRootContext);

@@ -20,12 +20,12 @@ import type { NumberFieldRoot } from '../root/NumberFieldRoot';
 export function NumberFieldIncrement(componentProps: NumberFieldIncrement.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
+        ref,
         disabled: disabledProp = false,
         nativeButton = true,
-        ref,
         ...elementProps
     } = componentProps;
 
@@ -57,7 +57,7 @@ export function NumberFieldIncrement(componentProps: NumberFieldIncrement.Props)
 
     const disabled = disabledProp || contextDisabled;
 
-    const { props } = useNumberFieldButton({
+    const props = useNumberFieldButton({
         isIncrement: true,
         inputRef,
         startAutoChange,
@@ -106,8 +106,11 @@ export function NumberFieldIncrement(componentProps: NumberFieldIncrement.Props)
     return element;
 }
 
-export namespace NumberFieldIncrement {
-    export type State = NumberFieldRoot.State;
+export type NumberFieldIncrementState = {} & NumberFieldRoot.State;
 
-    export type Props = NativeButtonProps & HeadlessUIComponentProps<'button', State>;
+export type NumberFieldIncrementProps = {} & NativeButtonProps & HeadlessUIComponentProps<'button', NumberFieldIncrement.State>;
+
+export namespace NumberFieldIncrement {
+    export type State = NumberFieldIncrementState;
+    export type Props = NumberFieldIncrementProps;
 }

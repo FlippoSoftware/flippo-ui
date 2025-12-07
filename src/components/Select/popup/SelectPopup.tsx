@@ -3,22 +3,23 @@ import ReactDOM from 'react-dom';
 
 import {
     useAnimationFrame,
-    useEventCallback,
     useIsoLayoutEffect,
     useOpenChangeComplete,
     useStore,
     useTimeout
 } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
-import { DISABLED_TRANSITIONS_STYLE } from '~@lib/constants';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { isWebKit } from '~@lib/detectBrowser';
+import { getDisabledMountTransitionStyles } from '~@lib/getDisabledMountTransitionStyles';
 import { useRenderElement } from '~@lib/hooks';
 import { isMouseWithinBounds } from '~@lib/isMouseWithinBounds';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
 import { popupStateMapping } from '~@lib/popupStateMapping';
+import { REASONS } from '~@lib/reason';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 import { styleDisableScrollbar } from '~@lib/styles';
 import { FloatingFocusManager } from '~@packages/floating-ui-react';
@@ -30,7 +31,7 @@ import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 import { COMPOSITE_KEYS } from '../../Composite/composite';
 import { useToolbarRootContext } from '../../Toolbar/root/ToolbarRootContext';
 import { useSelectPositionerContext } from '../positioner/SelectPositionerContext';
-import { useSelectRootContext } from '../root/SelectRootContext';
+import { useSelectFloatingContext, useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';
 import { clearStyles, LIST_FUNCTIONAL_STYLES } from '../utils/clearStyles';
 
@@ -46,10 +47,9 @@ const customStyleHookMapping: StateAttributesMapping<SelectPopup.State> = {
  * Documentation: [Base UI Select](https://base-ui.com/react/components/select)
  */
 export function SelectPopup(componentProps: SelectPopup.Props) {
-    const {
-        /* eslint-disable unused-imports/no-unused-vars */
-        className,
+    const { /* eslint-disable unused-imports/no-unused-vars */
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
@@ -70,13 +70,13 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
     const {
         side,
         align,
-        context,
         alignItemWithTriggerActive,
         setControlledAlignItemWithTrigger,
         scrollDownArrowRef,
         scrollUpArrowRef
     } = useSelectPositionerContext();
     const insideToolbar = useToolbarRootContext(true) != null;
+    const floatingRootContext = useSelectFloatingContext();
 
     const highlightTimeout = useTimeout();
 
@@ -97,7 +97,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
 
     const scrollArrowFrame = useAnimationFrame();
 
-    const handleScroll = useEventCallback((scroller: HTMLDivElement) => {
+    const handleScroll = useStableCallback((scroller: HTMLDivElement) => {
         if (!positionerElement || !popupRef.current || !initialPlacedRef.current) {
             return;
         }
@@ -109,6 +109,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
 
         const isTopPositioned = positionerElement.style.top === '0px';
         const isBottomPositioned = positionerElement.style.bottom === '0px';
+
         const currentHeight = positionerElement.getBoundingClientRect().height;
         const doc = ownerDocument(positionerElement);
         const positionerStyles = getComputedStyle(positionerElement);
@@ -116,38 +117,57 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         const marginBottom = Number.parseFloat(positionerStyles.marginBottom);
         const viewportHeight = doc.documentElement.clientHeight - marginTop - marginBottom;
 
+        const scrollTop = scroller.scrollTop;
+        const scrollHeight = scroller.scrollHeight;
+        const clientHeight = scroller.clientHeight;
+        const maxScrollTop = scrollHeight - clientHeight;
+
+        let nextPositionerHeight: number | null = null;
+        let nextScrollTop: number | null = null;
+        let setReachedMax = false;
+
         if (isTopPositioned) {
-            const scrollTop = scroller.scrollTop;
-            const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
             const diff = maxScrollTop - scrollTop;
-            const nextHeight = Math.min(currentHeight + diff, viewportHeight);
-            positionerElement.style.height = `${Math.min(currentHeight + diff, viewportHeight)}px`;
+            const idealHeight = currentHeight + diff;
+            const nextHeight = Math.min(idealHeight, viewportHeight);
+
+            nextPositionerHeight = nextHeight;
 
             if (nextHeight !== viewportHeight) {
-                scroller.scrollTop = maxScrollTop;
+                nextScrollTop = maxScrollTop;
             }
             else {
-                reachedMaxHeightRef.current = true;
+                setReachedMax = true;
             }
         }
         else if (isBottomPositioned) {
-            const scrollTop = scroller.scrollTop;
-            const minScrollTop = 0;
-            const diff = scrollTop - minScrollTop;
-            const nextHeight = Math.min(currentHeight + diff, viewportHeight);
+            const diff = scrollTop - 0;
             const idealHeight = currentHeight + diff;
+            const nextHeight = Math.min(idealHeight, viewportHeight);
             const overshoot = idealHeight - viewportHeight;
-            positionerElement.style.height = `${Math.min(idealHeight, viewportHeight)}px`;
+
+            nextPositionerHeight = nextHeight;
 
             if (nextHeight !== viewportHeight) {
-                scroller.scrollTop = 0;
+                nextScrollTop = 0;
             }
             else {
-                reachedMaxHeightRef.current = true;
-                if (scroller.scrollTop < scroller.scrollHeight - scroller.clientHeight) {
-                    scroller.scrollTop -= diff - overshoot;
+                setReachedMax = true;
+
+                if (scrollTop < maxScrollTop) {
+                    nextScrollTop = scrollTop - (diff - overshoot);
                 }
             }
+        }
+
+        if (nextPositionerHeight != null) {
+            positionerElement.style.height = `${nextPositionerHeight}px`;
+        }
+        if (nextScrollTop != null) {
+            scroller.scrollTop = nextScrollTop;
+        }
+        if (setReachedMax) {
+            reachedMaxHeightRef.current = true;
         }
 
         handleScrollArrowVisibility();
@@ -327,7 +347,6 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
             handleScrollArrowVisibility();
 
             // Avoid the `onScroll` event logic from triggering before the popup is placed.
-            // eslint-disable-next-line react-web-api/no-leaked-timeout
             setTimeout(() => {
                 initialPlacedRef.current = true;
             });
@@ -356,8 +375,8 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
 
         const win = ownerWindow(positionerElement);
 
-        function handleResize(event: Event) {
-            setOpen(false, createChangeEventDetails('window-resize', event));
+        function handleResize(event: UIEvent) {
+            setOpen(false, createChangeEventDetails(REASONS.windowResize, event));
         }
 
         win.addEventListener('resize', handleResize);
@@ -414,36 +433,45 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         ref: [ref, popupRef],
         state,
         customStyleHookMapping,
-        props: [popupProps, defaultProps, {
-            style: transitionStatus === 'starting' ? DISABLED_TRANSITIONS_STYLE.style : undefined,
-            className:
+        props: [
+            popupProps,
+            defaultProps,
+            getDisabledMountTransitionStyles(transitionStatus),
+            {
+                className:
                     !listElement && alignItemWithTriggerActive ? styleDisableScrollbar.className : undefined
-        }, elementProps]
+            },
+            elementProps
+        ]
     });
 
     return (
         <React.Fragment>
             {styleDisableScrollbar.element}
-            <FloatingFocusManager context={context} modal={false} disabled={!mounted} restoreFocus>
+            <FloatingFocusManager
+                context={floatingRootContext}
+                modal={false}
+                disabled={!mounted}
+                restoreFocus
+            >
                 {element}
             </FloatingFocusManager>
         </React.Fragment>
     );
 }
 
-export namespace SelectPopup {
-    export type Props = {
-        children?: React.ReactNode;
-        /**
-         * @ignore
-         */
-        id?: string;
-    } & HeadlessUIComponentProps<'div', State>;
+export type SelectPopupProps = {
+    children?: React.ReactNode;
+} & HeadlessUIComponentProps<'div', SelectPopup.State>;
 
-    export type State = {
-        side: Side | 'none';
-        align: Align;
-        open: boolean;
-        transitionStatus: TransitionStatus;
-    };
+export type SelectPopupState = {
+    side: Side | 'none';
+    align: Align;
+    open: boolean;
+    transitionStatus: TransitionStatus;
+};
+
+export namespace SelectPopup {
+    export type Props = SelectPopupProps;
+    export type State = SelectPopupState;
 }

@@ -40,12 +40,7 @@ export function TooltipArrow({ ref: forwardedRef, ...componentProps }: TooltipAr
             align,
             uncentered: arrowUncentered
         }),
-        [
-            open,
-            side,
-            align,
-            arrowUncentered
-        ]
+        [open, side, align, arrowUncentered]
     );
 
     const element = useRenderElement('div', componentProps, {

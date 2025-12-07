@@ -17,7 +17,6 @@ export const NumberFieldScrubAreaContext = React.createContext<
 
 export function useNumberFieldScrubAreaContext() {
     const context = React.use(NumberFieldScrubAreaContext);
-
     if (context === undefined) {
         throw new Error(
             'Headless UI: NumberFieldScrubAreaContext is missing. NumberFieldScrubArea parts must be placed within <NumberField.ScrubArea>.'

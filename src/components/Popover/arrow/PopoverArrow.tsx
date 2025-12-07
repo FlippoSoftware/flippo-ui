@@ -25,7 +25,8 @@ export function PopoverArrow(componentProps: PopoverArrow.Props) {
         ...elementProps
     } = componentProps;
 
-    const { open } = usePopoverRootContext();
+    const { store } = usePopoverRootContext();
+    const open = store.useState('open');
     const {
         arrowRef,
         side,
@@ -41,12 +42,7 @@ export function PopoverArrow(componentProps: PopoverArrow.Props) {
             align,
             uncentered: arrowUncentered
         }),
-        [
-            open,
-            side,
-            align,
-            arrowUncentered
-        ]
+        [open, side, align, arrowUncentered]
     );
 
     const element = useRenderElement('div', componentProps, {
@@ -59,16 +55,19 @@ export function PopoverArrow(componentProps: PopoverArrow.Props) {
     return element;
 }
 
-export namespace PopoverArrow {
-    export type State = {
-        /**
-         * Whether the popover is currently open.
-         */
-        open: boolean;
-        side: Side;
-        align: Align;
-        uncentered: boolean;
-    };
+export type PopoverArrowState = {
+    /**
+     * Whether the popover is currently open.
+     */
+    open: boolean;
+    side: Side;
+    align: Align;
+    uncentered: boolean;
+};
 
-    export type Props = HeadlessUIComponentProps<'div', State>;
+export type PopoverArrowProps = {} & HeadlessUIComponentProps<'div', PopoverArrow.State>;
+
+export namespace PopoverArrow {
+    export type State = PopoverArrowState;
+    export type Props = PopoverArrowProps;
 }

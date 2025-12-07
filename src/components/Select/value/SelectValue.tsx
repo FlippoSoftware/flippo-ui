@@ -27,8 +27,8 @@ export function SelectValue(componentProps: SelectValue.Props) {
         className,
         render,
         /* eslint-enable unused-imports/no-unused-vars */
-        children: childrenProp,
         ref,
+        children: childrenProp,
         ...elementProps
     } = componentProps;
 
@@ -37,12 +37,14 @@ export function SelectValue(componentProps: SelectValue.Props) {
     const value = useStore(store, selectors.value);
     const items = useStore(store, selectors.items);
     const itemToStringLabel = useStore(store, selectors.itemToStringLabel);
+    const serializedValue = useStore(store, selectors.serializedValue);
 
     const state: SelectValue.State = React.useMemo(
         () => ({
-            value
+            value,
+            placeholder: !serializedValue
         }),
-        [value]
+        [value, serializedValue]
     );
 
     const children
@@ -63,24 +65,27 @@ export function SelectValue(componentProps: SelectValue.Props) {
     return element;
 }
 
-export namespace SelectValue {
-    export type State = {
-        /**
-         * The value of the currently selected item.
-         */
-        value: any;
-    };
+export type SelectValueState = {
+    /**
+     * The value of the currently selected item.
+     */
+    value: any;
+};
 
-    export type Props = {
-        /**
-         * Accepts a function that returns a `ReactNode` to format the selected value.
-         * @example
-         * ```tsx
-         * <Select.Value>
-         *   {(value: string | null) => value ? labels[value] : 'No value'}
-         * </Select.Value>
-         * ```
-         */
-        children?: React.ReactNode | ((value: any) => React.ReactNode);
-    } & Omit<HeadlessUIComponentProps<'span', State>, 'children'>;
+export type SelectValueProps = {
+    /**
+     * Accepts a function that returns a `ReactNode` to format the selected value.
+     * @example
+     * ```tsx
+     * <Select.Value>
+     *   {(value: string | null) => value ? labels[value] : 'No value'}
+     * </Select.Value>
+     * ```
+     */
+    children?: React.ReactNode | ((value: any) => React.ReactNode);
+} & Omit<HeadlessUIComponentProps<'span', SelectValue.State>, 'children'>;
+
+export namespace SelectValue {
+    export type State = SelectValueState;
+    export type Props = SelectValueProps;
 }

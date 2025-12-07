@@ -1,9 +1,15 @@
 import React from 'react';
 
+import { useAnimationsFinished } from '@flippo-ui/hooks/use-animations-finished';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+
+import { adaptiveOrigin } from '~@lib/adaptiveOriginMiddleware';
 import { POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { getDisabledMountTransitionStyles } from '~@lib/getDisabledMountTransitionStyles';
 import { useAnchorPositioning, useRenderElement } from '~@lib/hooks';
 import { InternalBackdrop } from '~@lib/InternalBackdrop';
 import { popupStateMapping } from '~@lib/popupStateMapping';
+import { REASONS } from '~@lib/reason';
 import { FloatingNode, useFloatingNodeId } from '~@packages/floating-ui-react';
 
 import type { Align, Side } from '~@lib/hooks';
@@ -23,9 +29,10 @@ import { PopoverPositionerContext } from './PopoverPositionerContext';
 export function PopoverPositioner(componentProps: PopoverPositioner.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
+        ref,
         anchor,
         positionMethod = 'absolute',
         side = 'bottom',
@@ -36,25 +43,29 @@ export function PopoverPositioner(componentProps: PopoverPositioner.Props) {
         collisionPadding = 5,
         arrowPadding = 5,
         sticky = false,
-        trackAnchor = true,
+        disableAnchorTracking = false,
         collisionAvoidance = POPUP_COLLISION_AVOIDANCE,
-        ref,
         ...elementProps
     } = componentProps;
 
-    const {
-        floatingRootContext,
-        open,
-        mounted,
-        setPositionerElement,
-        modal,
-        openReason,
-        openMethod,
-        triggerElement,
-        internalBackdropRef
-    } = usePopoverRootContext();
+    const { store } = usePopoverRootContext();
     const keepMounted = usePopoverPortalContext();
     const nodeId = useFloatingNodeId();
+
+    const floatingRootContext = store.useState('floatingRootContext');
+    const mounted = store.useState('mounted');
+    const open = store.useState('open');
+    const openMethod = store.useState('openMethod');
+    const openReason = store.useState('openChangeReason');
+    const triggerElement = store.useState('activeTriggerElement');
+    const modal = store.useState('modal');
+    const positionerElement = store.useState('positionerElement');
+    const instantType = store.useState('instantType');
+    const transitionStatus = store.useState('transitionStatus');
+
+    const prevTriggerElementRef = React.useRef<Element | null>(null);
+
+    const runOnceAnimationsFinish = useAnimationsFinished(positionerElement, false, false);
 
     const positioning = useAnchorPositioning({
         anchor,
@@ -69,10 +80,11 @@ export function PopoverPositioner(componentProps: PopoverPositioner.Props) {
         collisionBoundary,
         collisionPadding,
         sticky,
-        trackAnchor,
+        disableAnchorTracking,
         keepMounted,
         nodeId,
-        collisionAvoidance
+        collisionAvoidance,
+        adaptiveOrigin
     });
 
     const defaultProps: HTMLProps = React.useMemo(() => {
@@ -100,52 +112,102 @@ export function PopoverPositioner(componentProps: PopoverPositioner.Props) {
         [defaultProps, positioning]
     );
 
+    const domReference = floatingRootContext?.select('domReferenceElement');
+
+    // When the current trigger element changes, enable transitions on the
+    // positioner temporarily
+    useIsoLayoutEffect(() => {
+        const currentTriggerElement = domReference;
+        const prevTriggerElement = prevTriggerElementRef.current;
+
+        if (currentTriggerElement) {
+            prevTriggerElementRef.current = currentTriggerElement;
+        }
+
+        if (
+            prevTriggerElement
+            && currentTriggerElement
+            && currentTriggerElement !== prevTriggerElement
+        ) {
+            store.set('instantType', undefined);
+            const ac = new AbortController();
+            runOnceAnimationsFinish(() => {
+                store.set('instantType', 'trigger-change');
+            }, ac.signal);
+
+            return () => {
+                ac.abort();
+            };
+        }
+
+        return undefined;
+    }, [domReference, runOnceAnimationsFinish, store]);
+
     const state: PopoverPositioner.State = React.useMemo(
         () => ({
             open,
             side: positioner.side,
             align: positioner.align,
-            anchorHidden: positioner.anchorHidden
+            anchorHidden: positioner.anchorHidden,
+            instant: instantType
         }),
         [
             open,
             positioner.side,
             positioner.align,
-            positioner.anchorHidden
+            positioner.anchorHidden,
+            instantType
         ]
+    );
+
+    const setPositionerElement = React.useCallback(
+        (element: HTMLElement | null) => {
+            store.set('positionerElement', element);
+        },
+        [store]
     );
 
     const element = useRenderElement('div', componentProps, {
         state,
-        props: [positioner.props, elementProps],
+        props: [positioner.props, getDisabledMountTransitionStyles(transitionStatus), elementProps],
         ref: [ref, setPositionerElement],
         customStyleHookMapping: popupStateMapping
     });
 
     return (
-        <PopoverPositionerContext value={positioner}>
-            {mounted && modal === true && openReason !== 'trigger-hover' && openMethod !== 'touch' && (
+        <PopoverPositionerContext.Provider value={positioner}>
+            {mounted
+              && modal === true
+              && openReason !== REASONS.triggerHover
+              && openMethod !== 'touch' && (
                 <InternalBackdrop
-                    ref={internalBackdropRef}
-                    inert={!open}
-                    cutout={triggerElement}
+                  ref={store.context.internalBackdropRef}
+                  inert={!open}
+                  cutout={triggerElement}
                 />
             )}
             <FloatingNode id={nodeId}>{element}</FloatingNode>
-        </PopoverPositionerContext>
+        </PopoverPositionerContext.Provider>
     );
 }
 
-export namespace PopoverPositioner {
-    export type State = {
-        /**
-         * Whether the popover is currently open.
-         */
-        open: boolean;
-        side: Side;
-        align: Align;
-        anchorHidden: boolean;
-    };
+export type PopoverPositionerState = {
+    /**
+     * Whether the popover is currently open.
+     */
+    open: boolean;
+    side: Side;
+    align: Align;
+    anchorHidden: boolean;
+    /**
+     * Whether CSS transitions should be disabled.
+     */
+    instant: string | undefined;
+};
 
-    export type Props = useAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', State>;
+export type PopoverPositionerProps = {} & useAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', PopoverPositioner.State>;
+
+export namespace PopoverPositioner {
+    export type State = PopoverPositionerState;
+    export type Props = PopoverPositionerProps;
 }

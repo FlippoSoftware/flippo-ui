@@ -1,9 +1,12 @@
 import React from 'react';
 
-import { useControlledState, useEventCallback } from '@flippo-ui/hooks';
+import { useControlledState } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+
 import { useDirection, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { REASONS } from '~@lib/reason';
 import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
 import { CompositeList } from '../../Composite/list/CompositeList';
@@ -23,11 +26,11 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
         className,
         render,
         /* eslint-enable unused-imports/no-unused-vars */
-        value: valueProp,
         defaultValue = 0,
-        orientation = 'horizontal',
-        ref,
         onValueChange: onValueChangeProp,
+        orientation = 'horizontal',
+        value: valueProp,
+        ref,
         ...elementProps
     } = componentProps;
 
@@ -38,7 +41,7 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
     const [value, setValue] = useControlledState({
         prop: valueProp,
         defaultProp: defaultValue,
-        caller: 'TabsRoot'
+        caller: 'Tabs'
     });
 
     const [tabPanelMap, setTabPanelMap] = React.useState(
@@ -51,7 +54,7 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
     const [tabActivationDirection, setTabActivationDirection]
         = React.useState<TabsTab.ActivationDirection>('none');
 
-    const onValueChange = useEventCallback(
+    const onValueChange = useStableCallback(
         (newValue: TabsTab.Value, eventDetails: TabsRoot.ChangeEventDetails) => {
             onValueChangeProp?.(newValue, eventDetails);
 
@@ -188,38 +191,46 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
     );
 }
 
+export type TabsRootOrientation = Orientation;
+
+export type TabsRootState = {
+    orientation: TabsRoot.Orientation;
+    tabActivationDirection: TabsTab.ActivationDirection;
+};
+
+export type TabsRootProps = {
+    /**
+     * The value of the currently active `Tab`. Use when the component is controlled.
+     * When the value is `null`, no Tab will be active.
+     */
+    value?: TabsTab.Value;
+    /**
+     * The default value. Use when the component is not controlled.
+     * When the value is `null`, no Tab will be active.
+     * @default 0
+     */
+    defaultValue?: TabsTab.Value;
+    /**
+     * The component orientation (layout flow direction).
+     * @default 'horizontal'
+     */
+    orientation?: TabsRoot.Orientation;
+    /**
+     * Callback invoked when new value is being set.
+     */
+    onValueChange?: (value: TabsTab.Value, eventDetails: TabsRoot.ChangeEventDetails) => void;
+} & HeadlessUIComponentProps<'div', TabsRoot.State>;
+
+export type TabsRootChangeEventReason = typeof REASONS.none;
+export type TabsRootChangeEventDetails = HeadlessUIChangeEventDetails<
+    TabsRoot.ChangeEventReason,
+    { activationDirection: TabsTab.ActivationDirection }
+>;
+
 export namespace TabsRoot {
-    export type State = {
-        orientation: Orientation;
-        tabActivationDirection: TabsTab.ActivationDirection;
-    };
-
-    export type Props = {
-        /**
-         * The value of the currently selected `Tab`. Use when the component is controlled.
-         * When the value is `null`, no Tab will be selected.
-         */
-        value?: TabsTab.Value;
-        /**
-         * The default value. Use when the component is not controlled.
-         * When the value is `null`, no Tab will be selected.
-         * @default 0
-         */
-        defaultValue?: TabsTab.Value;
-        /**
-         * The component orientation (layout flow direction).
-         * @default 'horizontal'
-         */
-        orientation?: Orientation;
-        /**
-         * Callback invoked when new value is being set.
-         */
-        onValueChange?: (value: TabsTab.Value, eventDetails: ChangeEventDetails) => void;
-    } & HeadlessUIComponentProps<'div', State>;
-
-    export type ChangeEventReason = 'none';
-    export type ChangeEventDetails = HeadlessUIChangeEventDetails<
-        ChangeEventReason,
-        { activationDirection: TabsTab.ActivationDirection }
-    >;
+    export type State = TabsRootState;
+    export type Props = TabsRootProps;
+    export type Orientation = TabsRootOrientation;
+    export type ChangeEventReason = TabsRootChangeEventReason;
+    export type ChangeEventDetails = TabsRootChangeEventDetails;
 }

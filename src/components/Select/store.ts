@@ -2,6 +2,9 @@ import { createSelector } from '@flippo-ui/hooks';
 
 import type { Store, TransitionStatus } from '@flippo-ui/hooks';
 
+import { compareItemEquality } from '~@lib/itemEquality';
+import { stringifyAsValue } from '~@lib/resolveValueLabel';
+
 import type { HTMLProps } from '~@lib/types';
 
 export type State = {
@@ -11,14 +14,13 @@ export type State = {
 
     items:
       | Record<string, React.ReactNode>
-      | Array<{ label: React.ReactNode; value: any }>
+      | ReadonlyArray<{ label: React.ReactNode; value: any }>
       | undefined;
     itemToStringLabel: ((item: any) => string) | undefined;
     itemToStringValue: ((item: any) => string) | undefined;
     isItemEqualToValue: (item: any, value: any) => boolean;
 
     value: any;
-    label: string;
 
     open: boolean;
     mounted: boolean;
@@ -54,8 +56,6 @@ export const selectors = {
     isItemEqualToValue: createSelector((state: State) => state.isItemEqualToValue),
 
     value: createSelector((state: State) => state.value),
-    label: createSelector((state: State) => state.label),
-
     open: createSelector((state: State) => state.open),
     mounted: createSelector((state: State) => state.mounted),
     forceMount: createSelector((state: State) => state.forceMount),
@@ -66,13 +66,24 @@ export const selectors = {
     selectedIndex: createSelector((state: State) => state.selectedIndex),
     isActive: createSelector((state: State, index: number) => state.activeIndex === index),
 
-    isSelected: createSelector((state: State, index: number, value: any) => {
+    isSelected: createSelector((state: State, index: number, candidate: any) => {
+        const comparer = state.isItemEqualToValue;
+        const storeValue = state.value;
+
         if (state.multiple) {
-            return Array.isArray(state.value) && state.value.includes(value);
+            return (
+                Array.isArray(storeValue)
+                && storeValue.some((item) => compareItemEquality(item, candidate, comparer))
+            );
         }
+
         // `selectedIndex` is only updated after the items mount for the first time,
         // the value check avoids a re-render for the initially selected item.
-        return state.selectedIndex === index || state.value === value;
+        if (state.selectedIndex === index && state.selectedIndex !== null) {
+            return true;
+        }
+
+        return compareItemEquality(storeValue, candidate, comparer);
     }),
     isSelectedByFocus: createSelector((state: State, index: number) => {
         return state.selectedIndex === index;
@@ -86,5 +97,14 @@ export const selectors = {
 
     scrollUpArrowVisible: createSelector((state: State) => state.scrollUpArrowVisible),
     scrollDownArrowVisible: createSelector((state: State) => state.scrollDownArrowVisible),
-    hasScrollArrows: createSelector((state: State) => state.hasScrollArrows)
+
+    hasScrollArrows: createSelector((state: State) => state.hasScrollArrows),
+
+    serializedValue: createSelector((state: State) => {
+        const { multiple, value, itemToStringValue } = state;
+        if (multiple && Array.isArray(value) && value.length === 0) {
+            return '';
+        }
+        return stringifyAsValue(value, itemToStringValue);
+    })
 };

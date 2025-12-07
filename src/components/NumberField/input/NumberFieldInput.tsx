@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useValueChanged } from '@flippo-ui/hooks/use-value-changed';
+
 import { createChangeEventDetails, createGenericEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { formatNumber, formatNumberMaxPrecision } from '~@lib/formatNumber';
 import { useRenderElement } from '~@lib/hooks';
@@ -16,23 +17,23 @@ import {
     parseNumber,
     PERSIAN_DETECT_RE
 } from '~@lib/parseNumeric';
+import { REASONS } from '~@lib/reason';
 import { stopEvent } from '~@packages/floating-ui-react/utils';
 
-import type { HeadlessUIChangeEventDetails, HeadlessUIGenericEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useFieldControlValidation } from '../../Field/control/useFieldControlValidation';
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { useField } from '../../Field/useField';
 import { fieldValidityMapping } from '../../Field/utils/constants';
 import { useFormContext } from '../../Form/FormContext';
+import { useLabelableContext } from '../../LabelableProvider';
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
 import { DEFAULT_STEP } from '../utils/constants';
 import { styleHookMapping } from '../utils/styleHooks';
 
 import type { NumberFieldRoot } from '../root/NumberFieldRoot';
 
-const customStyleHookMapping = {
+const stateAttributesMapping = {
     ...fieldValidityMapping,
     ...styleHookMapping
 };
@@ -56,8 +57,8 @@ const NAVIGATE_KEYS = new Set([
 export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
@@ -92,56 +93,38 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
 
     const { clearErrors } = useFormContext();
     const {
-        labelId,
         validationMode,
         setTouched,
         setFocused,
-        invalid
-    } = useFieldRootContext();
-
-    const {
-        getInputValidationProps,
-        getValidationProps,
-        commitValidation,
-        inputRef: inputValidationRef
-    } = useFieldControlValidation();
+        invalid,
+        shouldValidateOnChange,
+        validation
+    }
+        = useFieldRootContext();
+    const { labelId } = useLabelableContext();
 
     const hasTouchedInputRef = React.useRef(false);
     const blockRevalidationRef = React.useRef(false);
 
     useField({
         id,
-        commitValidation,
+        commit: validation.commit,
         value,
         controlRef: inputRef,
         name,
         getValue: () => value ?? null
     });
 
-    const prevValueRef = React.useRef(value);
-    const prevInputValueRef = React.useRef(inputValue);
-
-    useIsoLayoutEffect(() => {
-        if (prevValueRef.current === value && prevInputValueRef.current === inputValue) {
-            return;
-        }
+    useValueChanged(value, (previousValue) => {
+        const validateOnChange = shouldValidateOnChange();
 
         clearErrors(name);
 
-        if (validationMode === 'onChange') {
-            commitValidation(value);
+        if (validateOnChange) {
+            validation.commit(value);
         }
-    }, [
-        value,
-        inputValue,
-        name,
-        clearErrors,
-        validationMode,
-        commitValidation
-    ]);
 
-    useIsoLayoutEffect(() => {
-        if (prevValueRef.current === value || validationMode === 'onChange') {
+        if (previousValue === value || validateOnChange) {
             return;
         }
 
@@ -149,13 +132,9 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
             blockRevalidationRef.current = false;
             return;
         }
-        commitValidation(value, true);
-    }, [commitValidation, validationMode, value]);
 
-    useIsoLayoutEffect(() => {
-        prevValueRef.current = value;
-        prevInputValueRef.current = inputValue;
-    }, [value, inputValue]);
+        validation.commit(value, true);
+    });
 
     const inputProps: React.ComponentProps<'input'> = {
         id,
@@ -202,11 +181,11 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
             allowInputSyncRef.current = true;
 
             if (inputValue.trim() === '') {
-                setValue(null);
+                setValue(null, createChangeEventDetails(REASONS.inputClear, event.nativeEvent));
                 if (validationMode === 'onBlur') {
-                    commitValidation(null);
+                    validation.commit(null);
                 }
-                onValueCommitted(null, createGenericEventDetails('none', event.nativeEvent));
+                onValueCommitted(null, createGenericEventDetails(REASONS.inputClear, event.nativeEvent));
                 return;
             }
 
@@ -229,18 +208,18 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
                     ? Number(parsedValue.toFixed(maxFrac))
                     : parsedValue;
 
-            const nextEventDetails = createGenericEventDetails('none', event.nativeEvent);
+            const nextEventDetails = createGenericEventDetails(REASONS.inputBlur, event.nativeEvent);
             const shouldUpdateValue = value !== committed;
             const shouldCommit = hadManualInput || shouldUpdateValue || hadPendingProgrammaticChange;
 
             if (validationMode === 'onBlur') {
-                commitValidation(committed);
+                validation.commit(committed);
             }
             if (shouldUpdateValue) {
-                setValue(committed, event.nativeEvent);
+                setValue(committed, createChangeEventDetails(REASONS.inputBlur, event.nativeEvent));
             }
             if (shouldCommit) {
-                onValueCommitted(committed, nextEventDetails as unknown as HeadlessUIChangeEventDetails<'none'>);
+                onValueCommitted(committed, nextEventDetails);
             }
 
             // Normalize only the displayed text
@@ -264,7 +243,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
 
             if (targetValue.trim() === '') {
                 setInputValue(targetValue);
-                setValue(null, event.nativeEvent);
+                setValue(null, createChangeEventDetails(REASONS.inputClear, event.nativeEvent));
                 return;
             }
 
@@ -298,7 +277,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
                 setInputValue(targetValue);
                 const parsedValue = parseNumber(targetValue, locale, formatOptionsRef.current);
                 if (parsedValue !== null) {
-                    setValue(parsedValue, event.nativeEvent);
+                    setValue(parsedValue, createChangeEventDetails(REASONS.inputChange, event.nativeEvent));
                 }
                 return;
             }
@@ -307,7 +286,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
 
             if (parsedValue !== null) {
                 setInputValue(targetValue);
-                setValue(parsedValue, event.nativeEvent);
+                setValue(parsedValue, createChangeEventDetails(REASONS.inputChange, event.nativeEvent));
             }
         },
         onKeyDown(event) {
@@ -405,23 +384,33 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
             // Prevent insertion of text or caret from moving.
             stopEvent(event);
 
-            const details = createChangeEventDetails('none', nativeEvent);
+            const commitDetails = createGenericEventDetails(REASONS.keyboard, nativeEvent);
 
             if (event.key === 'ArrowUp') {
-                incrementValue(amount, 1, parsedValue, nativeEvent);
-                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, details);
+                incrementValue(amount, {
+                    direction: 1,
+                    currentValue: parsedValue,
+                    event: nativeEvent,
+                    reason: REASONS.keyboard
+                });
+                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, commitDetails);
             }
             else if (event.key === 'ArrowDown') {
-                incrementValue(amount, -1, parsedValue, nativeEvent);
-                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, details);
+                incrementValue(amount, {
+                    direction: -1,
+                    currentValue: parsedValue,
+                    event: nativeEvent,
+                    reason: REASONS.keyboard
+                });
+                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, commitDetails);
             }
             else if (event.key === 'Home' && min != null) {
-                setValue(min, nativeEvent);
-                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, details);
+                setValue(min, createChangeEventDetails(REASONS.keyboard, nativeEvent));
+                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, commitDetails);
             }
             else if (event.key === 'End' && max != null) {
-                setValue(max, nativeEvent);
-                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, details);
+                setValue(max, createChangeEventDetails(REASONS.keyboard, nativeEvent));
+                onValueCommitted(lastChangedValueRef.current ?? valueRef.current, commitDetails);
             }
         },
         onPaste(event) {
@@ -438,35 +427,33 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
 
             if (parsedValue !== null) {
                 allowInputSyncRef.current = false;
-                setValue(parsedValue, event.nativeEvent);
+                setValue(parsedValue, createChangeEventDetails(REASONS.inputPaste, event.nativeEvent));
                 setInputValue(pastedData);
             }
         }
     };
 
     const element = useRenderElement('input', componentProps, {
-        ref: [ref, inputRef, inputValidationRef],
+        ref: [ref, inputRef, validation.inputRef],
         state,
-        props: [
-            inputProps,
-            getInputValidationProps(),
-            getValidationProps(),
-            elementProps
-        ],
-        customStyleHookMapping
+        props: [inputProps, validation.getInputValidationProps(), elementProps],
+        customStyleHookMapping: stateAttributesMapping
     });
 
     return element;
 }
 
-export namespace NumberFieldInput {
-    export type State = {} & NumberFieldRoot.State;
+export type NumberFieldInputState = {} & NumberFieldRoot.State;
 
-    export type Props = {
+export type NumberFieldInputProps = {
     /**
      * A string value that provides a user-friendly name for the role of the input.
      * @default 'Number field'
      */
-        'aria-roledescription'?: React.AriaAttributes['aria-roledescription'] | undefined;
-    } & HeadlessUIComponentProps<'input', State>;
+    'aria-roledescription'?: React.AriaAttributes['aria-roledescription'] | undefined;
+} & HeadlessUIComponentProps<'input', NumberFieldInput.State>;
+
+export namespace NumberFieldInput {
+    export type State = NumberFieldInputState;
+    export type Props = NumberFieldInputProps;
 }

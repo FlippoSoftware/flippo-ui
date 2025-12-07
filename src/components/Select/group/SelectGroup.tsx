@@ -42,11 +42,13 @@ export function SelectGroup(componentProps: SelectGroup.Props) {
         }, elementProps]
     });
 
-    return <SelectGroupContext value={contextValue}>{element}</SelectGroupContext>;
+    return <SelectGroupContext.Provider value={contextValue}>{element}</SelectGroupContext.Provider>;
 }
 
-export namespace SelectGroup {
-    export type State = object;
+export type SelectGroupState = {};
+export type SelectGroupProps = {} & HeadlessUIComponentProps<'div', SelectGroup.State>;
 
-    export type Props = HeadlessUIComponentProps<'div', State>;
+export namespace SelectGroup {
+    export type State = SelectGroupState;
+    export type Props = SelectGroupProps;
 }

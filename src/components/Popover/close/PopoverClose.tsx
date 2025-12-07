@@ -1,9 +1,12 @@
+import type React from 'react';
+
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import { useRenderElement } from '~@lib/hooks';
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
+import { REASONS } from '~@lib/reason';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button';
+import { useButton } from '../../use-button/useButton';
 import { usePopoverRootContext } from '../root/PopoverRootContext';
 
 /**
@@ -15,12 +18,12 @@ import { usePopoverRootContext } from '../root/PopoverRootContext';
 export function PopoverClose(componentProps: PopoverClose.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
-        disabled = false,
-        nativeButton = true,
         ref,
+        disabled,
+        nativeButton,
         ...elementProps
     } = componentProps;
 
@@ -30,13 +33,16 @@ export function PopoverClose(componentProps: PopoverClose.Props) {
         native: nativeButton
     });
 
-    const { setOpen } = usePopoverRootContext();
+    const { store } = usePopoverRootContext();
 
     const element = useRenderElement('button', componentProps, {
         ref: [ref, buttonRef],
         props: [{
             onClick(event) {
-                setOpen(false, createChangeEventDetails('close-press', event.nativeEvent));
+                store.setOpen(
+                    false,
+                    createChangeEventDetails(REASONS.closePress, event.nativeEvent, event.currentTarget)
+                );
             }
         }, elementProps, getButtonProps]
     });
@@ -44,8 +50,11 @@ export function PopoverClose(componentProps: PopoverClose.Props) {
     return element;
 }
 
-export namespace PopoverClose {
-    export type State = object;
+export type PopoverCloseState = {};
 
-    export type Props = NativeButtonProps & HeadlessUIComponentProps<'button', State>;
+export type PopoverCloseProps = {} & NativeButtonProps & HeadlessUIComponentProps<'button', PopoverClose.State>;
+
+export namespace PopoverClose {
+    export type State = PopoverCloseState;
+    export type Props = PopoverCloseProps;
 }

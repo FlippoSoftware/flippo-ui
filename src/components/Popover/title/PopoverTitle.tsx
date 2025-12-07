@@ -1,5 +1,7 @@
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
-import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
@@ -14,23 +16,23 @@ import { usePopoverRootContext } from '../root/PopoverRootContext';
 export function PopoverTitle(componentProps: PopoverTitle.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
     } = componentProps;
 
-    const { setTitleId } = usePopoverRootContext();
+    const { store } = usePopoverRootContext();
 
     const id = useHeadlessUiId(elementProps.id);
 
     useIsoLayoutEffect(() => {
-        setTitleId(id);
+        store.set('titleElementId', id);
         return () => {
-            setTitleId(undefined);
+            store.set('titleElementId', undefined);
         };
-    }, [setTitleId, id]);
+    }, [store, id]);
 
     const element = useRenderElement('h2', componentProps, {
         ref,
@@ -40,8 +42,11 @@ export function PopoverTitle(componentProps: PopoverTitle.Props) {
     return element;
 }
 
-export namespace PopoverTitle {
-    export type State = object;
+export type PopoverTitleState = {};
 
-    export type Props = HeadlessUIComponentProps<'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6', State>;
+export type PopoverTitleProps = {} & HeadlessUIComponentProps<'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6', PopoverTitle.State>;
+
+export namespace PopoverTitle {
+    export type State = PopoverTitleState;
+    export type Props = PopoverTitleProps;
 }

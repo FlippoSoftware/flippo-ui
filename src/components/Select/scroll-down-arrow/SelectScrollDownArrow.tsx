@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -12,18 +10,21 @@ import { SelectScrollArrow } from '../scroll-arrow/SelectScrollArrow';
  *
  * Documentation: [Base UI Select](https://base-ui.com/react/components/select)
  */
-export function SelectScrollDownArrow(props: SelectScrollDownArrow.Props) {
-    return <SelectScrollArrow {...props} direction={'down'} />;
+export function SelectScrollDownArrow(componentProps: SelectScrollDownArrow.Props) {
+    return <SelectScrollArrow {...componentProps} direction={'down'} />;
 }
 
-export namespace SelectScrollDownArrow {
-    export type State = object;
+export type SelectScrollDownArrowState = {};
 
-    export type Props = {
-        /**
-         * Whether to keep the HTML element in the DOM while the select menu is not scrollable.
-         * @default false
-         */
-        keepMounted?: boolean;
-    } & HeadlessUIComponentProps<'div', State>;
+export type SelectScrollDownArrowProps = {
+    /**
+     * Whether to keep the HTML element in the DOM while the select popup is not scrollable.
+     * @default false
+     */
+    keepMounted?: boolean;
+} & HeadlessUIComponentProps<'div', SelectScrollDownArrow.State>;
+
+export namespace SelectScrollDownArrow {
+    export type State = SelectScrollDownArrowState;
+    export type Props = SelectScrollDownArrowProps;
 }

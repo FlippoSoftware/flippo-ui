@@ -1,17 +1,12 @@
-
-
-import React from 'react';
-
 import { FloatingPortalLite } from '~@lib/FloatingPortalLite';
 
-export function ToastPortal(props: ToastPortal.Props) {
-    const { children, container } = props;
+export const ToastPortal = FloatingPortalLite;
 
-    return <FloatingPortalLite root={container}>{children}</FloatingPortalLite>;
-}
+export type ToastPortalProps = {} & FloatingPortalLite.Props<ToastPortal.State>;
 
+// eslint-disable-next-line ts/no-redeclare
 export namespace ToastPortal {
-    export type Props = React.PropsWithChildren<{
-        container?: HTMLElement | null | React.RefObject<HTMLElement | null>;
-    }>;
+    export type State = {};
+
+    export type Props = ToastPortalProps;
 }

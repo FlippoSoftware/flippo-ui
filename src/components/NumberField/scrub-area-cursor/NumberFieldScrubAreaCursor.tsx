@@ -25,8 +25,8 @@ import type { NumberFieldRoot } from '../root/NumberFieldRoot';
 export function NumberFieldScrubAreaCursor(componentProps: NumberFieldScrubAreaCursor.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
@@ -64,8 +64,11 @@ export function NumberFieldScrubAreaCursor(componentProps: NumberFieldScrubAreaC
     return element && ReactDOM.createPortal(element, ownerDocument(domElement).body);
 }
 
-export namespace NumberFieldScrubAreaCursor {
-    export type State = NumberFieldRoot.State;
+export type NumberFieldScrubAreaCursorState = {} & NumberFieldRoot.State;
 
-    export type Props = HeadlessUIComponentProps<'span', State>;
+export type NumberFieldScrubAreaCursorProps = {} & HeadlessUIComponentProps<'span', NumberFieldScrubAreaCursor.State>;
+
+export namespace NumberFieldScrubAreaCursor {
+    export type State = NumberFieldScrubAreaCursorState;
+    export type Props = NumberFieldScrubAreaCursorProps;
 }

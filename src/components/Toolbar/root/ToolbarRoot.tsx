@@ -20,7 +20,7 @@ export function ToolbarRoot(componentProps: ToolbarRoot.Props) {
     const {
         cols = 1,
         disabled = false,
-        loop = true,
+        loopFocus = true,
         orientation = 'horizontal',
         className,
         render,
@@ -68,7 +68,7 @@ export function ToolbarRoot(componentProps: ToolbarRoot.Props) {
               props={[defaultProps, elementProps]}
               cols={cols}
               disabledIndices={disabledIndices}
-              loop={loop}
+              loopFocus={loopFocus}
               onMapChange={setItemMap}
               orientation={orientation}
             />
@@ -104,6 +104,6 @@ export namespace ToolbarRoot {
          *
          * @default true
          */
-        loop?: boolean;
+        loopFocus?: boolean;
     } & HeadlessUIComponentProps<'div', State>;
 }

@@ -7,14 +7,13 @@ export type TabsListContextValue = {
     highlightedTabIndex: number;
     onTabActivation: (newValue: any, eventDetails: TabsRoot.ChangeEventDetails) => void;
     setHighlightedTabIndex: (index: number) => void;
-    tabsListRef: React.RefObject<HTMLElement | null>;
+    tabsListElement: HTMLElement | null;
 };
 
 export const TabsListContext = React.createContext<TabsListContextValue | undefined>(undefined);
 
 export function useTabsListContext() {
     const context = React.use(TabsListContext);
-
     if (context === undefined) {
         throw new Error(
             'Headless UI: TabsListContext is missing. TabsList parts must be placed within <Tabs.List>.'

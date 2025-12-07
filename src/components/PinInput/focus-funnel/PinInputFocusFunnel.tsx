@@ -47,12 +47,7 @@ export function PinInputFocusFunnel(componentProps: PinInputFocusFunnel.Props) {
             lastFocusedInputIndex,
             maxIndex
         );
-    }, [
-        focusMode,
-        values,
-        lastFocusedInputIndex,
-        elementsRef
-    ]);
+    }, [focusMode, values, lastFocusedInputIndex, elementsRef]);
 
     /**
      * Handle focus funnel click to direct focus to appropriate input

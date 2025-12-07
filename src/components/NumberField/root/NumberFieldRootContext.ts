@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { Timeout } from '@flippo-ui/hooks';
 
-import type { EventWithOptionalKeyState } from '../utils/types';
+import type { EventWithOptionalKeyState, IncrementValueParameters } from '../utils/types';
 
 import type { NumberFieldRoot } from './NumberFieldRoot';
 
@@ -18,14 +18,9 @@ export type NumberFieldRootContextValue = {
     disabled: boolean;
     readOnly: boolean;
     id: string | undefined;
-    setValue: (unvalidatedValue: number | null, event?: Event, dir?: 1 | -1) => void;
+    setValue: (value: number | null, details: NumberFieldRoot.ChangeEventDetails) => void;
     getStepAmount: (event?: EventWithOptionalKeyState) => number | undefined;
-    incrementValue: (
-        amount: number,
-        dir: 1 | -1,
-        currentValue?: number | null,
-        event?: Event,
-    ) => void;
+    incrementValue: (amount: number, params: IncrementValueParameters) => void;
     inputRef: React.RefObject<HTMLInputElement | null>;
     allowInputSyncRef: React.RefObject<boolean | null>;
     formatOptionsRef: React.RefObject<Intl.NumberFormatOptions | undefined>;
@@ -59,7 +54,6 @@ export const NumberFieldRootContext = React.createContext<NumberFieldRootContext
 
 export function useNumberFieldRootContext() {
     const context = React.use(NumberFieldRootContext);
-
     if (context === undefined) {
         throw new Error(
             'Headless UI: NumberFieldRootContext is missing. NumberField parts must be placed within <NumberField.Root>.'

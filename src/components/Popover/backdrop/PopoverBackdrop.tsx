@@ -1,17 +1,19 @@
 import React from 'react';
 
-import { useRenderElement } from '~@lib/hooks';
-import { popupStateMapping } from '~@lib/popupStateMapping';
+import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
+
+import { useRenderElement } from '~@lib/hooks/useRenderElement';
+import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
+import { REASONS } from '~@lib/reason';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
-import type { TransitionStatus } from '@flippo-ui/hooks';
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { usePopoverRootContext } from '../root/PopoverRootContext';
 
-const customStyleHookMapping: StateAttributesMapping<PopoverBackdrop.State> = {
-    ...popupStateMapping,
+const stateAttributesMapping: StateAttributesMapping<PopoverBackdrop.State> = {
+    ...baseMapping,
     ...transitionStatusMapping
 };
 
@@ -31,13 +33,12 @@ export function PopoverBackdrop(componentProps: PopoverBackdrop.Props) {
         ...elementProps
     } = componentProps;
 
-    const {
-        open,
-        mounted,
-        transitionStatus,
-        openReason,
-        backdropRef
-    } = usePopoverRootContext();
+    const { store } = usePopoverRootContext();
+
+    const open = store.useState('open');
+    const mounted = store.useState('mounted');
+    const transitionStatus = store.useState('transitionStatus');
+    const openReason = store.useState('openChangeReason');
 
     const state: PopoverBackdrop.State = React.useMemo(
         () => ({
@@ -49,30 +50,33 @@ export function PopoverBackdrop(componentProps: PopoverBackdrop.Props) {
 
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: [backdropRef, ref],
+        ref: [store.context.backdropRef, ref],
         props: [{
             role: 'presentation',
             hidden: !mounted,
             style: {
-                pointerEvents: openReason === 'trigger-hover' ? 'none' : undefined,
+                pointerEvents: openReason === REASONS.triggerHover ? 'none' : undefined,
                 userSelect: 'none',
                 WebkitUserSelect: 'none'
             }
         }, elementProps],
-        customStyleHookMapping
+        customStyleHookMapping: stateAttributesMapping
     });
 
     return element;
 }
 
-export namespace PopoverBackdrop {
-    export type State = {
-        /**
-         * Whether the popover is currently open.
-         */
-        open: boolean;
-        transitionStatus: TransitionStatus;
-    };
+export type PopoverBackdropState = {
+    /**
+     * Whether the popover is currently open.
+     */
+    open: boolean;
+    transitionStatus: TransitionStatus;
+};
 
-    export type Props = HeadlessUIComponentProps<'div', State>;
+export type PopoverBackdropProps = {} & HeadlessUIComponentProps<'div', PopoverBackdrop.State>;
+
+export namespace PopoverBackdrop {
+    export type State = PopoverBackdropState;
+    export type Props = PopoverBackdropProps;
 }

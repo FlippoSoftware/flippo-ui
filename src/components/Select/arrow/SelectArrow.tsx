@@ -72,16 +72,19 @@ export function SelectArrow(componentProps: SelectArrow.Props) {
     return element;
 }
 
-export namespace SelectArrow {
-    export type State = {
-        /**
-         * Whether the select menu is currently open.
-         */
-        open: boolean;
-        side: Side | 'none';
-        align: Align;
-        uncentered: boolean;
-    };
+export type SelectArrowState = {
+    /**
+     * Whether the select popup is currently open.
+     */
+    open: boolean;
+    side: Side | 'none';
+    align: Align;
+    uncentered: boolean;
+};
 
-    export type Props = HeadlessUIComponentProps<'div', State>;
+export type SelectArrowProps = {} & HeadlessUIComponentProps<'div', SelectArrow.State>;
+
+export namespace SelectArrow {
+    export type State = SelectArrowState;
+    export type Props = SelectArrowProps;
 }

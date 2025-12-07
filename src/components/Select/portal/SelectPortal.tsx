@@ -1,11 +1,8 @@
-
-
 import React from 'react';
 
 import { useStore } from '@flippo-ui/hooks';
-import { FloatingPortal } from '~@packages/floating-ui-react';
 
-import type { FloatingPortalProps } from '~@packages/floating-ui-react';
+import { FloatingPortal } from '~@packages/floating-ui-react';
 
 import { useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';
@@ -18,9 +15,7 @@ import { SelectPortalContext } from './SelectPortalContext';
  *
  * Documentation: [Base UI Select](https://base-ui.com/react/components/select)
  */
-export function SelectPortal(props: SelectPortal.Props) {
-    const { children, container } = props;
-
+export function SelectPortal(componentProps: SelectPortal.Props) {
     const { store } = useSelectRootContext();
     const mounted = useStore(store, selectors.mounted);
     const forceMount = useStore(store, selectors.forceMount);
@@ -31,18 +26,18 @@ export function SelectPortal(props: SelectPortal.Props) {
     }
 
     return (
-        <SelectPortalContext value>
-            <FloatingPortal root={container}>{children}</FloatingPortal>
-        </SelectPortalContext>
+        <SelectPortalContext.Provider value>
+            <FloatingPortal {...componentProps} />
+        </SelectPortalContext.Provider>
     );
 }
 
 export namespace SelectPortal {
-    export type Props = {
-        children?: React.ReactNode;
-        /**
-         * A parent element to render the portal element into.
-         */
-        container?: FloatingPortalProps['root'];
-    };
+    export type State = {};
+}
+
+export type SelectPortalProps = {} & FloatingPortal.Props<SelectPortal.State>;
+
+export namespace SelectPortal {
+    export type Props = SelectPortalProps;
 }

@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 
 import { formatNumber } from '~@lib/formatNumber';
@@ -21,8 +19,8 @@ import type { SliderRoot } from '../root/SliderRoot';
 export function SliderValue(componentProps: SliderValue.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         'aria-live': ariaLive = 'off',
         children,
@@ -72,7 +70,7 @@ export function SliderValue(componentProps: SliderValue.Props) {
             // and also when the value is changing (but not yet committed)
             'aria-live': ariaLive,
             'children':
-          typeof children === 'function' ? children(formattedValues, values) : defaultDisplayValue,
+                    typeof children === 'function' ? children(formattedValues, values) : defaultDisplayValue,
             'htmlFor': outputFor
         }, elementProps],
         customStyleHookMapping: sliderStyleHookMapping
@@ -81,10 +79,12 @@ export function SliderValue(componentProps: SliderValue.Props) {
     return element;
 }
 
+export type SliderValueProps = {
+    children?:
+      | null
+      | ((formattedValues: readonly string[], values: readonly number[]) => React.ReactNode);
+} & Omit<HeadlessUIComponentProps<'output', SliderRoot.State>, 'children'>;
+
 export namespace SliderValue {
-    export type Props = {
-        children?:
-          | null
-          | ((formattedValues: readonly string[], values: readonly number[]) => React.ReactNode);
-    } & Omit<HeadlessUIComponentProps<'output', SliderRoot.State>, 'children'>;
+    export type Props = SliderValueProps;
 }

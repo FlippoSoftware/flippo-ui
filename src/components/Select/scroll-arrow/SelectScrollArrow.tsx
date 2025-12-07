@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-    useEnhancedEffect,
+    useIsoLayoutEffect,
     useOpenChangeComplete,
     useStore,
     useTimeout,
@@ -25,12 +25,12 @@ import { selectors } from '../store';
 export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
+        ref,
         direction,
         keepMounted = false,
-        ref,
         ...elementProps
     } = componentProps;
 
@@ -57,9 +57,9 @@ export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
 
     const scrollArrowRef = direction === 'up' ? scrollUpArrowRef : scrollDownArrowRef;
 
-    const { mounted, transitionStatus, setMounted } = useTransitionStatus(visible);
+    const { transitionStatus, setMounted } = useTransitionStatus(visible);
 
-    useEnhancedEffect(() => {
+    useIsoLayoutEffect(() => {
         scrollArrowsMountedCountRef.current += 1;
         if (!store.state.hasScrollArrows) {
             store.set('hasScrollArrows', true);
@@ -90,16 +90,10 @@ export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
             side,
             transitionStatus
         }),
-        [
-            direction,
-            visible,
-            side,
-            transitionStatus
-        ]
+        [direction, visible, side, transitionStatus]
     );
 
     const defaultProps: React.ComponentProps<'div'> = {
-        'hidden': !mounted,
         'aria-hidden': true,
         'children': direction === 'up' ? '▲' : '▼',
         'style': {
@@ -237,20 +231,23 @@ export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
     return element;
 }
 
-export namespace SelectScrollArrow {
-    export type State = {
-        direction: 'up' | 'down';
-        visible: boolean;
-        side: Side | 'none';
-        transitionStatus: TransitionStatus;
-    };
+export type SelectScrollArrowState = {
+    direction: 'up' | 'down';
+    visible: boolean;
+    side: Side | 'none';
+    transitionStatus: TransitionStatus;
+};
 
-    export type Props = {
-        direction: 'up' | 'down';
-        /**
-         * Whether to keep the HTML element in the DOM while the select menu is not scrollable.
-         * @default false
-         */
-        keepMounted?: boolean;
-    } & HeadlessUIComponentProps<'div', State>;
+export type SelectScrollArrowProps = {
+    direction: 'up' | 'down';
+    /**
+     * Whether to keep the HTML element in the DOM while the select popup is not scrollable.
+     * @default false
+     */
+    keepMounted?: boolean;
+} & HeadlessUIComponentProps<'div', SelectScrollArrow.State>;
+
+export namespace SelectScrollArrow {
+    export type State = SelectScrollArrowState;
+    export type Props = SelectScrollArrowProps;
 }

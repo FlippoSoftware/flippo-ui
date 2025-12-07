@@ -1,5 +1,3 @@
-
-
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -18,8 +16,8 @@ import type { SliderRoot } from '../root/SliderRoot';
 export function SliderTrack(componentProps: SliderTrack.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
@@ -41,6 +39,8 @@ export function SliderTrack(componentProps: SliderTrack.Props) {
     return element;
 }
 
+export type SliderTrackProps = {} & HeadlessUIComponentProps<'div', SliderRoot.State>;
+
 export namespace SliderTrack {
-    export type Props = HeadlessUIComponentProps<'div', SliderRoot.State>;
+    export type Props = SliderTrackProps;
 }

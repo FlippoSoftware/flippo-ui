@@ -1,38 +1,51 @@
-
-
 import React from 'react';
 
-import { NextFloatingDelayGroup } from '@floating-ui/react';
+import { FloatingDelayGroup } from '~@packages/floating-ui-react';
 
 import { TooltipProviderContext } from './TooltipProviderContext';
 
-export function TooltipProvider(props: TooltipProvider.Props) {
-    const {
-        delay,
-        closeDelay,
-        timeout = 400,
-        children
-    } = props;
+import type { TooltipProviderContextValue } from './TooltipProviderContext';
 
-    const contextValue = React.useMemo(() =>
-        ({ delay, closeDelay }), [delay, closeDelay]);
+export function TooltipProvider(props: TooltipProviderProps) {
+    const { delay, closeDelay, timeout = 400 } = props;
 
-    const delayGroup = React.useMemo(() =>
-        ({ open: delay, close: closeDelay }), [delay, closeDelay]);
+    const contextValue: TooltipProviderContextValue = React.useMemo(
+        () => ({
+            delay,
+            closeDelay
+        }),
+        [delay, closeDelay]
+    );
+
+    const delayValue = React.useMemo(() => ({ open: delay, close: closeDelay }), [delay, closeDelay]);
 
     return (
-        <TooltipProviderContext value={contextValue}>
-            <NextFloatingDelayGroup delay={delayGroup} timeoutMs={timeout}>
-                {children}
-            </NextFloatingDelayGroup>
-        </TooltipProviderContext>
+        <TooltipProviderContext.Provider value={contextValue}>
+            <FloatingDelayGroup delay={delayValue} timeoutMs={timeout}>
+                {props.children}
+            </FloatingDelayGroup>
+        </TooltipProviderContext.Provider>
     );
 }
 
+export type TooltipProviderProps = {
+    children?: React.ReactNode;
+    /**
+     * How long to wait before opening a tooltip. Specified in milliseconds.
+     */
+    delay?: number;
+    /**
+     * How long to wait before closing a tooltip. Specified in milliseconds.
+     */
+    closeDelay?: number;
+    /**
+     * Another tooltip will open instantly if the previous tooltip
+     * is closed within this timeout. Specified in milliseconds.
+     * @default 400
+     */
+    timeout?: number;
+};
+
 export namespace TooltipProvider {
-    export type Props = React.PropsWithChildren<{
-        delay?: number;
-        closeDelay?: number;
-        timeout?: number;
-    }>;
+    export type Props = TooltipProviderProps;
 }

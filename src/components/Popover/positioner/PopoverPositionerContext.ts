@@ -18,7 +18,6 @@ export const PopoverPositionerContext = React.createContext<PopoverPositionerCon
 
 export function usePopoverPositionerContext() {
     const context = React.use(PopoverPositionerContext);
-
     if (!context) {
         throw new Error(
             'Headless UI: PopoverPositionerContext is missing. PopoverPositioner parts must be placed within <Popover.Positioner>.'
