@@ -36,6 +36,7 @@ export function ContextMenuRoot(props: ContextMenuRoot.Props) {
     const actionsRef: ContextMenuRootContextValue['actionsRef'] = React.useRef(null);
     const positionerRef = React.useRef<HTMLElement | null>(null);
     const allowMouseUpTriggerRef = React.useRef(true);
+    const initialCursorPointRef = React.useRef<{ x: number; y: number } | null>(null);
     const id = useId();
 
     const contextValue: ContextMenuRootContextValue = React.useMemo(
@@ -47,25 +48,37 @@ export function ContextMenuRoot(props: ContextMenuRoot.Props) {
             internalBackdropRef,
             positionerRef,
             allowMouseUpTriggerRef,
+            initialCursorPointRef,
             rootId: id
         }),
         [anchor, id]
     );
 
     return (
-        <ContextMenuRootContext value={contextValue}>
-            <MenuRootContext value={undefined}>
+        <ContextMenuRootContext.Provider value={contextValue}>
+            <MenuRootContext.Provider value={undefined}>
                 <Menu.Root {...props} />
-            </MenuRootContext>
-        </ContextMenuRootContext>
+            </MenuRootContext.Provider>
+        </ContextMenuRootContext.Provider>
     );
 }
 
+export type ContextMenuRootState = {};
+
+export type ContextMenuRootProps = {
+    /**
+     * Event handler called when the menu is opened or closed.
+     */
+    onOpenChange?: (open: boolean, eventDetails: ContextMenuRoot.ChangeEventDetails) => void;
+} & Omit<Menu.Root.Props, 'modal' | 'openOnHover' | 'delay' | 'closeDelay' | 'onOpenChange'>;
+
+export type ContextMenuRootChangeEventReason = MenuRoot.ChangeEventReason;
+export type ContextMenuRootChangeEventDetails
+    = HeadlessUIChangeEventDetails<ContextMenuRoot.ChangeEventReason>;
+
 export namespace ContextMenuRoot {
-    export type State = object;
-
-    export type Props = Omit<Menu.Root.Props, 'modal' | 'openOnHover' | 'delay' | 'closeDelay'>;
-
-    export type ChangeEventReason = MenuRoot.ChangeEventReason;
-    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
+    export type State = ContextMenuRootState;
+    export type Props = ContextMenuRootProps;
+    export type ChangeEventReason = ContextMenuRootChangeEventReason;
+    export type ChangeEventDetails = ContextMenuRootChangeEventDetails;
 }

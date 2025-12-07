@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AnimationFrame, useOpenInteractionType, useScrollLock } from '@flippo-ui/hooks';
+import { useOpenInteractionType, useScrollLock } from '@flippo-ui/hooks';
 
 import { useHeadlessUiId } from '~@lib/hooks';
 import {
@@ -10,6 +10,7 @@ import {
     useFloatingTree
 } from '~@packages/floating-ui-react';
 
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CompositeRoot } from '../Composite/root/CompositeRoot';
@@ -26,10 +27,23 @@ import type { MenubarContextValue } from './MenubarContext';
  *
  * Documentation: [Base UI Menubar](https://base-ui.com/react/components/menubar)
  */
-export function Menubar(props: Menubar.Props) {
+const menubarStateAttributesMapping: StateAttributesMapping<Menubar.State> = {
+    hasSubmenuOpen(value) {
+        return {
+            'data-has-submenu-open': value ? 'true' : 'false'
+        };
+    }
+};
+
+/**
+ * The container for menus.
+ *
+ * Documentation: [Base UI Menubar](https://base-ui.com/react/components/menubar)
+ */
+export function Menubar(componentProps: Menubar.Props) {
     const {
         orientation = 'horizontal',
-        loop = true,
+        loopFocus = true,
         render,
         className,
         modal = true,
@@ -37,7 +51,7 @@ export function Menubar(props: Menubar.Props) {
         id: idProp,
         ref,
         ...elementProps
-    } = props;
+    } = componentProps;
 
     const [contentElement, setContentElement] = React.useState<HTMLElement | null>(null);
     const [hasSubmenuOpen, setHasSubmenuOpen] = React.useState(false);
@@ -54,21 +68,17 @@ export function Menubar(props: Menubar.Props) {
         }
     }, [hasSubmenuOpen, resetOpenInteractionType]);
 
-    useScrollLock({
-        enabled: modal && hasSubmenuOpen && openMethod !== 'touch',
-        open: hasSubmenuOpen,
-        mounted: hasSubmenuOpen,
-        referenceElement: contentElement
-    });
+    useScrollLock(modal && hasSubmenuOpen && openMethod !== 'touch', contentElement);
 
     const id = useHeadlessUiId(idProp);
 
     const state = React.useMemo(
         () => ({
             orientation,
-            modal
+            modal,
+            hasSubmenuOpen
         }),
-        [orientation, modal]
+        [orientation, modal, hasSubmenuOpen]
     );
 
     const contentRef = React.useRef<HTMLDivElement>(null);
@@ -104,10 +114,11 @@ export function Menubar(props: Menubar.Props) {
                       render={render}
                       className={className}
                       state={state}
+                      stateAttributesMapping={menubarStateAttributesMapping}
                       refs={[ref, setContentElement, contentRef]}
                       props={[{ role: 'menubar', id }, interactionTypeProps, elementProps]}
                       orientation={orientation}
-                      loop={loop}
+                      loopFocus={loopFocus}
                       highlightItemOnHover={hasSubmenuOpen}
                     />
                 </MenubarContent>
@@ -116,10 +127,9 @@ export function Menubar(props: Menubar.Props) {
     );
 }
 
-function MenubarContent(props: React.PropsWithChildren<object>) {
+function MenubarContent(props: React.PropsWithChildren<{}>) {
     const nodeId = useFloatingNodeId();
     const { events: menuEvents } = useFloatingTree()!;
-    const openSubmenusRef = React.useRef(new Set<string>());
     const rootContext = useMenubarContext();
 
     React.useEffect(() => {
@@ -129,24 +139,12 @@ function MenubarContent(props: React.PropsWithChildren<object>) {
             }
 
             if (details.open) {
-                openSubmenusRef.current.add(details.nodeId);
+                if (!rootContext.hasSubmenuOpen) {
+                    rootContext.setHasSubmenuOpen(true);
+                }
             }
-            else {
-                openSubmenusRef.current.delete(details.nodeId);
-            }
-
-            const isAnyOpen = openSubmenusRef.current.size > 0;
-            if (isAnyOpen) {
-                rootContext.setHasSubmenuOpen(true);
-            }
-            else if (rootContext.hasSubmenuOpen) {
-                // wait for the next frame to set the state to make sure another menu doesn't open
-                // immediately after the previous one is closed
-                AnimationFrame.request(() => {
-                    if (openSubmenusRef.current.size === 0) {
-                        rootContext.setHasSubmenuOpen(false);
-                    }
-                });
+            else if (details.reason !== 'sibling-open' && details.reason !== 'list-navigation') {
+                rootContext.setHasSubmenuOpen(false);
             }
         }
 
@@ -160,30 +158,46 @@ function MenubarContent(props: React.PropsWithChildren<object>) {
     return <FloatingNode id={nodeId}>{props.children}</FloatingNode>;
 }
 
-export namespace Menubar {
-    export type State = object;
+export type MenubarState = {
+    /**
+     * The orientation of the menubar.
+     */
+    orientation: MenuRoot.Orientation;
+    /**
+     * Whether the menubar is modal.
+     */
+    modal: boolean;
+    /**
+     * Whether any submenu within the menubar is open.
+     */
+    hasSubmenuOpen: boolean;
+};
 
-    export type Props = {
+export type MenubarProps = {
     /**
      * Whether the menubar is modal.
      * @default true
      */
-        modal?: boolean;
-        /**
-         * Whether the whole menubar is disabled.
-         * @default false
-         */
-        disabled?: boolean;
-        /**
-         * The orientation of the menubar.
-         * @default 'horizontal'
-         */
-        orientation?: MenuRoot.Orientation;
-        /**
-         * Whether to loop keyboard focus back to the first item
-         * when the end of the list is reached while using the arrow keys.
-         * @default true
-         */
-        loop?: boolean;
-    } & HeadlessUIComponentProps<'div', State>;
+    modal?: boolean;
+    /**
+     * Whether the whole menubar is disabled.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * The orientation of the menubar.
+     * @default 'horizontal'
+     */
+    orientation?: MenuRoot.Orientation;
+    /**
+     * Whether to loop keyboard focus back to the first item
+     * when the end of the list is reached while using the arrow keys.
+     * @default true
+     */
+    loopFocus?: boolean;
+} & HeadlessUIComponentProps<'div', Menubar.State>;
+
+export namespace Menubar {
+    export type State = MenubarState;
+    export type Props = MenubarProps;
 }

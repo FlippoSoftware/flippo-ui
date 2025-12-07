@@ -1,4 +1,5 @@
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -17,8 +18,8 @@ export function MenuGroupLabel(componentProps: MenuGroupLabel.Props) {
         className,
         render,
         /* eslint-enable unused-imports/no-unused-vars */
-        id: idProp,
         ref,
+        id: idProp,
         ...elementProps
     } = componentProps;
 
@@ -43,8 +44,11 @@ export function MenuGroupLabel(componentProps: MenuGroupLabel.Props) {
     });
 }
 
-export namespace MenuGroupLabel {
-    export type State = object;
+export type MenuGroupLabelProps = {} & HeadlessUIComponentProps<'div', MenuGroupLabel.State>;
 
-    export type Props = HeadlessUIComponentProps<'div', State>;
+export type MenuGroupLabelState = {};
+
+export namespace MenuGroupLabel {
+    export type Props = MenuGroupLabelProps;
+    export type State = MenuGroupLabelState;
 }

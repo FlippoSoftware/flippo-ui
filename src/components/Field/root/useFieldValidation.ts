@@ -1,16 +1,21 @@
 import React from 'react';
 
-import { useEventCallback, useTimeout } from '@flippo-ui/hooks';
+import { useEventCallback } from '@flippo-ui/hooks/use-event-callback';
+import { useTimeout } from '@flippo-ui/hooks/use-timeout';
+
+import { EMPTY_OBJECT } from '~@lib/constants';
 import { mergeProps } from '~@lib/merge';
 
 import type { HTMLProps } from '~@lib/types';
 
 import { useFormContext } from '../../Form/FormContext';
-import { useFieldRootContext } from '../root/FieldRootContext';
+import { useLabelableContext } from '../../LabelableProvider/LabelableContext';
 import { DEFAULT_VALIDITY_STATE } from '../utils/constants';
 import { getCombinedFieldValidityData } from '../utils/getCombinedFieldValidityData';
 
-import type { FieldValidityData } from '../root/FieldRoot';
+import type { Form } from '../../Form';
+
+import type { FieldRootState, FieldValidityData } from './FieldRoot';
 
 const validityKeys = Object.keys(DEFAULT_VALIDITY_STATE) as Array<keyof ValidityState>;
 
@@ -36,29 +41,29 @@ function isOnlyValueMissing(state: Record<keyof ValidityState, boolean> | undefi
     return onlyValueMissing;
 }
 
-type HTMLInterface<ControlTag extends 'input' | 'textarea' = 'input' | 'textarea'> = ControlTag extends 'input' ? HTMLInputElement : HTMLTextAreaElement;
+export function useFieldValidation(
+    params: UseFieldValidationParameters
+): UseFieldValidationReturnValue {
+    const { formRef, clearErrors } = useFormContext();
 
-export function useFieldControlValidation<ControlTag extends 'input' | 'textarea' = 'input'>() {
     const {
         setValidityData,
         validate,
-        messageIds,
         validityData,
-        validationMode,
         validationDebounceTime,
         invalid,
         markedDirtyRef,
-        controlId,
         state,
-        name
-    } = useFieldRootContext();
+        name,
+        shouldValidateOnChange
+    } = params;
 
-    const { formRef, clearErrors } = useFormContext();
+    const { controlId, getDescriptionProps } = useLabelableContext();
 
     const timeout = useTimeout();
-    const inputRef = React.useRef<HTMLInterface<ControlTag> | null>(null);
+    const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-    const commitValidation = useEventCallback(async (value: unknown, revalidate = false) => {
+    const commit = useEventCallback(async (value: unknown, revalidate = false) => {
         const element = inputRef.current;
         if (!element) {
             return;
@@ -117,7 +122,7 @@ export function useFieldControlValidation<ControlTag extends 'input' | 'textarea
             // let it fall through to the main validation logic below.
         }
 
-        function getState(el: HTMLInterface<ControlTag>) {
+        function getState(el: HTMLInputElement) {
             const computedState = validityKeys.reduce(
                 (acc, key) => {
                     acc[key] = el.validity[key];
@@ -157,21 +162,24 @@ export function useFieldControlValidation<ControlTag extends 'input' | 'textarea
         const nextState = getState(element);
 
         let defaultValidationMessage;
+        const validateOnChange = shouldValidateOnChange();
 
-        if (element.validationMessage) {
+        if (element.validationMessage && !validateOnChange) {
+            // not validating on change, if there is a `validationMessage` from
+            // native validity, set errors and skip calling the custom validate fn
             defaultValidationMessage = element.validationMessage;
             validationErrors = [element.validationMessage];
         }
         else {
-            const formValues = Array.from(formRef.current.fields.values()).reduce(
-                (acc, field) => {
-                    if (field.name && field.getValueRef) {
-                        acc[field.name] = field.getValueRef.current?.();
-                    }
-                    return acc;
-                },
-                {} as Record<string, unknown>
-            );
+            // call the validate function because either
+            // - validating on change, or
+            // - native constraint validations passed, custom validity check is next
+            const formValues = Array.from(formRef.current.fields.values()).reduce((acc, field) => {
+                if (field.name) {
+                    acc[field.name] = field.getValue();
+                }
+                return acc;
+            }, {} as Form.Values);
 
             const resultOrPromise = validate(value, formValues);
             if (
@@ -198,12 +206,26 @@ export function useFieldControlValidation<ControlTag extends 'input' | 'textarea
                     element.setCustomValidity(result);
                 }
             }
+            else if (validateOnChange) {
+                // validate function returned no errors, if validating on change
+                // we need to clear the custom validity state
+                element.setCustomValidity('');
+                nextState.customError = false;
+
+                if (element.validationMessage) {
+                    defaultValidationMessage = element.validationMessage;
+                    validationErrors = [element.validationMessage];
+                }
+                else if (element.validity.valid && !nextState.valid) {
+                    nextState.valid = true;
+                }
+            }
         }
 
-        const nextValidityData: FieldValidityData = {
+        const nextValidityData = {
             value,
             state: nextState,
-            error: defaultValidationMessage ?? (Array.isArray(result) ? result[0] : (result ?? '')) as string,
+            error: defaultValidationMessage ?? (Array.isArray(result) ? result[0] ?? '' : (result ?? '')),
             errors: validationErrors,
             initialValue: validityData.initialValue
         };
@@ -224,13 +246,11 @@ export function useFieldControlValidation<ControlTag extends 'input' | 'textarea
     const getValidationProps = React.useCallback(
         (externalProps = {}) =>
             mergeProps<any>(
-                {
-                    ...(messageIds.length && { 'aria-describedby': messageIds.join(' ') }),
-                    ...(state.valid === false && { 'aria-invalid': true })
-                },
+                getDescriptionProps,
+                state.valid === false ? { 'aria-invalid': true } : EMPTY_OBJECT,
                 externalProps
             ),
-        [messageIds, state.valid]
+        [getDescriptionProps, state.valid]
     );
 
     const getInputValidationProps = React.useCallback(
@@ -245,8 +265,8 @@ export function useFieldControlValidation<ControlTag extends 'input' | 'textarea
 
                         clearErrors(name);
 
-                        if (validationMode !== 'onChange') {
-                            commitValidation(event.currentTarget.value, true);
+                        if (!shouldValidateOnChange()) {
+                            commit(event.currentTarget.value, true);
                             return;
                         }
 
@@ -258,7 +278,7 @@ export function useFieldControlValidation<ControlTag extends 'input' | 'textarea
 
                         if (element.value === '') {
                             // Ignore the debounce time for empty values.
-                            commitValidation(element.value);
+                            commit(element.value);
                             return;
                         }
 
@@ -266,11 +286,11 @@ export function useFieldControlValidation<ControlTag extends 'input' | 'textarea
 
                         if (validationDebounceTime) {
                             timeout.start(validationDebounceTime, () => {
-                                commitValidation(element.value);
+                                commit(element.value);
                             });
                         }
                         else {
-                            commitValidation(element.value);
+                            commit(element.value);
                         }
                     }
                 },
@@ -281,10 +301,10 @@ export function useFieldControlValidation<ControlTag extends 'input' | 'textarea
             clearErrors,
             name,
             timeout,
-            commitValidation,
+            commit,
             invalid,
-            validationMode,
-            validationDebounceTime
+            validationDebounceTime,
+            shouldValidateOnChange
         ]
     );
 
@@ -293,17 +313,30 @@ export function useFieldControlValidation<ControlTag extends 'input' | 'textarea
             getValidationProps,
             getInputValidationProps,
             inputRef,
-            commitValidation
+            commit
         }),
-        [getValidationProps, getInputValidationProps, commitValidation]
+        [getValidationProps, getInputValidationProps, commit]
     );
 }
 
-export namespace useFieldControlValidation {
-    export type ReturnValue = {
-        getValidationProps: (props?: HTMLProps) => HTMLProps;
-        getInputValidationProps: (props?: HTMLProps) => HTMLProps;
-        inputRef: React.MutableRefObject<any>;
-        commitValidation: (value: unknown, revalidate?: boolean) => void;
-    };
-}
+export type UseFieldValidationParameters = {
+    setValidityData: (data: FieldValidityData) => void;
+    validate: (
+        value: unknown,
+        formValues: Form.Values,
+    ) => string | string[] | null | Promise<string | string[] | null>;
+    validityData: FieldValidityData;
+    validationDebounceTime: number;
+    invalid: boolean;
+    markedDirtyRef: React.RefObject<boolean>;
+    state: FieldRootState;
+    name: string | undefined;
+    shouldValidateOnChange: () => boolean;
+};
+
+export type UseFieldValidationReturnValue = {
+    getValidationProps: (props?: HTMLProps) => HTMLProps;
+    getInputValidationProps: (props?: HTMLProps) => HTMLProps;
+    inputRef: React.RefObject<HTMLInputElement | null>;
+    commit: (value: unknown, revalidate?: boolean) => Promise<void>;
+};

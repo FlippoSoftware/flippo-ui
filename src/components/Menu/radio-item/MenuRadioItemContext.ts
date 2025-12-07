@@ -12,7 +12,6 @@ export const MenuRadioItemContext = React.createContext<MenuRadioItemContextValu
 
 export function useMenuRadioItemContext() {
     const context = React.use(MenuRadioItemContext);
-
     if (context === undefined) {
         throw new Error(
             'Headless UI: MenuRadioItemContext is missing. MenuRadioItem parts must be placed within <Menu.RadioItem>.'

@@ -1,17 +1,18 @@
 import React from 'react';
 
 import {
-    useAnimationFinished,
+    useAnimationsFinished,
     useControlledState,
-    useEventCallback,
     useIsoLayoutEffect,
     useTransitionStatus
 } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { useHeadlessUiId } from '~@lib/hooks';
+import { REASONS } from '~@lib/reason';
 
 import type { CollapsibleRoot } from './CollapsibleRoot';
 
@@ -59,11 +60,11 @@ export function useCollapsibleRoot(
     const transitionDimensionRef = React.useRef<'width' | 'height' | null>(null);
     const panelRef: React.RefObject<HTMLElement | null> = React.useRef(null);
 
-    const runOnceAnimationsFinish = useAnimationFinished(panelRef, false);
+    const runOnceAnimationsFinish = useAnimationsFinished(panelRef, false);
 
-    const handleTrigger = useEventCallback((event: React.MouseEvent | React.KeyboardEvent) => {
+    const handleTrigger = useStableCallback((event: React.MouseEvent | React.KeyboardEvent) => {
         const nextOpen = !open;
-        const eventDetails = createChangeEventDetails('trigger-press', event.nativeEvent);
+        const eventDetails = createChangeEventDetails(REASONS.triggerPress, event.nativeEvent);
 
         onOpenChange(nextOpen, eventDetails);
 
@@ -166,72 +167,75 @@ export function useCollapsibleRoot(
     );
 }
 
-export namespace useCollapsibleRoot {
-    export type Parameters = {
-        /**
-         * Whether the collapsible panel is currently open.
-         *
-         * To render an uncontrolled collapsible, use the `defaultOpen` prop instead.
-         */
-        open?: boolean;
-        /**
-         * Whether the collapsible panel is initially open.
-         *
-         * To render a controlled collapsible, use the `open` prop instead.
-         * @default false
-         */
-        defaultOpen?: boolean;
-        /**
-         * Event handler called when the panel is opened or closed.
-         */
-        onOpenChange: (open: boolean, eventDetails: CollapsibleRoot.ChangeEventDetails) => void;
-        /**
-         * Whether the component should ignore user interaction.
-         * @default false
-         */
-        disabled: boolean;
-    };
+export type UseCollapsibleRootParameters = {
+    /**
+     * Whether the collapsible panel is currently open.
+     *
+     * To render an uncontrolled collapsible, use the `defaultOpen` prop instead.
+     */
+    open?: boolean;
+    /**
+     * Whether the collapsible panel is initially open.
+     *
+     * To render a controlled collapsible, use the `open` prop instead.
+     * @default false
+     */
+    defaultOpen?: boolean;
+    /**
+     * Event handler called when the panel is opened or closed.
+     */
+    onOpenChange: (open: boolean, eventDetails: CollapsibleRoot.ChangeEventDetails) => void;
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
+    disabled: boolean;
+};
 
-    export type ReturnValue = {
-        abortControllerRef: React.RefObject<AbortController | null>;
-        animationTypeRef: React.RefObject<AnimationType>;
-        /**
-         * Whether the component should ignore user interaction.
-         */
-        disabled: boolean;
-        handleTrigger: (event: React.MouseEvent | React.KeyboardEvent) => void;
-        /**
-         * The height of the panel.
-         */
-        height: number | undefined;
-        /**
-         * Whether the collapsible panel is currently mounted.
-         */
-        mounted: boolean;
-        /**
-         * Whether the collapsible panel is currently open.
-         */
-        open: boolean;
-        panelId: React.HTMLAttributes<Element>['id'];
-        panelRef: React.RefObject<HTMLElement | null>;
-        runOnceAnimationsFinish: (fnToExecute: () => void, signal?: AbortSignal | null) => void;
-        setDimensions: React.Dispatch<React.SetStateAction<Dimensions>>;
-        setHiddenUntilFound: React.Dispatch<React.SetStateAction<boolean>>;
-        setKeepMounted: React.Dispatch<React.SetStateAction<boolean>>;
-        setMounted: (open: boolean) => void;
-        setOpen: (open: boolean) => void;
-        setPanelIdState: (id: string | undefined) => void;
-        setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-        transitionDimensionRef: React.RefObject<'height' | 'width' | null>;
-        transitionStatus: TransitionStatus;
-        /**
-         * The visible state of the panel used to determine the `[hidden]` attribute
-         * only when CSS keyframe animations are used.
-         */
-        visible: boolean;
-        /**
-         * The width of the panel.
-         */
-        width: number | undefined;
-    };
+export type UseCollapsibleRootReturnValue = {
+    abortControllerRef: React.RefObject<AbortController | null>;
+    animationTypeRef: React.RefObject<AnimationType>;
+    /**
+     * Whether the component should ignore user interaction.
+     */
+    disabled: boolean;
+    handleTrigger: (event: React.MouseEvent | React.KeyboardEvent) => void;
+    /**
+     * The height of the panel.
+     */
+    height: number | undefined;
+    /**
+     * Whether the collapsible panel is currently mounted.
+     */
+    mounted: boolean;
+    /**
+     * Whether the collapsible panel is currently open.
+     */
+    open: boolean;
+    panelId: React.HTMLAttributes<Element>['id'];
+    panelRef: React.RefObject<HTMLElement | null>;
+    runOnceAnimationsFinish: (fnToExecute: () => void, signal?: AbortSignal | null) => void;
+    setDimensions: React.Dispatch<React.SetStateAction<Dimensions>>;
+    setHiddenUntilFound: React.Dispatch<React.SetStateAction<boolean>>;
+    setKeepMounted: React.Dispatch<React.SetStateAction<boolean>>;
+    setMounted: (open: boolean) => void;
+    setOpen: (open: boolean) => void;
+    setPanelIdState: (id: string | undefined) => void;
+    setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+    transitionDimensionRef: React.RefObject<'height' | 'width' | null>;
+    transitionStatus: TransitionStatus;
+    /**
+     * The visible state of the panel used to determine the `[hidden]` attribute
+     * only when CSS keyframe animations are used.
+     */
+    visible: boolean;
+    /**
+     * The width of the panel.
+     */
+    width: number | undefined;
+};
+
+export namespace useCollapsibleRoot {
+    export type Parameters = UseCollapsibleRootParameters;
+    export type ReturnValue = UseCollapsibleRootReturnValue;
 }

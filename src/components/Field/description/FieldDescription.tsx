@@ -1,11 +1,10 @@
-
-
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
+import { useLabelableContext } from '../../LabelableProvider';
 import { useFieldRootContext } from '../root/FieldRootContext';
 import { fieldValidityMapping } from '../utils/constants';
 
@@ -28,11 +27,10 @@ export function FieldDescription(componentProps: FieldDescription.Props) {
         ...elementProps
     } = componentProps;
 
-    const { state } = useFieldRootContext(false);
-
     const id = useHeadlessUiId(idProp);
 
-    const { setMessageIds } = useFieldRootContext();
+    const fieldRootContext = useFieldRootContext(false);
+    const { setMessageIds } = useLabelableContext();
 
     useIsoLayoutEffect(() => {
         if (!id) {
@@ -48,7 +46,7 @@ export function FieldDescription(componentProps: FieldDescription.Props) {
 
     const element = useRenderElement('p', componentProps, {
         ref,
-        state,
+        state: fieldRootContext.state,
         props: [{ id }, elementProps],
         customStyleHookMapping: fieldValidityMapping
     });

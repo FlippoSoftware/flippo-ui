@@ -23,7 +23,7 @@ const styleHookMapping: StateAttributesMapping<CollapsibleRoot.State> = {
  *
  * Documentation: [Base UI Collapsible](https://base-ui.com/react/components/collapsible)
  */
-export function CollapsibleTrigger(componentProps: CollapsibleTrigger.Props) {
+export function CollapsibleTrigger(componentProps: CollapsibleTriggerProps) {
     const {
         panelId,
         open,
@@ -57,12 +57,7 @@ export function CollapsibleTrigger(componentProps: CollapsibleTrigger.Props) {
             disabled,
             'onClick': handleTrigger
         }),
-        [
-            panelId,
-            disabled,
-            open,
-            handleTrigger
-        ]
+        [panelId, disabled, open, handleTrigger]
     );
 
     const element = useRenderElement('button', componentProps, {
@@ -75,6 +70,8 @@ export function CollapsibleTrigger(componentProps: CollapsibleTrigger.Props) {
     return element;
 }
 
+export type CollapsibleTriggerProps = {} & NativeButtonProps & HeadlessUIComponentProps<'button', CollapsibleRoot.State>;
+
 export namespace CollapsibleTrigger {
-    export type Props = NativeButtonProps & HeadlessUIComponentProps<'button', CollapsibleRoot.State>;
+    export type Props = CollapsibleTriggerProps;
 }

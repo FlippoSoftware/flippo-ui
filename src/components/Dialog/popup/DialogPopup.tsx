@@ -34,7 +34,7 @@ const stateAttributesMapping: StateAttributesMapping<DialogPopup.State> = {
  *
  * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
  */
-export function DialogPopup(componentProps: DialogPopup.Props) {
+export function DialogPopup(componentProps: DialogPopupProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
@@ -60,6 +60,7 @@ export function DialogPopup(componentProps: DialogPopup.Props) {
     const openMethod = store.useState('openMethod');
     const titleElementId = store.useState('titleElementId');
     const transitionStatus = store.useState('transitionStatus');
+    const role = store.useState('role');
 
     useDialogPortalContext();
 
@@ -102,7 +103,7 @@ export function DialogPopup(componentProps: DialogPopup.Props) {
         props: [rootPopupProps, {
             'aria-labelledby': titleElementId ?? undefined,
             'aria-describedby': descriptionElementId ?? undefined,
-            'role': 'dialog',
+            role,
             'tabIndex': -1,
             'hidden': !mounted,
             onKeyDown(event: React.KeyboardEvent) {
@@ -134,8 +135,7 @@ export function DialogPopup(componentProps: DialogPopup.Props) {
     );
 }
 
-export namespace DialogPopup {
-    export type Props = {
+export type DialogPopupProps = {
     /**
      * Determines the element to focus when the dialog is opened.
      *
@@ -145,38 +145,42 @@ export namespace DialogPopup {
      * - `function`: Called with the interaction type (`mouse`, `touch`, `pen`, or `keyboard`).
      *   Return an element to focus, `true` to use the default behavior, or `false`/`undefined` to do nothing.
      */
-        initialFocus?:
-          | boolean
-          | React.RefObject<HTMLElement | null>
-          | ((openType: Interaction) => boolean | HTMLElement | null | void);
-        /**
-         * Determines the element to focus when the dialog is closed.
-         *
-         * - `false`: Do not move focus.
-         * - `true`: Move focus based on the default behavior (trigger or previously focused element).
-         * - `RefObject`: Move focus to the ref element.
-         * - `function`: Called with the interaction type (`mouse`, `touch`, `pen`, or `keyboard`).
-         *   Return an element to focus, `true` to use the default behavior, or `false`/`undefined` to do nothing.
-         */
-        finalFocus?:
-          | boolean
-          | React.RefObject<HTMLElement | null>
-          | ((closeType: Interaction) => boolean | HTMLElement | null | void);
-    } & HeadlessUIComponentProps<'div', DialogPopup.State>;
+    initialFocus?:
+      | boolean
+      | React.RefObject<HTMLElement | null>
+      | ((openType: Interaction) => boolean | HTMLElement | null | void);
+    /**
+     * Determines the element to focus when the dialog is closed.
+     *
+     * - `false`: Do not move focus.
+     * - `true`: Move focus based on the default behavior (trigger or previously focused element).
+     * - `RefObject`: Move focus to the ref element.
+     * - `function`: Called with the interaction type (`mouse`, `touch`, `pen`, or `keyboard`).
+     *   Return an element to focus, `true` to use the default behavior, or `false`/`undefined` to do nothing.
+     */
+    finalFocus?:
+      | boolean
+      | React.RefObject<HTMLElement | null>
+      | ((closeType: Interaction) => boolean | HTMLElement | null | void);
+} & HeadlessUIComponentProps<'div', DialogPopup.State>;
 
-    export type State = {
+export type DialogPopupState = {
     /**
      * Whether the dialog is currently open.
      */
-        open: boolean;
-        transitionStatus: TransitionStatus;
-        /**
-         * Whether the dialog is nested within a parent dialog.
-         */
-        nested: boolean;
-        /**
-         * Whether the dialog has nested dialogs open.
-         */
-        nestedDialogOpen: boolean;
-    };
+    open: boolean;
+    transitionStatus: TransitionStatus;
+    /**
+     * Whether the dialog is nested within a parent dialog.
+     */
+    nested: boolean;
+    /**
+     * Whether the dialog has nested dialogs open.
+     */
+    nestedDialogOpen: boolean;
+};
+
+export namespace DialogPopup {
+    export type Props = DialogPopupProps;
+    export type State = DialogPopupState;
 }

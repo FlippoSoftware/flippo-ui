@@ -12,7 +12,7 @@ import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { fieldValidityMapping } from '../../Field/utils/constants';
 import { useCheckboxRootContext } from '../root/CheckboxRootContext';
-import { useCustomStyleHookMapping } from '../utils/useCustomStyleHookMapping';
+import { useStateAttributesMapping } from '../utils/useStateAttributesMapping';
 
 import type { CheckboxRoot } from '../root/CheckboxRoot';
 
@@ -21,15 +21,14 @@ import type { CheckboxRoot } from '../root/CheckboxRoot';
  * Renders a `<span>` element.
  *
  * Documentation: [Base UI Checkbox](https://base-ui.com/react/components/checkbox)
- */
-export function CheckboxIndicator(componentProps: CheckboxIndicator.Props) {
+ */export function CheckboxIndicator(componentProps: CheckboxIndicator.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
-        keepMounted = false,
         ref,
+        keepMounted = false,
         ...elementProps
     } = componentProps;
 
@@ -59,15 +58,15 @@ export function CheckboxIndicator(componentProps: CheckboxIndicator.Props) {
         }
     });
 
-    const baseStyleHookMapping = useCustomStyleHookMapping(rootState);
+    const baseStateAttributesMapping = useStateAttributesMapping(rootState);
 
-    const customStyleHookMapping: StateAttributesMapping<CheckboxIndicator.State> = React.useMemo(
+    const stateAttributesMapping: StateAttributesMapping<CheckboxIndicator.State> = React.useMemo(
         () => ({
-            ...baseStyleHookMapping,
+            ...baseStateAttributesMapping,
             ...transitionStatusMapping,
             ...fieldValidityMapping
         }),
-        [baseStyleHookMapping]
+        [baseStateAttributesMapping]
     );
 
     const shouldRender = keepMounted || rendered;
@@ -76,7 +75,7 @@ export function CheckboxIndicator(componentProps: CheckboxIndicator.Props) {
         enabled: shouldRender,
         ref: [ref, indicatorRef],
         state,
-        customStyleHookMapping,
+        customStyleHookMapping: stateAttributesMapping,
         props: elementProps
     });
 
@@ -87,16 +86,19 @@ export function CheckboxIndicator(componentProps: CheckboxIndicator.Props) {
     return element;
 }
 
-export namespace CheckboxIndicator {
-    export type State = {
-        transitionStatus: TransitionStatus;
-    } & CheckboxRoot.State;
+export type CheckboxIndicatorState = {
+    transitionStatus: TransitionStatus;
+} & CheckboxRoot.State;
 
-    export type Props = {
-        /**
-         * Whether to keep the element in the DOM when the checkbox is not checked.
-         * @default false
-         */
-        keepMounted?: boolean;
-    } & HeadlessUIComponentProps<'span', State>;
+export type CheckboxIndicatorProps = {
+    /**
+     * Whether to keep the element in the DOM when the checkbox is not checked.
+     * @default false
+     */
+    keepMounted?: boolean;
+} & HeadlessUIComponentProps<'span', CheckboxIndicator.State>;
+
+export namespace CheckboxIndicator {
+    export type State = CheckboxIndicatorState;
+    export type Props = CheckboxIndicatorProps;
 }

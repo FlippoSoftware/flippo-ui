@@ -1,4 +1,4 @@
-
+import React from 'react';
 
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
@@ -7,6 +7,7 @@ import { getTarget } from '~@packages/floating-ui-react/utils';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
+import { useLabelableContext } from '../../LabelableProvider';
 import { useFieldRootContext } from '../root/FieldRootContext';
 import { fieldValidityMapping } from '../utils/constants';
 
@@ -29,36 +30,30 @@ export function FieldLabel(componentProps: FieldLabel.Props) {
         ...elementProps
     } = componentProps;
 
-    const {
-        labelId,
-        setLabelId,
-        state,
-        controlId
-    } = useFieldRootContext(false);
+    const fieldRootContext = useFieldRootContext(false);
+
+    const { controlId, setLabelId, labelId } = useLabelableContext();
 
     const id = useHeadlessUiId(idProp);
-    const htmlFor = controlId ?? undefined;
+
+    const labelRef = React.useRef<HTMLLabelElement>(null);
 
     useIsoLayoutEffect(() => {
-        if (controlId != null || idProp) {
+        if (id) {
             setLabelId(id);
         }
+
         return () => {
             setLabelId(undefined);
         };
-    }, [
-        controlId,
-        id,
-        idProp,
-        setLabelId
-    ]);
+    }, [id, setLabelId]);
 
     const element = useRenderElement('label', componentProps, {
-        ref,
-        state,
+        ref: [ref, labelRef],
+        state: fieldRootContext.state,
         props: [{
             id: labelId,
-            htmlFor,
+            htmlFor: controlId ?? undefined,
             onMouseDown(event) {
                 const target = getTarget(event.nativeEvent) as HTMLElement | null;
                 if (target?.closest('button,input,select,textarea')) {

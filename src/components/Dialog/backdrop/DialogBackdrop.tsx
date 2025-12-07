@@ -22,7 +22,7 @@ const stateAttributesMapping: StateAttributesMapping<DialogBackdrop.State> = {
  *
  * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
  */
-export function DialogBackdrop(componentProps: DialogBackdrop.Props) {
+export function DialogBackdrop(componentProps: DialogBackdropProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,
@@ -63,22 +63,23 @@ export function DialogBackdrop(componentProps: DialogBackdrop.Props) {
     });
 }
 
-export namespace DialogBackdrop {
-
-    export type Props = {
+export type DialogBackdropProps = {
     /**
      * Whether the backdrop is forced to render even when nested.
      * @default false
      */
-        forceRender?: boolean;
-    } & HeadlessUIComponentProps<'div', DialogBackdrop.State>;
+    forceRender?: boolean;
+} & HeadlessUIComponentProps<'div', DialogBackdrop.State>;
 
-    export type State = {
+export type DialogBackdropState = {
     /**
      * Whether the dialog is currently open.
      */
-        open: boolean;
-        transitionStatus: TransitionStatus;
-    };
+    open: boolean;
+    transitionStatus: TransitionStatus;
+};
 
+export namespace DialogBackdrop {
+    export type Props = DialogBackdropProps;
+    export type State = DialogBackdropState;
 }

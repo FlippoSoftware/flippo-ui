@@ -4,7 +4,7 @@ import type { MenuRoot } from '../Menu/root/MenuRoot';
 
 export type MenubarContextValue = {
     modal: boolean;
-    disabled?: boolean;
+    disabled: boolean;
     contentElement: HTMLElement | null;
     setContentElement: (element: HTMLElement | null) => void;
     hasSubmenuOpen: boolean;

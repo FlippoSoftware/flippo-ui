@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
@@ -11,7 +13,7 @@ import { useDialogRootContext } from '../root/DialogRootContext';
  *
  * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
  */
-export function DialogTitle(componentProps: DialogTitle.Props) {
+export function DialogTitle(componentProps: DialogTitleProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,
@@ -33,8 +35,11 @@ export function DialogTitle(componentProps: DialogTitle.Props) {
     });
 }
 
-export namespace DialogTitle {
-    export type Props = {} & HeadlessUIComponentProps<'h2', DialogTitle.State>;
+export type DialogTitleProps = {} & HeadlessUIComponentProps<'h2', DialogTitle.State>;
 
-    export type State = {};
+export type DialogTitleState = {};
+
+export namespace DialogTitle {
+    export type Props = DialogTitleProps;
+    export type State = DialogTitleState;
 }

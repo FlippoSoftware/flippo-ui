@@ -1,6 +1,6 @@
-import * as ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom';
 
-import { useIsoLayoutEffect, useLatestRef } from '@flippo-ui/hooks';
+import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useFormContext } from '../Form/FormContext';
 
@@ -8,6 +8,15 @@ import { useFieldRootContext } from './root/FieldRootContext';
 import { getCombinedFieldValidityData } from './utils/getCombinedFieldValidityData';
 
 export function useField(params: useField.Parameters) {
+    const {
+        enabled = true,
+        value,
+        id,
+        name,
+        controlRef,
+        commit
+    } = params;
+
     const { formRef } = useFormContext();
     const {
         invalid,
@@ -15,16 +24,8 @@ export function useField(params: useField.Parameters) {
         validityData,
         setValidityData
     } = useFieldRootContext();
-    const {
-        enabled = true,
-        value,
-        id,
-        name,
-        controlRef,
-        commitValidation
-    } = params;
 
-    const getValueRef = useLatestRef(params.getValue);
+    const getValue = useEventCallback(params.getValue);
 
     useIsoLayoutEffect(() => {
         if (!enabled) {
@@ -33,10 +34,10 @@ export function useField(params: useField.Parameters) {
 
         let initialValue = value;
         if (initialValue === undefined) {
-            initialValue = getValueRef.current?.();
+            initialValue = getValue();
         }
 
-        if (validityData.initialValue === null && initialValue !== validityData.initialValue) {
+        if (validityData.initialValue === null && initialValue !== null) {
             setValidityData((prev) => ({ ...prev, initialValue }));
         }
     }, [
@@ -44,38 +45,36 @@ export function useField(params: useField.Parameters) {
         setValidityData,
         value,
         validityData.initialValue,
-        getValueRef
+        getValue
     ]);
 
     useIsoLayoutEffect(() => {
-        if (!enabled) {
+        if (!enabled || !id) {
             return;
         }
 
-        if (id) {
-            formRef.current.fields.set(id, {
-                controlRef,
-                validityData: getCombinedFieldValidityData(validityData, invalid),
-                validate() {
-                    let nextValue = value;
-                    if (nextValue === undefined) {
-                        nextValue = getValueRef.current?.();
-                    }
+        formRef.current.fields.set(id, {
+            getValue,
+            name,
+            controlRef,
+            validityData: getCombinedFieldValidityData(validityData, invalid),
+            validate() {
+                let nextValue = value;
+                if (nextValue === undefined) {
+                    nextValue = getValue();
+                }
 
-                    markedDirtyRef.current = true;
-                    // Synchronously update the validity state so the submit event can be prevented.
-                    ReactDOM.flushSync(() => commitValidation(nextValue));
-                },
-                getValueRef,
-                name
-            });
-        }
+                markedDirtyRef.current = true;
+                // Synchronously update the validity state so the submit event can be prevented.
+                ReactDOM.flushSync(() => commit(nextValue));
+            }
+        });
     }, [
-        commitValidation,
+        commit,
         controlRef,
         enabled,
         formRef,
-        getValueRef,
+        getValue,
         id,
         invalid,
         markedDirtyRef,
@@ -101,7 +100,7 @@ export namespace useField {
         getValue?: (() => unknown) | undefined;
         id: string | undefined;
         name?: string | undefined;
-        commitValidation: (value: unknown) => void;
+        commit: (value: unknown) => void;
         /**
          * A ref to a focusable element that receives focus when the field fails
          * validation during form submission.

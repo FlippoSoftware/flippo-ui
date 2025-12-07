@@ -25,6 +25,11 @@
       "import": "./dist/components/Accordion/index.es.js",
       "require": "./dist/components/Accordion/index.cjs.js"
     },
+    "./autocomplete": {
+      "types": "./dist/components/Autocomplete/index.d.ts",
+      "import": "./dist/components/Autocomplete/index.es.js",
+      "require": "./dist/components/Autocomplete/index.cjs.js"
+    },
     "./avatar": {
       "types": "./dist/components/Avatar/index.d.ts",
       "import": "./dist/components/Avatar/index.es.js",
@@ -49,6 +54,11 @@
       "types": "./dist/components/Collapsible/index.d.ts",
       "import": "./dist/components/Collapsible/index.es.js",
       "require": "./dist/components/Collapsible/index.cjs.js"
+    },
+    "./combobox": {
+      "types": "./dist/components/Combobox/index.d.ts",
+      "import": "./dist/components/Combobox/index.es.js",
+      "require": "./dist/components/Combobox/index.cjs.js"
     },
     "./composite": {
       "types": "./dist/components/Composite/index.d.ts",
@@ -90,6 +100,11 @@
       "import": "./dist/components/Input/index.es.js",
       "require": "./dist/components/Input/index.cjs.js"
     },
+    "./labelable-provider": {
+      "types": "./dist/components/LabelableProvider/index.d.ts",
+      "import": "./dist/components/LabelableProvider/index.es.js",
+      "require": "./dist/components/LabelableProvider/index.cjs.js"
+    },
     "./list": {
       "types": "./dist/components/List/index.d.ts",
       "import": "./dist/components/List/index.es.js",
@@ -109,6 +124,11 @@
       "types": "./dist/components/Meter/index.d.ts",
       "import": "./dist/components/Meter/index.es.js",
       "require": "./dist/components/Meter/index.cjs.js"
+    },
+    "./navigation-menu": {
+      "types": "./dist/components/NavigationMenu/index.d.ts",
+      "import": "./dist/components/NavigationMenu/index.es.js",
+      "require": "./dist/components/NavigationMenu/index.cjs.js"
     },
     "./number-field": {
       "types": "./dist/components/NumberField/index.d.ts",
@@ -144,6 +164,11 @@
       "types": "./dist/components/RadioGroup/index.d.ts",
       "import": "./dist/components/RadioGroup/index.es.js",
       "require": "./dist/components/RadioGroup/index.cjs.js"
+    },
+    "./scroll-area": {
+      "types": "./dist/components/ScrollArea/index.d.ts",
+      "import": "./dist/components/ScrollArea/index.es.js",
+      "require": "./dist/components/ScrollArea/index.cjs.js"
     },
     "./select": {
       "types": "./dist/components/Select/index.d.ts",
@@ -245,7 +270,8 @@
     "build": "vite build && node scripts/generate-exports.js",
     "build:exports": "node scripts/generate-exports.js",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "inline-scripts": "tsx ./scripts/inlineScripts.mts"
   },
   "peerDependencies": {
     "react": "catalog:",
@@ -279,7 +305,10 @@
     "eslint-plugin-react-hooks": "catalog:",
     "eslint-plugin-react-refresh": "catalog:",
     "glob": "catalog:",
+    "globby": "catalog:",
     "jsdom": "catalog:",
+    "terser": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:",
     "vite-plugin-dts": "catalog:",
     "vitest": "catalog:"

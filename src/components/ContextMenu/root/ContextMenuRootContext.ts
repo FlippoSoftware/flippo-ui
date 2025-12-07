@@ -12,6 +12,7 @@ export type ContextMenuRootContextValue = {
     } | null>;
     positionerRef: React.RefObject<HTMLElement | null>;
     allowMouseUpTriggerRef: React.RefObject<boolean>;
+    initialCursorPointRef: React.RefObject<{ x: number; y: number } | null>;
     rootId: string | undefined;
 };
 
@@ -23,7 +24,6 @@ export function useContextMenuRootContext(optional: false): ContextMenuRootConte
 export function useContextMenuRootContext(optional?: true): ContextMenuRootContextValue | undefined;
 export function useContextMenuRootContext(optional = true) {
     const context = React.use(ContextMenuRootContext);
-
     if (context === undefined && !optional) {
         throw new Error(
             'Headless UI: ContextMenuRootContext is missing. ContextMenu parts must be placed within <ContextMenu.Root>.'

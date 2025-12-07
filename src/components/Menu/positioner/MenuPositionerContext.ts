@@ -1,7 +1,6 @@
 import React from 'react';
 
 import type { Align, Side } from '~@lib/hooks';
-import type { FloatingContext } from '~@packages/floating-ui-react';
 
 export type MenuPositionerContextValue = {
     /**
@@ -15,7 +14,7 @@ export type MenuPositionerContextValue = {
     arrowRef: React.RefObject<Element | null>;
     arrowUncentered: boolean;
     arrowStyles: React.CSSProperties;
-    floatingContext: FloatingContext;
+    nodeId: string | undefined;
 };
 
 export const MenuPositionerContext = React.createContext<MenuPositionerContextValue | undefined>(
@@ -26,10 +25,9 @@ export function useMenuPositionerContext(optional?: false): MenuPositionerContex
 export function useMenuPositionerContext(optional: true): MenuPositionerContextValue | undefined;
 export function useMenuPositionerContext(optional?: boolean) {
     const context = React.use(MenuPositionerContext);
-
     if (context === undefined && !optional) {
         throw new Error(
-            'Headless UI: MenuPositionerContext is missing. MenuPositioner parts must be placed within <Menu.Positioner>.'
+            'Base UI: MenuPositionerContext is missing. MenuPositioner parts must be placed within <Menu.Positioner>.'
         );
     }
     return context;

@@ -12,7 +12,7 @@ export type AccordionRootContextValue = {
     handleValueChange: (newValue: number | string, nextOpen: boolean) => void;
     hiddenUntilFound: boolean;
     keepMounted: boolean;
-    loop: boolean;
+    loopFocus: boolean;
     orientation: Orientation;
     state: AccordionRoot.State;
     value: AccordionValue;
@@ -24,11 +24,11 @@ export const AccordionRootContext = React.createContext<AccordionRootContextValu
 
 export function useAccordionRootContext() {
     const context = React.use(AccordionRootContext);
-
     if (context === undefined) {
         throw new Error(
             'Headless UI: AccordionRootContext is missing. Accordion parts must be placed within <Accordion.Root>.'
         );
     }
+
     return context;
 }

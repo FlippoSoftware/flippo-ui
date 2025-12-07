@@ -1,8 +1,11 @@
 import React from 'react';
 
 import { MenuRoot } from '../root/MenuRoot';
+import { useMenuRootContext } from '../root/MenuRootContext';
 
 import { MenuSubmenuRootContext } from './MenuSubmenuRootContext';
+
+export { useMenuSubmenuRootContext } from './MenuSubmenuRootContext';
 
 /**
  * Groups all parts of a submenu.
@@ -12,29 +15,32 @@ import { MenuSubmenuRootContext } from './MenuSubmenuRootContext';
  */
 export function MenuSubmenuRoot(props: MenuSubmenuRoot.Props) {
     const { closeParentOnEsc = false } = props;
+    const parentMenu = useMenuRootContext().store;
+
+    const contextValue = React.useMemo(() => ({ parentMenu }), [parentMenu]);
 
     return (
-        <MenuSubmenuRootContext.Provider value>
-            <MenuRoot closeParentOnEsc={closeParentOnEsc} {...props} />
+        <MenuSubmenuRootContext.Provider value={contextValue}>
+            <MenuRoot {...props} closeParentOnEsc={closeParentOnEsc} />
         </MenuSubmenuRootContext.Provider>
     );
 }
 
+export type MenuSubmenuRootProps = {
+    /**
+     * Event handler called when the menu is opened or closed.
+     */
+    onOpenChange?: (open: boolean, eventDetails: MenuSubmenuRoot.ChangeEventDetails) => void;
+} & Omit<MenuRoot.Props, 'modal' | 'openOnHover' | 'onOpenChange'>;
+
+export type MenuSubmenuRootState = {};
+
+export type MenuSubmenuRootChangeEventReason = MenuRoot.ChangeEventReason;
+export type MenuSubmenuRootChangeEventDetails = MenuRoot.ChangeEventDetails;
+
 export namespace MenuSubmenuRoot {
-    export type Props = {
-        /**
-         * Whether the submenu should open when the trigger is hovered.
-         * @default true
-         */
-        openOnHover?: MenuRoot.Props['openOnHover'];
-        /**
-         * Event handler called when the menu is opened or closed.
-         */
-        onOpenChange?: (open: boolean, eventDetails: ChangeEventDetails) => void;
-    } & Omit<MenuRoot.Props, 'modal' | 'openOnHover' | 'onOpenChange'>;
-
-    export type State = {};
-
-    export type ChangeEventReason = MenuRoot.ChangeEventReason;
-    export type ChangeEventDetails = MenuRoot.ChangeEventDetails;
+    export type Props = MenuSubmenuRootProps;
+    export type State = MenuSubmenuRootState;
+    export type ChangeEventReason = MenuSubmenuRootChangeEventReason;
+    export type ChangeEventDetails = MenuSubmenuRootChangeEventDetails;
 }

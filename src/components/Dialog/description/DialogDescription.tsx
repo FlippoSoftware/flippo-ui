@@ -11,14 +11,14 @@ import { useDialogRootContext } from '../root/DialogRootContext';
  *
  * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
  */
-export function DialogDescription(componentProps: DialogDescription.Props) {
+export function DialogDescription(componentProps: DialogDescriptionProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,
         className,
         /* eslint-enable unused-imports/no-unused-vars */
-        ref,
         id: idProp,
+        ref,
         ...elementProps
     } = componentProps;
     const { store } = useDialogRootContext();
@@ -33,8 +33,11 @@ export function DialogDescription(componentProps: DialogDescription.Props) {
     });
 }
 
-export namespace DialogDescription {
-    export type Props = {} & HeadlessUIComponentProps<'p', State>;
+export type DialogDescriptionProps = {} & HeadlessUIComponentProps<'p', DialogDescription.State>;
 
-    export type State = {};
+export type DialogDescriptionState = {};
+
+export namespace DialogDescription {
+    export type Props = DialogDescriptionProps;
+    export type State = DialogDescriptionState;
 }

@@ -12,7 +12,9 @@ export type CompositeListContextValue<Metadata> = {
 export const CompositeListContext = React.createContext<CompositeListContextValue<any>>({
     register: () => {},
     unregister: () => {},
-    subscribeMapChange: () => () => {},
+    subscribeMapChange: () => {
+        return () => {};
+    },
     elementsRef: { current: [] },
     nextIndexRef: { current: 0 }
 });

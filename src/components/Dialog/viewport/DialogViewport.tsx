@@ -31,14 +31,14 @@ const stateAttributesMapping: StateAttributesMapping<DialogViewport.State> = {
  *
  * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
  */
-export function DialogViewport(componentProps: DialogViewport.Props) {
+export function DialogViewport(componentProps: DialogViewportProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
         render,
         /* eslint-enable unused-imports/no-unused-vars */
-        ref,
         children,
+        ref,
         ...elementProps
     } = componentProps;
 
@@ -78,23 +78,25 @@ export function DialogViewport(componentProps: DialogViewport.Props) {
     });
 }
 
-export namespace DialogViewport {
-    export type State = {
+export type DialogViewportState = {
     /**
      * Whether the dialog is currently open.
      */
-        open: boolean;
-        transitionStatus: TransitionStatus;
-        /**
-         * Whether the dialog is nested within another dialog.
-         */
-        nested: boolean;
-        /**
-         * Whether the dialog has nested dialogs open.
-         */
-        nestedDialogOpen: boolean;
-    };
+    open: boolean;
+    transitionStatus: TransitionStatus;
+    /**
+     * Whether the dialog is nested within another dialog.
+     */
+    nested: boolean;
+    /**
+     * Whether the dialog has nested dialogs open.
+     */
+    nestedDialogOpen: boolean;
+};
 
-    export type Props = {} & HeadlessUIComponentProps<'div', State>;
+export type DialogViewportProps = {} & HeadlessUIComponentProps<'div', DialogViewportState>;
 
+export namespace DialogViewport {
+    export type State = DialogViewportState;
+    export type Props = DialogViewportProps;
 }

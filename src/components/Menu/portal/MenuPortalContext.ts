@@ -4,7 +4,6 @@ export const MenuPortalContext = React.createContext<boolean | undefined>(undefi
 
 export function useMenuPortalContext() {
     const value = React.use(MenuPortalContext);
-
     if (value === undefined) {
         throw new Error('Headless UI: <Menu.Portal> is missing.');
     }

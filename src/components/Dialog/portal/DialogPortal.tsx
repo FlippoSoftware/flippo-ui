@@ -14,8 +14,8 @@ import { DialogPortalContext } from './DialogPortalContext';
  *
  * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
  */
-export function DialogPortal(componentProps: DialogPortal.Props) {
-    const { keepMounted = false, ref, ...elementProps } = componentProps;
+export function DialogPortal(props: DialogPortalProps) {
+    const { keepMounted = false, ...portalProps } = props;
 
     const { store } = useDialogRootContext();
     const mounted = store.useState('mounted');
@@ -28,11 +28,11 @@ export function DialogPortal(componentProps: DialogPortal.Props) {
 
     return (
         <DialogPortalContext.Provider value={keepMounted}>
-            <FloatingPortal ref={ref} {...elementProps}>
+            <FloatingPortal {...portalProps}>
                 {mounted && modal === true && (
                     <InternalBackdrop ref={store.context.internalBackdropRef} inert={!open} />
                 )}
-                {elementProps.children}
+                {props.children}
             </FloatingPortal>
         </DialogPortalContext.Provider>
     );
@@ -40,16 +40,20 @@ export function DialogPortal(componentProps: DialogPortal.Props) {
 
 export namespace DialogPortal {
     export type State = {};
+}
 
-    export type Props = {
+export type DialogPortalProps = {
     /**
      * Whether to keep the portal mounted in the DOM while the popup is hidden.
      * @default false
      */
-        keepMounted?: boolean;
-        /**
-         * A parent element to render the portal element into.
-         */
-        container?: FloatingPortal.Props<DialogPortal.State>['container'];
-    } & FloatingPortal.Props<DialogPortal.State>;
+    keepMounted?: boolean;
+    /**
+     * A parent element to render the portal element into.
+     */
+    container?: FloatingPortal.Props<DialogPortal.State>['container'];
+} & FloatingPortal.Props<DialogPortal.State>;
+
+export namespace DialogPortal {
+    export type Props = DialogPortalProps;
 }

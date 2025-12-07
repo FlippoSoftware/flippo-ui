@@ -3,53 +3,40 @@ import React from 'react';
 import { createSelector, ReactStore } from '@flippo-ui/hooks/use-store';
 
 import type { Interaction } from '@flippo-ui/hooks/use-enhanced-click-handler';
-import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
 
-import { EMPTY_OBJECT } from '~@lib/constants';
-import { getEmptyContext } from '~@packages/floating-ui-react/hooks/useFloatingRootContext';
+import {
+    createInitialPopupStoreState,
+    popupStoreSelectors,
+    PopupTriggerMap
+} from '~@lib/popups';
 
-import type { PopupTriggerMap } from '~@lib/popupStoreUtils';
-import type { FloatingUIOpenChangeDetails, HTMLProps } from '~@lib/types';
-import type { FloatingRootContext } from '~@packages/floating-ui-react/types';
+import type { PopupStoreContext, PopupStoreState } from '~@lib/popups';
+import type { FloatingUIOpenChangeDetails } from '~@lib/types';
 
 import type { DialogRoot } from '../root/DialogRoot';
 
-export type State<Payload> = {
-    readonly open: boolean;
-    readonly mounted: boolean;
-    readonly modal: boolean | 'trap-focus';
-    readonly disablePointerDismissal: boolean;
-    readonly transitionStatus: TransitionStatus;
-    readonly openMethod: Interaction | null;
-    readonly nested: boolean;
-    readonly nestedOpenDialogCount: number;
-    readonly titleElementId: string | undefined;
-    readonly descriptionElementId: string | undefined;
-    readonly activeTriggerId: string | null;
-    readonly popupElement: HTMLElement | null;
-    readonly viewportElement: HTMLElement | null;
-    readonly triggers: PopupTriggerMap;
-    readonly floatingRootContext: FloatingRootContext;
-    readonly payload: Payload | undefined;
-    readonly activeTriggerProps: HTMLProps;
-    readonly inactiveTriggerProps: HTMLProps;
-    readonly popupProps: HTMLProps;
+export type State<Payload> = PopupStoreState<Payload> & {
+    modal: boolean | 'trap-focus';
+    disablePointerDismissal: boolean;
+    openMethod: Interaction | null;
+    nested: boolean;
+    nestedOpenDialogCount: number;
+    titleElementId: string | undefined;
+    descriptionElementId: string | undefined;
+    viewportElement: HTMLElement | null;
+    role: 'dialog' | 'alertdialog';
 };
 
-type Context = {
+type Context = PopupStoreContext<DialogRoot.ChangeEventDetails> & {
     readonly popupRef: React.RefObject<HTMLElement | null>;
     readonly backdropRef: React.RefObject<HTMLDivElement | null>;
     readonly internalBackdropRef: React.RefObject<HTMLDivElement | null>;
-    readonly preventUnmountingOnCloseRef: React.RefObject<boolean>;
-
-    readonly onOpenChange?: (open: boolean, eventDetails: DialogRoot.ChangeEventDetails) => void;
-    readonly onOpenChangeComplete?: (open: boolean) => void;
     readonly onNestedDialogOpen?: (ownChildrenCount: number) => void;
     readonly onNestedDialogClose?: () => void;
 };
 
 const selectors = {
-    open: createSelector((state: State<unknown>) => state.open),
+    ...popupStoreSelectors,
     modal: createSelector((state: State<unknown>) => state.modal),
     nested: createSelector((state: State<unknown>) => state.nested),
     nestedOpenDialogCount: createSelector((state: State<unknown>) => state.nestedOpenDialogCount),
@@ -57,33 +44,18 @@ const selectors = {
     openMethod: createSelector((state: State<unknown>) => state.openMethod),
     descriptionElementId: createSelector((state: State<unknown>) => state.descriptionElementId),
     titleElementId: createSelector((state: State<unknown>) => state.titleElementId),
-    mounted: createSelector((state: State<unknown>) => state.mounted),
-    transitionStatus: createSelector((state: State<unknown>) => state.transitionStatus),
-    popupProps: createSelector((state: State<unknown>) => state.popupProps),
-    floatingRootContext: createSelector((state: State<unknown>) => state.floatingRootContext),
-    activeTriggerId: createSelector((state: State<unknown>) => state.activeTriggerId),
-    activeTriggerElement: createSelector((state: State<unknown>) =>
-        state.mounted && state.activeTriggerId != null
-            ? (state.triggers.get(state.activeTriggerId) ?? null)
-            : null
-    ),
-    triggers: createSelector((state: State<unknown>) => state.triggers),
-    popupElement: createSelector((state: State<unknown>) => state.popupElement),
     viewportElement: createSelector((state: State<unknown>) => state.viewportElement),
-    payload: createSelector((state: State<unknown>) => state.payload),
-    activeTriggerProps: createSelector((state: State<unknown>) => state.activeTriggerProps),
-    inactiveTriggerProps: createSelector((state: State<unknown>) => state.inactiveTriggerProps)
+    role: createSelector((state: State<unknown>) => state.role)
 };
 
-export type DialogStoreOptions = {
-    modal?: State<unknown>['modal'];
-    disablePointerDismissal?: State<unknown>['disablePointerDismissal'];
-};
-
-export class DialogStore<Payload> extends ReactStore<State<Payload>, Context, typeof selectors> {
-    constructor(options?: DialogStoreOptions) {
+export class DialogStore<Payload> extends ReactStore<
+    Readonly<State<Payload>>,
+    Context,
+  typeof selectors
+> {
+    constructor(initialState?: Partial<State<Payload>>) {
         super(
-            createInitialState<Payload>(options),
+            createInitialState<Payload>(initialState),
             {
                 // eslint-disable-next-line react/no-create-ref
                 popupRef: React.createRef<HTMLElement>(),
@@ -91,7 +63,9 @@ export class DialogStore<Payload> extends ReactStore<State<Payload>, Context, ty
                 backdropRef: React.createRef<HTMLDivElement>(),
                 // eslint-disable-next-line react/no-create-ref
                 internalBackdropRef: React.createRef<HTMLDivElement>(),
-                preventUnmountingOnCloseRef: { current: false }
+                triggerElements: new PopupTriggerMap(),
+                onOpenChange: undefined,
+                onOpenChangeComplete: undefined
             },
             selectors
         );
@@ -102,13 +76,13 @@ export class DialogStore<Payload> extends ReactStore<State<Payload>, Context, ty
         eventDetails: Omit<DialogRoot.ChangeEventDetails, 'preventUnmountOnClose'>
     ) => {
         (eventDetails as DialogRoot.ChangeEventDetails).preventUnmountOnClose = () => {
-            this.context.preventUnmountingOnCloseRef.current = true;
+            this.set('preventUnmountingOnClose', true);
         };
 
         if (!nextOpen && eventDetails.trigger == null && this.state.activeTriggerId != null) {
             // When closing the dialog, pass the old trigger to the onOpenChange event
             // so it's not reset too early (potentially causing focus issues in controlled scenarios).
-            eventDetails.trigger = this.state.triggers.get(this.state.activeTriggerId);
+            eventDetails.trigger = this.state.activeTriggerElement ?? undefined;
         }
 
         this.context.onOpenChange?.(nextOpen, eventDetails as DialogRoot.ChangeEventDetails);
@@ -124,41 +98,37 @@ export class DialogStore<Payload> extends ReactStore<State<Payload>, Context, ty
             nested: this.state.nested
         };
 
-        this.state.floatingRootContext.events?.emit('openchange', details);
+        this.state.floatingRootContext.context.events?.emit('openchange', details);
 
-        this.set('open', nextOpen);
-        if (!nextOpen) {
-            this.set('activeTriggerId', null);
-        }
+        const updatedState: Partial<State<Payload>> = {
+            open: nextOpen
+        };
 
+        // If a popup is closing, the `trigger` may be null.
+        // We want to keep the previous value so that exit animations are played and focus is returned correctly.
         const newTriggerId = eventDetails.trigger?.id ?? null;
         if (newTriggerId || nextOpen) {
-            this.set('activeTriggerId', newTriggerId);
+            updatedState.activeTriggerId = newTriggerId;
+            updatedState.activeTriggerElement = eventDetails.trigger ?? null;
         }
+
+        this.update(updatedState);
     };
 }
 
-function createInitialState<Payload>(options: DialogStoreOptions = {}): State<Payload> {
-    const { modal = true, disablePointerDismissal = false } = options;
+function createInitialState<Payload>(initialState: Partial<State<Payload>> = {}): State<Payload> {
     return {
-        disablePointerDismissal,
-        modal,
-        open: false,
-        nested: false,
+        ...createInitialPopupStoreState<Payload>(),
+        modal: true,
+        disablePointerDismissal: false,
         popupElement: null,
         viewportElement: null,
-        activeTriggerId: null,
         descriptionElementId: undefined,
         titleElementId: undefined,
         openMethod: null,
-        mounted: false,
-        transitionStatus: 'idle',
+        nested: false,
         nestedOpenDialogCount: 0,
-        triggers: new Map(),
-        floatingRootContext: getEmptyContext(),
-        payload: undefined,
-        activeTriggerProps: EMPTY_OBJECT as HTMLProps,
-        inactiveTriggerProps: EMPTY_OBJECT as HTMLProps,
-        popupProps: EMPTY_OBJECT as HTMLProps
+        role: 'dialog',
+        ...initialState
     };
 }

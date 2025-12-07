@@ -21,5 +21,6 @@ export function useAccordionItemContext() {
             'Headless UI: AccordionItemContext is missing. Accordion parts must be placed within <Accordion.Item>.'
         );
     }
+
     return context;
 }

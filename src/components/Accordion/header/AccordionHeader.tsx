@@ -13,7 +13,7 @@ import type { AccordionItem } from '../item/AccordionItem';
  *
  * Documentation: [Base UI Accordion](https://base-ui.com/react/components/accordion)
  */
-export function AccordionHeader(componentProps: AccordionHeader.Props) {
+export function AccordionHeader(componentProps: AccordionHeaderProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,
@@ -35,6 +35,8 @@ export function AccordionHeader(componentProps: AccordionHeader.Props) {
     return element;
 }
 
+export type AccordionHeaderProps = {} & HeadlessUIComponentProps<'h3', AccordionItem.State>;
+
 export namespace AccordionHeader {
-    export type Props = HeadlessUIComponentProps<'h3', AccordionItem.State>;
+    export type Props = AccordionHeaderProps;
 }

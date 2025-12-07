@@ -14,11 +14,11 @@ import type { FieldsetRootContextValue } from './FieldsetRootContext';
  *
  * Documentation: [Base UI Fieldset](https://base-ui.com/react/components/fieldset)
  */
-export function FieldsetRoot(componentProps: FieldsetRoot.Props) {
+export function FieldsetRoot(componentProps: FieldsetRootProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         disabled = false,
         ref,
@@ -52,17 +52,19 @@ export function FieldsetRoot(componentProps: FieldsetRoot.Props) {
     );
 
     return (
-        <FieldsetRootContext value={contextValue}>{element}</FieldsetRootContext>
+        <FieldsetRootContext.Provider value={contextValue}>{element}</FieldsetRootContext.Provider>
     );
 }
 
-export namespace FieldsetRoot {
-    export type State = {
-        /**
-         * Whether the component should ignore user interaction.
-         */
-        disabled: boolean;
-    };
+export type FieldsetRootState = {
+    /**
+     * Whether the component should ignore user interaction.
+     */
+    disabled: boolean;
+};
+export type FieldsetRootProps = {} & HeadlessUIComponentProps<'fieldset', FieldsetRoot.State>;
 
-    export type Props = HeadlessUIComponentProps<'fieldset', State>;
+export namespace FieldsetRoot {
+    export type State = FieldsetRootState;
+    export type Props = FieldsetRootProps;
 }

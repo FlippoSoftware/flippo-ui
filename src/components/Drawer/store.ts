@@ -2,7 +2,8 @@ import React from 'react';
 
 import { createSelector, ReactStore } from '@flippo-ui/hooks';
 
-import type { DrawerGestureDataAttributes, useDrawerGesture } from './drag/useDrawerGesture';
+import type { DrawerGestureDataAttributes } from './drag/DrawerGestureDataAttributes';
+import type { useDrawerGesture } from './drag/useDrawerGesture';
 
 export type DrawerDirection = useDrawerGesture.SwipeDirection;
 export type SnapPoint = number | string;

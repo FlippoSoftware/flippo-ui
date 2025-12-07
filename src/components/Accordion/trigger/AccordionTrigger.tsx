@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+
 import { triggerOpenStateMapping } from '~@lib/collapsibleOpenStateMapping';
 import { useRenderElement } from '~@lib/hooks';
 import { isElementDisabled } from '~@lib/isElementDisabled';
@@ -59,7 +60,7 @@ function getActiveTriggers(accordionItemRefs: {
  * Documentation: [Base UI Accordion](https://base-ui.com/react/components/accordion)
  */
 
-export function AccordionTrigger(componentProps: AccordionTrigger.Props) {
+export function AccordionTrigger(componentProps: AccordionTriggerProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
@@ -67,7 +68,7 @@ export function AccordionTrigger(componentProps: AccordionTrigger.Props) {
         /* eslint-enable unused-imports/no-unused-vars */
         disabled: disabledProp,
         id: idProp,
-        nativeButton,
+        nativeButton = true,
         ref,
         ...elementProps
     } = componentProps;
@@ -90,7 +91,7 @@ export function AccordionTrigger(componentProps: AccordionTrigger.Props) {
     const {
         accordionItemRefs,
         direction,
-        loop,
+        loopFocus,
         orientation
     } = useAccordionRootContext();
 
@@ -132,7 +133,7 @@ export function AccordionTrigger(componentProps: AccordionTrigger.Props) {
                 const thisIndex = triggers.indexOf(event.target as HTMLButtonElement);
 
                 function toNext() {
-                    if (loop) {
+                    if (loopFocus) {
                         nextIndex = thisIndex + 1 > lastIndex ? 0 : thisIndex + 1;
                     }
                     else {
@@ -141,7 +142,7 @@ export function AccordionTrigger(componentProps: AccordionTrigger.Props) {
                 }
 
                 function toPrev() {
-                    if (loop) {
+                    if (loopFocus) {
                         nextIndex = thisIndex === 0 ? lastIndex : thisIndex - 1;
                     }
                     else {
@@ -202,7 +203,7 @@ export function AccordionTrigger(componentProps: AccordionTrigger.Props) {
             id,
             isHorizontal,
             isRtl,
-            loop,
+            loopFocus,
             open,
             panelId
         ]
@@ -218,6 +219,8 @@ export function AccordionTrigger(componentProps: AccordionTrigger.Props) {
     return element;
 }
 
+export type AccordionTriggerProps = {} & NativeButtonProps & HeadlessUIComponentProps<'button', AccordionItem.State>;
+
 export namespace AccordionTrigger {
-    export type Props = HeadlessUIComponentProps<'button', AccordionItem.State> & NativeButtonProps;
+    export type Props = AccordionTriggerProps;
 }

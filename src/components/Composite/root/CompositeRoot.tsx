@@ -1,10 +1,9 @@
 import React from 'react';
 
-import { useEventCallback } from '@flippo-ui/hooks';
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '~@lib/constants';
 import { useDirection, useRenderElement } from '~@lib/hooks';
 
-import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CompositeList } from '../list/CompositeList';
@@ -20,32 +19,33 @@ import type { CompositeRootContextValue } from './CompositeRootContext';
 /**
  * @internal
  */
-export function CompositeRoot<Metadata extends object, State extends Record<string, any>>(
+export function CompositeRoot<Metadata extends {}, State extends Record<string, any>>(
     componentProps: CompositeRoot.Props<Metadata, State>
 ) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         refs = EMPTY_ARRAY,
         props = EMPTY_ARRAY,
         state = EMPTY_OBJECT as State,
-        customStyleHookMapping,
+        stateAttributesMapping,
         highlightedIndex: highlightedIndexProp,
         onHighlightedIndexChange: onHighlightedIndexChangeProp,
         orientation,
         dense,
         itemSizes,
-        loop,
+        loopFocus,
         cols,
         enableHomeAndEndKeys,
         onMapChange: onMapChangeProp,
-        stopEventPropagation,
+        stopEventPropagation = true,
         rootRef,
         disabledIndices,
         modifierKeys,
         highlightItemOnHover = false,
+        tag = 'div',
         ...elementProps
     } = componentProps;
 
@@ -56,11 +56,12 @@ export function CompositeRoot<Metadata extends object, State extends Record<stri
         highlightedIndex,
         onHighlightedIndexChange,
         elementsRef,
-        onMapChange: onMapChangeUnwrapped
+        onMapChange: onMapChangeUnwrapped,
+        relayKeyboardEvent
     } = useCompositeRoot({
         itemSizes,
         cols,
-        loop,
+        loopFocus,
         dense,
         orientation,
         highlightedIndex: highlightedIndexProp,
@@ -73,54 +74,63 @@ export function CompositeRoot<Metadata extends object, State extends Record<stri
         modifierKeys
     });
 
-    const onMapChange = useEventCallback(
-        (newMap: Map<Element, CompositeMetadata<Metadata> | null>) => {
-            onMapChangeProp?.(newMap);
-            onMapChangeUnwrapped(newMap);
-        }
-    );
-
-    const element = useRenderElement('div', componentProps, {
+    const element = useRenderElement(tag, componentProps, {
         state,
         ref: refs,
         props: [defaultProps, ...props, elementProps],
-        customStyleHookMapping
+        customStyleHookMapping: stateAttributesMapping
     });
 
     const contextValue: CompositeRootContextValue = React.useMemo(
-        () => ({ highlightedIndex, onHighlightedIndexChange, highlightItemOnHover }),
-        [highlightedIndex, onHighlightedIndexChange, highlightItemOnHover]
+        () => ({
+            highlightedIndex,
+            onHighlightedIndexChange,
+            highlightItemOnHover,
+            relayKeyboardEvent
+        }),
+        [highlightedIndex, onHighlightedIndexChange, highlightItemOnHover, relayKeyboardEvent]
     );
 
     return (
-        <CompositeRootContext value={contextValue}>
-            <CompositeList<Metadata> elementsRef={elementsRef} onMapChange={onMapChange}>
+        <CompositeRootContext.Provider value={contextValue}>
+            <CompositeList<Metadata>
+              elementsRef={elementsRef}
+              onMapChange={(newMap) => {
+                    onMapChangeProp?.(newMap);
+                    onMapChangeUnwrapped(newMap);
+                }}
+            >
                 {element}
             </CompositeList>
-        </CompositeRootContext>
+        </CompositeRootContext.Provider>
     );
 }
 
+export type CompositeRootProps<Metadata, State extends Record<string, any>> = {
+    props?: Array<Record<string, any> | (() => Record<string, any>)>;
+    state?: State;
+    stateAttributesMapping?: StateAttributesMapping<State>;
+    refs?: (React.Ref<Element> | undefined)[];
+    tag?: keyof React.JSX.IntrinsicElements;
+    orientation?: 'horizontal' | 'vertical' | 'both';
+    cols?: number;
+    loopFocus?: boolean;
+    highlightedIndex?: number;
+    onHighlightedIndexChange?: (index: number) => void;
+    itemSizes?: Dimensions[];
+    dense?: boolean;
+    enableHomeAndEndKeys?: boolean;
+    onMapChange?: (newMap: Map<Node, CompositeMetadata<Metadata> | null>) => void;
+    stopEventPropagation?: boolean;
+    rootRef?: React.RefObject<HTMLElement | null>;
+    disabledIndices?: number[];
+    modifierKeys?: ModifierKey[];
+    highlightItemOnHover?: boolean;
+} & Pick<HeadlessUIComponentProps<'div', State>, 'render' | 'className' | 'children'>;
+
 export namespace CompositeRoot {
-    export type Props<Metadata, State extends Record<string, any>> = {
-        props?: Array<Record<string, any> | (() => Record<string, any>)>;
-        state?: State;
-        customStyleHookMapping?: CustomStyleHookMapping<State>;
-        refs?: (React.Ref<HTMLElement | null> | undefined)[];
-        tag?: keyof React.JSX.IntrinsicElements;
-        orientation?: 'horizontal' | 'vertical' | 'both';
-        cols?: number;
-        loop?: boolean;
-        highlightedIndex?: number;
-        onHighlightedIndexChange?: (index: number) => void;
-        itemSizes?: Dimensions[];
-        dense?: boolean;
-        enableHomeAndEndKeys?: boolean;
-        onMapChange?: (newMap: Map<Node, CompositeMetadata<Metadata> | null>) => void;
-        stopEventPropagation?: boolean;
-        rootRef?: React.RefObject<HTMLElement | null>;
-        disabledIndices?: number[];
-        modifierKeys?: ModifierKey[];
-        highlightItemOnHover?: boolean;
-    } & Pick<HeadlessUIComponentProps<'div', State>, 'render' | 'className' | 'children'>;
+    export type Props<Metadata, State extends Record<string, any>> = CompositeRootProps<
+        Metadata,
+        State
+    >;
 }

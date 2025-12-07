@@ -1,9 +1,11 @@
 import React from 'react';
 
-import { useEventCallback } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { REASONS } from '~@lib/reason';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CollapsibleRootContext } from './CollapsibleRootContext';
@@ -18,7 +20,7 @@ import type { CollapsibleRootContextValue } from './CollapsibleRootContext';
  *
  * Documentation: [Base UI Collapsible](https://base-ui.com/react/components/collapsible)
  */
-export function CollapsibleRoot(componentProps: CollapsibleRoot.Props) {
+export function CollapsibleRoot(componentProps: CollapsibleRootProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,
@@ -32,7 +34,7 @@ export function CollapsibleRoot(componentProps: CollapsibleRoot.Props) {
         ...elementProps
     } = componentProps;
 
-    const onOpenChange = useEventCallback(onOpenChangeProp);
+    const onOpenChange = useStableCallback(onOpenChangeProp);
 
     const collapsible = useCollapsibleRoot({
         open,
@@ -69,48 +71,54 @@ export function CollapsibleRoot(componentProps: CollapsibleRoot.Props) {
 
     if (componentProps.render !== null) {
         return (
-            <CollapsibleRootContext value={contextValue}>
+            <CollapsibleRootContext.Provider value={contextValue}>
                 {element}
-            </CollapsibleRootContext>
+            </CollapsibleRootContext.Provider>
         );
     }
 
     return (
-        <CollapsibleRootContext value={contextValue}>
+        <CollapsibleRootContext.Provider value={contextValue}>
             {elementProps.children}
-        </CollapsibleRootContext>
+        </CollapsibleRootContext.Provider>
     );
 }
 
+export type CollapsibleRootState = {} & Pick<useCollapsibleRoot.ReturnValue, 'open' | 'disabled'>;
+
+export type CollapsibleRootProps = {
+    /**
+     * Whether the collapsible panel is currently open.
+     *
+     * To render an uncontrolled collapsible, use the `defaultOpen` prop instead.
+     */
+    open?: boolean;
+    /**
+     * Whether the collapsible panel is initially open.
+     *
+     * To render a controlled collapsible, use the `open` prop instead.
+     * @default false
+     */
+    defaultOpen?: boolean;
+    /**
+     * Event handler called when the panel is opened or closed.
+     */
+    onOpenChange?: (open: boolean, eventDetails: CollapsibleRootChangeEventDetails) => void;
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
+    disabled?: boolean;
+    render?: HeadlessUIComponentProps<'div', CollapsibleRootState>['render'] | null;
+} & Omit<HeadlessUIComponentProps<'div', CollapsibleRoot.State>, 'render'>;
+
+export type CollapsibleRootChangeEventReason = typeof REASONS.triggerPress | typeof REASONS.none;
+export type CollapsibleRootChangeEventDetails
+    = HeadlessUIChangeEventDetails<CollapsibleRootChangeEventReason>;
+
 export namespace CollapsibleRoot {
-    export type State = Pick<useCollapsibleRoot.ReturnValue, 'open' | 'disabled'>;
-
-    export type Props = {
-        /**
-         * Whether the collapsible panel is currently open.
-         *
-         * To render an uncontrolled collapsible, use the `defaultOpen` prop instead.
-         */
-        open?: boolean;
-        /**
-         * Whether the collapsible panel is initially open.
-         *
-         * To render a controlled collapsible, use the `open` prop instead.
-         * @default false
-         */
-        defaultOpen?: boolean;
-        /**
-         * Event handler called when the panel is opened or closed.
-         */
-        onOpenChange?: (open: boolean, eventDetails: ChangeEventDetails) => void;
-        /**
-         * Whether the component should ignore user interaction.
-         * @default false
-         */
-        disabled?: boolean;
-        render?: HeadlessUIComponentProps<'div', State>['render'] | null;
-    } & Omit<HeadlessUIComponentProps<'div', State>, 'render'>;
-
-    export type ChangeEventReason = 'trigger-press' | 'none';
-    export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;
+    export type State = CollapsibleRootState;
+    export type Props = CollapsibleRootProps;
+    export type ChangeEventReason = CollapsibleRootChangeEventReason;
+    export type ChangeEventDetails = CollapsibleRootChangeEventDetails;
 }

@@ -1,12 +1,13 @@
 import React from 'react';
 
+import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
+import { REASONS } from '~@lib/reason';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
+import { useButton } from '../../use-button';
 import { useDialogRootContext } from '../root/DialogRootContext';
-
-import { useDialogClose } from './useDialogClose';
 
 /**
  * A button that closes the dialog.
@@ -14,7 +15,7 @@ import { useDialogClose } from './useDialogClose';
  *
  * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
  */
-export function DialogClose(componentProps: DialogClose.Props) {
+export function DialogClose(componentProps: DialogCloseProps) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,
@@ -22,36 +23,43 @@ export function DialogClose(componentProps: DialogClose.Props) {
         /* eslint-enable unused-imports/no-unused-vars */
         disabled = false,
         nativeButton = true,
-        ref: refProp,
+        ref,
         ...elementProps
     } = componentProps;
 
     const { store } = useDialogRootContext();
     const open = store.useState('open');
 
-    const { getRootProps, ref } = useDialogClose({
+    function handleClick(event: React.MouseEvent) {
+        if (open) {
+            store.setOpen(false, createChangeEventDetails(REASONS.closePress, event.nativeEvent));
+        }
+    }
+
+    const { getButtonProps, buttonRef } = useButton({
         disabled,
-        open,
-        setOpen: store.setOpen,
-        nativeButton
+        native: nativeButton
     });
 
     const state: DialogClose.State = React.useMemo(() => ({ disabled }), [disabled]);
 
     return useRenderElement('button', componentProps, {
         state,
-        ref: [refProp, ref],
-        props: [elementProps, getRootProps]
+        ref: [ref, buttonRef],
+        props: [{ onClick: handleClick }, elementProps, getButtonProps]
     });
 }
 
-export namespace DialogClose {
-    export type Props = {} & NativeButtonProps & HeadlessUIComponentProps<'button', DialogClose.State>;
+export type DialogCloseProps = {} & NativeButtonProps & HeadlessUIComponentProps<'button', DialogClose.State>;
 
-    export type State = {
+export type DialogCloseState = {
     /**
      * Whether the button is currently disabled.
      */
-        disabled: boolean;
-    };
+    disabled: boolean;
+};
+
+export namespace DialogClose {
+    export type Props = DialogCloseProps;
+    export type State = DialogCloseState;
 }

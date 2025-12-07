@@ -4,7 +4,6 @@ export const DialogPortalContext = React.createContext<boolean | undefined>(unde
 
 export function useDialogPortalContext() {
     const value = React.use(DialogPortalContext);
-
     if (value === undefined) {
         throw new Error('Headless UI: <Dialog.Portal> is missing.');
     }

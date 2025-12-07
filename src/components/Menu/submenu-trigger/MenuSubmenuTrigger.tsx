@@ -1,8 +1,14 @@
 import React from 'react';
 
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
+import { useTriggerRegistration } from '~@lib/popups';
 import { triggerOpenStateMapping } from '~@lib/popupStateMapping';
-import { useFloatingTree } from '~@packages/floating-ui-react';
+import {
+    safePolygon,
+    useClick,
+    useHoverReferenceInteraction,
+    useInteractions
+} from '~@packages/floating-ui-react';
 
 import type { HeadlessUIComponentProps, NonNativeButtonProps } from '~@lib/types';
 
@@ -10,6 +16,7 @@ import { useCompositeListItem } from '../../Composite/list/useCompositeListItem'
 import { useMenuItem } from '../item/useMenuItem';
 import { useMenuPositionerContext } from '../positioner/MenuPositionerContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
+import { useMenuSubmenuRootContext } from '../submenu-root/MenuSubmenuRootContext';
 
 /**
  * A menu item that opens a submenu.
@@ -20,63 +27,113 @@ import { useMenuRootContext } from '../root/MenuRootContext';
 export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
-        className,
         render,
+        className,
         /* eslint-enable unused-imports/no-unused-vars */
         label,
         id: idProp,
         nativeButton = false,
+        openOnHover = true,
+        delay = 100,
+        closeDelay = 0,
+        disabled: disabledProp = false,
         ref,
         ...elementProps
     } = componentProps;
 
-    const id = useHeadlessUiId(idProp);
-
-    const {
-        triggerProps: rootTriggerProps,
-        parent,
-        setTriggerElement,
-        open,
-        typingRef,
-        disabled,
-        allowMouseUpTriggerRef
-    } = useMenuRootContext();
+    const listItem = useCompositeListItem();
     const menuPositionerContext = useMenuPositionerContext();
 
-    if (parent.type !== 'menu') {
-        throw new Error('Headless UI: <Menu.SubmenuTrigger> must be placed in <Menu.SubmenuRoot>.');
+    const { store } = useMenuRootContext();
+
+    const thisTriggerId = useHeadlessUiId(idProp);
+    const open = store.useState('open');
+    const floatingRootContext = store.useState('floatingRootContext');
+    const floatingTreeRoot = store.useState('floatingTreeRoot');
+
+    const baseRegisterTrigger = useTriggerRegistration(thisTriggerId, store);
+    const registerTrigger = React.useCallback(
+        (element: HTMLElement | null) => {
+            const cleanup = baseRegisterTrigger(element);
+
+            if (element !== null && store.select('open') && store.select('activeTriggerId') == null) {
+                store.update({
+                    activeTriggerId: thisTriggerId,
+                    activeTriggerElement: element,
+                    closeDelay
+                });
+            }
+
+            return cleanup;
+        },
+        [baseRegisterTrigger, closeDelay, store, thisTriggerId]
+    );
+
+    const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null);
+
+    const submenuRootContext = useMenuSubmenuRootContext();
+    if (!submenuRootContext?.parentMenu) {
+        throw new Error('Base UI: <Menu.SubmenuTrigger> must be placed in <Menu.SubmenuRoot>.');
     }
 
-    const parentMenuContext = parent.context;
+    store.useSyncedValues({
+        closeDelay,
+        activeTriggerElement: triggerElement
+    });
 
-    const { activeIndex, itemProps, setActiveIndex } = parentMenuContext;
-    const item = useCompositeListItem({ label });
+    const parentMenuStore = submenuRootContext.parentMenu;
 
-    const highlighted = activeIndex === item.index;
-
-    const { events: menuEvents } = useFloatingTree()!;
+    const itemProps = parentMenuStore.useState('itemProps');
+    const highlighted = parentMenuStore.useState('isActive', listItem.index);
 
     const itemMetadata = React.useMemo(
         () => ({
             type: 'submenu-trigger' as const,
-            setActive: () => setActiveIndex(item.index),
-            allowMouseEnterEnabled: parentMenuContext.allowMouseEnter
+            setActive: () => parentMenuStore.set('activeIndex', listItem.index)
         }),
-        [setActiveIndex, item.index, parentMenuContext.allowMouseEnter]
+        [parentMenuStore, listItem.index]
     );
+
+    const rootDisabled = store.useState('disabled');
+    const disabled = disabledProp || rootDisabled;
 
     const { getItemProps, itemRef } = useMenuItem({
         closeOnClick: false,
         disabled,
         highlighted,
-        id,
-        menuEvents,
-        allowMouseUpTriggerRef,
-        typingRef,
+        id: thisTriggerId,
+        store,
         nativeButton,
         itemMetadata,
-        nodeId: menuPositionerContext?.floatingContext.nodeId
+        nodeId: menuPositionerContext?.nodeId
     });
+
+    const hoverEnabled = store.useState('hoverEnabled');
+    const allowMouseEnter = store.useState('allowMouseEnter');
+
+    const hoverProps = useHoverReferenceInteraction(floatingRootContext, {
+        enabled: hoverEnabled && openOnHover && !disabled,
+        handleClose: safePolygon({ blockPointerEvents: true }),
+        mouseOnly: true,
+        move: true,
+        restMs: allowMouseEnter ? delay : undefined,
+        delay: { open: allowMouseEnter ? delay : 10 ** 10, close: closeDelay },
+        triggerElement,
+        externalTree: floatingTreeRoot
+    });
+
+    const click = useClick(floatingRootContext, {
+        enabled: !disabled,
+        event: 'mousedown',
+        toggle: !openOnHover,
+        ignoreMouse: openOnHover,
+        stickIfOpen: false
+    });
+
+    const localInteractionProps = useInteractions([click]);
+
+    const rootTriggerProps = store.useState('triggerProps', true);
+    delete rootTriggerProps.id;
 
     const state: MenuSubmenuTrigger.State = React.useMemo(
         () => ({ disabled, highlighted, open }),
@@ -85,50 +142,87 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
 
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: [ref, item.ref, itemRef, setTriggerElement],
         customStyleHookMapping: triggerOpenStateMapping,
         props: [
+            localInteractionProps.getReferenceProps(),
+            hoverProps,
             rootTriggerProps,
             itemProps,
-            elementProps,
-            getItemProps,
             {
                 tabIndex: open || highlighted ? 0 : -1,
                 onBlur() {
                     if (highlighted) {
-                        setActiveIndex(null);
+                        parentMenuStore.set('activeIndex', null);
                     }
                 }
-            }
+            },
+            elementProps,
+            getItemProps
+        ],
+        ref: [
+            ref,
+            listItem.ref,
+            itemRef,
+            registerTrigger,
+            setTriggerElement
         ]
     });
 
     return element;
 }
 
-export namespace MenuSubmenuTrigger {
-    export type Props = {
-        children?: React.ReactNode;
-        onClick?: React.MouseEventHandler<HTMLElement>;
-        /**
-         * Overrides the text label to use when the item is matched during keyboard text navigation.
-         */
-        label?: string;
-        /**
-         * @ignore
-         */
-        id?: string;
-    } & NonNativeButtonProps & HeadlessUIComponentProps<'div', State>;
+export type MenuSubmenuTriggerProps = {
+    onClick?: React.MouseEventHandler<HTMLElement>;
+    /**
+     * Overrides the text label to use when the item is matched during keyboard text navigation.
+     */
+    label?: string;
+    /**
+     * @ignore
+     */
+    id?: string;
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * How long to wait before the menu may be opened on hover. Specified in milliseconds.
+     *
+     * Requires the `openOnHover` prop.
+     * @default 100
+     */
+    delay?: number;
+    /**
+     * How long to wait before closing the menu that was opened on hover.
+     * Specified in milliseconds.
+     *
+     * Requires the `openOnHover` prop.
+     * @default 0
+     */
+    closeDelay?: number;
+    /**
+     * Whether the menu should also open when the trigger is hovered.
+     */
+    openOnHover?: boolean;
+} & NonNativeButtonProps & HeadlessUIComponentProps<'div', MenuSubmenuTrigger.State>;
 
-    export type State = {
+export type MenuSubmenuTriggerState = {
     /**
      * Whether the component should ignore user interaction.
      */
-        disabled: boolean;
-        highlighted: boolean;
-        /**
-         * Whether the menu is currently open.
-         */
-        open: boolean;
-    };
+    disabled: boolean;
+    /**
+     * Whether the item is highlighted.
+     */
+    highlighted: boolean;
+    /**
+     * Whether the menu is currently open.
+     */
+    open: boolean;
+};
+
+export namespace MenuSubmenuTrigger {
+    export type Props = MenuSubmenuTriggerProps;
+    export type State = MenuSubmenuTriggerState;
 }
