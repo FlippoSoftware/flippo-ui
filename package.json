@@ -10,13 +10,180 @@
   "license": "ISC",
   "keywords": [],
   "exports": {
-    ".": "./src/hooks/index.ts"
+    ".": {
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.es.js",
+      "require": "./dist/hooks/index.cjs.js"
+    },
+    "./use-animation-frame": {
+      "types": "./dist/hooks/useAnimationFrame/index.d.ts",
+      "import": "./dist/hooks/useAnimationFrame/index.es.js",
+      "require": "./dist/hooks/useAnimationFrame/index.cjs.js"
+    },
+    "./use-animations-finished": {
+      "types": "./dist/hooks/useAnimationsFinished/index.d.ts",
+      "import": "./dist/hooks/useAnimationsFinished/index.es.js",
+      "require": "./dist/hooks/useAnimationsFinished/index.cjs.js"
+    },
+    "./use-clipboard": {
+      "types": "./dist/hooks/useClipboard/index.d.ts",
+      "import": "./dist/hooks/useClipboard/index.es.js",
+      "require": "./dist/hooks/useClipboard/index.cjs.js"
+    },
+    "./use-controlled-state": {
+      "types": "./dist/hooks/useControlledState/index.d.ts",
+      "import": "./dist/hooks/useControlledState/index.es.js",
+      "require": "./dist/hooks/useControlledState/index.cjs.js"
+    },
+    "./use-did-update": {
+      "types": "./dist/hooks/useDidUpdate/index.d.ts",
+      "import": "./dist/hooks/useDidUpdate/index.es.js",
+      "require": "./dist/hooks/useDidUpdate/index.cjs.js"
+    },
+    "./use-drag-gesture": {
+      "types": "./dist/hooks/useDragGesture/index.d.ts",
+      "import": "./dist/hooks/useDragGesture/index.es.js",
+      "require": "./dist/hooks/useDragGesture/index.cjs.js"
+    },
+    "./use-enhanced-click-handler": {
+      "types": "./dist/hooks/useEnhancedClickHandler/index.d.ts",
+      "import": "./dist/hooks/useEnhancedClickHandler/index.es.js",
+      "require": "./dist/hooks/useEnhancedClickHandler/index.cjs.js"
+    },
+    "./use-enhanced-effect": {
+      "types": "./dist/hooks/useEnhancedEffect/index.d.ts",
+      "import": "./dist/hooks/useEnhancedEffect/index.es.js",
+      "require": "./dist/hooks/useEnhancedEffect/index.cjs.js"
+    },
+    "./use-event-callback": {
+      "types": "./dist/hooks/useEventCallback/index.d.ts",
+      "import": "./dist/hooks/useEventCallback/index.es.js",
+      "require": "./dist/hooks/useEventCallback/index.cjs.js"
+    },
+    "./use-forced-rerendering": {
+      "types": "./dist/hooks/useForcedRerendering/index.d.ts",
+      "import": "./dist/hooks/useForcedRerendering/index.es.js",
+      "require": "./dist/hooks/useForcedRerendering/index.cjs.js"
+    },
+    "./use-id": {
+      "types": "./dist/hooks/useId/index.d.ts",
+      "import": "./dist/hooks/useId/index.es.js",
+      "require": "./dist/hooks/useId/index.cjs.js"
+    },
+    "./use-interval": {
+      "types": "./dist/hooks/useInterval/index.d.ts",
+      "import": "./dist/hooks/useInterval/index.es.js",
+      "require": "./dist/hooks/useInterval/index.cjs.js"
+    },
+    "./use-is-first-render": {
+      "types": "./dist/hooks/useIsFirstRender/index.d.ts",
+      "import": "./dist/hooks/useIsFirstRender/index.es.js",
+      "require": "./dist/hooks/useIsFirstRender/index.cjs.js"
+    },
+    "./use-iso-layout-effect": {
+      "types": "./dist/hooks/useIsoLayoutEffect/index.d.ts",
+      "import": "./dist/hooks/useIsoLayoutEffect/index.es.js",
+      "require": "./dist/hooks/useIsoLayoutEffect/index.cjs.js"
+    },
+    "./use-latest-ref": {
+      "types": "./dist/hooks/useLatestRef/index.d.ts",
+      "import": "./dist/hooks/useLatestRef/index.es.js",
+      "require": "./dist/hooks/useLatestRef/index.cjs.js"
+    },
+    "./use-lazy-ref": {
+      "types": "./dist/hooks/useLazyRef/index.d.ts",
+      "import": "./dist/hooks/useLazyRef/index.es.js",
+      "require": "./dist/hooks/useLazyRef/index.cjs.js"
+    },
+    "./use-merged-ref": {
+      "types": "./dist/hooks/useMergedRef/index.d.ts",
+      "import": "./dist/hooks/useMergedRef/index.es.js",
+      "require": "./dist/hooks/useMergedRef/index.cjs.js"
+    },
+    "./use-on-first-render": {
+      "types": "./dist/hooks/useOnFirstRender/index.d.ts",
+      "import": "./dist/hooks/useOnFirstRender/index.es.js",
+      "require": "./dist/hooks/useOnFirstRender/index.cjs.js"
+    },
+    "./use-on-mount": {
+      "types": "./dist/hooks/useOnMount/index.d.ts",
+      "import": "./dist/hooks/useOnMount/index.es.js",
+      "require": "./dist/hooks/useOnMount/index.cjs.js"
+    },
+    "./use-open-change-complete": {
+      "types": "./dist/hooks/useOpenChangeComplete/index.d.ts",
+      "import": "./dist/hooks/useOpenChangeComplete/index.es.js",
+      "require": "./dist/hooks/useOpenChangeComplete/index.cjs.js"
+    },
+    "./use-open-interaction-type": {
+      "types": "./dist/hooks/useOpenInteractionType/index.d.ts",
+      "import": "./dist/hooks/useOpenInteractionType/index.es.js",
+      "require": "./dist/hooks/useOpenInteractionType/index.cjs.js"
+    },
+    "./use-previous-value": {
+      "types": "./dist/hooks/usePreviousValue/index.d.ts",
+      "import": "./dist/hooks/usePreviousValue/index.es.js",
+      "require": "./dist/hooks/usePreviousValue/index.cjs.js"
+    },
+    "./use-scroll-lock": {
+      "types": "./dist/hooks/useScrollLock/index.d.ts",
+      "import": "./dist/hooks/useScrollLock/index.es.js",
+      "require": "./dist/hooks/useScrollLock/index.cjs.js"
+    },
+    "./use-stable-callback": {
+      "types": "./dist/hooks/useStableCallback/index.d.ts",
+      "import": "./dist/hooks/useStableCallback/index.es.js",
+      "require": "./dist/hooks/useStableCallback/index.cjs.js"
+    },
+    "./use-status-transition": {
+      "types": "./dist/hooks/useStatusTransition/index.d.ts",
+      "import": "./dist/hooks/useStatusTransition/index.es.js",
+      "require": "./dist/hooks/useStatusTransition/index.cjs.js"
+    },
+    "./use-store": {
+      "types": "./dist/hooks/useStore/index.d.ts",
+      "import": "./dist/hooks/useStore/index.es.js",
+      "require": "./dist/hooks/useStore/index.cjs.js"
+    },
+    "./use-timeout": {
+      "types": "./dist/hooks/useTimeout/index.d.ts",
+      "import": "./dist/hooks/useTimeout/index.es.js",
+      "require": "./dist/hooks/useTimeout/index.cjs.js"
+    },
+    "./use-transition-status": {
+      "types": "./dist/hooks/useTransitionStatus/index.d.ts",
+      "import": "./dist/hooks/useTransitionStatus/index.es.js",
+      "require": "./dist/hooks/useTransitionStatus/index.cjs.js"
+    },
+    "./use-unmount": {
+      "types": "./dist/hooks/useUnmount/index.d.ts",
+      "import": "./dist/hooks/useUnmount/index.es.js",
+      "require": "./dist/hooks/useUnmount/index.cjs.js"
+    },
+    "./use-value-as-ref": {
+      "types": "./dist/hooks/useValueAsRef/index.d.ts",
+      "import": "./dist/hooks/useValueAsRef/index.es.js",
+      "require": "./dist/hooks/useValueAsRef/index.cjs.js"
+    },
+    "./use-value-changed": {
+      "types": "./dist/hooks/useValueChanged/index.d.ts",
+      "import": "./dist/hooks/useValueChanged/index.es.js",
+      "require": "./dist/hooks/useValueChanged/index.cjs.js"
+    }
   },
+  "main": "./dist/hooks/index.cjs.js",
+  "module": "./dist/hooks/index.es.js",
+  "types": "./dist/hooks/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build && node scripts/generate-exports.js",
+    "build:exports": "node scripts/generate-exports.js"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "dependencies": {
-    "@types/use-sync-external-store": "catalog:",
     "reselect": "catalog:",
     "use-sync-external-store": "catalog:"
   },
@@ -26,12 +193,16 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/use-sync-external-store": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
     "eslint": "catalog:",
     "eslint-plugin-format": "catalog:",
     "eslint-plugin-react-hooks": "catalog:",
     "eslint-plugin-react-refresh": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
-    "typescript": "catalog:"
+    "glob": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vitest": "catalog:"
   }
 }
