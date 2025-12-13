@@ -18,6 +18,7 @@ import {
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { PayloadChildRenderFunction } from '~@lib/popups';
 
+import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
 import { TooltipStore } from '../store/TooltipStore';
 
 import type { TooltipHandle } from '../store/TooltipHandle';
@@ -46,6 +47,15 @@ export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
         open: openProp ?? defaultOpen,
         activeTriggerId: triggerIdProp !== undefined ? triggerIdProp : defaultTriggerIdProp
     });
+
+    // Register with TooltipMultiple if inside one
+    const multipleContext = useTooltipMultipleContext();
+    React.useEffect(() => {
+        if (!multipleContext) {
+            return;
+        }
+        return multipleContext.store.registerStore(store);
+    }, [multipleContext, store]);
 
     store.useControlledProp('open', openProp, defaultOpen);
     store.useControlledProp('activeTriggerId', triggerIdProp, defaultTriggerIdProp);

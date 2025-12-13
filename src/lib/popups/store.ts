@@ -71,6 +71,12 @@ export type PopupStoreState<Payload> = {
      * Props to spread onto the popup element.
      */
     popupProps: HTMLProps;
+
+    /**
+     * ID of the primary trigger used for positioning when opened via sync (e.g., TooltipMultiple).
+     * When activeTriggerId is null but primaryTriggerId is set, the primary trigger is used.
+     */
+    primaryTriggerId: string | null;
 };
 
 export function createInitialPopupStoreState<Payload>(): PopupStoreState<Payload> {
@@ -87,7 +93,8 @@ export function createInitialPopupStoreState<Payload>(): PopupStoreState<Payload
         positionerElement: null,
         activeTriggerProps: EMPTY_OBJECT as HTMLProps,
         inactiveTriggerProps: EMPTY_OBJECT as HTMLProps,
-        popupProps: EMPTY_OBJECT as HTMLProps
+        popupProps: EMPTY_OBJECT as HTMLProps,
+        primaryTriggerId: null
     };
 }
 
@@ -154,7 +161,9 @@ export const popupStoreSelectors = {
     popupProps: createSelector((state: PopupStoreState<unknown>) => state.popupProps),
 
     popupElement: createSelector((state: PopupStoreState<unknown>) => state.popupElement),
-    positionerElement: createSelector((state: PopupStoreState<unknown>) => state.positionerElement)
+    positionerElement: createSelector((state: PopupStoreState<unknown>) => state.positionerElement),
+
+    primaryTriggerId: createSelector((state: PopupStoreState<unknown>) => state.primaryTriggerId)
 };
 
 export type PopupStoreSelectors = typeof popupStoreSelectors;

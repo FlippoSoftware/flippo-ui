@@ -108,21 +108,45 @@ export type PayloadChildRenderFunction<Payload> = (arg: {
 }) => React.ReactNode;
 
 /**
- * Ensures that when there's only one trigger element registered, it is set as the active trigger.
- * This allows controlled popups to work correctly without an explicit triggerId, maintaining compatibility
- * with the contained triggers.
+ * Ensures that when there's no active trigger, one is selected implicitly.
+ * Priority order:
+ * 1. Primary trigger (if set via `primary` prop)
+ * 2. First trigger (if only one trigger is registered)
+ *
+ * This allows controlled popups to work correctly without an explicit triggerId,
+ * and enables TooltipMultiple to sync open state while each tooltip positions
+ * relative to its own primary trigger.
  *
  * This should be called on the Root part.
  *
- * @param open Whether the popup is open.
  * @param store The Store instance managing the popup state.
  */
 export function useImplicitActiveTrigger<State extends PopupStoreState<any>>(
     store: ReactStore<State, PopupStoreContext<any>, typeof popupStoreSelectors>
 ) {
     const open = store.useState('open');
+    const primaryTriggerId = store.useState('primaryTriggerId');
+
     useIsoLayoutEffect(() => {
-        if (open && !store.select('activeTriggerId') && store.context.triggerElements.size === 1) {
+        // if (open && !store.select('activeTriggerId') && store.context.triggerElements.size === 1) {
+        if (!open || store.select('activeTriggerId')) {
+            return;
+        }
+
+        // 1. Try primary trigger first
+        if (primaryTriggerId) {
+            const primaryElement = store.context.triggerElements.getById(primaryTriggerId);
+            if (primaryElement) {
+                store.update({
+                    activeTriggerId: primaryTriggerId,
+                    activeTriggerElement: primaryElement
+                } as Partial<State>);
+                return;
+            }
+        }
+
+        // 2. Fallback: first trigger if only one exists
+        if (store.context.triggerElements.size === 1) {
             const iteratorResult = store.context.triggerElements.entries().next();
             if (!iteratorResult.done) {
                 const [implicitTriggerId, implicitTriggerElement] = iteratorResult.value;
@@ -132,7 +156,7 @@ export function useImplicitActiveTrigger<State extends PopupStoreState<any>>(
                 } as Partial<State>);
             }
         }
-    }, [open, store]);
+    }, [open, primaryTriggerId, store]);
 }
 
 /**

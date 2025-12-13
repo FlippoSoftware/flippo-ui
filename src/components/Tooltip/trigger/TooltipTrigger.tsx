@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+
 import { OPEN_DELAY } from '~@lib/constants';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks/';
 import { useTriggerDataForwarding } from '~@lib/popups';
@@ -8,6 +10,8 @@ import { safePolygon, useDelayGroup, useHoverReferenceInteraction } from '~@pack
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
+import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
+import { multipleSafePolygon } from '../multiple/multipleSafePolygon';
 import { useTooltipProviderContext } from '../provider/TooltipProviderContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
@@ -23,6 +27,7 @@ export function TooltipTrigger(
         /* eslint-enable unused-imports/no-unused-vars */
         handle,
         payload,
+        primary = false,
         disabled: disabledProp,
         delay,
         closeDelay,
@@ -44,6 +49,36 @@ export function TooltipTrigger(
     const floatingRootContext = store.useState('floatingRootContext');
     const isOpenedByThisTrigger = store.useState('isOpenedByTrigger', thisTriggerId);
 
+    // Register this trigger as primary if marked
+    useIsoLayoutEffect(() => {
+        if (!primary || !thisTriggerId) {
+            return;
+        }
+
+        const currentPrimaryId = store.select('primaryTriggerId');
+
+        // First wins strategy: if there's already a primary, warn and ignore
+        if (currentPrimaryId !== null && currentPrimaryId !== thisTriggerId) {
+            if (process.env.NODE_ENV !== 'production') {
+                console.warn(
+                    `[Tooltip] Multiple triggers marked as primary. `
+                    + `Trigger "${currentPrimaryId}" is already primary. `
+                    + `Ignoring primary on trigger "${thisTriggerId}".`
+                );
+            }
+            return;
+        }
+
+        store.set('primaryTriggerId', thisTriggerId);
+
+        // Cleanup: reset if this trigger unmounts
+        return () => {
+            if (store.select('primaryTriggerId') === thisTriggerId) {
+                store.set('primaryTriggerId', null);
+            }
+        };
+    }, [primary, store, thisTriggerId]);
+
     const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null);
 
     const delayWithDefault = delay ?? OPEN_DELAY;
@@ -60,7 +95,11 @@ export function TooltipTrigger(
     );
 
     const providerContext = useTooltipProviderContext();
+    const multipleContext = useTooltipMultipleContext();
+
+    // Disable delay group when inside Multiple to allow all tooltips open simultaneously
     const { delayRef, isInstantPhase, hasProvider } = useDelayGroup(floatingRootContext, {
+        enabled: !multipleContext,
         open: isOpenedByThisTrigger
     });
 
@@ -71,11 +110,22 @@ export function TooltipTrigger(
     const trackCursorAxis = store.useState('trackCursorAxis');
     const disableHoverablePopup = store.useState('disableHoverablePopup');
 
+    // Use multipleSafePolygon for Multiple, regular safePolygon otherwise
+    const handleClose = React.useMemo(() => {
+        if (disableHoverablePopup || trackCursorAxis === 'both') {
+            return null;
+        }
+        if (multipleContext) {
+            return multipleSafePolygon(multipleContext.store);
+        }
+        return safePolygon();
+    }, [disableHoverablePopup, trackCursorAxis, multipleContext]);
+
     const hoverProps = useHoverReferenceInteraction(floatingRootContext, {
         enabled: !disabled,
         mouseOnly: true,
         move: false,
-        handleClose: !disableHoverablePopup && trackCursorAxis !== 'both' ? safePolygon() : null,
+        handleClose,
         restMs() {
             const providerDelay = providerContext?.delay;
             const groupOpenValue
@@ -142,6 +192,13 @@ export type TooltipTriggerProps<Payload = unknown> = {
      * A payload to pass to the tooltip when it is opened.
      */
     payload?: Payload;
+    /**
+     * Marks this trigger as the primary trigger for positioning.
+     * Used when the tooltip is opened via TooltipMultiple sync.
+     * If multiple triggers are marked as primary, the first one wins.
+     * @default false
+     */
+    primary?: boolean;
     /**
      * How long to wait before opening the tooltip. Specified in milliseconds.
      * @default 600

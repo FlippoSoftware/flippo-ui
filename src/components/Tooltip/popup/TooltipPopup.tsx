@@ -14,6 +14,7 @@ import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { Align, Side } from '~@lib/hooks';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
+import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
 import { useTooltipPositionerContext } from '../positioner/TooltipPositionerContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
@@ -86,9 +87,24 @@ export function TooltipPopup(componentProps: TooltipPopupProps) {
     const disabled = store.useState('disabled');
     const closeDelay = store.useState('closeDelay');
 
+    // Register popup element with Multiple store for safePolygon tracking
+    const multipleContext = useTooltipMultipleContext();
+    React.useEffect(() => {
+        if (!multipleContext || !popupElement) {
+            return;
+        }
+        multipleContext.store.registerPopup(popupElement);
+        return () => {
+            multipleContext.store.unregisterPopup(popupElement);
+        };
+    }, [multipleContext, popupElement]);
+
+    // For Multiple: use larger closeDelay to allow mouse movement between elements
+    const effectiveCloseDelay = multipleContext ? Math.max(closeDelay, 150) : closeDelay;
+
     useHoverFloatingInteraction(floatingContext, {
         enabled: !disabled,
-        closeDelay
+        closeDelay: effectiveCloseDelay
     });
 
     const state: TooltipPopup.State = React.useMemo(
