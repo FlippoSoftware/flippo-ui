@@ -36,7 +36,14 @@ import { TooltipMultipleStore } from './TooltipMultipleStore';
  * ```
  */
 export function TooltipMultiple(props: TooltipMultiple.Props) {
-    const { defaultOpen = false, onOpenChange, children } = props;
+    const {
+        defaultOpen = false,
+        onOpenChange,
+        disabled,
+        delay,
+        closeDelay,
+        children
+    } = props;
 
     const store = TooltipMultipleStore.useStore(defaultOpen);
 
@@ -45,7 +52,15 @@ export function TooltipMultiple(props: TooltipMultiple.Props) {
         store.context.onOpenChange = onOpenChange;
     }, [store, onOpenChange]);
 
-    const contextValue = React.useMemo(() => ({ store }), [store]);
+    const contextValue = React.useMemo(
+        () => ({
+            store,
+            disabled,
+            delay,
+            closeDelay
+        }),
+        [store, disabled, delay, closeDelay]
+    );
 
     return (
         <TooltipMultipleContext.Provider value={contextValue}>
@@ -64,6 +79,21 @@ export type TooltipMultipleProps = {
      * Callback when the shared open state changes.
      */
     onOpenChange?: (open: boolean, eventDetails: TooltipRoot.ChangeEventDetails) => void;
+    /**
+     * Whether all tooltips in the group are disabled.
+     * Individual triggers can override this.
+     */
+    disabled?: boolean;
+    /**
+     * Common open delay for all triggers in the group (in milliseconds).
+     * Individual triggers can override this.
+     */
+    delay?: number;
+    /**
+     * Common close delay for all triggers in the group (in milliseconds).
+     * Individual triggers can override this.
+     */
+    closeDelay?: number;
     /**
      * The tooltip roots to synchronize.
      */

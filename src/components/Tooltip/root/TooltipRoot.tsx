@@ -43,13 +43,21 @@ export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
         children
     } = props;
 
+    // Check if inside TooltipMultiple - if so, ignore local open/defaultOpen
+    const multipleContext = useTooltipMultipleContext();
+    const isInsideMultiple = multipleContext !== null;
+
+    // When inside Multiple, use Multiple's defaultOpen for initial state
+    const effectiveDefaultOpen = isInsideMultiple
+        ? multipleContext.store.select('open')
+        : (openProp ?? defaultOpen);
+
     const store = TooltipStore.useStore<Payload>(handle?.store, {
-        open: openProp ?? defaultOpen,
+        open: effectiveDefaultOpen,
         activeTriggerId: triggerIdProp !== undefined ? triggerIdProp : defaultTriggerIdProp
     });
 
     // Register with TooltipMultiple if inside one
-    const multipleContext = useTooltipMultipleContext();
     React.useEffect(() => {
         if (!multipleContext) {
             return;
@@ -57,13 +65,15 @@ export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
         return multipleContext.store.registerStore(store);
     }, [multipleContext, store]);
 
-    store.useControlledProp('open', openProp, defaultOpen);
+    // When inside Multiple, don't use controlled prop for open - Multiple handles it
+    store.useControlledProp('open', isInsideMultiple ? undefined : openProp, isInsideMultiple ? false : defaultOpen);
     store.useControlledProp('activeTriggerId', triggerIdProp, defaultTriggerIdProp);
 
     store.useContextCallback('onOpenChange', onOpenChange);
     store.useContextCallback('onOpenChangeComplete', onOpenChangeComplete);
 
-    const openState = store.useState('open');
+    // When inside Multiple, use Multiple's open state
+    const openState = store.useOpen();
 
     const activeTriggerId = store.useState('activeTriggerId');
     const payload = store.useState('payload') as Payload | undefined;
@@ -83,7 +93,8 @@ export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
 
     store.useSyncedValue('disabled', disabled);
 
-    useImplicitActiveTrigger(store);
+    // Pass the correct open state (from Multiple if inside, otherwise from store)
+    useImplicitActiveTrigger(store, openState);
     const { forceUnmount, transitionStatus } = useOpenStateTransitions(open, store);
     const isInstantPhase = store.useState('isInstantPhase');
     const instantType = store.useState('instantType');

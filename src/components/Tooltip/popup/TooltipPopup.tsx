@@ -34,9 +34,10 @@ export function TooltipPopup(componentProps: TooltipPopupProps) {
     } = componentProps;
 
     const store = useTooltipRootContext();
+    const multipleContext = useTooltipMultipleContext();
     const { side, align } = useTooltipPositionerContext();
 
-    const open = store.useState('open');
+    const open = store.useOpen();
     const mounted = store.useState('mounted');
     const instantType = store.useState('instantType');
     const transitionStatus = store.useState('transitionStatus');
@@ -88,7 +89,6 @@ export function TooltipPopup(componentProps: TooltipPopupProps) {
     const closeDelay = store.useState('closeDelay');
 
     // Register popup element with Multiple store for safePolygon tracking
-    const multipleContext = useTooltipMultipleContext();
     React.useEffect(() => {
         if (!multipleContext || !popupElement) {
             return;

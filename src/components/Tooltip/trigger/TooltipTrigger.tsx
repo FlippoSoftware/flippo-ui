@@ -10,8 +10,8 @@ import { safePolygon, useDelayGroup, useHoverReferenceInteraction } from '~@pack
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
 import { multipleSafePolygon } from '../multiple/multipleSafePolygon';
+import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
 import { useTooltipProviderContext } from '../provider/TooltipProviderContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
@@ -81,8 +81,12 @@ export function TooltipTrigger(
 
     const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null);
 
-    const delayWithDefault = delay ?? OPEN_DELAY;
-    const closeDelayWithDefault = closeDelay ?? 0;
+    const providerContext = useTooltipProviderContext();
+    const multipleContext = useTooltipMultipleContext();
+
+    // Priority: trigger prop > multiple context > provider context > default
+    const effectiveDelay = delay ?? multipleContext?.delay ?? OPEN_DELAY;
+    const effectiveCloseDelay = closeDelay ?? multipleContext?.closeDelay ?? 0;
 
     const { registerTrigger, isMountedByThisTrigger } = useTriggerDataForwarding(
         thisTriggerId,
@@ -90,12 +94,9 @@ export function TooltipTrigger(
         store,
         {
             payload,
-            closeDelay: closeDelayWithDefault
+            closeDelay: effectiveCloseDelay
         }
     );
-
-    const providerContext = useTooltipProviderContext();
-    const multipleContext = useTooltipMultipleContext();
 
     // Disable delay group when inside Multiple to allow all tooltips open simultaneously
     const { delayRef, isInstantPhase, hasProvider } = useDelayGroup(floatingRootContext, {
@@ -106,7 +107,8 @@ export function TooltipTrigger(
     store.useSyncedValue('isInstantPhase', isInstantPhase);
 
     const rootDisabled = store.useState('disabled');
-    const disabled = disabledProp ?? rootDisabled;
+    // Priority: trigger prop > multiple context > root prop
+    const disabled = disabledProp ?? multipleContext?.disabled ?? rootDisabled;
     const trackCursorAxis = store.useState('trackCursorAxis');
     const disableHoverablePopup = store.useState('disableHoverablePopup');
 
@@ -115,9 +117,11 @@ export function TooltipTrigger(
         if (disableHoverablePopup || trackCursorAxis === 'both') {
             return null;
         }
+
         if (multipleContext) {
             return multipleSafePolygon(multipleContext.store);
         }
+
         return safePolygon();
     }, [disableHoverablePopup, trackCursorAxis, multipleContext]);
 
@@ -131,10 +135,10 @@ export function TooltipTrigger(
             const groupOpenValue
                 = typeof delayRef.current === 'object' ? delayRef.current.open : undefined;
 
-            let computedRestMs = delayWithDefault;
-            if (hasProvider) {
+            let computedRestMs = effectiveDelay;
+            if (hasProvider && !multipleContext) {
                 if (groupOpenValue !== 0) {
-                    computedRestMs = delay ?? providerDelay ?? delayWithDefault;
+                    computedRestMs = delay ?? providerDelay ?? effectiveDelay;
                 }
                 else {
                     computedRestMs = 0;
@@ -146,8 +150,8 @@ export function TooltipTrigger(
         delay() {
             const closeValue = typeof delayRef.current === 'object' ? delayRef.current.close : undefined;
 
-            let computedCloseDelay: number | undefined = closeDelayWithDefault;
-            if (closeDelay == null && hasProvider) {
+            let computedCloseDelay: number | undefined = effectiveCloseDelay;
+            if (closeDelay == null && hasProvider && !multipleContext) {
                 computedCloseDelay = closeValue;
             }
 

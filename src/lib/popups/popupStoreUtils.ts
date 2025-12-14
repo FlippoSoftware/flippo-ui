@@ -122,9 +122,15 @@ export type PayloadChildRenderFunction<Payload> = (arg: {
  * @param store The Store instance managing the popup state.
  */
 export function useImplicitActiveTrigger<State extends PopupStoreState<any>>(
-    store: ReactStore<State, PopupStoreContext<any>, typeof popupStoreSelectors>
+    store: ReactStore<State, PopupStoreContext<any>, typeof popupStoreSelectors>,
+    /**
+     * Optional external open state (e.g., from Multiple context).
+     * If provided, uses this instead of store's open state.
+     */
+    externalOpen?: boolean
 ) {
-    const open = store.useState('open');
+    const storeOpen = store.useState('open');
+    const open = externalOpen ?? storeOpen;
     const primaryTriggerId = store.useState('primaryTriggerId');
 
     useIsoLayoutEffect(() => {

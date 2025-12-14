@@ -47,7 +47,7 @@ export function TooltipPositioner(componentProps: TooltipPositionerProps) {
     const store = useTooltipRootContext();
     const keepMounted = useTooltipPortalContext();
 
-    const open = store.useState('open');
+    const open = store.useOpen();
     const mounted = store.useState('mounted');
     const trackCursorAxis = store.useState('trackCursorAxis');
     const disableHoverablePopup = store.useState('disableHoverablePopup');

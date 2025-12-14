@@ -13,6 +13,8 @@ import { REASONS } from '~@lib/reason';
 
 import type { PopupStoreContext, PopupStoreState } from '~@lib/popups';
 
+import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
+
 import type { TooltipRoot } from '../root/TooltipRoot';
 
 export type State<Payload> = PopupStoreState<Payload> & {
@@ -112,6 +114,18 @@ export class TooltipStore<Payload> extends ReactStore<
         else {
             changeState();
         }
+    };
+
+    public useOpen = () => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const multipleContext = useTooltipMultipleContext();
+        const isInsideMultiple = multipleContext !== null;
+
+        // When inside Multiple, use Multiple's open state
+        const localOpenState = this.useState('open');
+        const multipleOpenState = multipleContext?.store.useState('open');
+
+        return isInsideMultiple ? (multipleOpenState ?? false) : localOpenState;
     };
 
     public static useStore<Payload>(

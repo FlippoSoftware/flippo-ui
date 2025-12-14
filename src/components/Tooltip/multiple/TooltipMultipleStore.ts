@@ -84,30 +84,30 @@ export class TooltipMultipleStore extends ReactStore<
         this.set('open', nextOpen);
 
         // Sync all registered stores
-        for (const store of this.context.stores) {
-            const originalSetOpen = this.context.originalSetOpenMap.get(store);
-            if (!originalSetOpen) {
-                continue;
-            }
+        // for (const store of this.context.stores) {
+        //     const originalSetOpen = this.context.originalSetOpenMap.get(store);
+        //     if (!originalSetOpen) {
+        //         continue;
+        //     }
 
-            // Get the primary trigger for positioning (if set)
-            const primaryTriggerId = store.select('primaryTriggerId');
-            const primaryTriggerElement = primaryTriggerId
-                ? store.context.triggerElements.getById(primaryTriggerId) as HTMLElement | undefined
-                : undefined;
+        //     // Get the primary trigger for positioning (if set)
+        //     const primaryTriggerId = store.select('primaryTriggerId');
+        //     const primaryTriggerElement = primaryTriggerId
+        //         ? store.context.triggerElements.getById(primaryTriggerId) as HTMLElement | undefined
+        //         : undefined;
 
-            // Create event details with proper trigger for positioning
-            const storeDetails = createChangeEventDetails(
-                details.reason as TooltipRoot.ChangeEventReason,
-                details.event
-            ) as TooltipRoot.ChangeEventDetails;
-            storeDetails.preventUnmountOnClose = () => {
-                store.set('preventUnmountingOnClose', true);
-            };
-            storeDetails.trigger = primaryTriggerElement;
+        //     // Create event details with proper trigger for positioning
+        //     const storeDetails = createChangeEventDetails(
+        //         details.reason as TooltipRoot.ChangeEventReason,
+        //         details.event
+        //     ) as TooltipRoot.ChangeEventDetails;
+        //     storeDetails.preventUnmountOnClose = () => {
+        //         store.set('preventUnmountingOnClose', true);
+        //     };
+        //     storeDetails.trigger = primaryTriggerElement;
 
-            originalSetOpen(nextOpen, storeDetails);
-        }
+        //     originalSetOpen(nextOpen, storeDetails);
+        // }
     };
 
     /**
@@ -126,29 +126,43 @@ export class TooltipMultipleStore extends ReactStore<
         // Override setOpen to sync through this store
         store.setOpen = this.setOpen;
 
-        // Sync initial state if already open
-        if (this.state.open) {
-            const primaryTriggerId = store.select('primaryTriggerId');
-            const primaryTriggerElement = primaryTriggerId
-                ? store.context.triggerElements.getById(primaryTriggerId) as HTMLElement | undefined
-                : undefined;
-
-            const details = createChangeEventDetails(
-                REASONS.none as TooltipRoot.ChangeEventReason
-            ) as TooltipRoot.ChangeEventDetails;
-            details.preventUnmountOnClose = () => {
-                store.set('preventUnmountingOnClose', true);
-            };
-            details.trigger = primaryTriggerElement;
-
-            const originalSetOpen = this.context.originalSetOpenMap.get(store);
-            originalSetOpen?.(true, details);
-        }
+        // Sync initial state to match Multiple's open state
+        this.syncStoreOpenState(store, this.state.open);
 
         // Return cleanup function
         return () => {
             this.unregisterStore(store);
         };
+    };
+
+    /**
+     * Syncs a single store's open state with the given value.
+     */
+    private syncStoreOpenState = (store: TooltipStore<unknown>, open: boolean): void => {
+        const originalSetOpen = this.context.originalSetOpenMap.get(store);
+        if (!originalSetOpen) {
+            return;
+        }
+
+        // Only sync if store's open state differs
+        if (store.select('open') === open) {
+            return;
+        }
+
+        const primaryTriggerId = store.select('primaryTriggerId');
+        const primaryTriggerElement = primaryTriggerId
+            ? store.context.triggerElements.getById(primaryTriggerId) as HTMLElement | undefined
+            : undefined;
+
+        const details = createChangeEventDetails(
+            REASONS.none as TooltipRoot.ChangeEventReason
+        ) as TooltipRoot.ChangeEventDetails;
+        details.preventUnmountOnClose = () => {
+            store.set('preventUnmountingOnClose', true);
+        };
+        details.trigger = primaryTriggerElement;
+
+        originalSetOpen(open, details);
     };
 
     /**
