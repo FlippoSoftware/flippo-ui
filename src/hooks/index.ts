@@ -14,6 +14,7 @@ export * from './useIsFirstRender';
 export * from './useIsoLayoutEffect';
 export * from './useLatestRef';
 export * from './useLazyRef';
+export * from './useMediaQuery';
 export * from './useMergedRef';
 export * from './useOnFirstRender';
 export * from './useOnMount';
