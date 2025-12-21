@@ -12,6 +12,7 @@ export * as Fieldset from './components/Fieldset';
 export * as Form from './components/Form';
 export * as Input from './components/Input';
 export * as Link from './components/Link';
+export * as Marquee from './components/Marquee';
 export * as Menu from './components/Menu';
 export * as Menubar from './components/Menubar';
 export * as Meter from './components/Meter';
