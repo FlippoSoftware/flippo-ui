@@ -14,6 +14,7 @@ export * from './Fieldset';
 export * from './Form';
 export * from './Input';
 export * from './List';
+export * from './Marquee';
 export * from './Menu';
 export * from './Menubar';
 export * from './Meter';

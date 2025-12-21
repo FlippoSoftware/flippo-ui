@@ -110,6 +110,11 @@
       "import": "./dist/components/List/index.es.js",
       "require": "./dist/components/List/index.cjs.js"
     },
+    "./marquee": {
+      "types": "./dist/components/Marquee/index.d.ts",
+      "import": "./dist/components/Marquee/index.es.js",
+      "require": "./dist/components/Marquee/index.cjs.js"
+    },
     "./menu": {
       "types": "./dist/components/Menu/index.d.ts",
       "import": "./dist/components/Menu/index.es.js",
