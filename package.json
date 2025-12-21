@@ -130,6 +130,11 @@
       "import": "./dist/components/NavigationMenu/index.es.js",
       "require": "./dist/components/NavigationMenu/index.cjs.js"
     },
+    "./no-ssr": {
+      "types": "./dist/components/NoSsr/index.d.ts",
+      "import": "./dist/components/NoSsr/index.es.js",
+      "require": "./dist/components/NoSsr/index.cjs.js"
+    },
     "./number-field": {
       "types": "./dist/components/NumberField/index.d.ts",
       "import": "./dist/components/NumberField/index.es.js",
@@ -254,6 +259,11 @@
       "types": "./dist/lib/hooks/useDirection.d.ts",
       "import": "./dist/lib/hooks/useDirection.es.js",
       "require": "./dist/lib/hooks/useDirection.cjs.js"
+    },
+    "./createHeadlessUIEventDetails": {
+      "types": "./dist/lib/createHeadlessUIEventDetails.d.ts",
+      "import": "./dist/lib/createHeadlessUIEventDetails.es.js",
+      "require": "./dist/lib/createHeadlessUIEventDetails.cjs.js"
     }
   },
   "main": "./dist/index.cjs.js",
