@@ -22,9 +22,9 @@ export type FloatingRootState = {
     floatingId: string | undefined;
 };
 
-export type FloatingRootStoreContext<Reason extends string = string> = {
+export type FloatingRootStoreContext<Reason extends string = string, CustomProperties extends object = {}> = {
     onOpenChange:
-    | ((open: boolean, eventDetails: HeadlessUIChangeEventDetails<Reason>) => void)
+    | ((open: boolean, eventDetails: HeadlessUIChangeEventDetails<Reason, CustomProperties>) => void)
     | undefined;
     readonly dataRef: React.RefObject<ContextData>;
     readonly events: FloatingEvents;
@@ -43,7 +43,7 @@ const selectors = {
     floatingId: createSelector((state: FloatingRootState) => state.floatingId)
 };
 
-type FloatingRootStoreOptions<Reason extends string = string> = {
+type FloatingRootStoreOptions<Reason extends string = string, CustomProperties extends object = {}> = {
     open: boolean;
     referenceElement: ReferenceType | null;
     floatingElement: HTMLElement | null;
@@ -52,16 +52,16 @@ type FloatingRootStoreOptions<Reason extends string = string> = {
     nested: boolean;
     noEmit: boolean;
     onOpenChange:
-    | ((open: boolean, eventDetails: HeadlessUIChangeEventDetails<Reason>) => void)
+    | ((open: boolean, eventDetails: HeadlessUIChangeEventDetails<Reason, CustomProperties>) => void)
     | undefined;
 };
 
-export class FloatingRootStore<Reason extends string = string> extends ReactStore<
+export class FloatingRootStore<Reason extends string = string, CustomProperties extends object = {}> extends ReactStore<
     Readonly<FloatingRootState>,
-    FloatingRootStoreContext<Reason>,
+    FloatingRootStoreContext<Reason, CustomProperties>,
   typeof selectors
 > {
-    constructor(options: FloatingRootStoreOptions<Reason>) {
+    constructor(options: FloatingRootStoreOptions<Reason, CustomProperties>) {
         const {
             nested,
             noEmit,
@@ -94,7 +94,7 @@ export class FloatingRootStore<Reason extends string = string> extends ReactStor
      * @param newOpen The new open state.
      * @param eventDetails Details about the event that triggered the open state change.
      */
-    setOpen = (newOpen: boolean, eventDetails: HeadlessUIChangeEventDetails<Reason>) => {
+    setOpen = (newOpen: boolean, eventDetails: HeadlessUIChangeEventDetails<Reason, CustomProperties>) => {
         this.context.dataRef.current.openEvent = newOpen ? eventDetails.event : undefined;
         if (!this.context.noEmit) {
             const details: FloatingUIOpenChangeDetails = {

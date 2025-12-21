@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useOpenChangeComplete } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo-ui/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
@@ -17,10 +17,12 @@ import type { HeadlessUIComponentProps } from '~@lib/types';
 import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
 import { useTooltipPositionerContext } from '../positioner/TooltipPositionerContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
+import { multipleActive } from '../utils/stateAttributes';
 
 const stateAttributesMapping: StateAttributesMapping<TooltipPopup.State> = {
     ...baseMapping,
-    ...transitionStatusMapping
+    ...transitionStatusMapping,
+    multipleActive
 };
 
 export function TooltipPopup(componentProps: TooltipPopupProps) {
@@ -89,7 +91,7 @@ export function TooltipPopup(componentProps: TooltipPopupProps) {
     const closeDelay = store.useState('closeDelay');
 
     // Register popup element with Multiple store for safePolygon tracking
-    React.useEffect(() => {
+    useIsoLayoutEffect(() => {
         if (!multipleContext || !popupElement) {
             return;
         }
@@ -107,27 +109,34 @@ export function TooltipPopup(componentProps: TooltipPopupProps) {
         closeDelay: effectiveCloseDelay
     });
 
+    const multipleActive = store.useMultipleActive();
+
+    // Hide from screen readers when not active in multiple mode
+    const isHiddenFromScreenReader = multipleContext !== null && !multipleActive;
+
     const state: TooltipPopup.State = React.useMemo(
         () => ({
             open,
             side,
             align,
             instant: instantType,
-            transitionStatus
+            transitionStatus,
+            multipleActive
         }),
         [
             open,
             side,
             align,
             instantType,
-            transitionStatus
+            transitionStatus,
+            multipleActive
         ]
     );
 
     const element = useRenderElement('div', componentProps, {
         state,
         ref: [ref, store.context.popupRef, store.useStateSetter('popupElement')],
-        props: [popupProps, getDisabledMountTransitionStyles(transitionStatus), elementProps],
+        props: [popupProps, getDisabledMountTransitionStyles(transitionStatus), isHiddenFromScreenReader ? { 'aria-hidden': true } : undefined, elementProps],
         customStyleHookMapping: stateAttributesMapping
     });
 
@@ -135,6 +144,10 @@ export function TooltipPopup(componentProps: TooltipPopupProps) {
 }
 
 export type TooltipPopupState = {
+    /**
+     * Whether the tooltip is currently active in the multiple context.
+     */
+    multipleActive: boolean;
     /**
      * Whether the tooltip is currently open.
      */

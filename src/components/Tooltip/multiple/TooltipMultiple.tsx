@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { CompositeTooltipList } from '../composite';
+
 import type { TooltipRoot } from '../root/TooltipRoot';
 
 import { TooltipMultipleContext } from './TooltipMultipleContext';
@@ -37,6 +39,7 @@ import { TooltipMultipleStore } from './TooltipMultipleStore';
  */
 export function TooltipMultiple(props: TooltipMultiple.Props) {
     const {
+        open = false,
         defaultOpen = false,
         onOpenChange,
         disabled,
@@ -45,12 +48,10 @@ export function TooltipMultiple(props: TooltipMultiple.Props) {
         children
     } = props;
 
-    const store = TooltipMultipleStore.useStore(defaultOpen);
+    const store = TooltipMultipleStore.useStore(open ?? defaultOpen);
+    const elementsRef = React.useRef<(HTMLElement | null)[]>([]);
 
-    // Set up callback
-    React.useEffect(() => {
-        store.context.onOpenChange = onOpenChange;
-    }, [store, onOpenChange]);
+    store.useContextCallback('onOpenChange', onOpenChange);
 
     const contextValue = React.useMemo(
         () => ({
@@ -63,13 +64,20 @@ export function TooltipMultiple(props: TooltipMultiple.Props) {
     );
 
     return (
-        <TooltipMultipleContext.Provider value={contextValue}>
-            {children}
-        </TooltipMultipleContext.Provider>
+        <TooltipMultipleContext value={contextValue}>
+            <CompositeTooltipList elementsRef={elementsRef}>
+                {children}
+            </CompositeTooltipList>
+        </TooltipMultipleContext>
     );
 }
 
 export type TooltipMultipleProps = {
+    /**
+     * Whether the tooltips are open.
+     * @default false
+     */
+    open?: boolean;
     /**
      * Whether the tooltips are initially open.
      * @default false

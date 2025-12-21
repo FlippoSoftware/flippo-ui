@@ -8,14 +8,21 @@ import { useTriggerDataForwarding } from '~@lib/popups';
 import { triggerOpenStateMapping } from '~@lib/popupStateMapping';
 import { safePolygon, useDelayGroup, useHoverReferenceInteraction } from '~@packages/floating-ui-react';
 
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { multipleSafePolygon } from '../multiple/multipleSafePolygon';
 import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
 import { useTooltipProviderContext } from '../provider/TooltipProviderContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
+import { multipleActive } from '../utils/stateAttributes';
 
 import type { TooltipHandle } from '../store/TooltipHandle';
+
+const stateAttributesMapping: StateAttributesMapping<TooltipTrigger.State> = {
+    ...triggerOpenStateMapping,
+    multipleActive
+};
 
 export function TooltipTrigger(
     componentProps: TooltipTrigger.Props
@@ -48,6 +55,8 @@ export function TooltipTrigger(
     const isTriggerActive = store.useState('isTriggerActive', thisTriggerId);
     const floatingRootContext = store.useState('floatingRootContext');
     const isOpenedByThisTrigger = store.useState('isOpenedByTrigger', thisTriggerId);
+
+    const multipleItemIndex = store.useState('multipleItemIndex');
 
     // Register this trigger as primary if marked
     useIsoLayoutEffect(() => {
@@ -163,9 +172,36 @@ export function TooltipTrigger(
         isActiveTrigger: isTriggerActive
     });
 
+    useIsoLayoutEffect(() => {
+        if (!triggerElement || !multipleContext || multipleItemIndex == null || multipleItemIndex < 0)
+            return;
+
+        const onSetActive = () => {
+            multipleContext.store.set('activeIndex', multipleItemIndex);
+        };
+
+        const onSetInactive = () => {
+            multipleContext.store.set('activeIndex', null);
+        };
+
+        triggerElement.addEventListener('mouseenter', onSetActive);
+        triggerElement.addEventListener('mouseleave', onSetInactive);
+        triggerElement.addEventListener('focus', onSetActive);
+        triggerElement.addEventListener('blur', onSetInactive);
+
+        return () => {
+            triggerElement.removeEventListener('mouseenter', onSetActive);
+            triggerElement.removeEventListener('mouseleave', onSetInactive);
+            triggerElement.removeEventListener('focus', onSetActive);
+            triggerElement.removeEventListener('blur', onSetInactive);
+        };
+    }, [triggerElement, multipleItemIndex, store]);
+
+    const multipleActive = store.useMultipleActive();
+
     const state: TooltipTrigger.State = React.useMemo(
-        () => ({ open: isOpenedByThisTrigger }),
-        [isOpenedByThisTrigger]
+        () => ({ open: isOpenedByThisTrigger, multipleActive }),
+        [isOpenedByThisTrigger, multipleActive]
     );
 
     const rootTriggerProps = store.useState('triggerProps', isMountedByThisTrigger);
@@ -173,8 +209,10 @@ export function TooltipTrigger(
     const element = useRenderElement('button', componentProps, {
         state,
         ref: [ref, registerTrigger, setTriggerElement],
-        props: [hoverProps, rootTriggerProps, { id: thisTriggerId }, elementProps],
-        customStyleHookMapping: triggerOpenStateMapping
+        props: [hoverProps, rootTriggerProps, {
+            id: thisTriggerId
+        }, elementProps],
+        customStyleHookMapping: stateAttributesMapping
     });
 
     return element;
@@ -185,6 +223,10 @@ export type TooltipTriggerState = {
      * Whether the tooltip is currently open.
      */
     open: boolean;
+    /**
+     * Whether the tooltip is currently active in the multiple context.
+     */
+    multipleActive: boolean;
 };
 
 export type TooltipTriggerProps<Payload = unknown> = {

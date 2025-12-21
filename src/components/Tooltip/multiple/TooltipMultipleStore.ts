@@ -12,6 +12,10 @@ export type MultipleState = {
      * Shared open state for all tooltips in the group.
      */
     open: boolean;
+    /**
+     * The index of the active tooltip in the group.
+     */
+    activeIndex: number | null;
 };
 
 export type MultipleContext = {
@@ -35,7 +39,8 @@ export type MultipleContext = {
 };
 
 const selectors = {
-    open: createSelector((state: MultipleState) => state.open)
+    open: createSelector((state: MultipleState) => state.open),
+    activeIndex: createSelector((state: MultipleState) => state.activeIndex)
 };
 
 /**
@@ -50,7 +55,7 @@ export class TooltipMultipleStore extends ReactStore<
 > {
     constructor(defaultOpen = false) {
         super(
-            { open: defaultOpen },
+            { open: defaultOpen, activeIndex: null },
             {
                 stores: new Set(),
                 originalSetOpenMap: new WeakMap(),
@@ -83,31 +88,9 @@ export class TooltipMultipleStore extends ReactStore<
         // Update shared state
         this.set('open', nextOpen);
 
-        // Sync all registered stores
-        // for (const store of this.context.stores) {
-        //     const originalSetOpen = this.context.originalSetOpenMap.get(store);
-        //     if (!originalSetOpen) {
-        //         continue;
-        //     }
-
-        //     // Get the primary trigger for positioning (if set)
-        //     const primaryTriggerId = store.select('primaryTriggerId');
-        //     const primaryTriggerElement = primaryTriggerId
-        //         ? store.context.triggerElements.getById(primaryTriggerId) as HTMLElement | undefined
-        //         : undefined;
-
-        //     // Create event details with proper trigger for positioning
-        //     const storeDetails = createChangeEventDetails(
-        //         details.reason as TooltipRoot.ChangeEventReason,
-        //         details.event
-        //     ) as TooltipRoot.ChangeEventDetails;
-        //     storeDetails.preventUnmountOnClose = () => {
-        //         store.set('preventUnmountingOnClose', true);
-        //     };
-        //     storeDetails.trigger = primaryTriggerElement;
-
-        //     originalSetOpen(nextOpen, storeDetails);
-        // }
+        if (details.multipleItemIndex !== undefined) {
+            this.set('activeIndex', details.multipleItemIndex);
+        }
     };
 
     /**

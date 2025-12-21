@@ -161,7 +161,7 @@ function generateExports() {
     }
 
     // Добавляем дополнительные exports для утилит
-    const utilExports = [{ key: './merge-props', path: './dist/lib/merge' }, { key: './direction-provider', path: './dist/lib/hooks/useDirection' }];
+    const utilExports = [{ key: './merge-props', path: './dist/lib/merge' }, { key: './direction-provider', path: './dist/lib/hooks/useDirection' }, { key: './createHeadlessUIEventDetails', path: './dist/lib/createHeadlessUIEventDetails' }];
 
     console.log('📝 Generating utility exports...');
     for (const util of utilExports) {
