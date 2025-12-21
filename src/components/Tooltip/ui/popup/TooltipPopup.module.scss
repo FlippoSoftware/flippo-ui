@@ -14,7 +14,8 @@
   transform-origin: var(--transform-origin);
   transition:
     transform 150ms,
-    opacity 150ms;
+    opacity 150ms,
+    background-color 150ms;
 
   &[data-starting-style],
   &[data-ending-style] {
@@ -24,5 +25,9 @@
 
   &[data-instant] {
     transition-duration: 0ms;
+  }
+
+  &[data-multiple-active] {
+    background-color: var(--f-color-brand-35);
   }
 }
