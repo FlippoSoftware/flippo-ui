@@ -95,6 +95,11 @@
       "import": "./dist/hooks/useLazyRef/index.es.js",
       "require": "./dist/hooks/useLazyRef/index.cjs.js"
     },
+    "./use-media-query": {
+      "types": "./dist/hooks/useMediaQuery/index.d.ts",
+      "import": "./dist/hooks/useMediaQuery/index.es.js",
+      "require": "./dist/hooks/useMediaQuery/index.cjs.js"
+    },
     "./use-merged-ref": {
       "types": "./dist/hooks/useMergedRef/index.d.ts",
       "import": "./dist/hooks/useMergedRef/index.es.js",
@@ -129,6 +134,11 @@
       "types": "./dist/hooks/useScrollLock/index.d.ts",
       "import": "./dist/hooks/useScrollLock/index.es.js",
       "require": "./dist/hooks/useScrollLock/index.cjs.js"
+    },
+    "./use-ssr": {
+      "types": "./dist/hooks/useSsr/index.d.ts",
+      "import": "./dist/hooks/useSsr/index.es.js",
+      "require": "./dist/hooks/useSsr/index.cjs.js"
     },
     "./use-stable-callback": {
       "types": "./dist/hooks/useStableCallback/index.d.ts",
