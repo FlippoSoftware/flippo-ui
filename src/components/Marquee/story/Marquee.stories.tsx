@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Marquee } from '../index';
 
 const meta = {
-    title: 'Components/Marquee',
+    title: 'Widgets/Marquee',
     component: Marquee.Root,
     parameters: {
         layout: 'padded'
