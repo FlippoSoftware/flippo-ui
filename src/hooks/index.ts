@@ -4,6 +4,7 @@ export * from './useClipboard';
 export * from './useColorSchema';
 export * from './useControlledState';
 export * from './useDidUpdate';
+export * from './useDocumentTitle';
 export * from './useDragGesture';
 export * from './useEnhancedClickHandler';
 export * from './useEnhancedEffect';
