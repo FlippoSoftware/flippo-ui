@@ -1,0 +1,1 @@
+export { useFavicon } from './useFavicon';

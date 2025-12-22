@@ -11,6 +11,7 @@ export * from './useEnhancedEffect';
 export * from './useEventCallback';
 export * from './useEventListener';
 export * from './useEyeDropper';
+export * from './useFavicon';
 export * from './useForcedRerendering';
 export * from './useId';
 export * from './useInterval';
