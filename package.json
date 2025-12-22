@@ -60,6 +60,11 @@
       "import": "./dist/hooks/useEventCallback/index.es.js",
       "require": "./dist/hooks/useEventCallback/index.cjs.js"
     },
+    "./use-event-listener": {
+      "types": "./dist/hooks/useEventListener/index.d.ts",
+      "import": "./dist/hooks/useEventListener/index.es.js",
+      "require": "./dist/hooks/useEventListener/index.cjs.js"
+    },
     "./use-eye-dropper": {
       "types": "./dist/hooks/useEyeDropper/index.d.ts",
       "import": "./dist/hooks/useEyeDropper/index.es.js",
