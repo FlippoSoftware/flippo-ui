@@ -7,6 +7,7 @@ export * from './useDragGesture';
 export * from './useEnhancedClickHandler';
 export * from './useEnhancedEffect';
 export * from './useEventCallback';
+export * from './useEyeDropper';
 export * from './useForcedRerendering';
 export * from './useId';
 export * from './useInterval';
