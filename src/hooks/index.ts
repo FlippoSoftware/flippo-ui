@@ -1,6 +1,7 @@
 export * from './useAnimationFrame';
 export * from './useAnimationsFinished';
 export * from './useClipboard';
+export * from './useColorSchema';
 export * from './useControlledState';
 export * from './useDidUpdate';
 export * from './useDragGesture';
