@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { useSyncExternalStore } from 'use-sync-external-store/shim';
 
-export function useMediaQuery(query: string, options: useMediaQuery.Options): boolean {
+export function useMediaQuery(query: string, options: useMediaQuery.Options = {}): boolean {
     // Wait for jsdom to support the match media feature.
-    // All the browsers Base UI support have this built-in.
+    // All the browsers Headless UI support have this built-in.
     // This defensive check is here for simplicity.
     // Most of the time, the match media logic isn't central to people tests.
     const supportMatchMedia

@@ -1,11 +1,16 @@
-import {
-    useEffect,
-    useMemo,
-    useRef,
-    useState
-} from 'react';
+import React from 'react';
 
-type ObserverRect = Omit<DOMRectReadOnly, 'toJSON'>;
+import { isTarget } from '~@lib/isTarget';
+
+import type { HookTarget } from '~@lib/isTarget';
+
+import { useIsoLayoutEffect } from '../useIsoLayoutEffect';
+import { useRefAsState } from '../useRefAsState';
+import { useValueAsRef } from '../useValueAsRef';
+
+import type { RefAsState } from '../useRefAsState';
+
+export type ObserverRect = Omit<DOMRectReadOnly, 'toJSON'>;
 
 const defaultState: ObserverRect = {
     x: 0,
@@ -17,14 +22,29 @@ const defaultState: ObserverRect = {
     bottom: 0,
     right: 0
 };
+export type UseResizeObserverReturn<T extends HTMLElement = any> = readonly [RefAsState<T>, ObserverRect];
 
-export function useResizeObserver<T extends HTMLElement = any>(options?: ResizeObserverOptions) {
-    const frameID = useRef(0);
-    const ref = useRef<T>(null);
+export function useResizeObserver(target: HookTarget, options?: ResizeObserverOptions): ObserverRect;
 
-    const [rect, setRect] = useState<ObserverRect>(defaultState);
+export function useResizeObserver<Target extends HTMLElement>(
+    options?: ResizeObserverOptions
+): UseResizeObserverReturn<Target>;
 
-    const observer = useMemo(
+export function useResizeObserver<Target extends HTMLElement>(
+    ...args: [HookTarget, ResizeObserverOptions?] | [ResizeObserverOptions?]
+): ObserverRect | UseResizeObserverReturn<Target> {
+    const target = (isTarget(args[0] as HookTarget) ? args[0] : undefined) as HookTarget | undefined;
+    const options = (target ? args[1] : args[0]) as ResizeObserverOptions | undefined;
+
+    const frameID = React.useRef(0);
+    const internalRef = useRefAsState<Target>();
+    const optionsRef = useValueAsRef(options);
+
+    const [rect, setRect] = React.useState<ObserverRect>(defaultState);
+
+    const element = target ? isTarget.getElement(target) : internalRef.current;
+
+    const observer = React.useMemo(
         () =>
             typeof window !== 'undefined'
                 ? new ResizeObserver((entries) => {
@@ -34,26 +54,24 @@ export function useResizeObserver<T extends HTMLElement = any>(options?: ResizeO
                         cancelAnimationFrame(frameID.current);
 
                         frameID.current = requestAnimationFrame(() => {
-                            if (ref.current) {
-                                const boxSize = entry.borderBoxSize?.[0] || entry.contentBoxSize?.[0];
-                                if (boxSize) {
-                                    const width = boxSize.inlineSize;
-                                    const height = boxSize.blockSize;
+                            const boxSize = entry.borderBoxSize?.[0] || entry.contentBoxSize?.[0];
+                            if (boxSize) {
+                                const width = boxSize.inlineSize;
+                                const height = boxSize.blockSize;
 
-                                    setRect({
-                                        width,
-                                        height,
-                                        x: entry.contentRect.x,
-                                        y: entry.contentRect.y,
-                                        top: entry.contentRect.top,
-                                        left: entry.contentRect.left,
-                                        bottom: entry.contentRect.bottom,
-                                        right: entry.contentRect.right
-                                    });
-                                }
-                                else {
-                                    setRect(entry.contentRect);
-                                }
+                                setRect({
+                                    width,
+                                    height,
+                                    x: entry.contentRect.x,
+                                    y: entry.contentRect.y,
+                                    top: entry.contentRect.top,
+                                    left: entry.contentRect.left,
+                                    bottom: entry.contentRect.bottom,
+                                    right: entry.contentRect.right
+                                });
+                            }
+                            else {
+                                setRect(entry.contentRect);
                             }
                         });
                     }
@@ -62,9 +80,9 @@ export function useResizeObserver<T extends HTMLElement = any>(options?: ResizeO
         []
     );
 
-    useEffect(() => {
-        if (ref.current) {
-            observer?.observe(ref.current, options);
+    useIsoLayoutEffect(() => {
+        if (element) {
+            observer?.observe(element as Element, optionsRef.current);
         }
 
         return () => {
@@ -74,9 +92,13 @@ export function useResizeObserver<T extends HTMLElement = any>(options?: ResizeO
                 cancelAnimationFrame(frameID.current);
             }
         };
-    }, [ref.current]);
+    }, [element]);
 
-    return [ref, rect] as const;
+    if (target) {
+        return rect;
+    }
+
+    return [internalRef, rect] as const;
 }
 
 export function useElementSize<T extends HTMLElement = any>(options?: ResizeObserverOptions) {

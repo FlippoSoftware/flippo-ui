@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
-import { randomId } from '../utils';
+import { randomId } from '~@lib/randomId';
+
+import { useIsoLayoutEffect } from '../useIsoLayoutEffect';
+import { useStableCallback } from '../useStableCallback';
 
 function getHeadingsData(
     headings: HTMLElement[],
@@ -9,12 +12,11 @@ function getHeadingsData(
 ): UseScrollSpyHeadingData[] {
     const result: UseScrollSpyHeadingData[] = [];
 
-    for (let i = 0; i < headings.length; i += 1) {
-        const heading = headings[i];
+    for (const heading of headings) {
         result.push({
             depth: getDepth(heading),
             value: getValue(heading),
-            id: heading.id || randomId(),
+            id: heading.id || randomId('scroll-spy'),
             getNode: () => (heading.id ? document.getElementById(heading.id)! : heading)
         });
     }
@@ -38,7 +40,7 @@ function getActiveElement(rects: DOMRect[], offset: number = 0) {
                 position: item.y
             };
         },
-        { index: 0, position: rects[0].y }
+        { index: 0, position: rects[0]?.y ?? 0 }
     );
 
     return closest.index;
@@ -104,21 +106,21 @@ export function useScrollSpy({
     offset = 0,
     scrollHost
 }: UseScrollSpyOptions = {}): UseScrollSpyReturnType {
-    const [active, setActive] = useState(-1);
-    const [initialized, setInitialized] = useState(false);
-    const [data, setData] = useState<UseScrollSpyHeadingData[]>([]);
-    const headingsRef = useRef<UseScrollSpyHeadingData[]>([]);
+    const [active, setActive] = React.useState(-1);
+    const [initialized, setInitialized] = React.useState(false);
+    const [data, setData] = React.useState<UseScrollSpyHeadingData[]>([]);
+    const headingsRef = React.useRef<UseScrollSpyHeadingData[]>([]);
 
-    const handleScroll = () => {
+    const handleScroll = useStableCallback(() => {
         setActive(
             getActiveElement(
                 headingsRef.current.map((d) => d.getNode().getBoundingClientRect()),
                 offset
             )
         );
-    };
+    });
 
-    const initialize = () => {
+    const initialize = useStableCallback(() => {
         const headings = getHeadingsData(
             Array.from(document.querySelectorAll(selector)),
             getDepth,
@@ -133,12 +135,13 @@ export function useScrollSpy({
                 offset
             )
         );
-    };
+    });
 
-    useEffect(() => {
+    useIsoLayoutEffect(() => {
         initialize();
         const _scrollHost = scrollHost || window;
         _scrollHost.addEventListener('scroll', handleScroll);
+
         return () => _scrollHost.removeEventListener('scroll', handleScroll);
     }, [scrollHost]);
 

@@ -1,149 +1,83 @@
 import React from 'react';
 
-import { clamp } from '~@lib/clamp';
+import { isTarget } from '~@lib/isTarget';
 
-import { useOnMount } from '../useOnMount';
-import { useStableCallback } from '../useStableCallback';
+import type { HookTarget } from '~@lib/isTarget';
 
-export type UseMovePosition = {
+import { useIsoLayoutEffect } from '../useIsoLayoutEffect';
+import { useRefAsState } from '../useRefAsState';
+
+import type { RefAsState } from '../useRefAsState';
+
+export type UseMouseOptions = {
+    /** Reset position to (0, 0) when mouse leaves the element */
+    resetOnExit?: boolean;
+};
+
+export type UseMouseReturn = {
     x: number;
     y: number;
 };
 
-export function clampUseMovePosition(position: UseMovePosition) {
-    return {
-        x: clamp(position.x, 0, 1),
-        y: clamp(position.y, 0, 1)
-    };
-}
+export function useMouse(target: HookTarget, options?: UseMouseOptions): UseMouseReturn;
 
-export type UseMoveHandlers = {
-    onScrubStart?: () => void;
-    onScrubEnd?: () => void;
-};
+export function useMouse<Target extends HTMLElement>(
+    options?: UseMouseOptions
+): UseMouseReturn & { ref: RefAsState<Target> };
 
-export type UseMoveReturnValue<T extends HTMLElement = any> = {
-    ref: React.RefCallback<T | null>;
-    active: boolean;
-};
+export function useMouse<Target extends HTMLElement>(
+    ...args: [HookTarget, UseMouseOptions?] | [UseMouseOptions?]
+): UseMouseReturn | (UseMouseReturn & { ref: RefAsState<Target> }) {
+    const target = (isTarget(args[0] as HookTarget) ? args[0] : undefined) as HookTarget | undefined;
+    const options = ((target ? args[1] : args[0]) ?? { resetOnExit: false }) as UseMouseOptions;
 
-export function useMove<T extends HTMLElement = any>(
-    onChange: (value: UseMovePosition) => void,
-    handlers?: UseMoveHandlers,
-    dir: 'ltr' | 'rtl' = 'ltr'
-): UseMoveReturnValue<T> {
-    const mounted = React.useRef<boolean>(false);
-    const isSliding = React.useRef(false);
-    const frame = React.useRef(0);
-    const [active, setActive] = React.useState(false);
-    const cleanupRef = React.useRef<(() => void) | null>(null);
+    const [position, setPosition] = React.useState({ x: 0, y: 0 });
+    const internalRef = useRefAsState<Target>();
 
-    useOnMount(() => {
-        mounted.current = true;
-    });
+    const resetMousePosition = () => setPosition({ x: 0, y: 0 });
 
-    const refCallback: React.RefCallback<T | null> = useStableCallback(
-        (node) => {
-            // Clean up previous node if it exists
-            if (cleanupRef.current) {
-                cleanupRef.current();
-                cleanupRef.current = null;
+    const element = target ? isTarget.getElement(target) : internalRef.current;
+
+    useIsoLayoutEffect(() => {
+        const targetElement = element ?? document;
+
+        const setMousePosition = (event: MouseEvent) => {
+            if (element) {
+                const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+                const x = Math.max(
+                    0,
+                    Math.round(event.pageX - rect.left - (window.scrollX || window.scrollX))
+                );
+
+                const y = Math.max(
+                    0,
+                    Math.round(event.pageY - rect.top - (window.scrollY || window.scrollY))
+                );
+
+                setPosition({ x, y });
             }
-
-            if (!node) {
-                return;
+            else {
+                setPosition({ x: event.clientX, y: event.clientY });
             }
+        };
 
-            const onScrub = ({ x, y }: UseMovePosition) => {
-                cancelAnimationFrame(frame.current);
-
-                frame.current = requestAnimationFrame(() => {
-                    if (mounted.current && node) {
-                        node.style.userSelect = 'none';
-                        const rect = node.getBoundingClientRect();
-
-                        if (rect.width && rect.height) {
-                            const _x = clamp((x - rect.left) / rect.width, 0, 1);
-                            onChange({
-                                x: dir === 'ltr' ? _x : 1 - _x,
-                                y: clamp((y - rect.top) / rect.height, 0, 1)
-                            });
-                        }
-                    }
-                });
-            };
-
-            const bindEvents = () => {
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', stopScrubbing);
-                document.addEventListener('touchmove', onTouchMove, { passive: false });
-                document.addEventListener('touchend', stopScrubbing);
-            };
-
-            const unbindEvents = () => {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', stopScrubbing);
-                document.removeEventListener('touchmove', onTouchMove);
-                document.removeEventListener('touchend', stopScrubbing);
-            };
-
-            function startScrubbing() {
-                if (!isSliding.current && mounted.current) {
-                    isSliding.current = true;
-                    typeof handlers?.onScrubStart === 'function' && handlers.onScrubStart();
-                    setActive(true);
-                    bindEvents();
-                }
-            }
-
-            function stopScrubbing() {
-                if (isSliding.current && mounted.current) {
-                    isSliding.current = false;
-                    setActive(false);
-                    unbindEvents();
-                    setTimeout(() => {
-                        typeof handlers?.onScrubEnd === 'function' && handlers.onScrubEnd();
-                    }, 0);
-                }
-            }
-
-            function onMouseMove(event: MouseEvent) {
-                onScrub({ x: event.clientX, y: event.clientY });
-            }
-
-            function onMouseDown(event: MouseEvent) {
-                startScrubbing();
-                event.preventDefault();
-                onMouseMove(event);
-            }
-
-            function onTouchMove(event: TouchEvent) {
-                if (event.cancelable) {
-                    event.preventDefault();
-                }
-
-                onScrub({ x: event.changedTouches[0]?.clientX ?? 0, y: event.changedTouches[0]?.clientY ?? 0 });
-            }
-
-            function onTouchStart(event: TouchEvent) {
-                if (event.cancelable) {
-                    event.preventDefault();
-                }
-
-                startScrubbing();
-                onTouchMove(event);
-            }
-
-            node.addEventListener('mousedown', onMouseDown);
-            node.addEventListener('touchstart', onTouchStart, { passive: false });
-
-            // Store cleanup function in ref instead of returning it
-            cleanupRef.current = () => {
-                node.removeEventListener('mousedown', onMouseDown);
-                node.removeEventListener('touchstart', onTouchStart);
-            };
+        targetElement.addEventListener('mousemove', setMousePosition as any);
+        if (options.resetOnExit) {
+            targetElement.addEventListener('mouseleave', resetMousePosition as any);
         }
-    );
 
-    return { ref: refCallback, active };
+        return () => {
+            targetElement.removeEventListener('mousemove', setMousePosition as any);
+            if (options.resetOnExit) {
+                targetElement.removeEventListener('mouseleave', resetMousePosition as any);
+            }
+        };
+    }, [element, options.resetOnExit]);
+
+    if (target) {
+        return position;
+    }
+
+    return { ref: internalRef, ...position };
 }

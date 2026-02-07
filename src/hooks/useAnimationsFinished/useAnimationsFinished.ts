@@ -1,13 +1,16 @@
 import type React from 'react';
 import ReactDOM from 'react-dom';
 
+import { isTarget } from '~@lib/isTarget';
 import { resolveRef } from '~@lib/resolveRef';
+
+import type { HookTarget } from '~@lib/isTarget';
 
 import { useAnimationFrame } from '../useAnimationFrame';
 import { useStableCallback } from '../useStableCallback';
 
 export function useAnimationsFinished(
-    elementOrRef: React.RefObject<HTMLElement | null> | HTMLElement | null,
+    elementOrRef: HookTarget | React.RefObject<HTMLElement | null> | HTMLElement | null,
     waitForNextTick = false,
     treatAbortedAsFinished = true
 ) {
@@ -28,7 +31,19 @@ export function useAnimationsFinished(
         ) => {
             frame.cancel();
 
-            const element = resolveRef(elementOrRef);
+            let element: HTMLElement | null = null;
+            if (elementOrRef) {
+                if (elementOrRef instanceof HTMLElement) {
+                    element = elementOrRef;
+                }
+                else if (isTarget(elementOrRef as HookTarget)) {
+                    element = isTarget.getElement(elementOrRef as HookTarget) as HTMLElement | null;
+                }
+                else {
+                    element = resolveRef(elementOrRef as React.RefObject<HTMLElement | null>);
+                }
+            }
+
             if (element == null) {
                 return;
             }

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef } from 'react';
+import React from 'react';
 
-import { useReducedMotion } from '../use-reduced-motion/use-reduced-motion';
+import { useMediaQuery } from '../useMediaQuery';
+import { useOnMount } from '../useOnMount';
 import { useWindowEvent } from '../useWindowEvent';
 
 type UseScrollIntoViewAnimation = {
@@ -53,14 +54,14 @@ export function useScrollIntoView<
     cancelable = true,
     isList = false
 }: UseScrollIntoViewOptions = {}): UseScrollIntoViewReturnValue<Target, Parent> {
-    const frameID = useRef(0);
-    const startTime = useRef(0);
-    const shouldStop = useRef(false);
+    const frameID = React.useRef(0);
+    const startTime = React.useRef(0);
+    const shouldStop = React.useRef(false);
 
-    const scrollableRef = useRef<Parent | null>(null);
-    const targetRef = useRef<Target | null>(null);
+    const scrollableRef = React.useRef<Parent | null>(null);
+    const targetRef = React.useRef<Target | null>(null);
 
-    const reducedMotion = useReducedMotion();
+    const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
     const cancel = (): void => {
         if (frameID.current) {
@@ -68,7 +69,7 @@ export function useScrollIntoView<
         }
     };
 
-    const scrollIntoView = useCallback(
+    const scrollIntoView = React.useCallback(
         ({ alignment = 'start' }: UseScrollIntoViewAnimation = {}) => {
             shouldStop.current = false;
 
@@ -90,10 +91,10 @@ export function useScrollIntoView<
 
             function animateScroll() {
                 if (startTime.current === 0) {
-                    startTime.current = performance.now();
+                    startTime.current = Date.now();
                 }
 
-                const now = performance.now();
+                const now = Date.now();
                 const elapsed = now - startTime.current;
 
                 // Easing timing progress
@@ -117,6 +118,7 @@ export function useScrollIntoView<
                     cancel();
                 }
             }
+
             animateScroll();
         },
         [
@@ -151,7 +153,7 @@ export function useScrollIntoView<
     });
 
     // Cleanup requestAnimationFrame
-    useEffect(() => cancel, []);
+    useOnMount(() => cancel);
 
     return {
         scrollableRef,
@@ -251,7 +253,12 @@ function getRelativePosition({
     return 0;
 }
 
-function getScrollStart({ axis, parent }: any) {
+type GetScrollStartParams = {
+    axis: 'x' | 'y';
+    parent: HTMLElement | null;
+};
+
+function getScrollStart({ axis, parent }: GetScrollStartParams) {
     if (!parent && typeof document === 'undefined') {
         return 0;
     }
@@ -268,7 +275,13 @@ function getScrollStart({ axis, parent }: any) {
     return body[method] + documentElement[method];
 }
 
-function setScrollParam({ axis, parent, distance }: any) {
+type SetScrollParamParams = {
+    axis: 'x' | 'y';
+    parent: HTMLElement | null;
+    distance: number;
+};
+
+function setScrollParam({ axis, parent, distance }: SetScrollParamParams) {
     if (!parent && typeof document === 'undefined') {
         return;
     }

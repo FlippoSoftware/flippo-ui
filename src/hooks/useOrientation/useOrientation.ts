@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React from 'react';
 
 import { useIsoLayoutEffect } from '../useIsoLayoutEffect';
 
@@ -53,8 +53,8 @@ export function useOrientation({
     defaultType = 'landscape-primary',
     getInitialValueInEffect = true
 }: UseOrientationOptions = {}): UseOrientationReturnType {
-    const [orientation, setOrientation] = useState<UseOrientationReturnType>(
-        getInitialValue(
+    const [orientation, setOrientation] = React.useState<UseOrientationReturnType>(
+        () => getInitialValue(
             {
                 angle: defaultAngle,
                 type: defaultType
