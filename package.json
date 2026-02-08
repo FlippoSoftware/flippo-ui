@@ -25,10 +25,20 @@
       "import": "./dist/hooks/useAnimationsFinished/index.es.js",
       "require": "./dist/hooks/useAnimationsFinished/index.cjs.js"
     },
+    "./use-click-outside": {
+      "types": "./dist/hooks/useClickOutside/index.d.ts",
+      "import": "./dist/hooks/useClickOutside/index.es.js",
+      "require": "./dist/hooks/useClickOutside/index.cjs.js"
+    },
     "./use-clipboard": {
       "types": "./dist/hooks/useClipboard/index.d.ts",
       "import": "./dist/hooks/useClipboard/index.es.js",
       "require": "./dist/hooks/useClipboard/index.cjs.js"
+    },
+    "./use-color-schema": {
+      "types": "./dist/hooks/useColorSchema/index.d.ts",
+      "import": "./dist/hooks/useColorSchema/index.es.js",
+      "require": "./dist/hooks/useColorSchema/index.cjs.js"
     },
     "./use-controlled-state": {
       "types": "./dist/hooks/useControlledState/index.d.ts",
@@ -39,6 +49,11 @@
       "types": "./dist/hooks/useDidUpdate/index.d.ts",
       "import": "./dist/hooks/useDidUpdate/index.es.js",
       "require": "./dist/hooks/useDidUpdate/index.cjs.js"
+    },
+    "./use-document-title": {
+      "types": "./dist/hooks/useDocumentTitle/index.d.ts",
+      "import": "./dist/hooks/useDocumentTitle/index.es.js",
+      "require": "./dist/hooks/useDocumentTitle/index.cjs.js"
     },
     "./use-drag-gesture": {
       "types": "./dist/hooks/useDragGesture/index.d.ts",
@@ -70,15 +85,80 @@
       "import": "./dist/hooks/useEyeDropper/index.es.js",
       "require": "./dist/hooks/useEyeDropper/index.cjs.js"
     },
+    "./use-favicon": {
+      "types": "./dist/hooks/useFavicon/index.d.ts",
+      "import": "./dist/hooks/useFavicon/index.es.js",
+      "require": "./dist/hooks/useFavicon/index.cjs.js"
+    },
+    "./use-file-dialog": {
+      "types": "./dist/hooks/useFileDialog/index.d.ts",
+      "import": "./dist/hooks/useFileDialog/index.es.js",
+      "require": "./dist/hooks/useFileDialog/index.cjs.js"
+    },
+    "./use-focus": {
+      "types": "./dist/hooks/useFocus/index.d.ts",
+      "import": "./dist/hooks/useFocus/index.es.js",
+      "require": "./dist/hooks/useFocus/index.cjs.js"
+    },
+    "./use-focus-return": {
+      "types": "./dist/hooks/useFocusReturn/index.d.ts",
+      "import": "./dist/hooks/useFocusReturn/index.es.js",
+      "require": "./dist/hooks/useFocusReturn/index.cjs.js"
+    },
+    "./use-focus-trap": {
+      "types": "./dist/hooks/useFocusTrap/index.d.ts",
+      "import": "./dist/hooks/useFocusTrap/index.es.js",
+      "require": "./dist/hooks/useFocusTrap/index.cjs.js"
+    },
+    "./use-focus-within": {
+      "types": "./dist/hooks/useFocusWithin/index.d.ts",
+      "import": "./dist/hooks/useFocusWithin/index.es.js",
+      "require": "./dist/hooks/useFocusWithin/index.cjs.js"
+    },
     "./use-forced-rerendering": {
       "types": "./dist/hooks/useForcedRerendering/index.d.ts",
       "import": "./dist/hooks/useForcedRerendering/index.es.js",
       "require": "./dist/hooks/useForcedRerendering/index.cjs.js"
     },
+    "./use-fullscreen": {
+      "types": "./dist/hooks/useFullscreen/index.d.ts",
+      "import": "./dist/hooks/useFullscreen/index.es.js",
+      "require": "./dist/hooks/useFullscreen/index.cjs.js"
+    },
+    "./use-hash": {
+      "types": "./dist/hooks/useHash/index.d.ts",
+      "import": "./dist/hooks/useHash/index.es.js",
+      "require": "./dist/hooks/useHash/index.cjs.js"
+    },
+    "./use-hotkeys": {
+      "types": "./dist/hooks/useHotkeys/index.d.ts",
+      "import": "./dist/hooks/useHotkeys/index.es.js",
+      "require": "./dist/hooks/useHotkeys/index.cjs.js"
+    },
+    "./use-hover": {
+      "types": "./dist/hooks/useHover/index.d.ts",
+      "import": "./dist/hooks/useHover/index.es.js",
+      "require": "./dist/hooks/useHover/index.cjs.js"
+    },
     "./use-id": {
       "types": "./dist/hooks/useId/index.d.ts",
       "import": "./dist/hooks/useId/index.es.js",
       "require": "./dist/hooks/useId/index.cjs.js"
+    },
+    "./use-idle": {
+      "types": "./dist/hooks/useIdle/index.d.ts",
+      "import": "./dist/hooks/useIdle/index.es.js",
+      "require": "./dist/hooks/useIdle/index.cjs.js"
+    },
+    "./use-in-viewport": {
+      "types": "./dist/hooks/useInViewport/index.d.ts",
+      "import": "./dist/hooks/useInViewport/index.es.js",
+      "require": "./dist/hooks/useInViewport/index.cjs.js"
+    },
+    "./use-intersection": {
+      "types": "./dist/hooks/useIntersection/index.d.ts",
+      "import": "./dist/hooks/useIntersection/index.es.js",
+      "require": "./dist/hooks/useIntersection/index.cjs.js"
     },
     "./use-interval": {
       "types": "./dist/hooks/useInterval/index.d.ts",
@@ -105,6 +185,16 @@
       "import": "./dist/hooks/useLazyRef/index.es.js",
       "require": "./dist/hooks/useLazyRef/index.cjs.js"
     },
+    "./use-local-storage": {
+      "types": "./dist/hooks/useLocalStorage/index.d.ts",
+      "import": "./dist/hooks/useLocalStorage/index.es.js",
+      "require": "./dist/hooks/useLocalStorage/index.cjs.js"
+    },
+    "./use-long-press": {
+      "types": "./dist/hooks/useLongPress/index.d.ts",
+      "import": "./dist/hooks/useLongPress/index.es.js",
+      "require": "./dist/hooks/useLongPress/index.cjs.js"
+    },
     "./use-media-query": {
       "types": "./dist/hooks/useMediaQuery/index.d.ts",
       "import": "./dist/hooks/useMediaQuery/index.es.js",
@@ -114,6 +204,26 @@
       "types": "./dist/hooks/useMergedRef/index.d.ts",
       "import": "./dist/hooks/useMergedRef/index.es.js",
       "require": "./dist/hooks/useMergedRef/index.cjs.js"
+    },
+    "./use-mouse": {
+      "types": "./dist/hooks/useMouse/index.d.ts",
+      "import": "./dist/hooks/useMouse/index.es.js",
+      "require": "./dist/hooks/useMouse/index.cjs.js"
+    },
+    "./use-move": {
+      "types": "./dist/hooks/useMove/index.d.ts",
+      "import": "./dist/hooks/useMove/index.es.js",
+      "require": "./dist/hooks/useMove/index.cjs.js"
+    },
+    "./use-mutation-observer": {
+      "types": "./dist/hooks/useMutationObserver/index.d.ts",
+      "import": "./dist/hooks/useMutationObserver/index.es.js",
+      "require": "./dist/hooks/useMutationObserver/index.cjs.js"
+    },
+    "./use-network": {
+      "types": "./dist/hooks/useNetwork/index.d.ts",
+      "import": "./dist/hooks/useNetwork/index.es.js",
+      "require": "./dist/hooks/useNetwork/index.cjs.js"
     },
     "./use-on-first-render": {
       "types": "./dist/hooks/useOnFirstRender/index.d.ts",
@@ -135,15 +245,45 @@
       "import": "./dist/hooks/useOpenInteractionType/index.es.js",
       "require": "./dist/hooks/useOpenInteractionType/index.cjs.js"
     },
+    "./use-orientation": {
+      "types": "./dist/hooks/useOrientation/index.d.ts",
+      "import": "./dist/hooks/useOrientation/index.es.js",
+      "require": "./dist/hooks/useOrientation/index.cjs.js"
+    },
+    "./use-os": {
+      "types": "./dist/hooks/useOs/index.d.ts",
+      "import": "./dist/hooks/useOs/index.es.js",
+      "require": "./dist/hooks/useOs/index.cjs.js"
+    },
     "./use-previous-value": {
       "types": "./dist/hooks/usePreviousValue/index.d.ts",
       "import": "./dist/hooks/usePreviousValue/index.es.js",
       "require": "./dist/hooks/usePreviousValue/index.cjs.js"
     },
+    "./use-ref-as-state": {
+      "types": "./dist/hooks/useRefAsState/index.d.ts",
+      "import": "./dist/hooks/useRefAsState/index.es.js",
+      "require": "./dist/hooks/useRefAsState/index.cjs.js"
+    },
+    "./use-resize-observer": {
+      "types": "./dist/hooks/useResizeObserver/index.d.ts",
+      "import": "./dist/hooks/useResizeObserver/index.es.js",
+      "require": "./dist/hooks/useResizeObserver/index.cjs.js"
+    },
+    "./use-scroll-into-view": {
+      "types": "./dist/hooks/useScrollIntoView/index.d.ts",
+      "import": "./dist/hooks/useScrollIntoView/index.es.js",
+      "require": "./dist/hooks/useScrollIntoView/index.cjs.js"
+    },
     "./use-scroll-lock": {
       "types": "./dist/hooks/useScrollLock/index.d.ts",
       "import": "./dist/hooks/useScrollLock/index.es.js",
       "require": "./dist/hooks/useScrollLock/index.cjs.js"
+    },
+    "./use-scroll-spy": {
+      "types": "./dist/hooks/useScrollSpy/index.d.ts",
+      "import": "./dist/hooks/useScrollSpy/index.es.js",
+      "require": "./dist/hooks/useScrollSpy/index.cjs.js"
     },
     "./use-ssr": {
       "types": "./dist/hooks/useSsr/index.d.ts",
@@ -164,6 +304,11 @@
       "types": "./dist/hooks/useStore/index.d.ts",
       "import": "./dist/hooks/useStore/index.es.js",
       "require": "./dist/hooks/useStore/index.cjs.js"
+    },
+    "./use-text-selection": {
+      "types": "./dist/hooks/useTextSelection/index.d.ts",
+      "import": "./dist/hooks/useTextSelection/index.es.js",
+      "require": "./dist/hooks/useTextSelection/index.cjs.js"
     },
     "./use-timeout": {
       "types": "./dist/hooks/useTimeout/index.d.ts",
@@ -189,6 +334,21 @@
       "types": "./dist/hooks/useValueChanged/index.d.ts",
       "import": "./dist/hooks/useValueChanged/index.es.js",
       "require": "./dist/hooks/useValueChanged/index.cjs.js"
+    },
+    "./use-viewport-size": {
+      "types": "./dist/hooks/useViewportSize/index.d.ts",
+      "import": "./dist/hooks/useViewportSize/index.es.js",
+      "require": "./dist/hooks/useViewportSize/index.cjs.js"
+    },
+    "./use-window-event": {
+      "types": "./dist/hooks/useWindowEvent/index.d.ts",
+      "import": "./dist/hooks/useWindowEvent/index.es.js",
+      "require": "./dist/hooks/useWindowEvent/index.cjs.js"
+    },
+    "./use-window-scroll": {
+      "types": "./dist/hooks/useWindowScroll/index.d.ts",
+      "import": "./dist/hooks/useWindowScroll/index.es.js",
+      "require": "./dist/hooks/useWindowScroll/index.cjs.js"
     }
   },
   "main": "./dist/hooks/index.cjs.js",
@@ -205,6 +365,7 @@
   },
   "dependencies": {
     "reselect": "catalog:",
+    "tabbable": "catalog:",
     "use-sync-external-store": "catalog:"
   },
   "devDependencies": {

@@ -1,26 +1,18 @@
 import React from 'react';
 
+import { tabbable } from 'tabbable';
+
 import { isTarget } from '~@lib/isTarget';
 
 import type { HookTarget } from '~@lib/isTarget';
 
 import { useIsoLayoutEffect } from '../useIsoLayoutEffect';
 
-export const FOCUS_SELECTOR = 'a, input, select, textarea, button, object, [tabindex]';
-
-function getFocusableElements(element: HTMLElement) {
-    const elements = Array.from(element.querySelectorAll(FOCUS_SELECTOR));
-    return elements.filter((element) => {
-        const htmlEl = element as HTMLElement;
-        return htmlEl.tabIndex !== -1 && !htmlEl.hidden && htmlEl.style.display !== 'none';
-    }) as HTMLElement[];
-}
-
 function focusElement(element: HTMLElement) {
     const autofocusElement = element.querySelector('[data-autofocus]') as HTMLElement;
     if (autofocusElement)
         return autofocusElement.focus();
-    const focusableElements = getFocusableElements(element);
+    const focusableElements = tabbable(element);
     if (focusableElements.length)
         focusableElements[0]?.focus();
 }
@@ -60,7 +52,7 @@ export function useFocusTrap<Target extends HTMLElement>(...args: any[]) {
             if (event.key !== 'Tab')
                 return;
 
-            const [firstElement, ...restElements] = getFocusableElements(htmlElement);
+            const [firstElement, ...restElements] = tabbable(htmlElement);
             if (!restElements.length)
                 return;
 
