@@ -53,12 +53,22 @@ export function useAnimationsFinished(
             }
             else {
                 frame.request(() => {
-                    function exec() {
+                    function exec(retryOnEmpty = false) {
                         if (!element) {
                             return;
                         }
 
-                        Promise.all(element.getAnimations().map((anim) => anim.finished))
+                        const animations = element.getAnimations();
+
+                        // If no animations are detected, the browser may not have started the CSS
+                        // transitions yet (e.g. for complex popups that take longer to process style
+                        // changes). Wait one more frame and try again before giving up.
+                        if (animations.length === 0 && retryOnEmpty) {
+                            frame.request(() => exec(false));
+                            return;
+                        }
+
+                        Promise.all(animations.map((anim) => anim.finished))
                             .then(() => {
                                 if (signal != null && signal.aborted) {
                                     return;
@@ -86,17 +96,17 @@ export function useAnimationsFinished(
                                     // Sometimes animations can be aborted because a property they depend on changes
                                     //  while the animation plays.
                                     // In such cases, we need to re-check if any new animations have started.
-                                    exec();
+                                    exec(false);
                                 }
                             });
                     }
 
                     // `open: true` animations need to wait for the next tick to be detected
                     if (waitForNextTick) {
-                        frame.request(exec);
+                        frame.request(() => exec(true));
                     }
                     else {
-                        exec();
+                        exec(true);
                     }
                 });
             }

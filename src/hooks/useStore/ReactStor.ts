@@ -105,11 +105,17 @@ export class ReactStore<
      */
     public useControlledProp<Key extends keyof State, Value extends State[Key]>(
         key: keyof State,
-        controlled: Value | undefined,
-        defaultValue: Value
+        controlled: Value | undefined
     ): void {
         React.useDebugValue(key);
         const isControlled = controlled !== undefined;
+
+        useIsoLayoutEffect(() => {
+            if (isControlled && !Object.is(this.state[key], controlled)) {
+                // Set the internal state to match the controlled value.
+                super.setState({ ...this.state, [key]: controlled });
+            }
+        }, [key, controlled, isControlled]);
 
         if (process.env.NODE_ENV !== 'production') {
             const previouslyControlled = this.controlledValues.get(key);
@@ -120,22 +126,6 @@ export class ReactStore<
                 );
             }
         }
-
-        if (!this.controlledValues.has(key)) {
-            // First time initialization
-            this.controlledValues.set(key, isControlled);
-
-            if (!isControlled && !Object.is(this.state[key], defaultValue)) {
-                super.setState({ ...this.state, [key]: defaultValue });
-            }
-        }
-
-        useIsoLayoutEffect(() => {
-            if (isControlled && !Object.is(this.state[key], controlled)) {
-                // Set the internal state to match the controlled value.
-                super.setState({ ...this.state, [key]: controlled });
-            }
-        }, [key, controlled, defaultValue, isControlled]);
     }
 
     /**
