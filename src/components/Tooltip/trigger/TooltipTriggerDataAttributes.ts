@@ -4,5 +4,6 @@ import { MultipleActiveAttributes } from '../utils/stateAttributes';
 
 export enum TooltipTriggerDataAttributes {
     popupOpen = CommonTriggerDataAttributes.popupOpen,
-    multipleActive = MultipleActiveAttributes.multipleActive
+    multipleActive = MultipleActiveAttributes.multipleActive,
+    triggerDisabled = 'data-trigger-disabled'
 }

@@ -81,6 +81,10 @@ export function TooltipPositioner(componentProps: TooltipPositionerProps) {
             hiddenStyles.pointerEvents = 'none';
         }
 
+        if (!mounted) {
+            hiddenStyles.display = 'none';
+        }
+
         return {
             role: 'presentation',
             hidden: !mounted,

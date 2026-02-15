@@ -14,14 +14,13 @@ export { useMenuSubmenuRootContext } from './MenuSubmenuRootContext';
  * Documentation: [Base UI Menu](https://base-ui.com/react/components/menu)
  */
 export function MenuSubmenuRoot(props: MenuSubmenuRoot.Props) {
-    const { closeParentOnEsc = false } = props;
     const parentMenu = useMenuRootContext().store;
 
     const contextValue = React.useMemo(() => ({ parentMenu }), [parentMenu]);
 
     return (
         <MenuSubmenuRootContext.Provider value={contextValue}>
-            <MenuRoot {...props} closeParentOnEsc={closeParentOnEsc} />
+            <MenuRoot {...props} />
         </MenuSubmenuRootContext.Provider>
     );
 }
@@ -30,8 +29,19 @@ export type MenuSubmenuRootProps = {
     /**
      * Event handler called when the menu is opened or closed.
      */
-    onOpenChange?: (open: boolean, eventDetails: MenuSubmenuRoot.ChangeEventDetails) => void;
-} & Omit<MenuRoot.Props, 'modal' | 'openOnHover' | 'onOpenChange'>;
+    onOpenChange?:
+    | ((open: boolean, eventDetails: MenuSubmenuRoot.ChangeEventDetails) => void)
+    | undefined;
+    /**
+     * When in a submenu, determines whether pressing the Escape key
+     * closes the entire menu, or only the current child menu.
+     * @default false
+     */
+    closeParentOnEsc?: boolean | undefined;
+} & Omit<
+    MenuRoot.Props,
+    'modal' | 'openOnHover' | 'onOpenChange'
+>;
 
 export type MenuSubmenuRootState = {};
 

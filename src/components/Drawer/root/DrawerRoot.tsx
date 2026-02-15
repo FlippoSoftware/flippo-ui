@@ -68,7 +68,7 @@ export function DrawerRoot(componentProps: DrawerRoot.Props) {
         [DrawerGestureDataAttributes.swipeDirectionDown]: direction === 'down' ? '' : null
     }), [direction, snapPoints]);
 
-    store.useControlledProp('activeSnapPointIndex', activeSnapPoint, 0);
+    store.useControlledProp('activeSnapPointIndex', activeSnapPoint);
     store.useSyncedValues({
         direction,
         shouldDrag,

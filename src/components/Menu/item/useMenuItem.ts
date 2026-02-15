@@ -3,14 +3,14 @@ import React from 'react';
 import { useMergedRef } from '@flippo-ui/hooks';
 
 import { mergeProps } from '~@lib/merge';
-import { REASONS } from '~@lib/reason';
 
 import type { HeadlessUIEvent, HTMLProps } from '~@lib/types';
 
-import { useContextMenuRootContext } from '../../ContextMenu/root/ContextMenuRootContext';
 import { useButton } from '../../use-button';
 
 import type { MenuStore } from '../store/MenuStore';
+
+import { useMenuItemCommonProps } from './useMenuItemCommonProps';
 
 export const REGULAR_ITEM = {
     type: 'regular-item' as const
@@ -29,9 +29,6 @@ export function useMenuItem(params: useMenuItem.Parameters): useMenuItem.ReturnV
     } = params;
 
     const itemRef = React.useRef<HTMLElement | null>(null);
-    const contextMenuContext = useContextMenuRootContext(true);
-    const isContextMenu = contextMenuContext !== undefined;
-    const { events: menuEvents } = store.useState('floatingTreeRoot');
 
     const { getButtonProps, buttonRef } = useButton({
         disabled,
@@ -39,25 +36,21 @@ export function useMenuItem(params: useMenuItem.Parameters): useMenuItem.ReturnV
         native: nativeButton
     });
 
+    const commonProps = useMenuItemCommonProps({
+        closeOnClick,
+        highlighted,
+        id,
+        nodeId,
+        store,
+        itemRef,
+        itemMetadata
+    });
+
     const getItemProps = React.useCallback(
         (externalProps?: HTMLProps): HTMLProps => {
             return mergeProps<'div'>(
+                commonProps,
                 {
-                    id,
-                    role: 'menuitem',
-                    tabIndex: highlighted ? 0 : -1,
-                    onMouseMove(event) {
-                        if (!nodeId) {
-                            return;
-                        }
-
-                        // Inform the floating tree that a menu item within this menu was hovered/moved over
-                        // so unrelated descendant submenus can be closed.
-                        menuEvents.emit('itemhover', {
-                            nodeId,
-                            target: event.currentTarget
-                        });
-                    },
                     onMouseEnter() {
                         if (itemMetadata.type !== 'submenu-trigger') {
                             return;
@@ -69,55 +62,13 @@ export function useMenuItem(params: useMenuItem.Parameters): useMenuItem.ReturnV
                         if (event.key === ' ' && store.context.typingRef.current) {
                             event.preventHeadlessUIHandler();
                         }
-                    },
-                    onClick(event) {
-                        if (closeOnClick) {
-                            menuEvents.emit('close', { domEvent: event, reason: REASONS.itemPress });
-                        }
-                    },
-                    onMouseUp(event) {
-                        if (contextMenuContext) {
-                            const initialCursorPoint = contextMenuContext.initialCursorPointRef.current;
-                            contextMenuContext.initialCursorPointRef.current = null;
-                            if (
-                                isContextMenu
-                                && initialCursorPoint
-                                && Math.abs(event.clientX - initialCursorPoint.x) <= 1
-                                && Math.abs(event.clientY - initialCursorPoint.y) <= 1
-                            ) {
-                                return;
-                            }
-                        }
-
-                        if (
-                            itemRef.current
-                            && store.context.allowMouseUpTriggerRef.current
-                            && (!isContextMenu || event.button === 2)
-                        ) {
-                            // This fires whenever the user clicks on the trigger, moves the cursor, and releases it over the item.
-                            // We trigger the click and override the `closeOnClick` preference to always close the menu.
-                            if (itemMetadata.type === 'regular-item') {
-                                itemRef.current.click();
-                            }
-                        }
                     }
                 },
                 externalProps,
                 getButtonProps
             );
         },
-        [
-            id,
-            highlighted,
-            getButtonProps,
-            closeOnClick,
-            menuEvents,
-            store,
-            isContextMenu,
-            contextMenuContext,
-            itemMetadata,
-            nodeId
-        ]
+        [commonProps, getButtonProps, store, itemMetadata]
     );
 
     const mergedRef = useMergedRef(itemRef, buttonRef);

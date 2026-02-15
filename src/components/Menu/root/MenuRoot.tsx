@@ -1,10 +1,9 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 import {
-    useAnimationFrame,
     useId,
     useIsoLayoutEffect,
+    useOnFirstRender,
     useScrollLock,
     useTimeout
 } from '@flippo-ui/hooks';
@@ -113,8 +112,27 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
     }, [contextMenuContext, parentMenuRootContext, menubarContext, isSubmenu]);
 
     const store = MenuStore.useStore(handle?.store, {
+        open: defaultOpen,
+        openProp,
+        activeTriggerId: defaultTriggerIdProp,
+        triggerIdProp,
         parent: parentFromContext
     });
+
+    // Support initially open state when uncontrolled
+    useOnFirstRender(() => {
+        if (openProp === undefined && store.state.open === false && defaultOpen === true) {
+            store.update({
+                open: true,
+                activeTriggerId: defaultTriggerIdProp
+            });
+        }
+    });
+
+    store.useControlledProp('openProp', openProp);
+    store.useControlledProp('triggerIdProp', triggerIdProp);
+
+    store.useContextCallback('onOpenChangeComplete', onOpenChangeComplete);
 
     const floatingTreeRoot = store.useState('floatingTreeRoot');
     const floatingNodeIdFromContext = useFloatingNodeId(floatingTreeRoot);
@@ -146,11 +164,6 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
         floatingParentNodeIdFromContext,
         store
     ]);
-
-    store.useControlledProp('open', openProp, defaultOpen);
-    store.useControlledProp('activeTriggerId', triggerIdProp, defaultTriggerIdProp);
-
-    store.useContextCallback('onOpenChangeComplete', onOpenChangeComplete);
 
     const open = store.useState('open');
     const activeTriggerElement = store.useState('activeTriggerElement');
@@ -244,7 +257,11 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
         ) => {
             const reason = eventDetails.reason;
 
-            if (open === nextOpen && eventDetails.trigger === activeTriggerElement) {
+            if (
+                open === nextOpen
+                && eventDetails.trigger === activeTriggerElement
+                && lastOpenChangeReason === reason
+            ) {
                 return;
             }
 
@@ -255,7 +272,7 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
             // Do not immediately reset the activeTriggerId to allow
             // exit animations to play and focus to be returned correctly.
             if (!nextOpen && eventDetails.trigger == null) {
-                eventDetails.trigger = activeTriggerElement as HTMLElement ?? undefined;
+                eventDetails.trigger = activeTriggerElement ?? undefined;
             }
 
             onOpenChange?.(nextOpen, eventDetails as MenuRoot.ChangeEventDetails);
@@ -311,32 +328,23 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
             }
 
             const isKeyboardClick
-        = (reason === REASONS.triggerPress || reason === REASONS.itemPress)
-          && (nativeEvent as MouseEvent).detail === 0
-          && nativeEvent?.isTrusted;
+                = (reason === REASONS.triggerPress || reason === REASONS.itemPress)
+                  && (nativeEvent as MouseEvent).detail === 0
+                  && nativeEvent?.isTrusted;
             const isDismissClose = !nextOpen && (reason === REASONS.escapeKey || reason == null);
 
-            function changeState() {
-                const updatedState: Partial<State<Payload>> = { open: nextOpen, openChangeReason: reason };
-                openEventRef.current = eventDetails.event ?? null;
+            const updatedState: Partial<State<Payload>> = { open: nextOpen, openChangeReason: reason };
+            openEventRef.current = eventDetails.event ?? null;
 
-                // If a popup is closing, the `trigger` may be null.
-                // We want to keep the previous value so that exit animations are played and focus is returned correctly.
-                const newTriggerId = eventDetails.trigger?.id ?? null;
-                if (newTriggerId || nextOpen) {
-                    updatedState.activeTriggerId = newTriggerId;
-                    updatedState.activeTriggerElement = eventDetails.trigger ?? null;
-                }
-
-                store.update(updatedState);
+            // If a popup is closing, the `trigger` may be null.
+            // We want to keep the previous value so that exit animations are played and focus is returned correctly.
+            const newTriggerId = eventDetails.trigger?.id ?? null;
+            if (newTriggerId || nextOpen) {
+                updatedState.activeTriggerId = newTriggerId;
+                updatedState.activeTriggerElement = eventDetails.trigger ?? null;
             }
 
-            if (reason === REASONS.triggerHover) {
-                ReactDOM.flushSync(changeState);
-            }
-            else {
-                changeState();
-            }
+            store.update(updatedState);
 
             if (
                 parent.type === 'menubar'
@@ -360,7 +368,7 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
     const createMenuEventDetails = React.useCallback(
         (reason: MenuRoot.ChangeEventReason) => {
             const details: MenuRoot.ChangeEventDetails
-        = createChangeEventDetails<MenuRoot.ChangeEventReason>(reason) as MenuRoot.ChangeEventDetails;
+                = createChangeEventDetails<MenuRoot.ChangeEventReason>(reason) as MenuRoot.ChangeEventDetails;
             details.preventUnmountOnClose = () => {
                 store.set('preventUnmountingOnClose', true);
             };
@@ -418,7 +426,7 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
 
     const dismiss = useDismiss(floatingRootContext, {
         enabled: !disabled,
-        bubbles: closeParentOnEsc && parent.type === 'menu',
+        bubbles: { escapeKey: closeParentOnEsc && parent.type === 'menu' },
         outsidePress() {
             if (parent.type !== 'context-menu' || openEventRef.current?.type === 'contextmenu') {
                 return true;
@@ -488,20 +496,18 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
     } = useInteractions([dismiss, role, listNavigation, typeahead]);
 
     const activeTriggerProps = React.useMemo(() => {
-        const referenceProps = mergeProps(
+        const mergedProps = mergeProps(
             getReferenceProps(),
             {
-                onMouseEnter() {
-                    store.set('hoverEnabled', true);
-                },
                 onMouseMove() {
                     store.set('allowMouseEnter', true);
                 }
             },
             interactionTypeProps
         );
-        delete referenceProps.role;
-        return referenceProps;
+
+        delete mergedProps.role;
+        return mergedProps;
     }, [getReferenceProps, store, interactionTypeProps]);
 
     const inactiveTriggerProps = React.useMemo(() => {
@@ -510,21 +516,20 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
             return triggerProps;
         }
 
-        const { role: roleDiscarded, 'aria-controls': ariaControlsDiscarded, ...rest } = triggerProps;
-        return rest;
-    }, [getTriggerProps]);
+        const mergedProps = mergeProps(triggerProps, interactionTypeProps);
+        delete mergedProps.role;
+        delete mergedProps['aria-controls'];
+        return mergedProps;
+    }, [getTriggerProps, interactionTypeProps]);
 
-    const disableHoverTimeout = useAnimationFrame();
     const popupProps = React.useMemo(
         () =>
             getFloatingProps({
-                onMouseEnter() {
-                    if (parent.type === 'menu') {
-                        disableHoverTimeout.request(() => store.set('hoverEnabled', false));
-                    }
-                },
                 onMouseMove() {
                     store.set('allowMouseEnter', true);
+                    if (parent.type === 'menu') {
+                        store.set('hoverEnabled', false);
+                    }
                 },
                 onClick() {
                     if (store.select('hoverEnabled')) {
@@ -541,7 +546,7 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
                     }
                 }
             }),
-        [getFloatingProps, parent.type, disableHoverTimeout, store]
+        [getFloatingProps, parent.type, store]
     );
 
     const itemProps = React.useMemo(() => getItemProps(), [getItemProps]);
@@ -563,13 +568,13 @@ export function MenuRoot<Payload>(props: MenuRoot.Props<Payload>) {
     );
 
     const content = (
-        <MenuRootContext.Provider value={context as MenuRootContextValue}>
+        <MenuRootContext.Provider value={context as MenuRootContextValue<Payload>}>
             {typeof children === 'function' ? children({ payload }) : children}
         </MenuRootContext.Provider>
     );
 
     if (parent.type === undefined || parent.type === 'context-menu') {
-    // set up a FloatingTree to provide the context to nested menus
+        // set up a FloatingTree to provide the context to nested menus
         return <FloatingTree externalTree={floatingTreeRoot}>{content}</FloatingTree>;
     }
 
@@ -627,7 +632,8 @@ export type MenuRootProps<Payload = unknown> = {
     highlightItemOnHover?: boolean;
     /**
      * Determines if the menu enters a modal state when open.
-     * - `true`: user interaction is limited to the menu: document page scroll is locked and and pointer interactions on outside elements are disabled.
+     * - `true`: user interaction is limited to the menu: document page scroll is locked and and pointer
+     * interactions on outside elements are disabled.
      * - `false`: user interaction with the rest of the document is allowed.
      * @default true
      */

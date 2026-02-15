@@ -1,13 +1,22 @@
 import React from 'react';
 
+import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
+
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping } from '~@lib/popupStateMapping';
+import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { Align, Side } from '~@lib/hooks';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useMenuPositionerContext } from '../positioner/MenuPositionerContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
+
+const stateAttributesMapping: StateAttributesMapping<MenuArrow.State> = {
+    ...popupStateMapping,
+    ...transitionStatusMapping
+};
 
 /**
  * Displays an element positioned against the menu anchor.
@@ -34,20 +43,28 @@ export function MenuArrow(componentProps: MenuArrow.Props) {
         arrowStyles
     } = useMenuPositionerContext();
     const open = store.useState('open');
+    const transitionStatus = store.useState('transitionStatus');
 
     const state: MenuArrow.State = React.useMemo(
         () => ({
             open,
             side,
             align,
-            uncentered: arrowUncentered
+            uncentered: arrowUncentered,
+            transitionStatus
         }),
-        [open, side, align, arrowUncentered]
+        [
+            open,
+            side,
+            align,
+            arrowUncentered,
+            transitionStatus
+        ]
     );
 
     return useRenderElement('div', componentProps, {
         ref: [arrowRef, ref],
-        customStyleHookMapping: popupStateMapping,
+        customStyleHookMapping: stateAttributesMapping,
         state,
         props: {
             'style': arrowStyles,
@@ -65,6 +82,7 @@ export type MenuArrowState = {
     side: Side;
     align: Align;
     uncentered: boolean;
+    transitionStatus: TransitionStatus;
 };
 
 export type MenuArrowProps = {} & HeadlessUIComponentProps<'div', MenuArrow.State>;

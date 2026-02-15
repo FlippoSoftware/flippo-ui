@@ -45,8 +45,8 @@ function PopoverRootComponent<Payload>(props: PopoverRoot.Props<Payload>) {
         activeTriggerId: triggerIdProp !== undefined ? triggerIdProp : defaultTriggerIdProp
     });
 
-    store.useControlledProp('open', openProp, defaultOpenProp);
-    store.useControlledProp('activeTriggerId', triggerIdProp, defaultTriggerIdProp);
+    store.useControlledProp('open', openProp);
+    store.useControlledProp('activeTriggerId', triggerIdProp);
 
     const open = store.useState('open');
     const positionerElement = store.useState('positionerElement');

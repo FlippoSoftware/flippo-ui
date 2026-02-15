@@ -52,8 +52,8 @@ export function DialogRoot<Payload>(props: DialogRoot.Props<Payload>) {
         );
     }).current;
 
-    store.useControlledProp('open', openProp, defaultOpen);
-    store.useControlledProp('activeTriggerId', triggerIdProp, defaultTriggerIdProp);
+    store.useControlledProp('open', openProp);
+    store.useControlledProp('activeTriggerId', triggerIdProp);
     store.useSyncedValues({ disablePointerDismissal, nested, modal });
     store.useContextCallback('onOpenChange', onOpenChange);
     store.useContextCallback('onOpenChangeComplete', onOpenChangeComplete);

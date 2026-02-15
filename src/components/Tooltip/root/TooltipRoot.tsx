@@ -70,8 +70,8 @@ export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
     }, [multipleContext, store]);
 
     // When inside Multiple, don't use controlled prop for open - Multiple handles it
-    store.useControlledProp('open', isInsideMultiple ? undefined : openProp, isInsideMultiple ? false : defaultOpen);
-    store.useControlledProp('activeTriggerId', triggerIdProp, defaultTriggerIdProp);
+    store.useControlledProp('open', isInsideMultiple ? undefined : openProp);
+    store.useControlledProp('activeTriggerId', triggerIdProp);
 
     store.useContextCallback('onOpenChange', onOpenChange);
     store.useContextCallback('onOpenChangeComplete', onOpenChangeComplete);

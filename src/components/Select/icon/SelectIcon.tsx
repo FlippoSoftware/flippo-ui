@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useStore } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '~@lib/hooks';
@@ -29,12 +27,9 @@ export function SelectIcon(componentProps: SelectIcon.Props) {
     const { store } = useSelectRootContext();
     const open = useStore(store, selectors.open);
 
-    const state: SelectIcon.State = React.useMemo(
-        () => ({
-            open
-        }),
-        [open]
-    );
+    const state: SelectIcon.State = {
+        open
+    };
 
     const element = useRenderElement('span', componentProps, {
         state,

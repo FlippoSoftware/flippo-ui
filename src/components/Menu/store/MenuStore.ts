@@ -59,11 +59,7 @@ const selectors = {
             && (state.modal ?? true)
     ),
 
-    allowMouseEnter: createSelector((state: State<unknown>): boolean =>
-        state.parent.type === 'menu'
-            ? state.parent.store.select('allowMouseEnter')
-            : state.allowMouseEnter
-    ),
+    allowMouseEnter: createSelector((state: State<unknown>) => state.allowMouseEnter),
     stickIfOpen: createSelector((state: State<unknown>) => state.stickIfOpen),
     parent: createSelector((state: State<unknown>) => state.parent),
     rootId: createSelector((state: State<unknown>): string | undefined => {
@@ -109,12 +105,13 @@ const selectors = {
 export class MenuStore<Payload> extends ReactStore<
     Readonly<State<Payload>>,
     Context,
-  typeof selectors
+    typeof selectors
 > {
     constructor(initialState?: Partial<State<Payload>>) {
         super(
             { ...createInitialState(), ...initialState },
             {
+
                 // eslint-disable-next-line react/no-create-ref
                 positionerRef: React.createRef<HTMLElement | null>(),
                 // eslint-disable-next-line react/no-create-ref
@@ -131,18 +128,6 @@ export class MenuStore<Payload> extends ReactStore<
                 triggerElements: new PopupTriggerMap()
             },
             selectors
-        );
-
-        // Sync `allowMouseEnter` with parent menu if applicable.
-        this.observe(
-            createSelector((state) => state.allowMouseEnter),
-            (allowMouseEnter, oldValue) => {
-                // The allowMouseEnter !== oldValue check prevent calling parent store's set
-                // on intialization. Without it, React might complain about updating one component during rendering another.
-                if (this.state.parent.type === 'menu' && allowMouseEnter !== oldValue) {
-                    this.state.parent.store.set('allowMouseEnter', allowMouseEnter);
-                }
-            }
         );
 
         // Set up propagation of state from parent menu if applicable.
@@ -174,12 +159,12 @@ export class MenuStore<Payload> extends ReactStore<
         externalStore: MenuStore<Payload> | undefined,
         initialState: Partial<State<Payload>>
     ) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-        const store = useLazyRef(() => {
-            return externalStore ?? new MenuStore<Payload>(initialState);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const internalStore = useLazyRef(() => {
+            return new MenuStore<Payload>(initialState);
         }).current;
 
-        return store;
+        return externalStore ?? internalStore;
     }
 
     private unsubscribeParentListener: (() => void) | null = null;
@@ -190,7 +175,7 @@ function createInitialState<Payload>(): State<Payload> {
         ...createInitialPopupStoreState(),
         disabled: false,
         modal: true,
-        allowMouseEnter: true,
+        allowMouseEnter: false,
         stickIfOpen: true,
         parent: {
             type: undefined

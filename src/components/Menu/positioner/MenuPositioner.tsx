@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { DROPDOWN_COLLISION_AVOIDANCE, POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { getDisabledMountTransitionStyles } from '~@lib/getDisabledMountTransitionStyles';
 import {
 
     useAnchorPositioning,
@@ -50,7 +51,7 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
         arrowPadding = 5,
         sticky = false,
         disableAnchorTracking = false,
-        collisionAvoidance = DROPDOWN_COLLISION_AVOIDANCE,
+        collisionAvoidance: collisionAvoidanceProp = DROPDOWN_COLLISION_AVOIDANCE,
         ref,
         ...elementProps
     } = componentProps;
@@ -67,6 +68,7 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
     const open = store.useState('open');
     const modal = store.useState('modal');
     const triggerElement = store.useState('activeTriggerElement');
+    const transitionStatus = store.useState('transitionStatus');
     const lastOpenChangeReason = store.useState('lastOpenChangeReason');
     const floatingNodeId = store.useState('floatingNodeId');
     const floatingParentNodeId = store.useState('floatingParentNodeId');
@@ -75,6 +77,7 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
     let sideOffset = sideOffsetProp;
     let alignOffset = alignOffsetProp;
     let align = alignProp;
+    let collisionAvoidance = collisionAvoidanceProp;
     if (parent.type === 'context-menu') {
         anchor = anchorProp ?? parent.context?.anchor;
         align = align ?? 'start';
@@ -89,6 +92,7 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
     if (parent.type === 'menu') {
         computedSide = computedSide ?? 'inline-end';
         computedAlign = computedAlign ?? 'start';
+        collisionAvoidance = componentProps.collisionAvoidance ?? POPUP_COLLISION_AVOIDANCE;
     }
     else if (parent.type === 'menubar') {
         computedSide = computedSide ?? 'bottom';
@@ -114,7 +118,8 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
         keepMounted,
         disableAnchorTracking,
         collisionAvoidance,
-        shiftCrossAxis: contextMenu,
+        shiftCrossAxis:
+            contextMenu && !('side' in collisionAvoidance && collisionAvoidance.side === 'flip'),
         externalTree: floatingTreeRoot
     });
 
@@ -123,6 +128,10 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
 
         if (!open) {
             hiddenStyles.pointerEvents = 'none';
+        }
+
+        if (!mounted) {
+            hiddenStyles.display = 'none';
         }
 
         return {
@@ -146,15 +155,6 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
                     && details.parentNodeId === store.select('floatingParentNodeId')
                 ) {
                     store.setOpen(false, createChangeEventDetails(REASONS.siblingOpen));
-                }
-            }
-            else if (details.parentNodeId === floatingNodeId) {
-                // Re-enable hover on the parent when a child closes, except when the child
-                // closed due to hovering a different sibling item in this parent (sibling-open).
-                // Keeping hover disabled in that scenario prevents the parent from closing
-                // immediately when the pointer then leaves it.
-                if (details.reason !== REASONS.siblingOpen) {
-                    store.set('hoverEnabled', true);
                 }
             }
         }
@@ -224,22 +224,13 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
         floatingParentNodeId
     ]);
 
-    const state: MenuPositioner.State = React.useMemo(
-        () => ({
-            open,
-            side: positioner.side,
-            align: positioner.align,
-            anchorHidden: positioner.anchorHidden,
-            nested: parent.type === 'menu'
-        }),
-        [
-            open,
-            positioner.side,
-            positioner.align,
-            positioner.anchorHidden,
-            parent.type
-        ]
-    );
+    const state: MenuPositioner.State = {
+        open,
+        side: positioner.side,
+        align: positioner.align,
+        anchorHidden: positioner.anchorHidden,
+        nested: parent.type === 'menu'
+    };
 
     const contextValue: MenuPositionerContextValue = React.useMemo(
         () => ({
@@ -264,14 +255,14 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
         state,
         customStyleHookMapping: popupStateMapping,
         ref: [ref, store.useStateSetter('positionerElement')],
-        props: [positionerProps, elementProps]
+        props: [positionerProps, getDisabledMountTransitionStyles(transitionStatus), elementProps]
     });
 
     const shouldRenderBackdrop
-    = mounted
-      && parent.type !== 'menu'
-      && ((parent.type !== 'menubar' && modal && lastOpenChangeReason !== REASONS.triggerHover)
-        || (parent.type === 'menubar' && parent.context.modal));
+        = mounted
+          && parent.type !== 'menu'
+          && ((parent.type !== 'menubar' && modal && lastOpenChangeReason !== REASONS.triggerHover)
+            || (parent.type === 'menubar' && parent.context.modal));
 
     // cuts a hole in the backdrop to allow pointer interaction with the menubar or dropdown menu trigger element
     let backdropCutout: HTMLElement | null = null;
@@ -318,7 +309,7 @@ export type MenuPositionerState = {
     nested: boolean;
 };
 
-export type MenuPositionerProps = {} & useAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', MenuPositioner.State>;
+export type MenuPositionerProps = useAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', MenuPositioner.State>;
 
 export namespace MenuPositioner {
     export type State = MenuPositionerState;

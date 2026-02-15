@@ -52,3 +52,19 @@ export function removeItem<Item, Value>(
 ): Item[] {
     return collection.filter((item) => !compareItemEquality(item, value, comparer));
 }
+
+export function selectedValueIncludes<Item, Value>(
+    selectedValues: readonly Item[] | undefined | null,
+    itemValue: Value,
+    comparer: ItemEqualityComparer<Value, Item>
+): boolean {
+    if (!selectedValues || selectedValues.length === 0) {
+        return false;
+    }
+    return selectedValues.some((selectedValue) => {
+        if (selectedValue === undefined) {
+            return false;
+        }
+        return compareItemEquality(itemValue, selectedValue, comparer);
+    });
+}

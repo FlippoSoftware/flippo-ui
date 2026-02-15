@@ -6,7 +6,12 @@ import { OPEN_DELAY } from '~@lib/constants';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks/';
 import { useTriggerDataForwarding } from '~@lib/popups';
 import { triggerOpenStateMapping } from '~@lib/popupStateMapping';
-import { safePolygon, useDelayGroup, useHoverReferenceInteraction } from '~@packages/floating-ui-react';
+import {
+    safePolygon,
+    useDelayGroup,
+    useFocus,
+    useHoverReferenceInteraction
+} from '~@packages/floating-ui-react';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -18,6 +23,8 @@ import { useTooltipRootContext } from '../root/TooltipRootContext';
 import { multipleActive } from '../utils/stateAttributes';
 
 import type { TooltipHandle } from '../store/TooltipHandle';
+
+import { TooltipTriggerDataAttributes } from './TooltipTriggerDataAttributes';
 
 const stateAttributesMapping: StateAttributesMapping<TooltipTrigger.State> = {
     ...triggerOpenStateMapping,
@@ -53,8 +60,8 @@ export function TooltipTrigger(
 
     const thisTriggerId = useHeadlessUiId(idProp);
     const isTriggerActive = store.useState('isTriggerActive', thisTriggerId);
-    const floatingRootContext = store.useState('floatingRootContext');
     const isOpenedByThisTrigger = store.useState('isOpenedByTrigger', thisTriggerId);
+    const floatingRootContext = store.useState('floatingRootContext');
 
     const multipleItemIndex = store.useState('multipleItemIndex');
 
@@ -88,66 +95,49 @@ export function TooltipTrigger(
         };
     }, [primary, store, thisTriggerId]);
 
-    const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null);
+    const triggerElementRef = React.useRef<Element | null>(null);
 
-    const providerContext = useTooltipProviderContext();
     const multipleContext = useTooltipMultipleContext();
 
-    // Priority: trigger prop > multiple context > provider context > default
-    const effectiveDelay = delay ?? multipleContext?.delay ?? OPEN_DELAY;
-    const effectiveCloseDelay = closeDelay ?? multipleContext?.closeDelay ?? 0;
+    const delayWithDefault = delay ?? multipleContext?.delay ?? OPEN_DELAY;
+    const closeDelayWithDefault = closeDelay ?? multipleContext?.closeDelay ?? 0;
 
     const { registerTrigger, isMountedByThisTrigger } = useTriggerDataForwarding(
         thisTriggerId,
-        triggerElement,
+        triggerElementRef,
         store,
         {
             payload,
-            closeDelay: effectiveCloseDelay
+            closeDelay: closeDelayWithDefault
         }
     );
 
-    // Disable delay group when inside Multiple to allow all tooltips open simultaneously
+    const providerContext = useTooltipProviderContext();
     const { delayRef, isInstantPhase, hasProvider } = useDelayGroup(floatingRootContext, {
-        enabled: !multipleContext,
         open: isOpenedByThisTrigger
     });
 
     store.useSyncedValue('isInstantPhase', isInstantPhase);
 
     const rootDisabled = store.useState('disabled');
-    // Priority: trigger prop > multiple context > root prop
-    const disabled = disabledProp ?? multipleContext?.disabled ?? rootDisabled;
+    const disabled = disabledProp ?? rootDisabled;
     const trackCursorAxis = store.useState('trackCursorAxis');
     const disableHoverablePopup = store.useState('disableHoverablePopup');
-
-    // Use multipleSafePolygon for Multiple, regular safePolygon otherwise
-    const handleClose = React.useMemo(() => {
-        if (disableHoverablePopup || trackCursorAxis === 'both') {
-            return null;
-        }
-
-        if (multipleContext) {
-            return multipleSafePolygon(multipleContext.store);
-        }
-
-        return safePolygon();
-    }, [disableHoverablePopup, trackCursorAxis, multipleContext]);
 
     const hoverProps = useHoverReferenceInteraction(floatingRootContext, {
         enabled: !disabled,
         mouseOnly: true,
         move: false,
-        handleClose,
+        handleClose: !disableHoverablePopup && trackCursorAxis !== 'both' ? safePolygon() : null,
         restMs() {
             const providerDelay = providerContext?.delay;
             const groupOpenValue
                 = typeof delayRef.current === 'object' ? delayRef.current.open : undefined;
 
-            let computedRestMs = effectiveDelay;
-            if (hasProvider && !multipleContext) {
+            let computedRestMs = delayWithDefault;
+            if (hasProvider) {
                 if (groupOpenValue !== 0) {
-                    computedRestMs = delay ?? providerDelay ?? effectiveDelay;
+                    computedRestMs = delay ?? providerDelay ?? delayWithDefault;
                 }
                 else {
                     computedRestMs = 0;
@@ -159,8 +149,8 @@ export function TooltipTrigger(
         delay() {
             const closeValue = typeof delayRef.current === 'object' ? delayRef.current.close : undefined;
 
-            let computedCloseDelay: number | undefined = effectiveCloseDelay;
-            if (closeDelay == null && hasProvider && !multipleContext) {
+            let computedCloseDelay: number | undefined = closeDelayWithDefault;
+            if (closeDelay == null && hasProvider) {
                 computedCloseDelay = closeValue;
             }
 
@@ -168,12 +158,14 @@ export function TooltipTrigger(
                 close: computedCloseDelay
             };
         },
-        triggerElement,
+        triggerElementRef,
         isActiveTrigger: isTriggerActive
     });
 
+    const focusProps = useFocus(floatingRootContext, { enabled: !disabled }).reference;
+
     useIsoLayoutEffect(() => {
-        if (!triggerElement || !multipleContext || multipleItemIndex == null || multipleItemIndex < 0)
+        if (!triggerElementRef.current || !multipleContext || multipleItemIndex == null || multipleItemIndex < 0)
             return;
 
         const onSetActive = () => {
@@ -183,6 +175,8 @@ export function TooltipTrigger(
         const onSetInactive = () => {
             multipleContext.store.set('activeIndex', null);
         };
+
+        const triggerElement = triggerElementRef.current;
 
         triggerElement.addEventListener('mouseenter', onSetActive);
         triggerElement.addEventListener('mouseleave', onSetInactive);
@@ -195,24 +189,28 @@ export function TooltipTrigger(
             triggerElement.removeEventListener('focus', onSetActive);
             triggerElement.removeEventListener('blur', onSetInactive);
         };
-    }, [triggerElement, multipleItemIndex, store]);
+    }, [triggerElementRef.current, multipleItemIndex, store]);
 
     const multipleActive = store.useMultipleActive();
 
-    const state: TooltipTrigger.State = React.useMemo(
-        () => ({ open: isOpenedByThisTrigger, multipleActive }),
-        [isOpenedByThisTrigger, multipleActive]
-    );
+    const state: TooltipTrigger.State = { open: isOpenedByThisTrigger, multipleActive };
 
     const rootTriggerProps = store.useState('triggerProps', isMountedByThisTrigger);
 
     const element = useRenderElement('button', componentProps, {
         state,
-        ref: [ref, registerTrigger, setTriggerElement],
-        props: [hoverProps, rootTriggerProps, {
-            id: thisTriggerId
-        }, elementProps],
-        customStyleHookMapping: stateAttributesMapping
+        ref: [ref, registerTrigger, triggerElementRef],
+        props: [
+            hoverProps,
+            focusProps,
+            rootTriggerProps,
+            {
+                id: thisTriggerId,
+                [TooltipTriggerDataAttributes.triggerDisabled]: disabled ? '' : undefined
+            } as React.HTMLAttributes<Element>,
+            elementProps
+        ],
+        customStyleHookMapping: triggerOpenStateMapping
     });
 
     return element;

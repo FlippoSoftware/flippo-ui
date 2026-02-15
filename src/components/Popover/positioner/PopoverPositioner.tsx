@@ -94,6 +94,10 @@ export function PopoverPositioner(componentProps: PopoverPositioner.Props) {
             hiddenStyles.pointerEvents = 'none';
         }
 
+        if (!mounted) {
+            hiddenStyles.display = 'none';
+        }
+
         return {
             role: 'presentation',
             hidden: !mounted,

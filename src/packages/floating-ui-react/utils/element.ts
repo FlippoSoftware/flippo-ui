@@ -1,6 +1,8 @@
-import { isHTMLElement, isShadowRoot } from '@floating-ui/utils/dom';
+import { isElement, isHTMLElement, isShadowRoot } from '@floating-ui/utils/dom';
 
 import { isJSDOM } from '~@lib/detectBrowser';
+
+import type { PopupTriggerMap } from '~@lib/popups';
 
 import { FOCUSABLE_ATTRIBUTE, TYPEABLE_SELECTOR } from './constants';
 
@@ -38,6 +40,29 @@ export function contains(parent?: Element | null, child?: Element | null) {
     }
 
     // Give up, the result is false
+    return false;
+}
+
+export function isTargetInsideEnabledTrigger(
+    target: EventTarget | null,
+    triggerElements: PopupTriggerMap
+) {
+    if (!isElement(target)) {
+        return false;
+    }
+
+    const targetElement = target as Element;
+
+    if (triggerElements.hasElement(targetElement)) {
+        return !targetElement.hasAttribute('data-trigger-disabled');
+    }
+
+    for (const [, trigger] of triggerElements.entries()) {
+        if (contains(trigger, targetElement)) {
+            return !trigger.hasAttribute('data-trigger-disabled');
+        }
+    }
+
     return false;
 }
 

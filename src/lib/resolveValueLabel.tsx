@@ -1,5 +1,4 @@
-
-import type * as React from 'react';
+import React from 'react';
 
 import { serializeValue } from './serializeValue';
 
@@ -113,11 +112,47 @@ export function resolveSelectedLabel(
 }
 
 export function resolveMultipleLabels(
-    values: any[] | undefined,
+    values: any[],
+    items: ItemsInput,
     itemToStringLabel?: (item: any) => string
-): string {
-    if (!Array.isArray(values) || values.length === 0) {
-        return '';
+): React.ReactNode {
+    return values.reduce((acc, value, index) => {
+        if (index > 0) {
+            acc.push(', ');
+        }
+        acc.push(
+            <React.Fragment key={index}>
+                {resolveSelectedLabel(value, items, itemToStringLabel)}
+            </React.Fragment>
+        );
+        return acc;
+    }, []);
+}
+
+/**
+ * Checks if the items array contains an item with a null value that has a non-null label.
+ */
+export function hasNullItemLabel(items: ItemsInput): boolean {
+    if (!Array.isArray(items)) {
+        return items != null && !('null' in items);
     }
-    return values.map((v) => stringifyAsLabel(v, itemToStringLabel)).join(', ');
+
+    if (isGroupedItems(items)) {
+        for (const group of items) {
+            for (const item of group.items) {
+                if (item && item.value == null && item.label != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    for (const item of items) {
+        if (item && item.value == null && item.label != null) {
+            return true;
+        }
+    }
+
+    return false;
 }

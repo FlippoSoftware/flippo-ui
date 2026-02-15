@@ -35,7 +35,7 @@ export function ScrollAreaCorner(componentProps: ScrollAreaCorner.Props) {
         }, elementProps]
     });
 
-    if (hiddenState.cornerHidden) {
+    if (hiddenState.corner) {
         return null;
     }
 

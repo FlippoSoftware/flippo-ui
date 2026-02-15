@@ -15,6 +15,7 @@ export type SelectRootContextValue = {
     readOnly: boolean;
     required: boolean;
     multiple: boolean;
+    highlightItemOnHover: boolean;
     setValue: (nextValue: any, eventDetails: SelectRoot.ChangeEventDetails) => void;
     setOpen: (open: boolean, eventDetails: SelectRoot.ChangeEventDetails) => void;
     listRef: React.RefObject<Array<HTMLElement | null>>;
@@ -23,7 +24,7 @@ export type SelectRootContextValue = {
     handleScrollArrowVisibility: () => void;
     scrollArrowsMountedCountRef: React.RefObject<number>;
     getItemProps: (
-        props?: HTMLProps & { active?: boolean; selected?: boolean },
+        props?: HTMLProps & { active?: boolean | undefined; selected?: boolean | undefined },
     ) => Record<string, unknown>; // PREVENT_COMMIT
     events: FloatingEvents;
     valueRef: React.RefObject<HTMLSpanElement | null>;
@@ -36,7 +37,7 @@ export type SelectRootContextValue = {
     }>;
     selectedItemTextRef: React.RefObject<HTMLSpanElement | null>;
     validation: UseFieldValidationReturnValue;
-    onOpenChangeComplete?: (open: boolean) => void;
+    onOpenChangeComplete?: ((open: boolean) => void) | undefined;
     keyboardActiveRef: React.RefObject<boolean>;
     alignItemWithTriggerActiveRef: React.RefObject<boolean>;
     initialValueRef: React.RefObject<any>;

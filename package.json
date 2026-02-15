@@ -40,6 +40,11 @@
       "import": "./dist/components/Button/index.es.js",
       "require": "./dist/components/Button/index.cjs.js"
     },
+    "./c-s-p-provider": {
+      "types": "./dist/components/CSPProvider/index.d.ts",
+      "import": "./dist/components/CSPProvider/index.es.js",
+      "require": "./dist/components/CSPProvider/index.cjs.js"
+    },
     "./checkbox": {
       "types": "./dist/components/Checkbox/index.d.ts",
       "import": "./dist/components/Checkbox/index.es.js",
@@ -284,6 +289,7 @@
     "dev": "vite build --watch",
     "build": "vite build && node scripts/generate-exports.js",
     "build:exports": "node scripts/generate-exports.js",
+    "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "inline-scripts": "tsx ./scripts/inlineScripts.mts"
