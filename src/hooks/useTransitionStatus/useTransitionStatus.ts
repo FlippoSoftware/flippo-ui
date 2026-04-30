@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 import { AnimationFrame } from '../useAnimationFrame';
 import { useIsoLayoutEffect } from '../useIsoLayoutEffect';
@@ -53,13 +52,10 @@ export function useTransitionStatus(
             return undefined;
         }
 
-        // Double RAF is needed to ensure the browser has painted the element
-        // with starting styles before we remove them. The first RAF waits for
-        // the browser to paint, the second RAF then removes the starting style.
         const frame = AnimationFrame.request(() => {
-            ReactDOM.flushSync(() => {
-                setTransitionStatus(undefined);
-            });
+            // Avoid `flushSync` here due to Firefox.
+            // See https://github.com/mui/base-ui/pull/3424
+            setTransitionStatus(undefined);
         });
 
         return () => {

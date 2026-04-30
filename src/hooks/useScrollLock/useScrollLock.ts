@@ -1,7 +1,10 @@
 import { isIOS, isWebKit } from '~@lib/detectBrowser';
 import { isOverflowElement } from '~@lib/isOverflowElement';
+import { isTarget } from '~@lib/isTarget';
 import { NOOP } from '~@lib/noop';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
+
+import type { HookTarget } from '~@lib/isTarget';
 
 import { AnimationFrame } from '../useAnimationFrame';
 import { useIsoLayoutEffect } from '../useIsoLayoutEffect';
@@ -233,13 +236,28 @@ const SCROLL_LOCKER = new ScrollLocker();
  * Locks the scroll of the document when enabled.
  *
  * @param enabled - Whether to enable the scroll lock.
- * @param referenceElement - Element to use as a reference for lock calculations.
+ * @param referenceElement - Element or HookTarget to use as a reference for lock calculations.
  */
-export function useScrollLock(enabled: boolean = true, referenceElement: Element | null = null) {
+export function useScrollLock(enabled: boolean = true, referenceElement: HookTarget | Element | null = null) {
     useIsoLayoutEffect(() => {
         if (!enabled) {
             return undefined;
         }
-        return SCROLL_LOCKER.acquire(referenceElement);
-    }, [enabled, referenceElement]);
+
+        let element: Element | null = null;
+        if (referenceElement) {
+            if (referenceElement instanceof Element) {
+                element = referenceElement;
+            }
+            else if (isTarget(referenceElement)) {
+                element = isTarget.getElement(referenceElement) as Element | null;
+            }
+        }
+
+        return SCROLL_LOCKER.acquire(element);
+    }, [enabled, referenceElement instanceof Element
+        ? referenceElement
+        : referenceElement && isTarget(referenceElement)
+            ? isTarget.getRawElement(referenceElement)
+            : null]);
 }

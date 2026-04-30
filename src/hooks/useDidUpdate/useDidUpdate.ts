@@ -14,5 +14,5 @@ export function useDidUpdate(callback: React.EffectCallback, deps?: React.Depend
 
         isMountedRef.current = true;
         return undefined;
-    }, [deps]);
+    }, deps);
 }

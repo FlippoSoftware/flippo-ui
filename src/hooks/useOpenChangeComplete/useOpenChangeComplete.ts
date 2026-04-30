@@ -1,8 +1,7 @@
 import React from 'react';
 
 import { useAnimationsFinished } from '../useAnimationsFinished';
-import { useEventCallback } from '../useEventCallback';
-import { useLatestRef } from '../useLatestRef';
+import { useStableCallback } from '../useStableCallback';
 
 type TUseOpenChangeCompleteParameters = {
     ref: React.RefObject<HTMLElement | null>;
@@ -19,23 +18,20 @@ export function useOpenChangeComplete(params: TUseOpenChangeCompleteParameters) 
         onComplete: onCompleteParam
     } = params;
 
-    const openRef = useLatestRef(open);
-    const onComplete = useEventCallback(onCompleteParam);
-    const runOnAnimationFinished = useAnimationsFinished(ref, open);
+    const onComplete = useStableCallback(onCompleteParam);
+    const runOnceAnimationsFinish = useAnimationsFinished(ref, open, false);
 
     React.useEffect(() => {
-        if (!enabled)
-            return;
+        if (!enabled) {
+            return undefined;
+        }
 
-        runOnAnimationFinished(() => {
-            if (open === openRef.current)
-                onComplete();
-        });
-    }, [
-        open,
-        enabled,
-        onComplete,
-        runOnAnimationFinished,
-        openRef
-    ]);
+        const abortController = new AbortController();
+
+        runOnceAnimationsFinish(onComplete, abortController.signal);
+
+        return () => {
+            abortController.abort();
+        };
+    }, [enabled, open, onComplete, runOnceAnimationsFinish]);
 }
