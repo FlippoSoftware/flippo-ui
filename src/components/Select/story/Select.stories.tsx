@@ -5,8 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Select } from '..';
 
 const meta: Meta<typeof Select.Root> = {
-    title: 'Input/Select',
-    component: Select.Root
+    title: 'Input/Select'
 };
 
 export default meta;

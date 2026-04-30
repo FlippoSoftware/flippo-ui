@@ -5,6 +5,12 @@
 
   display: flex;
 
+  // Add transitions to sync with popup animation
+  transition:
+    opacity 150ms,
+    transform 150ms;
+  transform-origin: center;
+
   &[data-side='top'] {
     bottom: -8px;
     rotate: 180deg;
@@ -23,6 +29,13 @@
   &[data-side='right'] {
     left: -13px;
     rotate: -90deg;
+  }
+
+  // Apply animation states to match popup
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    transform: scale(0.9);
   }
 }
 

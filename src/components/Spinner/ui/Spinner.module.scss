@@ -1,0 +1,64 @@
+.Spinner {
+  pointer-events: none;
+  position: relative;
+  size: var(--f-spacing-4);
+  transform-origin: center;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+.Spinner_brand {
+  color: var(--f-color-brand);
+}
+
+.Spinner_danger {
+  color: var(--f-color-danger);
+}
+
+.Spinner_warning {
+  color: var(--f-color-warning);
+}
+
+.Spinner_info {
+  color: var(--f-color-info);
+}
+
+.Spinner_success {
+  color: var(--f-color-success);
+}
+
+.Spinner_error {
+  color: var(--f-color-error);
+}
+
+.Spinner_current {
+  color: currentColor;
+}
+
+.Spinner_x_small {
+  size: var(--f-spacing-3);
+  height: var(--f-spacing-3);
+}
+
+.Spinner_small {
+  size: var(--f-spacing-4);
+  height: var(--f-spacing-4);
+}
+
+.Spinner_medium {
+  size: var(--f-spacing-6);
+  height: var(--f-spacing-6);
+}
+
+.Spinner_large {
+  size: var(--f-spacing-8);
+  height: var(--f-spacing-8);
+}
