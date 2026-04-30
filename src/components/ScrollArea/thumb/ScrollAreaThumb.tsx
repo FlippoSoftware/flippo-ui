@@ -36,7 +36,7 @@ export function ScrollAreaThumb(componentProps: ScrollAreaThumb.Props) {
 
     const { orientation } = useScrollAreaScrollbarContext();
 
-    const state: ScrollAreaThumb.State = React.useMemo(() => ({ orientation }), [orientation]);
+    const state: ScrollAreaThumb.State = { orientation };
 
     const element = useRenderElement('div', componentProps, {
         ref: [ref, orientation === 'vertical' ? thumbYRef : thumbXRef],

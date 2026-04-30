@@ -44,15 +44,15 @@ export function useFloatingRootContext(options: UseFloatingRootContextOptions): 
 
     const store = useLazyRef(
         () =>
-            new FloatingRootStore({
+            new FloatingRootStore<string>({
                 open,
                 onOpenChange,
                 referenceElement: elements.reference ?? null,
                 floatingElement: elements.floating ?? null,
-                triggerElements: elements.triggers ?? new PopupTriggerMap(),
+                triggerElements: new PopupTriggerMap(),
                 floatingId,
                 nested,
-                noEmit: options.noEmit || false
+                noEmit: false
             })
     ).current;
 
@@ -83,7 +83,7 @@ export function useFloatingRootContext(options: UseFloatingRootContextOptions): 
 
     store.context.onOpenChange = onOpenChange;
     store.context.nested = nested;
-    store.context.noEmit = options.noEmit || false;
+    store.context.noEmit = false;
 
     return store;
 }

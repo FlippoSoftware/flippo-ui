@@ -50,31 +50,21 @@ export function ScrollAreaScrollbar(componentProps: ScrollAreaScrollbar.Props) {
         thumbSize
     } = useScrollAreaRootContext();
 
-    const state: ScrollAreaScrollbar.State = React.useMemo(
-        () => ({
-            hovering,
-            scrolling: {
-                horizontal: scrollingX,
-                vertical: scrollingY
-            }[orientation],
-            orientation,
-            hasOverflowX: !hiddenState.scrollbarXHidden,
-            hasOverflowY: !hiddenState.scrollbarYHidden,
-            overflowXStart: overflowEdges.xStart,
-            overflowXEnd: overflowEdges.xEnd,
-            overflowYStart: overflowEdges.yStart,
-            overflowYEnd: overflowEdges.yEnd,
-            cornerHidden: hiddenState.cornerHidden
-        }),
-        [
-            hovering,
-            scrollingX,
-            scrollingY,
-            orientation,
-            hiddenState,
-            overflowEdges
-        ]
-    );
+    const state: ScrollAreaScrollbar.State = {
+        hovering,
+        scrolling: {
+            horizontal: scrollingX,
+            vertical: scrollingY
+        }[orientation],
+        orientation,
+        hasOverflowX: !hiddenState.x,
+        hasOverflowY: !hiddenState.y,
+        overflowXStart: overflowEdges.xStart,
+        overflowXEnd: overflowEdges.xEnd,
+        overflowYStart: overflowEdges.yStart,
+        overflowYEnd: overflowEdges.yEnd,
+        cornerHidden: hiddenState.corner
+    };
 
     const direction = useDirection();
 
@@ -155,13 +145,13 @@ export function ScrollAreaScrollbar(componentProps: ScrollAreaScrollbar.Props) {
                 const thumbHeight = thumbYRef.current.offsetHeight;
                 const trackRectY = scrollbarYRef.current.getBoundingClientRect();
                 const clickY
-          = event.clientY - trackRectY.top - thumbHeight / 2 - scrollbarYOffset + thumbYOffset / 2;
+                    = event.clientY - trackRectY.top - thumbHeight / 2 - scrollbarYOffset + thumbYOffset / 2;
 
                 const scrollableContentHeight = viewportRef.current.scrollHeight;
                 const viewportHeight = viewportRef.current.clientHeight;
 
                 const maxThumbOffsetY
-          = scrollbarYRef.current.offsetHeight - thumbHeight - scrollbarYOffset - thumbYOffset;
+                    = scrollbarYRef.current.offsetHeight - thumbHeight - scrollbarYOffset - thumbYOffset;
                 const scrollRatioY = clickY / maxThumbOffsetY;
                 const newScrollTop = scrollRatioY * (scrollableContentHeight - viewportHeight);
 
@@ -174,13 +164,13 @@ export function ScrollAreaScrollbar(componentProps: ScrollAreaScrollbar.Props) {
                 const thumbWidth = thumbXRef.current.offsetWidth;
                 const trackRectX = scrollbarXRef.current.getBoundingClientRect();
                 const clickX
-          = event.clientX - trackRectX.left - thumbWidth / 2 - scrollbarXOffset + thumbXOffset / 2;
+                    = event.clientX - trackRectX.left - thumbWidth / 2 - scrollbarXOffset + thumbXOffset / 2;
 
                 const scrollableContentWidth = viewportRef.current.scrollWidth;
                 const viewportWidth = viewportRef.current.clientWidth;
 
                 const maxThumbOffsetX
-          = scrollbarXRef.current.offsetWidth - thumbWidth - scrollbarXOffset - thumbXOffset;
+                    = scrollbarXRef.current.offsetWidth - thumbWidth - scrollbarXOffset - thumbXOffset;
                 const scrollRatioX = clickX / maxThumbOffsetX;
 
                 let newScrollLeft: number;
@@ -232,8 +222,7 @@ export function ScrollAreaScrollbar(componentProps: ScrollAreaScrollbar.Props) {
 
     const contextValue = React.useMemo(() => ({ orientation }), [orientation]);
 
-    const isHidden
-    = orientation === 'vertical' ? hiddenState.scrollbarYHidden : hiddenState.scrollbarXHidden;
+    const isHidden = orientation === 'vertical' ? hiddenState.y : hiddenState.x;
 
     const shouldRender = keepMounted || !isHidden;
     if (!shouldRender) {

@@ -3,12 +3,12 @@
  * Uses both a set of Elements and a map of IDs to Elements for efficient lookups.
  */
 export class PopupTriggerMap {
-    private elements: Set<Element>;
+    private elementsSet: Set<Element>;
 
     private idMap: Map<string, Element>;
 
     constructor() {
-        this.elements = new Set();
+        this.elementsSet = new Set();
         this.idMap = new Map();
     }
 
@@ -26,16 +26,16 @@ export class PopupTriggerMap {
         if (existingElement !== undefined) {
             // We assume that the same element won't be registered under multiple ids.
             // This is safe considering how useTriggerRegistration is implemented.
-            this.elements.delete(existingElement);
+            this.elementsSet.delete(existingElement);
         }
 
-        this.elements.add(element);
+        this.elementsSet.add(element);
         this.idMap.set(id, element);
 
         if (process.env.NODE_ENV !== 'production') {
-            if (this.elements.size !== this.idMap.size) {
+            if (this.elementsSet.size !== this.idMap.size) {
                 throw new Error(
-                    'Base UI: A trigger element cannot be registered under multiple IDs in PopupTriggerMap.'
+                    'Headless UI: A trigger element cannot be registered under multiple IDs in PopupTriggerMap.'
                 );
             }
         }
@@ -47,7 +47,7 @@ export class PopupTriggerMap {
     public delete(id: string) {
         const element = this.idMap.get(id);
         if (element) {
-            this.elements.delete(element);
+            this.elementsSet.delete(element);
             this.idMap.delete(id);
         }
     }
@@ -56,14 +56,14 @@ export class PopupTriggerMap {
      * Whether the given element is registered as a trigger.
      */
     public hasElement(element: Element): boolean {
-        return this.elements.has(element);
+        return this.elementsSet.has(element);
     }
 
     /**
      * Whether there is a registered trigger element matching the given predicate.
      */
     public hasMatchingElement(predicate: (el: Element) => boolean): boolean {
-        for (const element of this.elements) {
+        for (const element of this.elementsSet) {
             if (predicate(element)) {
                 return true;
             }
@@ -78,6 +78,13 @@ export class PopupTriggerMap {
 
     public entries(): IterableIterator<[string, Element]> {
         return this.idMap.entries();
+    }
+
+    /**
+     * Returns an iterable of all registered trigger elements.
+     */
+    public elements(): IterableIterator<Element> {
+        return this.elementsSet.values();
     }
 
     public get size(): number {

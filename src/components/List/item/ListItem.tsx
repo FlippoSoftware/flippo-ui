@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+
 import { useRenderElement } from '~@lib/hooks';
 
 import type {
@@ -9,7 +11,10 @@ import type {
     Orientation
 } from '~@lib/types';
 
-import { useCompositeListItem } from '../../Composite';
+import {
+    IndexGuessBehavior,
+    useCompositeListItem
+} from '../../Composite/list/useCompositeListItem';
 import { useButton } from '../../use-button';
 import { useListRootContext } from '../root/ListRootContext';
 import { NestedListContext, useNestedListContext } from '../root/NestedListContext';
@@ -32,6 +37,7 @@ export function ListItem(componentProps: ListItem.Props) {
         render,
         /* eslint-enable unused-imports/no-unused-vars */
         ref: refProp,
+        index: indexProp,
         interactive = false,
         disabled = false,
         focusableWhenDisabled = false,
@@ -47,9 +53,41 @@ export function ListItem(componentProps: ListItem.Props) {
 
     const orientation = store.useState('orientation');
     const type = store.useState('type');
+    const virtualized = store.useState('virtualized');
+    const elementsRef = store.useState('elementsRef');
 
-    const { ref, index } = useCompositeListItem();
+    const listItem = useCompositeListItem({
+        index: indexProp,
+        indexGuessBehavior: IndexGuessBehavior.GuessFromOrder
+    });
+
+    const itemRef = React.useRef<HTMLElement | null>(null);
+
+    const index = indexProp ?? listItem.index;
+    const hasRegistered = listItem.index !== -1;
+
     const { getButtonProps, buttonRef } = useButton({ disabled, focusableWhenDisabled, native: nativeButton });
+
+    // Register element in elementsRef when virtualized
+    useIsoLayoutEffect(() => {
+        const shouldRun = hasRegistered && (virtualized || indexProp != null);
+        if (!shouldRun) {
+            return undefined;
+        }
+
+        const list = elementsRef.current;
+        list[index] = itemRef.current;
+
+        return () => {
+            delete list[index];
+        };
+    }, [
+        hasRegistered,
+        virtualized,
+        index,
+        indexProp,
+        elementsRef
+    ]);
 
     const state: ListItem.State = React.useMemo(() => ({
         index,
@@ -83,7 +121,7 @@ export function ListItem(componentProps: ListItem.Props) {
 
     const element = useRenderElement('li', componentProps, {
         state,
-        ref: [ref, refProp, buttonRef],
+        ref: [listItem.ref, refProp, buttonRef, itemRef],
         props: [listItemProps, interactive ? getButtonProps(elementProps) : elementProps]
     });
 
@@ -154,5 +192,11 @@ export namespace ListItem {
          * Whether the item is focusable when disabled.
          */
         focusableWhenDisabled?: boolean;
+        /**
+         * The index of the item in the list. Required when `virtualized` is `true`
+         * on the parent `List.Root`. Improves performance when specified by avoiding
+         * the need to calculate the index automatically from the DOM.
+         */
+        index?: number;
     } & NonNativeButtonProps & HeadlessUIComponentProps<'li', State>;
 }

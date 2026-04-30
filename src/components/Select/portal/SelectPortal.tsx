@@ -20,6 +20,17 @@ export function SelectPortal(componentProps: SelectPortal.Props) {
     const mounted = useStore(store, selectors.mounted);
     const forceMount = useStore(store, selectors.forceMount);
 
+    // Reset forceMount after items have had a chance to register their values/labels.
+    // forceMount is set to true when the value changes programmatically, on trigger focus,
+    // or on autofill — but is never reset, causing the portal to render permanently.
+    // This effect runs after layout effects (where items register), so their data is captured
+    // before the portal unmounts.
+    // React.useEffect(() => {
+    //     if (forceMount && !mounted) {
+    //         store.set('forceMount', false);
+    //     }
+    // }, [forceMount, mounted, store]);
+
     const shouldRender = mounted || forceMount;
     if (!shouldRender) {
         return null;

@@ -13,20 +13,29 @@ export type CompositeRootContextValue = {
     relayKeyboardEvent: (event: React.KeyboardEvent<any>) => void;
 };
 
-export const CompositeRootContext = React.createContext<CompositeRootContextValue | undefined>(
-    undefined
-);
+export function createCompositeRootContext() {
+    const CompositeRootContext = React.createContext<CompositeRootContextValue | undefined>(
+        undefined
+    );
 
-export function useCompositeRootContext(optional: true): CompositeRootContextValue | undefined;
-export function useCompositeRootContext(optional?: false): CompositeRootContextValue;
-export function useCompositeRootContext(optional = false) {
-    const context = React.use(CompositeRootContext);
+    function useCompositeRootContext(optional: true): CompositeRootContextValue | undefined;
+    function useCompositeRootContext(optional?: false): CompositeRootContextValue;
+    function useCompositeRootContext(optional = false) {
+        const context = React.use(CompositeRootContext);
 
-    if (context === undefined && !optional) {
-        throw new Error(
-            'Headless UI: CompositeRootContext is missing. Composite parts must be placed within <Composite.Root>.'
-        );
+        if (context === undefined && !optional) {
+            throw new Error(
+                'Headless UI: CompositeRootContext is missing. Composite parts must be placed within <Composite.Root>.'
+            );
+        }
+
+        return context;
     }
 
-    return context;
+    return {
+        CompositeRootContext,
+        useCompositeRootContext
+    } as const;
 }
+
+export const { CompositeRootContext, useCompositeRootContext } = createCompositeRootContext();

@@ -13,6 +13,8 @@ import { REASONS } from '~@lib/reason';
 
 import type { PopupStoreContext, PopupStoreState } from '~@lib/popups';
 
+import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
+
 import type { TooltipRoot } from '../root/TooltipRoot';
 
 export type State<Payload> = PopupStoreState<Payload> & {
@@ -23,6 +25,8 @@ export type State<Payload> = PopupStoreState<Payload> & {
     disableHoverablePopup: boolean;
     openChangeReason: TooltipRoot.ChangeEventReason | null;
     closeDelay: number;
+    multipleItemRef: ((node: HTMLElement | null) => void) | null;
+    multipleItemIndex: number | null;
 };
 
 export type Context = PopupStoreContext<TooltipRoot.ChangeEventDetails> & {
@@ -37,7 +41,9 @@ const selectors = {
     trackCursorAxis: createSelector((state: State<unknown>) => state.trackCursorAxis),
     disableHoverablePopup: createSelector((state: State<unknown>) => state.disableHoverablePopup),
     lastOpenChangeReason: createSelector((state: State<unknown>) => state.openChangeReason),
-    closeDelay: createSelector((state: State<unknown>) => state.closeDelay)
+    closeDelay: createSelector((state: State<unknown>) => state.closeDelay),
+    multipleItemRef: createSelector((state: State<unknown>) => state.multipleItemRef),
+    multipleItemIndex: createSelector((state: State<unknown>) => state.multipleItemIndex)
 };
 
 export class TooltipStore<Payload> extends ReactStore<
@@ -114,6 +120,28 @@ export class TooltipStore<Payload> extends ReactStore<
         }
     };
 
+    public useOpen = () => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const multipleContext = useTooltipMultipleContext();
+        const isInsideMultiple = multipleContext !== null;
+
+        // When inside Multiple, use Multiple's open state
+        const localOpenState = this.useState('open');
+        const multipleOpenState = multipleContext?.store.useState('open');
+
+        return isInsideMultiple ? (multipleOpenState ?? false) : localOpenState;
+    };
+
+    public useMultipleActive = () => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const multipleContext = useTooltipMultipleContext();
+        const multipleItemIndex = this.useState('multipleItemIndex');
+
+        const isInsideMultiple = multipleContext !== null;
+
+        return isInsideMultiple ? multipleItemIndex === (multipleContext?.store.useState('activeIndex') ?? null) : false;
+    };
+
     public static useStore<Payload>(
         externalStore: TooltipStore<Payload> | undefined,
         initialState?: Partial<State<Payload>>
@@ -134,6 +162,8 @@ function createInitialState<Payload>(): State<Payload> {
         trackCursorAxis: 'none',
         disableHoverablePopup: false,
         openChangeReason: null,
-        closeDelay: 0
+        closeDelay: 0,
+        multipleItemRef: null,
+        multipleItemIndex: null
     };
 }

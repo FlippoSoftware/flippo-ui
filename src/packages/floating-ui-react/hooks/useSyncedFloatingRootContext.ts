@@ -24,7 +24,7 @@ export type UseSyncedFloatingRootContextOptions<
      * Whether the Popup element is passed to Floating UI as the floating element instead of the default Positioner.
      */
     treatPopupAsFloatingElement?: boolean;
-    onOpenChange: (open: boolean, eventDetails: HeadlessUIChangeEventDetails<Reason>) => void;
+    onOpenChange: (open: boolean, eventDetails: HeadlessUIChangeEventDetails<Reason> & Record<string, unknown>) => void;
 };
 
 /**

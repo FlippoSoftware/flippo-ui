@@ -42,13 +42,10 @@ export function MenuBackdrop(componentProps: MenuBackdrop.Props) {
 
     const contextMenuContext = useContextMenuRootContext();
 
-    const state: MenuBackdrop.State = React.useMemo(
-        () => ({
-            open,
-            transitionStatus
-        }),
-        [open, transitionStatus]
-    );
+    const state: MenuBackdrop.State = {
+        open,
+        transitionStatus
+    };
 
     return useRenderElement('div', componentProps, {
         ref: contextMenuContext?.backdropRef

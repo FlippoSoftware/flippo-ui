@@ -7,7 +7,11 @@ import { TooltipProviderContext } from './TooltipProviderContext';
 import type { TooltipProviderContextValue } from './TooltipProviderContext';
 
 export function TooltipProvider(props: TooltipProviderProps) {
-    const { delay, closeDelay, timeout = 400 } = props;
+    const {
+        delay,
+        closeDelay,
+        timeout = 400
+    } = props;
 
     const contextValue: TooltipProviderContextValue = React.useMemo(
         () => ({

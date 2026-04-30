@@ -36,6 +36,12 @@ export type UseFocusProps = {
      * @default true
      */
     visibleOnly?: boolean;
+    /**
+     * Additional check to determine if blur should be blocked.
+     * Return true to prevent closing on blur.
+     * Useful for grouped elements like Tooltip.Multiple.
+     */
+    shouldBlockBlurClose?: (relatedTarget: Element | null) => boolean;
 };
 
 /**
@@ -50,7 +56,7 @@ export function useFocus(
     const store = 'rootStore' in context ? context.rootStore : context;
 
     const { events, dataRef } = store.context;
-    const { enabled = true, visibleOnly = true } = props;
+    const { enabled = true, visibleOnly = true, shouldBlockBlurClose } = props;
 
     const blockFocusRef = React.useRef(false);
     const timeout = useTimeout();
@@ -197,11 +203,22 @@ export function useFocus(
                         return;
                     }
 
+                    // Additional check for grouped elements (e.g., Tooltip.Multiple)
+                    if (shouldBlockBlurClose?.(event.relatedTarget)) {
+                        return;
+                    }
+
                     store.setOpen(false, createChangeEventDetails(REASONS.triggerFocus, nativeEvent));
                 });
             }
         }),
-        [dataRef, store, visibleOnly, timeout]
+        [
+            dataRef,
+            store,
+            visibleOnly,
+            timeout,
+            shouldBlockBlurClose
+        ]
     );
 
     return React.useMemo(

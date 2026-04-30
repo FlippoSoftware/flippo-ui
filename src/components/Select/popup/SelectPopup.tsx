@@ -10,8 +10,9 @@ import {
 } from '@flippo-ui/hooks';
 import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 
-import type { TransitionStatus } from '@flippo-ui/hooks';
+import type { Interaction, TransitionStatus } from '@flippo-ui/hooks';
 
+import { clamp } from '~@lib/clamp';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { isWebKit } from '~@lib/detectBrowser';
 import { getDisabledMountTransitionStyles } from '~@lib/getDisabledMountTransitionStyles';
@@ -29,11 +30,16 @@ import type { Align, Side } from '~@lib/hooks';
 import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
 import { COMPOSITE_KEYS } from '../../Composite/composite';
+import { useCSPContext } from '../../CSPProvider/CSPContext';
 import { useToolbarRootContext } from '../../Toolbar/root/ToolbarRootContext';
 import { useSelectPositionerContext } from '../positioner/SelectPositionerContext';
 import { useSelectFloatingContext, useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';
 import { clearStyles, LIST_FUNCTIONAL_STYLES } from '../utils/clearStyles';
+
+import { getMaxPopupHeight, getMaxScrollTop, unsetTransformStyles } from './utils';
+
+const SCROLL_EPS_PX = 1;
 
 const customStyleHookMapping: StateAttributesMapping<SelectPopup.State> = {
     ...popupStateMapping,
@@ -52,6 +58,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
+        finalFocus,
         ...elementProps
     } = componentProps;
 
@@ -65,7 +72,8 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         keyboardActiveRef,
         multiple,
         handleScrollArrowVisibility,
-        scrollHandlerRef
+        scrollHandlerRef,
+        highlightItemOnHover
     } = useSelectRootContext();
     const {
         side,
@@ -77,6 +85,8 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
     } = useSelectPositionerContext();
     const insideToolbar = useToolbarRootContext(true) != null;
     const floatingRootContext = useSelectFloatingContext();
+
+    const { nonce, disableStyleElements } = useCSPContext();
 
     const highlightTimeout = useTimeout();
 
@@ -115,40 +125,70 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         const positionerStyles = getComputedStyle(positionerElement);
         const marginTop = Number.parseFloat(positionerStyles.marginTop);
         const marginBottom = Number.parseFloat(positionerStyles.marginBottom);
-        const viewportHeight = doc.documentElement.clientHeight - marginTop - marginBottom;
+        const maxPopupHeight = getMaxPopupHeight(getComputedStyle(popupRef.current));
+        const maxAvailableHeight = Math.min(
+            doc.documentElement.clientHeight - marginTop - marginBottom,
+            maxPopupHeight
+        );
 
         const scrollTop = scroller.scrollTop;
-        const scrollHeight = scroller.scrollHeight;
-        const clientHeight = scroller.clientHeight;
-        const maxScrollTop = scrollHeight - clientHeight;
+        const maxScrollTop = getMaxScrollTop(scroller);
 
-        let nextPositionerHeight: number | null = null;
+        let nextPositionerHeight = 0;
         let nextScrollTop: number | null = null;
         let setReachedMax = false;
+        let scrollToMax = false;
+
+        const setHeight = (height: number) => {
+            positionerElement.style.height = `${height}px`;
+        };
+
+        const handleSmallDiff = (diff: number, targetScrollTop: number) => {
+            const heightDelta = clamp(diff, 0, maxAvailableHeight - currentHeight);
+            if (heightDelta > 0) {
+                // Consume the remaining scroll in height.
+                setHeight(currentHeight + heightDelta);
+            }
+            scroller.scrollTop = targetScrollTop;
+            if (maxAvailableHeight - (currentHeight + heightDelta) <= SCROLL_EPS_PX) {
+                reachedMaxHeightRef.current = true;
+            }
+            handleScrollArrowVisibility();
+        };
 
         if (isTopPositioned) {
             const diff = maxScrollTop - scrollTop;
             const idealHeight = currentHeight + diff;
-            const nextHeight = Math.min(idealHeight, viewportHeight);
+            const nextHeight = Math.min(idealHeight, maxAvailableHeight);
 
             nextPositionerHeight = nextHeight;
 
-            if (nextHeight !== viewportHeight) {
-                nextScrollTop = maxScrollTop;
+            if (diff <= SCROLL_EPS_PX) {
+                handleSmallDiff(diff, maxScrollTop);
+                return;
+            }
+
+            if (maxAvailableHeight - nextHeight > SCROLL_EPS_PX) {
+                scrollToMax = true;
             }
             else {
                 setReachedMax = true;
             }
         }
         else if (isBottomPositioned) {
-            const diff = scrollTop - 0;
+            const diff = scrollTop;
             const idealHeight = currentHeight + diff;
-            const nextHeight = Math.min(idealHeight, viewportHeight);
-            const overshoot = idealHeight - viewportHeight;
+            const nextHeight = Math.min(idealHeight, maxAvailableHeight);
+            const overshoot = idealHeight - maxAvailableHeight;
 
             nextPositionerHeight = nextHeight;
 
-            if (nextHeight !== viewportHeight) {
+            if (diff <= SCROLL_EPS_PX) {
+                handleSmallDiff(diff, 0);
+                return;
+            }
+
+            if (maxAvailableHeight - nextHeight > SCROLL_EPS_PX) {
                 nextScrollTop = 0;
             }
             else {
@@ -160,13 +200,25 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
             }
         }
 
-        if (nextPositionerHeight != null) {
-            positionerElement.style.height = `${nextPositionerHeight}px`;
+        nextPositionerHeight = Math.ceil(nextPositionerHeight);
+
+        if (nextPositionerHeight !== 0) {
+            setHeight(nextPositionerHeight);
         }
-        if (nextScrollTop != null) {
-            scroller.scrollTop = nextScrollTop;
+
+        if (scrollToMax || nextScrollTop != null) {
+            // Recompute bounds after resizing (clientHeight likely changed).
+            const nextMaxScrollTop = getMaxScrollTop(scroller);
+
+            const target = scrollToMax ? nextMaxScrollTop : clamp(nextScrollTop!, 0, nextMaxScrollTop);
+
+            // Avoid adjustments that re-trigger scroll events forever.
+            if (Math.abs(scroller.scrollTop - target) > SCROLL_EPS_PX) {
+                scroller.scrollTop = target;
+            }
         }
-        if (setReachedMax) {
+
+        if (setReachedMax || nextPositionerHeight >= maxAvailableHeight - SCROLL_EPS_PX) {
             reachedMaxHeightRef.current = true;
         }
 
@@ -185,15 +237,12 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         }
     });
 
-    const state: SelectPopup.State = React.useMemo(
-        () => ({
-            open,
-            transitionStatus,
-            side,
-            align
-        }),
-        [open, transitionStatus, side, align]
-    );
+    const state: SelectPopup.State = {
+        open,
+        transitionStatus,
+        side,
+        align
+    };
 
     useIsoLayoutEffect(() => {
         if (
@@ -218,7 +267,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
     }, [popupRef, positionerElement]);
 
     useIsoLayoutEffect(() => {
-        if (mounted || alignItemWithTriggerActive) {
+        if (open || alignItemWithTriggerActive) {
             return;
         }
 
@@ -228,132 +277,167 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         maxHeightRef.current = 0;
 
         clearStyles(positionerElement, originalPositionerStylesRef.current);
-    }, [mounted, alignItemWithTriggerActive, positionerElement, popupRef]);
+    }, [open, alignItemWithTriggerActive, positionerElement, popupRef]);
 
     useIsoLayoutEffect(() => {
         const popupElement = popupRef.current;
 
-        if (!mounted || !triggerElement || !positionerElement || !popupElement) {
+        if (
+            !open
+            || !triggerElement
+            || !positionerElement
+            || !popupElement
+            || store.state.transitionStatus === 'ending'
+        ) {
             return;
         }
 
         if (!alignItemWithTriggerActive) {
             initialPlacedRef.current = true;
             scrollArrowFrame.request(handleScrollArrowVisibility);
+            popupElement.style.removeProperty('--transform-origin');
             return;
         }
 
         // Wait for `selectedItemTextRef.current` to be set.
         queueMicrotask(() => {
-            const positionerStyles = getComputedStyle(positionerElement);
-            const popupStyles = getComputedStyle(popupElement);
+            // Ensure we remove any transforms that can affect the location of the popup
+            // and therefore the calculations.
+            const restoreTransformStyles = unsetTransformStyles(popupElement);
+            popupElement.style.removeProperty('--transform-origin');
 
-            const doc = ownerDocument(triggerElement);
-            const win = ownerWindow(positionerElement);
-            const triggerRect = triggerElement.getBoundingClientRect();
-            const positionerRect = positionerElement.getBoundingClientRect();
-            const triggerX = triggerRect.left;
-            const triggerHeight = triggerRect.height;
-            const scroller = listElement || popupElement;
-            const scrollHeight = scroller.scrollHeight;
+            try {
+                const positionerStyles = getComputedStyle(positionerElement);
+                const popupStyles = getComputedStyle(popupElement);
 
-            const borderBottom = Number.parseFloat(popupStyles.borderBottomWidth);
-            const marginTop = Number.parseFloat(positionerStyles.marginTop) || 10;
-            const marginBottom = Number.parseFloat(positionerStyles.marginBottom) || 10;
-            const minHeight = Number.parseFloat(positionerStyles.minHeight) || 100;
+                const doc = ownerDocument(triggerElement);
+                const win = ownerWindow(positionerElement);
+                const triggerRect = triggerElement.getBoundingClientRect();
+                const positionerRect = positionerElement.getBoundingClientRect();
+                const triggerX = triggerRect.left;
+                const triggerHeight = triggerRect.height;
+                const scroller = listElement || popupElement;
+                const scrollHeight = scroller.scrollHeight;
 
-            const paddingLeft = 5;
-            const paddingRight = 5;
-            const triggerCollisionThreshold = 20;
+                const borderBottom = Number.parseFloat(popupStyles.borderBottomWidth);
+                const marginTop = Number.parseFloat(positionerStyles.marginTop) || 10;
+                const marginBottom = Number.parseFloat(positionerStyles.marginBottom) || 10;
+                const minHeight = Number.parseFloat(positionerStyles.minHeight) || 100;
+                const maxPopupHeight = getMaxPopupHeight(popupStyles);
 
-            const viewportHeight = doc.documentElement.clientHeight - marginTop - marginBottom;
-            const viewportWidth = doc.documentElement.clientWidth;
-            const availableSpaceBeneathTrigger = viewportHeight - triggerRect.bottom + triggerHeight;
+                const paddingLeft = 5;
+                const paddingRight = 5;
+                const triggerCollisionThreshold = 20;
 
-            const textElement = selectedItemTextRef.current;
-            const valueElement = valueRef.current;
-            let offsetX = 0;
-            let offsetY = 0;
+                const viewportHeight = doc.documentElement.clientHeight - marginTop - marginBottom;
+                const viewportWidth = doc.documentElement.clientWidth;
+                const availableSpaceBeneathTrigger = viewportHeight - triggerRect.bottom + triggerHeight;
 
-            if (textElement && valueElement) {
-                const valueRect = valueElement.getBoundingClientRect();
-                const textRect = textElement.getBoundingClientRect();
-                const valueLeftFromTriggerLeft = valueRect.left - triggerX;
-                const textLeftFromPositionerLeft = textRect.left - positionerRect.left;
-                const valueCenterFromPositionerTop = valueRect.top - triggerRect.top + valueRect.height / 2;
-                const textCenterFromTriggerTop = textRect.top - positionerRect.top + textRect.height / 2;
+                const textElement = selectedItemTextRef.current;
+                const valueElement = valueRef.current;
 
-                offsetX = valueLeftFromTriggerLeft - textLeftFromPositionerLeft;
-                offsetY = textCenterFromTriggerTop - valueCenterFromPositionerTop;
-            }
+                let textRect: DOMRect | undefined;
+                let offsetX = 0;
+                let offsetY = 0;
 
-            const idealHeight = availableSpaceBeneathTrigger + offsetY + marginBottom + borderBottom;
-            let height = Math.min(viewportHeight, idealHeight);
-            const maxHeight = viewportHeight - marginTop - marginBottom;
-            const scrollTop = idealHeight - height;
+                if (textElement && valueElement) {
+                    const valueRect = valueElement.getBoundingClientRect();
+                    textRect = textElement.getBoundingClientRect();
 
-            const left = Math.max(paddingLeft, triggerX + offsetX);
-            const maxRight = viewportWidth - paddingRight;
-            const rightOverflow = Math.max(0, left + positionerRect.width - maxRight);
+                    const valueLeftFromTriggerLeft = valueRect.left - triggerX;
+                    const textLeftFromPositionerLeft = textRect.left - positionerRect.left;
+                    const valueCenterFromPositionerTop
+                        = valueRect.top - triggerRect.top + valueRect.height / 2;
+                    const textCenterFromTriggerTop = textRect.top - positionerRect.top + textRect.height / 2;
 
-            positionerElement.style.left = `${left - rightOverflow}px`;
-            positionerElement.style.height = `${height}px`;
-            positionerElement.style.maxHeight = 'auto';
-            positionerElement.style.marginTop = `${marginTop}px`;
-            positionerElement.style.marginBottom = `${marginBottom}px`;
-            popupElement.style.height = '100%';
+                    offsetX = valueLeftFromTriggerLeft - textLeftFromPositionerLeft;
+                    offsetY = textCenterFromTriggerTop - valueCenterFromPositionerTop;
+                }
 
-            const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
-            const isTopPositioned = scrollTop >= maxScrollTop;
+                const idealHeight = availableSpaceBeneathTrigger + offsetY + marginBottom + borderBottom;
+                let height = Math.min(viewportHeight, idealHeight);
+                const maxHeight = viewportHeight - marginTop - marginBottom;
+                const scrollTop = idealHeight - height;
 
-            if (isTopPositioned) {
-                height = Math.min(viewportHeight, positionerRect.height) - (scrollTop - maxScrollTop);
-            }
+                const left = Math.max(paddingLeft, triggerX + offsetX);
+                const maxRight = viewportWidth - paddingRight;
+                const rightOverflow = Math.max(0, left + positionerRect.width - maxRight);
 
-            // When the trigger is too close to the top or bottom of the viewport, or the minHeight is
-            // reached, we fallback to aligning the popup to the trigger as the UX is poor otherwise.
-            const fallbackToAlignPopupToTrigger
-                = triggerRect.top < triggerCollisionThreshold
-                  || triggerRect.bottom > viewportHeight - triggerCollisionThreshold
-                  || height < Math.min(scrollHeight, minHeight);
-
-            // Safari doesn't position the popup correctly when pinch-zoomed.
-            const isPinchZoomed = (win.visualViewport?.scale ?? 1) !== 1 && isWebKit;
-
-            if (fallbackToAlignPopupToTrigger || isPinchZoomed) {
-                initialPlacedRef.current = true;
-                clearStyles(positionerElement, originalPositionerStylesRef.current);
-                ReactDOM.flushSync(() => setControlledAlignItemWithTrigger(false));
-                return;
-            }
-
-            if (isTopPositioned) {
-                const topOffset = Math.max(0, viewportHeight - idealHeight);
-                positionerElement.style.top = positionerRect.height >= maxHeight ? '0' : `${topOffset}px`;
+                positionerElement.style.left = `${left - rightOverflow}px`;
                 positionerElement.style.height = `${height}px`;
-                scroller.scrollTop = scroller.scrollHeight - scroller.clientHeight;
-                initialHeightRef.current = Math.max(minHeight, height);
-            }
-            else {
-                positionerElement.style.bottom = '0';
-                initialHeightRef.current = Math.max(minHeight, height);
-                scroller.scrollTop = scrollTop;
-            }
+                positionerElement.style.maxHeight = 'auto';
+                positionerElement.style.marginTop = `${marginTop}px`;
+                positionerElement.style.marginBottom = `${marginBottom}px`;
+                popupElement.style.height = '100%';
 
-            if (initialHeightRef.current === viewportHeight) {
-                reachedMaxHeightRef.current = true;
+                const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
+                const isTopPositioned = scrollTop >= maxScrollTop;
+
+                if (isTopPositioned) {
+                    height = Math.min(viewportHeight, positionerRect.height) - (scrollTop - maxScrollTop);
+                }
+
+                // When the trigger is too close to the top or bottom of the viewport, or the minHeight is
+                // reached, we fallback to aligning the popup to the trigger as the UX is poor otherwise.
+                const fallbackToAlignPopupToTrigger
+                    = triggerRect.top < triggerCollisionThreshold
+                      || triggerRect.bottom > viewportHeight - triggerCollisionThreshold
+                      || height < Math.min(scrollHeight, minHeight);
+
+                // Safari doesn't position the popup correctly when pinch-zoomed.
+                const isPinchZoomed = (win.visualViewport?.scale ?? 1) !== 1 && isWebKit;
+
+                if (fallbackToAlignPopupToTrigger || isPinchZoomed) {
+                    initialPlacedRef.current = true;
+                    clearStyles(positionerElement, originalPositionerStylesRef.current);
+                    ReactDOM.flushSync(() => setControlledAlignItemWithTrigger(false));
+                    return;
+                }
+
+                if (isTopPositioned) {
+                    const topOffset = Math.max(0, viewportHeight - idealHeight);
+                    positionerElement.style.top = positionerRect.height >= maxHeight ? '0' : `${topOffset}px`;
+                    positionerElement.style.height = `${height}px`;
+                    scroller.scrollTop = scroller.scrollHeight - scroller.clientHeight;
+                    initialHeightRef.current = Math.max(minHeight, height);
+                }
+                else {
+                    positionerElement.style.bottom = '0';
+                    initialHeightRef.current = Math.max(minHeight, height);
+                    scroller.scrollTop = scrollTop;
+                }
+
+                if (textRect) {
+                    const popupTop = positionerRect.top;
+                    const popupHeight = positionerRect.height;
+                    const textCenterY = textRect.top + textRect.height / 2;
+
+                    const transformOriginY
+                        = popupHeight > 0 ? ((textCenterY - popupTop) / popupHeight) * 100 : 50;
+
+                    const clampedY = clamp(transformOriginY, 0, 100);
+
+                    popupElement.style.setProperty('--transform-origin', `50% ${clampedY}%`);
+                }
+
+                if (initialHeightRef.current === viewportHeight || height >= maxPopupHeight) {
+                    reachedMaxHeightRef.current = true;
+                }
+
+                handleScrollArrowVisibility();
+
+                // Avoid the `onScroll` event logic from triggering before the popup is placed.
+                setTimeout(() => {
+                    initialPlacedRef.current = true;
+                });
             }
-
-            handleScrollArrowVisibility();
-
-            // Avoid the `onScroll` event logic from triggering before the popup is placed.
-            setTimeout(() => {
-                initialPlacedRef.current = true;
-            });
+            finally {
+                restoreTransformStyles();
+            }
         });
     }, [
         store,
-        mounted,
+        open,
         positionerElement,
         triggerElement,
         valueRef,
@@ -369,7 +453,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
     ]);
 
     React.useEffect(() => {
-        if (!alignItemWithTriggerActive || !positionerElement || !mounted) {
+        if (!alignItemWithTriggerActive || !positionerElement || !open) {
             return undefined;
         }
 
@@ -384,7 +468,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
         return () => {
             win.removeEventListener('resize', handleResize);
         };
-    }, [setOpen, alignItemWithTriggerActive, positionerElement, mounted]);
+    }, [setOpen, alignItemWithTriggerActive, positionerElement, open]);
 
     const defaultProps: HTMLProps = {
         ...(listElement
@@ -407,7 +491,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
             keyboardActiveRef.current = false;
         },
         onPointerLeave(event) {
-            if (isMouseWithinBounds(event) || event.pointerType === 'touch') {
+            if (!highlightItemOnHover || isMouseWithinBounds(event) || event.pointerType === 'touch') {
                 return;
             }
 
@@ -422,7 +506,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
             if (listElement) {
                 return;
             }
-            scrollHandlerRef.current?.(event.currentTarget);
+            handleScroll(event.currentTarget);
         },
         ...(alignItemWithTriggerActive && {
             style: listElement ? { height: '100%' } : LIST_FUNCTIONAL_STYLES
@@ -447,11 +531,12 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
 
     return (
         <React.Fragment>
-            {styleDisableScrollbar.element}
+            {!disableStyleElements && styleDisableScrollbar.getElement(nonce)}
             <FloatingFocusManager
                 context={floatingRootContext}
                 modal={false}
                 disabled={!mounted}
+                returnFocus={finalFocus}
                 restoreFocus
             >
                 {element}
@@ -462,6 +547,20 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
 
 export type SelectPopupProps = {
     children?: React.ReactNode;
+    /**
+     * Determines the element to focus when the select popup is closed.
+     *
+     * - `false`: Do not move focus.
+     * - `true`: Move focus based on the default behavior (trigger or previously focused element).
+     * - `RefObject`: Move focus to the ref element.
+     * - `function`: Called with the interaction type (`mouse`, `touch`, `pen`, or `keyboard`).
+     *   Return an element to focus, `true` to use the default behavior, or `false`/`undefined` to do nothing.
+     */
+    finalFocus?:
+      | boolean
+      | React.RefObject<HTMLElement | null>
+      | ((closeType: Interaction) => boolean | HTMLElement | null | void)
+      | undefined;
 } & HeadlessUIComponentProps<'div', SelectPopup.State>;
 
 export type SelectPopupState = {

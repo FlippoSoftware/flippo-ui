@@ -31,7 +31,7 @@ export class TooltipHandle<Payload> {
             : undefined;
 
         if (triggerId && !triggerElement) {
-            throw new Error(`Base UI: TooltipHandle.open: No trigger found with id "${triggerId}".`);
+            throw new Error(`Headless UI: TooltipHandle.open: No trigger found with id "${triggerId}".`);
         }
 
         this.store.setOpen(

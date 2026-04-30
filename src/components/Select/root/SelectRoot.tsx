@@ -8,6 +8,7 @@ import {
     useMergedRef,
     useOnFirstRender,
     useOpenChangeComplete,
+    useOpenInteractionType,
     useStore,
     useTransitionStatus
 } from '@flippo-ui/hooks';
@@ -15,12 +16,13 @@ import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 import { useValueAsRef } from '@flippo-ui/hooks/use-value-as-ref';
 import { useValueChanged } from '@flippo-ui/hooks/use-value-changed';
 
-import { EMPTY_ARRAY } from '~@lib/constants';
+import { EMPTY_ARRAY, EMPTY_OBJECT } from '~@lib/constants';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { defaultItemEquality, findItemIndex } from '~@lib/itemEquality';
+import { mergeProps } from '~@lib/merge';
 import { REASONS } from '~@lib/reason';
 import { stringifyAsValue } from '~@lib/resolveValueLabel';
-import { visuallyHidden } from '~@lib/visuallyHidden';
+import { visuallyHidden, visuallyHiddenInput } from '~@lib/visuallyHidden';
 import {
     useClick,
     useDismiss,
@@ -61,6 +63,7 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
         onValueChange,
         open: openProp,
         defaultOpen = false,
+        autoComplete,
         onOpenChange,
         name: nameProp,
         disabled: disabledProp = false,
@@ -75,20 +78,23 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
         itemToStringLabel,
         itemToStringValue,
         isItemEqualToValue = defaultItemEquality,
+        highlightItemOnHover = true,
         children
     } = props;
 
     const { clearErrors } = useFormContext();
     const {
         setDirty,
+        setTouched,
+        setFocused,
         shouldValidateOnChange,
         validityData,
         setFilled,
         name: fieldName,
         disabled: fieldDisabled,
-        validation
+        validation,
+        validationMode
     } = useFieldRootContext();
-    const { controlId } = useLabelableContext();
 
     const generatedId = useLabelableId({ id });
 
@@ -124,6 +130,11 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
     const alignItemWithTriggerActiveRef = React.useRef(false);
 
     const { mounted, setMounted, transitionStatus } = useTransitionStatus(open);
+    const {
+        openMethod,
+        triggerProps: interactionTypeProps,
+        reset: resetOpenInteractionType
+    } = useOpenInteractionType(open);
 
     const store = useLazyRef(
         () =>
@@ -140,7 +151,7 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
                 transitionStatus,
                 items,
                 forceMount: false,
-                touchModality: false,
+                openMethod: null,
                 activeIndex: null,
                 selectedIndex: null,
                 popupProps: {},
@@ -166,6 +177,13 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
         return stringifyAsValue(value, itemToStringValue);
     }, [multiple, value, itemToStringValue]);
 
+    const fieldStringValue = React.useMemo(() => {
+        if (multiple && Array.isArray(value)) {
+            return value.map((currentValue) => stringifyAsValue(currentValue, itemToStringValue));
+        }
+        return stringifyAsValue(value, itemToStringValue);
+    }, [multiple, value, itemToStringValue]);
+
     const controlRef = useValueAsRef(store.state.triggerElement);
 
     useField({
@@ -174,7 +192,7 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
         value,
         controlRef,
         name,
-        getValue: () => value
+        getValue: () => fieldStringValue
     });
 
     const initialValueRef = React.useRef(value);
@@ -186,8 +204,8 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
     }, [store, value]);
 
     useIsoLayoutEffect(() => {
-        setFilled(value !== null);
-    }, [value, setFilled]);
+        setFilled(multiple ? Array.isArray(value) && value.length > 0 : value != null);
+    }, [multiple, value, setFilled]);
 
     useIsoLayoutEffect(
         () => {
@@ -204,8 +222,8 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
                     return;
                 }
 
-                const lastValue = currentValue[currentValue.length - 1];
-                const lastIndex = findItemIndex(registry, lastValue as Value, isItemEqualToValue);
+                const lastValue = currentValue[currentValue.length - 1]!;
+                const lastIndex = findItemIndex(registry, lastValue, isItemEqualToValue);
                 store.set('selectedIndex', lastIndex === -1 ? null : lastIndex);
                 return;
             }
@@ -245,6 +263,18 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
 
             setOpenUnwrapped(nextOpen);
 
+            if (
+                !nextOpen
+                && (eventDetails.reason === REASONS.focusOut || eventDetails.reason === REASONS.outsidePress)
+            ) {
+                setTouched(true);
+                setFocused(false);
+
+                if (validationMode === 'onBlur') {
+                    validation.commit(value);
+                }
+            }
+
             // The active index will sync to the last selected index on the next open.
             // Workaround `enableFocusInside` in Floating UI setting `tabindex=0` of a non-highlighted
             // option upon close when tabbing out due to `keepMounted=true`:
@@ -264,6 +294,7 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
     const handleUnmount = useStableCallback(() => {
         setMounted(false);
         store.set('activeIndex', null);
+        resetOpenInteractionType();
         onOpenChangeComplete?.(false);
     });
 
@@ -370,10 +401,18 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
 
     const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([click, dismiss, listNavigation, typeahead]);
 
+    const mergedTriggerProps = React.useMemo(() => {
+        return mergeProps(
+            getReferenceProps(),
+            interactionTypeProps,
+            generatedId ? { id: generatedId } : EMPTY_OBJECT
+        );
+    }, [getReferenceProps, interactionTypeProps, generatedId]);
+
     useOnFirstRender(() => {
         store.update({
             popupProps: getFloatingProps(),
-            triggerProps: getReferenceProps()
+            triggerProps: mergedTriggerProps
         });
     });
 
@@ -387,11 +426,12 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
             mounted,
             transitionStatus,
             popupProps: getFloatingProps(),
-            triggerProps: getReferenceProps(),
+            triggerProps: mergedTriggerProps,
             items,
             itemToStringLabel,
             itemToStringValue,
-            isItemEqualToValue
+            isItemEqualToValue,
+            openMethod
         });
     }, [
         store,
@@ -403,11 +443,12 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
         mounted,
         transitionStatus,
         getFloatingProps,
-        getReferenceProps,
+        mergedTriggerProps,
         items,
         itemToStringLabel,
         itemToStringValue,
-        isItemEqualToValue
+        isItemEqualToValue,
+        openMethod
     ]);
 
     const contextValue: SelectRootContextValue = React.useMemo(
@@ -420,6 +461,7 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
             multiple,
             itemToStringLabel,
             itemToStringValue,
+            highlightItemOnHover,
             setValue,
             setOpen,
             listRef,
@@ -450,6 +492,7 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
             multiple,
             itemToStringLabel,
             itemToStringValue,
+            highlightItemOnHover,
             setValue,
             setOpen,
             getItemProps,
@@ -473,10 +516,10 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
             const currentSerializedValue = stringifyAsValue(v, itemToStringValue);
             return (
                 <input
-                  key={currentSerializedValue}
-                  type={'hidden'}
-                  name={name}
-                  value={currentSerializedValue}
+                    key={currentSerializedValue}
+                    type={'hidden'}
+                    name={name}
+                    value={currentSerializedValue}
                 />
             );
         });
@@ -487,10 +530,14 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
             <SelectFloatingContext.Provider value={floatingContext}>
                 {children}
                 <input
-                  {...validation.getInputValidationProps({
+                    {...validation.getInputValidationProps({
                         onFocus() {
                             // Move focus to the trigger element when the hidden input is focused.
-                            store.state.triggerElement?.focus();
+                            store.state.triggerElement?.focus({
+                                // Supported in Chrome from 144 (January 2026)
+                                // @ts-expect-error - focusVisible is not yet in the lib.dom.d.ts
+                                focusVisible: true
+                            });
                         },
                         // Handle browser autofill.
                         onChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -531,16 +578,16 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
                             queueMicrotask(handleChange);
                         }
                     })}
-                  id={id || controlId || undefined}
-                  name={multiple ? undefined : name}
-                  value={serializedValue}
-                  disabled={disabled}
-                  required={required && !hasMultipleSelection}
-                  readOnly={readOnly}
-                  ref={ref}
-                  style={visuallyHidden}
-                  tabIndex={-1}
-                  aria-hidden
+                    name={multiple ? undefined : name}
+                    autoComplete={autoComplete}
+                    value={serializedValue}
+                    disabled={disabled}
+                    required={required && !hasMultipleSelection}
+                    readOnly={readOnly}
+                    ref={ref}
+                    style={name ? visuallyHiddenInput : visuallyHidden}
+                    tabIndex={-1}
+                    aria-hidden
                 />
                 {hiddenInputs}
             </SelectFloatingContext.Provider>
@@ -557,69 +604,79 @@ export type SelectRootProps<Value, Multiple extends boolean | undefined = false>
     /**
      * A ref to access the hidden input element.
      */
-    inputRef?: React.Ref<HTMLInputElement>;
+    inputRef?: React.Ref<HTMLInputElement> | undefined;
     /**
      * Identifies the field when a form is submitted.
      */
-    name?: string;
+    name?: string | undefined;
+    /**
+     * Provides a hint to the browser for autofill.
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autocomplete
+     */
+    autoComplete?: string | undefined;
     /**
      * The id of the Select.
      */
-    id?: string;
+    id?: string | undefined;
     /**
      * Whether the user must choose a value before submitting a form.
      * @default false
      */
-    required?: boolean;
+    required?: boolean | undefined;
     /**
      * Whether the user should be unable to choose a different option from the select popup.
      * @default false
      */
-    readOnly?: boolean;
+    readOnly?: boolean | undefined;
     /**
      * Whether the component should ignore user interaction.
      * @default false
      */
-    disabled?: boolean;
+    disabled?: boolean | undefined;
     /**
      * Whether multiple items can be selected.
      * @default false
      */
-    multiple?: Multiple;
+    multiple?: Multiple | undefined;
+    /**
+     * Whether moving the pointer over items should highlight them.
+     * Disabling this prop allows CSS `:hover` to be differentiated from the `:focus` (`data-highlighted`) state.
+     * @default true
+     */
+    highlightItemOnHover?: boolean | undefined;
     /**
      * Whether the select popup is initially open.
      *
      * To render a controlled select popup, use the `open` prop instead.
      * @default false
      */
-    defaultOpen?: boolean;
+    defaultOpen?: boolean | undefined;
     /**
      * Event handler called when the select popup is opened or closed.
      */
-    onOpenChange?: (open: boolean, eventDetails: SelectRootChangeEventDetails) => void;
+    onOpenChange?: ((open: boolean, eventDetails: SelectRootChangeEventDetails) => void) | undefined;
     /**
      * Event handler called after any animations complete when the select popup is opened or closed.
      */
-    onOpenChangeComplete?: (open: boolean) => void;
+    onOpenChangeComplete?: ((open: boolean) => void) | undefined;
     /**
      * Whether the select popup is currently open.
      */
-    open?: boolean;
+    open?: boolean | undefined;
     /**
      * Determines if the select enters a modal state when open.
-     * - `true`: user interaction is limited to the select: document page scroll is locked and and pointer
-     *   interactions on outside elements are disabled.
+     * - `true`: user interaction is limited to the select: document page scroll is locked and pointer interactions on outside elements are disabled.
      * - `false`: user interaction with the rest of the document is allowed.
      * @default true
      */
-    modal?: boolean;
+    modal?: boolean | undefined;
     /**
      * A ref to imperative actions.
      * - `unmount`: When specified, the select will not be unmounted when closed.
      * Instead, the `unmount` function must be called to unmount the select manually.
      * Useful when the select's animation is controlled by an external library.
      */
-    actionsRef?: React.RefObject<SelectRootActions>;
+    actionsRef?: React.RefObject<SelectRootActions | null> | undefined;
     /**
      * Data structure of the items rendered in the select popup.
      * When specified, `<Select.Value>` renders the label of the selected item instead of the raw value.
@@ -634,42 +691,49 @@ export type SelectRootProps<Value, Multiple extends boolean | undefined = false>
      * <Select.Root items={items} />
      * ```
      */
-    items?: Record<string, React.ReactNode> | ReadonlyArray<{ label: React.ReactNode; value: any }>;
+    items?:
+      | Record<string, React.ReactNode>
+      | ReadonlyArray<{ label: React.ReactNode; value: any }>
+      | undefined;
     /**
-     * When the item values are objects (`<Select.Item value={object}>`), this function converts the object value
-     * to a string representation for display in the trigger.
-     * If the shape of the object is `{ value, label }`, the label will be used automatically without needing to specify this prop.
+     * When the item values are objects (`<Select.Item value={object}>`), this function converts
+     *  the object value to a string representation for display in the trigger.
+     * If the shape of the object is `{ value, label }`, the label will be used automatically
+     * without needing to specify this prop.
      */
-    itemToStringLabel?: (itemValue: Value) => string;
+    itemToStringLabel?: ((itemValue: Value) => string) | undefined;
     /**
-     * When the item values are objects (`<Select.Item value={object}>`), this function converts the object value
-     * to a string representation for form submission.
-     * If the shape of the object is `{ value, label }`, the value will be used automatically without needing to specify this prop.
+     * When the item values are objects (`<Select.Item value={object}>`), this function converts
+     *  the object value to a string representation for form submission.
+     * If the shape of the object is `{ value, label }`, the value will be used automatically
+     *  without needing to specify this prop.
      */
-    itemToStringValue?: (itemValue: Value) => string;
+    itemToStringValue?: ((itemValue: Value) => string) | undefined;
     /**
-     * Custom comparison logic used to determine if a select item value matches the current selected value.
-     * Useful when item values are objects without matching referentially.
+     * Custom comparison logic used to determine if a select item value matches the current
+     * selected value. Useful when item values are objects without matching referentially.
      * Defaults to `Object.is` comparison.
      */
-    isItemEqualToValue?: (itemValue: Value, value: Value) => boolean;
+    isItemEqualToValue?: ((itemValue: Value, value: Value) => boolean) | undefined;
     /**
      * The uncontrolled value of the select when it’s initially rendered.
      *
      * To render a controlled select, use the `value` prop instead.
      */
-    defaultValue?: SelectValueType<Value, Multiple> | null;
+    defaultValue?: SelectValueType<Value, Multiple> | null | undefined;
     /**
      * The value of the select. Use when controlled.
      */
-    value?: SelectValueType<Value, Multiple>;
+    value?: SelectValueType<Value, Multiple> | null | undefined;
     /**
      * Event handler called when the value of the select changes.
      */
-    onValueChange?: (
+    onValueChange?:
+    | ((
         value: SelectValueType<Value, Multiple> | (Multiple extends true ? never : null),
         eventDetails: SelectRootChangeEventDetails,
-    ) => void;
+    ) => void)
+    | undefined;
 };
 
 export type SelectRootState = {};

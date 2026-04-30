@@ -64,6 +64,8 @@ export function MenuPopup(componentProps: MenuPopup.Props) {
     const closeDelay = store.useState('closeDelay');
     const activeTriggerElement = store.useState('activeTriggerElement');
 
+    const isContextMenu = parent.type === 'context-menu';
+
     useOpenChangeComplete({
         open,
         ref: store.context.popupRef,
@@ -93,29 +95,18 @@ export function MenuPopup(componentProps: MenuPopup.Props) {
     const disabled = store.useState('disabled');
 
     useHoverFloatingInteraction(floatingContext, {
-        enabled:
-      hoverEnabled && !disabled && parent.type !== 'context-menu' && parent.type !== 'menubar',
+        enabled: hoverEnabled && !disabled && !isContextMenu && parent.type !== 'menubar',
         closeDelay
     });
 
-    const state: MenuPopup.State = React.useMemo(
-        () => ({
-            transitionStatus,
-            side,
-            align,
-            open,
-            nested: parent.type === 'menu',
-            instant: instantType
-        }),
-        [
-            transitionStatus,
-            side,
-            align,
-            open,
-            parent.type,
-            instantType
-        ]
-    );
+    const state: MenuPopup.State = {
+        transitionStatus,
+        side,
+        align,
+        open,
+        nested: parent.type === 'menu',
+        instant: instantType
+    };
 
     const element = useRenderElement('div', componentProps, {
         state,
@@ -136,7 +127,7 @@ export function MenuPopup(componentProps: MenuPopup.Props) {
         ]
     });
 
-    let returnFocus = parent.type === undefined || parent.type === 'context-menu';
+    let returnFocus = parent.type === undefined || isContextMenu;
     if (
         triggerElement
         || (parent.type === 'menubar' && lastOpenChangeReason !== REASONS.outsidePress)
@@ -147,7 +138,7 @@ export function MenuPopup(componentProps: MenuPopup.Props) {
     return (
         <FloatingFocusManager
             context={floatingContext}
-            modal={false}
+            modal={isContextMenu}
             disabled={!mounted}
             returnFocus={finalFocus === undefined ? returnFocus : finalFocus}
             initialFocus={parent.type !== 'menu'}
@@ -196,6 +187,7 @@ export type MenuPopupState = {
      */
     open: boolean;
     nested: boolean;
+    instant: 'dismiss' | 'click' | 'group' | undefined;
 };
 
 export namespace MenuPopup {

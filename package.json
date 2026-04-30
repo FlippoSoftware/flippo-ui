@@ -40,6 +40,11 @@
       "import": "./dist/components/Button/index.es.js",
       "require": "./dist/components/Button/index.cjs.js"
     },
+    "./c-s-p-provider": {
+      "types": "./dist/components/CSPProvider/index.d.ts",
+      "import": "./dist/components/CSPProvider/index.es.js",
+      "require": "./dist/components/CSPProvider/index.cjs.js"
+    },
     "./checkbox": {
       "types": "./dist/components/Checkbox/index.d.ts",
       "import": "./dist/components/Checkbox/index.es.js",
@@ -110,6 +115,11 @@
       "import": "./dist/components/List/index.es.js",
       "require": "./dist/components/List/index.cjs.js"
     },
+    "./marquee": {
+      "types": "./dist/components/Marquee/index.d.ts",
+      "import": "./dist/components/Marquee/index.es.js",
+      "require": "./dist/components/Marquee/index.cjs.js"
+    },
     "./menu": {
       "types": "./dist/components/Menu/index.d.ts",
       "import": "./dist/components/Menu/index.es.js",
@@ -129,6 +139,11 @@
       "types": "./dist/components/NavigationMenu/index.d.ts",
       "import": "./dist/components/NavigationMenu/index.es.js",
       "require": "./dist/components/NavigationMenu/index.cjs.js"
+    },
+    "./no-ssr": {
+      "types": "./dist/components/NoSsr/index.d.ts",
+      "import": "./dist/components/NoSsr/index.es.js",
+      "require": "./dist/components/NoSsr/index.cjs.js"
     },
     "./number-field": {
       "types": "./dist/components/NumberField/index.d.ts",
@@ -254,6 +269,11 @@
       "types": "./dist/lib/hooks/useDirection.d.ts",
       "import": "./dist/lib/hooks/useDirection.es.js",
       "require": "./dist/lib/hooks/useDirection.cjs.js"
+    },
+    "./createHeadlessUIEventDetails": {
+      "types": "./dist/lib/createHeadlessUIEventDetails.d.ts",
+      "import": "./dist/lib/createHeadlessUIEventDetails.es.js",
+      "require": "./dist/lib/createHeadlessUIEventDetails.cjs.js"
     }
   },
   "main": "./dist/index.cjs.js",
@@ -269,6 +289,7 @@
     "dev": "vite build --watch",
     "build": "vite build && node scripts/generate-exports.js",
     "build:exports": "node scripts/generate-exports.js",
+    "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "inline-scripts": "tsx ./scripts/inlineScripts.mts"

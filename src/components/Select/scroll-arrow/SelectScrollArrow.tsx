@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 import {
     useIsoLayoutEffect,
@@ -48,10 +48,10 @@ export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
         = direction === 'up' ? selectors.scrollUpArrowVisible : selectors.scrollDownArrowVisible;
 
     const stateVisible = useStore(store, visibleSelector);
-    const touchModality = useStore(store, selectors.touchModality);
+    const openMethod = useStore(store, selectors.openMethod);
 
     // Scroll arrows are disabled for touch modality as they are a hover-only element.
-    const visible = stateVisible && !touchModality;
+    const visible = stateVisible && openMethod !== 'touch';
 
     const timeout = useTimeout();
 
@@ -83,15 +83,12 @@ export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
         }
     });
 
-    const state: SelectScrollArrow.State = React.useMemo(
-        () => ({
-            direction,
-            visible,
-            side,
-            transitionStatus
-        }),
-        [direction, visible, side, transitionStatus]
-    );
+    const state: SelectScrollArrow.State = {
+        direction,
+        visible,
+        side,
+        transitionStatus
+    };
 
     const defaultProps: React.ComponentProps<'div'> = {
         'aria-hidden': true,

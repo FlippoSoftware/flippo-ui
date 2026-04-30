@@ -22,7 +22,8 @@ const entryPoints: Record<string, string> = {
     ...componentEntries,
     // Additional exports
     'lib/merge': path.resolve('src/lib/merge.ts'),
-    'lib/hooks/useDirection': path.resolve('src/lib/hooks/useDirection.ts')
+    'lib/hooks/useDirection': path.resolve('src/lib/hooks/useDirection.ts'),
+    'lib/createHeadlessUIEventDetails': path.resolve('src/lib/createHeadlessUIEventDetails.ts')
 };
 
 type VitestConfigExport = {

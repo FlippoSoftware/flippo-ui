@@ -1,8 +1,6 @@
 import React from 'react';
 
 import {
-    useEventCallback,
-    useLatestRef,
     useMergedRef,
     useStore,
     useTimeout
@@ -23,13 +21,12 @@ import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type {
     HeadlessUIComponentProps,
     HTMLProps,
-    NativeButtonProps,
-    NonNativeButtonProps
+    NativeButtonProps
 } from '~@lib/types';
 
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
 import { fieldValidityMapping } from '../../Field/utils/constants';
-import { useLabelableContext } from '../../LabelableProvider';
+import { useLabelableContext, useLabelableId } from '../../LabelableProvider';
 import { useButton } from '../../use-button';
 import { useSelectRootContext } from '../root/SelectRootContext';
 import { selectors } from '../store';
@@ -37,6 +34,8 @@ import { selectors } from '../store';
 import type { FieldRoot } from '../../Field/root/FieldRoot';
 
 const BOUNDARY_OFFSET = 2;
+const SELECTED_DELAY = 400;
+const UNSELECTED_DELAY = 200;
 
 const customStyleHookMapping: StateAttributesMapping<SelectTrigger.State> = {
     ...pressableTriggerOpenStateMapping,
@@ -57,6 +56,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
         className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
+        id: idProp,
         disabled: disabledProp = false,
         nativeButton = true,
         ...elementProps
@@ -76,6 +76,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
         selectionRef,
         validation,
         readOnly,
+        required,
         alignItemWithTriggerActiveRef,
         disabled: selectDisabled,
         keyboardActiveRef
@@ -88,13 +89,17 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
     const triggerProps = useStore(store, selectors.triggerProps);
     const positionerElement = useStore(store, selectors.positionerElement);
     const listElement = useStore(store, selectors.listElement);
-    const serializedValue = useStore(store, selectors.serializedValue);
+    const rootId = useStore(store, selectors.id);
+    const hasSelectedValue = useStore(store, selectors.hasSelectedValue);
+    const shouldCheckNullItemLabel = !hasSelectedValue && open;
+    const hasNullItemLabel = useStore(store, selectors.hasNullItemLabel, shouldCheckNullItemLabel);
+
+    const id = idProp ?? rootId;
+    useLabelableId({ id });
 
     const positionerRef = useValueAsRef(positionerElement);
 
     const triggerRef = React.useRef<HTMLElement | null>(null);
-    const timeoutFocus = useTimeout();
-    const timeoutMouseDown = useTimeout();
 
     const { getButtonProps, buttonRef } = useButton({
         disabled,
@@ -112,24 +117,40 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
         setTriggerElement
     );
 
-    const timeout1 = useTimeout();
-    const timeout2 = useTimeout();
+    const timeoutFocus = useTimeout();
+    const timeoutMouseDown = useTimeout();
+    const selectedDelayTimeout = useTimeout();
+    const unselectedDelayTimeout = useTimeout();
 
     React.useEffect(() => {
         if (open) {
-            // mousedown -> move to unselected item -> mouseup should not select within 200ms.
-            timeout2.start(200, () => {
-                selectionRef.current.allowUnselectedMouseUp = true;
+            const hasSelectedItemInList = hasSelectedValue || hasNullItemLabel;
+            const shouldDelayUnselectedMouseUpLonger = !hasSelectedItemInList;
 
-                // mousedown -> mouseup on selected item should not select within 400ms.
-                timeout1.start(200, () => {
+            // When there is no selected item in the list (placeholder-only selects), a mousedown
+            // on the trigger followed by a quick mouseup over the first option can accidentally select
+            // within 200ms. Delay unselected mouseup to match the safer 400ms window.
+            if (shouldDelayUnselectedMouseUpLonger) {
+                selectedDelayTimeout.start(SELECTED_DELAY, () => {
+                    selectionRef.current.allowUnselectedMouseUp = true;
                     selectionRef.current.allowSelectedMouseUp = true;
                 });
-            });
+            }
+            else {
+                // mousedown -> move to unselected item -> mouseup should not select within 200ms.
+                unselectedDelayTimeout.start(UNSELECTED_DELAY, () => {
+                    selectionRef.current.allowUnselectedMouseUp = true;
+
+                    // mousedown -> mouseup on selected item should not select within 400ms.
+                    selectedDelayTimeout.start(UNSELECTED_DELAY, () => {
+                        selectionRef.current.allowSelectedMouseUp = true;
+                    });
+                });
+            }
 
             return () => {
-                timeout1.clear();
-                timeout2.clear();
+                selectedDelayTimeout.clear();
+                unselectedDelayTimeout.clear();
             };
         }
 
@@ -143,10 +164,12 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
         return undefined;
     }, [
         open,
+        hasSelectedValue,
+        hasNullItemLabel,
         selectionRef,
         timeoutMouseDown,
-        timeout1,
-        timeout2
+        selectedDelayTimeout,
+        unselectedDelayTimeout
     ]);
 
     const ariaControlsId = React.useMemo(() => {
@@ -156,19 +179,22 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
     const props: HTMLProps = mergeProps<'button'>(
         triggerProps,
         {
+            id,
             'role': 'combobox',
             'aria-expanded': open ? 'true' : 'false',
             'aria-haspopup': 'listbox',
             'aria-controls': open ? ariaControlsId : undefined,
             'aria-labelledby': labelId,
             'aria-readonly': readOnly || undefined,
+            'aria-required': required || undefined,
             'tabIndex': disabled ? -1 : 0,
             'ref': mergedRef,
             onFocus(event) {
                 setFocused(true);
+
                 // The popup element shouldn't obscure the focused trigger.
                 if (open && alignItemWithTriggerActiveRef.current) {
-                    setOpen(false, createChangeEventDetails(REASONS.focusOut, event.nativeEvent));
+                    setOpen(false, createChangeEventDetails(REASONS.none, event.nativeEvent));
                 }
 
                 // Saves a re-render on initial click: `forceMount === true` mounts
@@ -180,7 +206,12 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
                     store.set('forceMount', true);
                 });
             },
-            onBlur() {
+            onBlur(event) {
+                // If focus is moving into the popup, don't count it as a blur.
+                if (contains(positionerElement, event.relatedTarget)) {
+                    return;
+                }
+
                 setTouched(true);
                 setFocused(false);
 
@@ -188,12 +219,8 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
                     validation.commit(value);
                 }
             },
-            onPointerMove({ pointerType }) {
+            onPointerMove() {
                 keyboardActiveRef.current = false;
-                store.set('touchModality', pointerType === 'touch');
-            },
-            onPointerDown({ pointerType }) {
-                store.set('touchModality', pointerType === 'touch');
             },
             onKeyDown() {
                 keyboardActiveRef.current = true;
@@ -250,24 +277,14 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
     // <Toolbar.Button render={<Select.Trigger />} />
     props.role = 'combobox';
 
-    const state: SelectTrigger.State = React.useMemo(
-        () => ({
-            ...fieldState,
-            open,
-            disabled,
-            value,
-            readOnly,
-            placeholder: !serializedValue
-        }),
-        [
-            fieldState,
-            open,
-            disabled,
-            value,
-            readOnly,
-            serializedValue
-        ]
-    );
+    const state: SelectTrigger.State = {
+        ...fieldState,
+        open,
+        disabled,
+        value,
+        readOnly,
+        placeholder: !hasSelectedValue
+    };
 
     return useRenderElement('button', componentProps, {
         ref: [ref, triggerRef],
@@ -284,6 +301,8 @@ export type SelectTriggerState = {
     readOnly: boolean;
     /** The value of the currently selected item. */
     value: any;
+    /** Whether the trigger is a placeholder. */
+    placeholder: boolean;
 } & FieldRoot.State;
 
 export type SelectTriggerProps = {

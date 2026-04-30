@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
@@ -50,13 +50,10 @@ export function MenuItem(componentProps: MenuItem.Props) {
         itemMetadata: REGULAR_ITEM
     });
 
-    const state: MenuItem.State = React.useMemo(
-        () => ({
-            disabled,
-            highlighted
-        }),
-        [disabled, highlighted]
-    );
+    const state: MenuItem.State = {
+        disabled,
+        highlighted
+    };
 
     return useRenderElement('div', componentProps, {
         state,

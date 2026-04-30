@@ -43,7 +43,7 @@ export const Inner = React.memo(
             render,
             className,
             /* eslint-enable unused-imports/no-unused-vars */
-            value = null,
+            value: itemValue = null,
             label,
             disabled = false,
             nativeButton = false,
@@ -67,13 +67,14 @@ export const Inner = React.memo(
             typingRef,
             valuesRef,
             keyboardActiveRef,
-            multiple
+            multiple,
+            highlightItemOnHover
         } = useSelectRootContext();
 
         const highlightTimeout = useTimeout();
 
         const highlighted = useStore(store, selectors.isActive, listItem.index);
-        const selected = useStore(store, selectors.isSelected, listItem.index, value);
+        const selected = useStore(store, selectors.isSelected, listItem.index, itemValue);
         const selectedByFocus = useStore(store, selectors.isSelectedByFocus, listItem.index);
         const isItemEqualToValue = useStore(store, selectors.isItemEqualToValue);
 
@@ -89,12 +90,12 @@ export const Inner = React.memo(
             }
 
             const values = valuesRef.current;
-            values[index] = value;
+            values[index] = itemValue;
 
             return () => {
                 delete values[index];
             };
-        }, [hasRegistered, index, value, valuesRef]);
+        }, [hasRegistered, index, itemValue, valuesRef]);
 
         useIsoLayoutEffect(() => {
             if (!hasRegistered) {
@@ -103,12 +104,15 @@ export const Inner = React.memo(
 
             const selectedValue = store.state.value;
 
-            let candidate = selectedValue;
+            let selectedCandidate = selectedValue;
             if (multiple && Array.isArray(selectedValue) && selectedValue.length > 0) {
-                candidate = selectedValue[selectedValue.length - 1];
+                selectedCandidate = selectedValue[selectedValue.length - 1];
             }
 
-            if (candidate !== undefined && compareItemEquality(candidate, value, isItemEqualToValue)) {
+            if (
+                selectedCandidate !== undefined
+                && compareItemEquality(itemValue, selectedCandidate, isItemEqualToValue)
+            ) {
                 store.set('selectedIndex', index);
             }
             return undefined;
@@ -118,17 +122,14 @@ export const Inner = React.memo(
             multiple,
             isItemEqualToValue,
             store,
-            value
+            itemValue
         ]);
 
-        const state: SelectItem.State = React.useMemo(
-            () => ({
-                disabled,
-                selected,
-                highlighted
-            }),
-            [disabled, selected, highlighted]
-        );
+        const state: SelectItem.State = {
+            disabled,
+            selected,
+            highlighted
+        };
 
         const rootProps = getItemProps({ active: highlighted, selected });
         // With our custom `focusItemOnHover` implementation, this interferes with the logic and can
@@ -151,12 +152,12 @@ export const Inner = React.memo(
             if (multiple) {
                 const currentValue = Array.isArray(selectedValue) ? selectedValue : [];
                 const nextValue = selected
-                    ? removeItem(currentValue, value, isItemEqualToValue)
-                    : [...currentValue, value];
+                    ? removeItem(currentValue, itemValue, isItemEqualToValue)
+                    : [...currentValue, itemValue];
                 setValue(nextValue, createChangeEventDetails(REASONS.itemPress, event));
             }
             else {
-                setValue(value, createChangeEventDetails(REASONS.itemPress, event));
+                setValue(itemValue, createChangeEventDetails(REASONS.itemPress, event));
                 setOpen(false, createChangeEventDetails(REASONS.itemPress, event));
             }
         }
@@ -164,21 +165,26 @@ export const Inner = React.memo(
         const defaultProps: HTMLProps = {
             'role': 'option',
             'aria-selected': selected,
-            'aria-disabled': disabled || undefined,
             'tabIndex': highlighted ? 0 : -1,
             onFocus() {
                 store.set('activeIndex', index);
             },
             onMouseEnter() {
-                if (!keyboardActiveRef.current && store.state.selectedIndex === null) {
+                if (
+                    !keyboardActiveRef.current
+                    && store.state.selectedIndex === null
+                    && highlightItemOnHover
+                ) {
                     store.set('activeIndex', index);
                 }
             },
             onMouseMove() {
-                store.set('activeIndex', index);
+                if (highlightItemOnHover) {
+                    store.set('activeIndex', index);
+                }
             },
             onMouseLeave(event) {
-                if (keyboardActiveRef.current || isMouseWithinBounds(event)) {
+                if (!highlightItemOnHover || keyboardActiveRef.current || isMouseWithinBounds(event)) {
                     return;
                 }
 

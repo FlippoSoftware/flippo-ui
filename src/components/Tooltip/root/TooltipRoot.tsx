@@ -7,6 +7,7 @@ import {
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { useImplicitActiveTrigger, useOpenStateTransitions } from '~@lib/popups';
 import { REASONS } from '~@lib/reason';
+import { visuallyHidden } from '~@lib/visuallyHidden';
 import {
     useClientPoint,
     useDismiss,
@@ -18,6 +19,8 @@ import {
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { PayloadChildRenderFunction } from '~@lib/popups';
 
+import { useCompositeTooltipListItem } from '../composite';
+import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
 import { TooltipStore } from '../store/TooltipStore';
 
 import type { TooltipHandle } from '../store/TooltipHandle';
@@ -42,25 +45,48 @@ export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
         children
     } = props;
 
+    const { ref: multipleItemRef, index: multipleItemIndex } = useCompositeTooltipListItem();
+
+    // Check if inside TooltipMultiple - if so, ignore local open/defaultOpen
+    const multipleContext = useTooltipMultipleContext();
+    const isInsideMultiple = multipleContext !== null;
+
+    // When inside Multiple, use Multiple's defaultOpen for initial state
+    const effectiveDefaultOpen = isInsideMultiple
+        ? multipleContext.store.select('open')
+        : (openProp ?? defaultOpen);
+
     const store = TooltipStore.useStore<Payload>(handle?.store, {
-        open: openProp ?? defaultOpen,
+        open: effectiveDefaultOpen,
         activeTriggerId: triggerIdProp !== undefined ? triggerIdProp : defaultTriggerIdProp
     });
 
-    store.useControlledProp('open', openProp, defaultOpen);
-    store.useControlledProp('activeTriggerId', triggerIdProp, defaultTriggerIdProp);
+    // Register with TooltipMultiple if inside one
+    React.useEffect(() => {
+        if (!multipleContext) {
+            return;
+        }
+        return multipleContext.store.registerStore(store);
+    }, [multipleContext, store]);
+
+    // When inside Multiple, don't use controlled prop for open - Multiple handles it
+    store.useControlledProp('open', isInsideMultiple ? undefined : openProp);
+    store.useControlledProp('activeTriggerId', triggerIdProp);
 
     store.useContextCallback('onOpenChange', onOpenChange);
     store.useContextCallback('onOpenChangeComplete', onOpenChangeComplete);
 
-    const openState = store.useState('open');
+    // When inside Multiple, use Multiple's open state
+    const openState = store.useOpen();
 
     const activeTriggerId = store.useState('activeTriggerId');
     const payload = store.useState('payload') as Payload | undefined;
 
     store.useSyncedValues({
         trackCursorAxis,
-        disableHoverablePopup
+        disableHoverablePopup,
+        multipleItemIndex,
+        multipleItemRef
     });
 
     const open = !disabled && openState;
@@ -73,7 +99,8 @@ export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
 
     store.useSyncedValue('disabled', disabled);
 
-    useImplicitActiveTrigger(store);
+    // Pass the correct open state (from Multiple if inside, otherwise from store)
+    useImplicitActiveTrigger(store, openState);
     const { forceUnmount, transitionStatus } = useOpenStateTransitions(open, store);
     const isInstantPhase = store.useState('isInstantPhase');
     const instantType = store.useState('instantType');
@@ -133,7 +160,22 @@ export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
         onOpenChange: store.setOpen
     });
 
-    const focus = useFocus(floatingRootContext, { enabled: !disabled });
+    // For Multiple: block blur close if focus moves to another element in the group
+    const shouldBlockBlurClose = React.useCallback(
+        (relatedTarget: Element | null) => {
+            if (!multipleContext || !relatedTarget) {
+                return false;
+            }
+
+            return multipleContext.store.isElementInGroup(relatedTarget);
+        },
+        [multipleContext]
+    );
+
+    const focus = useFocus(floatingRootContext, {
+        enabled: !disabled,
+        shouldBlockBlurClose: isInsideMultiple ? shouldBlockBlurClose : undefined
+    });
     const dismiss = useDismiss(floatingRootContext, { enabled: !disabled, referencePress: true });
     const clientPoint = useClientPoint(floatingRootContext, {
         enabled: !disabled && trackCursorAxis !== 'none',
@@ -155,6 +197,8 @@ export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
 
     return (
         <TooltipRootContext.Provider value={store as TooltipRootContextValue}>
+            {/* Hidden marker for CompositeList registration inside Tooltip.Multiple */}
+            {isInsideMultiple && <span ref={multipleItemRef} style={visuallyHidden} />}
             {typeof children === 'function' ? children({ payload }) : children}
         </TooltipRootContext.Provider>
     );
@@ -259,6 +303,7 @@ export type TooltipRootChangeEventReason
 export type TooltipRootChangeEventDetails
   = HeadlessUIChangeEventDetails<TooltipRoot.ChangeEventReason> & {
       preventUnmountOnClose: () => void;
+      multipleItemIndex?: number | null;
   };
 
 export namespace TooltipRoot {

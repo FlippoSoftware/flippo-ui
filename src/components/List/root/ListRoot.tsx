@@ -14,13 +14,6 @@ import { useNestedListContext } from './NestedListContext';
 
 import type { ListRootContextValue } from './ListRootContext';
 
-const INITIAL_STATE = {
-    nested: false,
-    nestedListNumber: 1,
-    orientation: 'vertical',
-    type: 'ordered'
-} as const;
-
 /**
  * Root container for the List component with full state management.
  * Renders a `<div>` element by default.
@@ -33,6 +26,7 @@ export function ListRoot(componentProps: ListRoot.Props) {
         /* eslint-enable unused-imports/no-unused-vars */
         orientation = 'vertical',
         type = 'ordered',
+        virtualized = false,
         ref,
         ...elementProps
     } = componentProps;
@@ -46,13 +40,24 @@ export function ListRoot(componentProps: ListRoot.Props) {
     const nestedListNumber = (parentListRootContext?.store.useState('nestedListNumber') ?? 0) + 1;
     const nestedListItemNumber = nesting?.nestedListItemNumber ?? undefined;
 
-    const store = useLazyRef(ListStore.create, INITIAL_STATE).current;
+    const initialState = React.useMemo(() => ({
+        nested: false,
+        nestedListNumber: 1,
+        orientation: 'vertical' as const,
+        type: 'ordered' as const,
+        virtualized: false,
+        elementsRef
+    }), []);
+
+    const store = useLazyRef(ListStore.create, initialState).current;
 
     store.useSyncedValues({
         nested,
         nestedListNumber,
         orientation,
-        type
+        type,
+        virtualized,
+        elementsRef
     });
 
     const state: ListRoot.State = React.useMemo(() => ({
@@ -81,6 +86,14 @@ export function ListRoot(componentProps: ListRoot.Props) {
     });
 
     const contextValue: ListRootContextValue = React.useMemo(() => ({ store }), [store]);
+
+    if (virtualized) {
+        return (
+            <ListRootContext value={contextValue}>
+                {element}
+            </ListRootContext>
+        );
+    }
 
     return (
         <ListRootContext value={contextValue}>
@@ -126,5 +139,13 @@ export namespace ListRoot {
          * @default 'ordered'
          */
         type?: 'ordered' | 'unordered';
+        /**
+         * Whether the items are being externally virtualized.
+         * When `true`, items should pass their `index` prop explicitly
+         * and CompositeList is not used for automatic index registration.
+         *
+         * @default false
+         */
+        virtualized?: boolean;
     };
 }

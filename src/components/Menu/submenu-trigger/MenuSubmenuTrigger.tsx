@@ -69,17 +69,21 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
         [baseRegisterTrigger, closeDelay, store, thisTriggerId]
     );
 
-    const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null);
+    const triggerElementRef = React.useRef<HTMLElement | null>(null);
+    const handleTriggerElementRef = React.useCallback(
+        (el: HTMLElement | null) => {
+            triggerElementRef.current = el;
+            store.set('activeTriggerElement', el);
+        },
+        [store]
+    );
 
     const submenuRootContext = useMenuSubmenuRootContext();
     if (!submenuRootContext?.parentMenu) {
         throw new Error('Base UI: <Menu.SubmenuTrigger> must be placed in <Menu.SubmenuRoot>.');
     }
 
-    store.useSyncedValues({
-        closeDelay,
-        activeTriggerElement: triggerElement
-    });
+    store.useSyncedValue('closeDelay', closeDelay);
 
     const parentMenuStore = submenuRootContext.parentMenu;
 
@@ -89,7 +93,9 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
     const itemMetadata = React.useMemo(
         () => ({
             type: 'submenu-trigger' as const,
-            setActive: () => parentMenuStore.set('activeIndex', listItem.index)
+            setActive() {
+                parentMenuStore.set('activeIndex', listItem.index);
+            }
         }),
         [parentMenuStore, listItem.index]
     );
@@ -109,16 +115,16 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
     });
 
     const hoverEnabled = store.useState('hoverEnabled');
-    const allowMouseEnter = store.useState('allowMouseEnter');
+    const allowMouseEnter = parentMenuStore.useState('allowMouseEnter');
 
     const hoverProps = useHoverReferenceInteraction(floatingRootContext, {
         enabled: hoverEnabled && openOnHover && !disabled,
         handleClose: safePolygon({ blockPointerEvents: true }),
         mouseOnly: true,
         move: true,
-        restMs: allowMouseEnter ? delay : undefined,
-        delay: { open: allowMouseEnter ? delay : 10 ** 10, close: closeDelay },
-        triggerElement,
+        restMs: delay,
+        delay: allowMouseEnter ? { open: delay, close: closeDelay } : 0,
+        triggerElementRef,
         externalTree: floatingTreeRoot
     });
 
@@ -135,10 +141,7 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
     const rootTriggerProps = store.useState('triggerProps', true);
     delete rootTriggerProps.id;
 
-    const state: MenuSubmenuTrigger.State = React.useMemo(
-        () => ({ disabled, highlighted, open }),
-        [disabled, highlighted, open]
-    );
+    const state: MenuSubmenuTrigger.State = { disabled, highlighted, open };
 
     const element = useRenderElement('div', componentProps, {
         state,
@@ -164,7 +167,7 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
             listItem.ref,
             itemRef,
             registerTrigger,
-            setTriggerElement
+            handleTriggerElementRef
         ]
     });
 

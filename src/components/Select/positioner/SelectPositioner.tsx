@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {
-    useEventCallback,
     useIsoLayoutEffect,
     useScrollLock,
     useStore
@@ -10,9 +9,10 @@ import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 
 import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { getDisabledMountTransitionStyles } from '~@lib/getDisabledMountTransitionStyles';
 import { useAnchorPositioning, useRenderElement } from '~@lib/hooks';
 import { InternalBackdrop } from '~@lib/InternalBackdrop';
-import { findItemIndex, itemIncludes } from '~@lib/itemEquality';
+import { findItemIndex, selectedValueIncludes } from '~@lib/itemEquality';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 import { REASONS } from '~@lib/reason';
 
@@ -76,17 +76,19 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
     const mounted = useStore(store, selectors.mounted);
     const modal = useStore(store, selectors.modal);
     const value = useStore(store, selectors.value);
-    const touchModality = useStore(store, selectors.touchModality);
+    const openMethod = useStore(store, selectors.openMethod);
     const positionerElement = useStore(store, selectors.positionerElement);
     const triggerElement = useStore(store, selectors.triggerElement);
     const isItemEqualToValue = useStore(store, selectors.isItemEqualToValue);
+    const transitionStatus = useStore(store, selectors.transitionStatus);
 
     const scrollUpArrowRef = React.useRef<HTMLDivElement | null>(null);
     const scrollDownArrowRef = React.useRef<HTMLDivElement | null>(null);
 
     const [controlledAlignItemWithTrigger, setControlledAlignItemWithTrigger]
         = React.useState(alignItemWithTrigger);
-    const alignItemWithTriggerActive = mounted && controlledAlignItemWithTrigger && !touchModality;
+    const alignItemWithTriggerActive
+        = mounted && controlledAlignItemWithTrigger && openMethod !== 'touch';
 
     if (!mounted && controlledAlignItemWithTrigger !== alignItemWithTrigger) {
         setControlledAlignItemWithTrigger(alignItemWithTrigger);
@@ -105,7 +107,10 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
 
     React.useImperativeHandle(alignItemWithTriggerActiveRef, () => alignItemWithTriggerActive);
 
-    useScrollLock((alignItemWithTriggerActive || modal) && open && !touchModality, triggerElement);
+    useScrollLock(
+        (alignItemWithTriggerActive || modal) && open && openMethod !== 'touch',
+        triggerElement
+    );
 
     const positioning = useAnchorPositioning({
         anchor,
@@ -135,6 +140,10 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
             hiddenStyles.pointerEvents = 'none';
         }
 
+        if (!mounted) {
+            hiddenStyles.display = 'none';
+        }
+
         return {
             role: 'presentation',
             hidden: !mounted,
@@ -145,15 +154,12 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
         };
     }, [open, mounted, positionerStyles]);
 
-    const state: SelectPositioner.State = React.useMemo(
-        () => ({
-            open,
-            side: renderedSide,
-            align: positioning.align,
-            anchorHidden: positioning.anchorHidden
-        }),
-        [open, renderedSide, positioning.align, positioning.anchorHidden]
-    );
+    const state: SelectPositioner.State = {
+        open,
+        side: renderedSide,
+        align: positioning.align,
+        anchorHidden: positioning.anchorHidden
+    };
 
     const setPositionerElement = useStableCallback((element) => {
         store.set('positionerElement', element);
@@ -163,71 +169,79 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
         ref: [ref, setPositionerElement],
         state,
         customStyleHookMapping: popupStateMapping,
-        props: [defaultProps, elementProps]
+        props: [defaultProps, getDisabledMountTransitionStyles(transitionStatus), elementProps]
     });
 
     const prevMapSizeRef = React.useRef(0);
 
-    const onMapChange = useStableCallback((map: Map<Element, { index?: number | null } | null>) => {
-        if (map.size === 0 && prevMapSizeRef.current === 0) {
-            return;
-        }
+    const onMapChange = useStableCallback(
+        (map: Map<Element, { index?: number | null | undefined } | null>) => {
+            if (map.size === 0 && prevMapSizeRef.current === 0) {
+                return;
+            }
 
-        if (valuesRef.current.length === 0) {
-            return;
-        }
+            if (valuesRef.current.length === 0) {
+                return;
+            }
 
-        const prevSize = prevMapSizeRef.current;
-        prevMapSizeRef.current = map.size;
+            const prevSize = prevMapSizeRef.current;
+            prevMapSizeRef.current = map.size;
 
-        if (map.size === prevSize) {
-            return;
-        }
+            if (map.size === prevSize) {
+                return;
+            }
 
-        const eventDetails = createChangeEventDetails(REASONS.none);
+            const eventDetails = createChangeEventDetails(REASONS.none);
 
-        if (prevSize !== 0 && !store.state.multiple && value !== null) {
-            const valueIndex = findItemIndex(valuesRef.current, value, isItemEqualToValue);
-            if (valueIndex === -1) {
-                const initial = initialValueRef.current;
-                const hasInitial
-                    = initial != null && itemIncludes(valuesRef.current, initial, isItemEqualToValue);
-                const nextValue = hasInitial ? initial : null;
-                setValue(nextValue, eventDetails);
+            if (prevSize !== 0 && !store.state.multiple && value !== null) {
+                const selectedValueIndex = findItemIndex(valuesRef.current, value, isItemEqualToValue);
+                if (selectedValueIndex === -1) {
+                    const initialSelectedValue = initialValueRef.current;
+                    const hasInitial
+                        = initialSelectedValue != null
+                          && findItemIndex(valuesRef.current, initialSelectedValue, isItemEqualToValue) !== -1;
+                    const nextValue = hasInitial ? initialSelectedValue : null;
+                    setValue(nextValue, eventDetails);
 
-                if (nextValue === null) {
-                    store.set('selectedIndex', null);
-                    selectedItemTextRef.current = null;
+                    if (nextValue === null) {
+                        store.set('selectedIndex', null);
+                        selectedItemTextRef.current = null;
+                    }
                 }
             }
-        }
 
-        if (prevSize !== 0 && store.state.multiple && Array.isArray(value)) {
-            const nextValue = value.filter((v) => itemIncludes(valuesRef.current, v, isItemEqualToValue));
-            if (
-                nextValue.length !== value.length
-                || nextValue.some((v) => !itemIncludes(value, v, isItemEqualToValue))
-            ) {
-                setValue(nextValue, eventDetails);
+            if (prevSize !== 0 && store.state.multiple && Array.isArray(value)) {
+                const hasVisibleItem = (selectedItemValue: unknown) =>
+                    findItemIndex(valuesRef.current, selectedItemValue, isItemEqualToValue) !== -1;
+                const nextValue = value.filter((selectedItemValue) => hasVisibleItem(selectedItemValue));
+                if (
+                    nextValue.length !== value.length
+                    || nextValue.some(
+                        (selectedItemValue) =>
+                            !selectedValueIncludes(value, selectedItemValue, isItemEqualToValue)
+                    )
+                ) {
+                    setValue(nextValue, eventDetails);
 
-                if (nextValue.length === 0) {
-                    store.set('selectedIndex', null);
-                    selectedItemTextRef.current = null;
+                    if (nextValue.length === 0) {
+                        store.set('selectedIndex', null);
+                        selectedItemTextRef.current = null;
+                    }
                 }
             }
-        }
 
-        if (open && alignItemWithTriggerActive) {
-            store.update({
-                scrollUpArrowVisible: false,
-                scrollDownArrowVisible: false
-            });
+            if (open && alignItemWithTriggerActive) {
+                store.update({
+                    scrollUpArrowVisible: false,
+                    scrollDownArrowVisible: false
+                });
 
-            const stylesToClear: React.CSSProperties = { height: '' };
-            clearStyles(positionerElement, stylesToClear);
-            clearStyles(popupRef.current, stylesToClear);
+                const stylesToClear: React.CSSProperties = { height: '' };
+                clearStyles(positionerElement, stylesToClear);
+                clearStyles(popupRef.current, stylesToClear);
+            }
         }
-    });
+    );
 
     const contextValue: SelectPositionerContextValue = React.useMemo(
         () => ({

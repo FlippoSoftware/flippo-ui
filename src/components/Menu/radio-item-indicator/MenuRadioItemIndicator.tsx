@@ -45,15 +45,12 @@ export function MenuRadioItemIndicator(componentProps: MenuRadioItemIndicator.Pr
         }
     });
 
-    const state: MenuRadioItemIndicator.State = React.useMemo(
-        () => ({
-            checked: item.checked,
-            disabled: item.disabled,
-            highlighted: item.highlighted,
-            transitionStatus
-        }),
-        [item.checked, item.disabled, item.highlighted, transitionStatus]
-    );
+    const state: MenuRadioItemIndicator.State = {
+        checked: item.checked,
+        disabled: item.disabled,
+        highlighted: item.highlighted,
+        transitionStatus
+    };
 
     const element = useRenderElement('span', componentProps, {
         state,

@@ -47,11 +47,11 @@ export function DialogTrigger(componentProps: DialogTriggerProps) {
     const floatingContext = store.useState('floatingRootContext');
     const isOpenedByThisTrigger = store.useState('isOpenedByTrigger', thisTriggerId);
 
-    const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null);
+    const triggerElementRef = React.useRef<HTMLElement | null>(null);
 
     const { registerTrigger, isMountedByThisTrigger } = useTriggerDataForwarding(
         thisTriggerId,
-        triggerElement,
+        triggerElementRef,
         store,
         {
             payload
@@ -79,7 +79,7 @@ export function DialogTrigger(componentProps: DialogTriggerProps) {
 
     return useRenderElement('button', componentProps, {
         state,
-        ref: [buttonRef, ref, registerTrigger, setTriggerElement],
+        ref: [buttonRef, ref, registerTrigger, triggerElementRef],
         props: [
             localInteractionProps.getReferenceProps(),
             rootTriggerProps,

@@ -65,7 +65,7 @@ export function useTriggerRegistration<State extends PopupStoreState<any>>(
  */
 export function useTriggerDataForwarding<State extends PopupStoreState<any>>(
     triggerId: string | undefined,
-    triggerElement: Element | null,
+    triggerElementRef: React.RefObject<Element | null>,
     store: ReactStore<State, PopupStoreContext<any>, typeof popupStoreSelectors>,
     stateUpdates: Omit<Partial<State>, 'activeTriggerId' | 'activeTriggerElement'>
 ) {
@@ -76,14 +76,26 @@ export function useTriggerDataForwarding<State extends PopupStoreState<any>>(
     const registerTrigger = useEventCallback((element: Element | null) => {
         const cleanup = baseRegisterTrigger(element);
 
-        if (element !== null && store.select('open') && store.select('activeTriggerId') == null) {
+        if (!element || !store.select('open')) {
+            return;
+        }
+
+        const activeTriggerId = store.select('activeTriggerId');
+
+        if (activeTriggerId === triggerId) {
+            store.update({
+                activeTriggerElement: element,
+                ...stateUpdates
+            } as Partial<State>);
+            return;
+        }
+
+        if (activeTriggerId == null) {
             // This runs when popup is open, but no active trigger is set.
-            // It can happen when using controlled mode and the trigger is mounted after opening or if `triggerId`
-            // prop is not set explicitly.
-            // In such cases the first trigger to run this code becomes the active trigger (store.select('activeTriggerId')
-            // should not return null after that).
-            // This is mostly for compatibility with contained triggers where no explicit `triggerId` was required in controlled
-            // mode.
+            // It can happen when using controlled mode and the trigger is mounted after opening or if `triggerId` prop
+            // is not set explicitly. In such cases the first trigger to run this code becomes the active trigger
+            // (store.select('activeTriggerId') should not return null after that). This is mostly for compatibility
+            // with contained triggers where no explicit `triggerId` was required in controlled mode.
             store.update({
                 activeTriggerId: triggerId,
                 activeTriggerElement: element,
@@ -96,9 +108,12 @@ export function useTriggerDataForwarding<State extends PopupStoreState<any>>(
 
     useIsoLayoutEffect(() => {
         if (isMountedByThisTrigger) {
-            store.update({ activeTriggerElement: triggerElement, ...stateUpdates } as Partial<State>);
+            store.update({
+                activeTriggerElement: triggerElementRef.current,
+                ...stateUpdates
+            } as Partial<State>);
         }
-    }, [isMountedByThisTrigger, store, triggerElement, ...Object.values(stateUpdates)]);
+    }, [isMountedByThisTrigger, store, triggerElementRef, ...Object.values(stateUpdates)]);
 
     return { registerTrigger, isMountedByThisTrigger };
 }
@@ -108,20 +123,50 @@ export type PayloadChildRenderFunction<Payload> = (arg: {
 }) => React.ReactNode;
 
 /**
- * Ensures that when there's only one trigger element registered, it is set as the active trigger.
- * This allows controlled popups to work correctly without an explicit triggerId, maintaining compatibility
- * with the contained triggers.
+ * Ensures that when there's no active trigger, one is selected implicitly.
+ * Priority order:
+ * 1. Primary trigger (if set via `primary` prop)
+ * 2. First trigger (if only one trigger is registered)
+ *
+ * This allows controlled popups to work correctly without an explicit triggerId,
+ * and enables TooltipMultiple to sync open state while each tooltip positions
+ * relative to its own primary trigger.
  *
  * This should be called on the Root part.
  *
- * @param open Whether the popup is open.
  * @param store The Store instance managing the popup state.
  */
 export function useImplicitActiveTrigger<State extends PopupStoreState<any>>(
-    store: ReactStore<State, PopupStoreContext<any>, typeof popupStoreSelectors>
+    store: ReactStore<State, PopupStoreContext<any>, typeof popupStoreSelectors>,
+    /**
+     * Optional external open state (e.g., from Multiple context).
+     * If provided, uses this instead of store's open state.
+     */
+    externalOpen?: boolean
 ) {
-    const open = store.useState('open');
+    const storeOpen = store.useState('open');
+    const open = externalOpen ?? storeOpen;
+    const primaryTriggerId = store.useState('primaryTriggerId');
+
     useIsoLayoutEffect(() => {
+        // if (open && !store.select('activeTriggerId') && store.context.triggerElements.size === 1) {
+        if (!open || store.select('activeTriggerId')) {
+            return;
+        }
+
+        // 1. Try primary trigger first
+        if (primaryTriggerId) {
+            const primaryElement = store.context.triggerElements.getById(primaryTriggerId);
+            if (primaryElement) {
+                store.update({
+                    activeTriggerId: primaryTriggerId,
+                    activeTriggerElement: primaryElement
+                } as Partial<State>);
+                return;
+            }
+        }
+
+        // 2. Fallback: first trigger if only one exists
         if (open && !store.select('activeTriggerId') && store.context.triggerElements.size === 1) {
             const iteratorResult = store.context.triggerElements.entries().next();
             if (!iteratorResult.done) {
@@ -132,7 +177,7 @@ export function useImplicitActiveTrigger<State extends PopupStoreState<any>>(
                 } as Partial<State>);
             }
         }
-    }, [open, store]);
+    }, [open, primaryTriggerId, store]);
 }
 
 /**

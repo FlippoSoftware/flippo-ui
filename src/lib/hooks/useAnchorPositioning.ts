@@ -1,9 +1,9 @@
 import React from 'react';
 
 import {
-    useEventCallback,
     useIsoLayoutEffect
 } from '@flippo-ui/hooks';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 import { useValueAsRef } from '@flippo-ui/hooks/use-value-as-ref';
 import {
     getAlignment,
@@ -162,7 +162,7 @@ export function useAnchorPositioning(
     const collisionAvoidanceFallbackAxisSide = collisionAvoidance.fallbackAxisSide || 'end';
 
     const anchorFn = typeof anchor === 'function' ? anchor : undefined;
-    const anchorFnCallback = useEventCallback(anchorFn);
+    const anchorFnCallback = useStableCallback(anchorFn);
     const anchorDep = anchorFn ? anchorFnCallback : anchor;
     const anchorValueRef = useValueAsRef(anchor);
 
@@ -341,18 +341,27 @@ export function useAnchorPositioning(
             ...commonCollisionProps,
             apply({
                 elements: { floating },
-                rects: { reference },
                 availableWidth,
-                availableHeight
+                availableHeight,
+                rects
             }) {
-                Object.entries({
-                    '--available-width': `${availableWidth}px`,
-                    '--available-height': `${availableHeight}px`,
-                    '--anchor-width': `${reference.width}px`,
-                    '--anchor-height': `${reference.height}px`
-                }).forEach(([key, value]) => {
-                    floating.style.setProperty(key, value);
-                });
+                const floatingStyle = floating.style;
+                floatingStyle.setProperty('--available-width', `${availableWidth}px`);
+                floatingStyle.setProperty('--available-height', `${availableHeight}px`);
+
+                // Snap anchor dimensions to device pixels to ensure the popup's visual width matches the anchor's one.
+                const dpr = window.devicePixelRatio || 1;
+                const {
+                    x,
+                    y,
+                    width,
+                    height
+                } = rects.reference;
+                const anchorWidth = (Math.round((x + width) * dpr) - Math.round(x * dpr)) / dpr;
+                const anchorHeight = (Math.round((y + height) * dpr) - Math.round(y * dpr)) / dpr;
+
+                floatingStyle.setProperty('--anchor-width', `${anchorWidth}px`);
+                floatingStyle.setProperty('--anchor-height', `${anchorHeight}px`);
             }
         }),
         arrow(
@@ -464,21 +473,24 @@ export function useAnchorPositioning(
     // This ensures the popup is inside the viewport initially before it gets positioned.
     const resolvedPosition: 'absolute' | 'fixed' = isPositioned ? positionMethod : 'fixed';
 
-    const floatingStyles = React.useMemo<React.CSSProperties>(
-        () =>
-            adaptiveOrigin
-                ? { position: resolvedPosition, [sideX]: x, [sideY]: y }
-                : { position: resolvedPosition, ...originalFloatingStyles },
-        [
-            adaptiveOrigin,
-            resolvedPosition,
-            sideX,
-            x,
-            sideY,
-            y,
-            originalFloatingStyles
-        ]
-    );
+    const floatingStyles = React.useMemo<React.CSSProperties>(() => {
+        const base = adaptiveOrigin
+            ? { position: resolvedPosition, [sideX]: x, [sideY]: y }
+            : { position: resolvedPosition, ...originalFloatingStyles };
+        if (!isPositioned) {
+            base.opacity = 0;
+        }
+        return base;
+    }, [
+        adaptiveOrigin,
+        resolvedPosition,
+        sideX,
+        x,
+        sideY,
+        y,
+        originalFloatingStyles,
+        isPositioned
+    ]);
 
     const registeredPositionReferenceRef = React.useRef<Element | VirtualElement | null>(null);
 

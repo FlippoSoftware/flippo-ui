@@ -76,11 +76,11 @@ export function PopoverTrigger(componentProps: PopoverTrigger.Props) {
     const floatingContext = store.useState('floatingRootContext');
     const isOpenedByThisTrigger = store.useState('isOpenedByTrigger', thisTriggerId);
 
-    const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null);
+    const triggerElementRef = React.useRef<HTMLElement | null>(null);
 
     const { registerTrigger, isMountedByThisTrigger } = useTriggerDataForwarding(
         thisTriggerId,
-        triggerElement,
+        triggerElementRef,
         store,
         {
             payload,
@@ -96,9 +96,9 @@ export function PopoverTrigger(componentProps: PopoverTrigger.Props) {
 
     const hoverProps = useHoverReferenceInteraction(floatingContext, {
         enabled:
-      floatingContext != null
-      && openOnHover
-      && (openMethod !== 'touch' || openReason !== REASONS.triggerPress),
+            floatingContext != null
+            && openOnHover
+            && (openMethod !== 'touch' || openReason !== REASONS.triggerPress),
         mouseOnly: true,
         move: false,
         handleClose: safePolygon(),
@@ -106,7 +106,7 @@ export function PopoverTrigger(componentProps: PopoverTrigger.Props) {
         delay: {
             close: closeDelay
         },
-        triggerElement,
+        triggerElementRef,
         isActiveTrigger: isTriggerActive
     });
 
@@ -116,13 +116,10 @@ export function PopoverTrigger(componentProps: PopoverTrigger.Props) {
 
     const rootTriggerProps = store.useState('triggerProps', isMountedByThisTrigger);
 
-    const state: PopoverTrigger.State = React.useMemo(
-        () => ({
-            disabled,
-            open: isOpenedByThisTrigger
-        }),
-        [disabled, isOpenedByThisTrigger]
-    );
+    const state: PopoverTrigger.State = {
+        disabled,
+        open: isOpenedByThisTrigger
+    };
 
     const { getButtonProps, buttonRef } = useButton({
         disabled,
@@ -144,7 +141,7 @@ export function PopoverTrigger(componentProps: PopoverTrigger.Props) {
 
     const element = useRenderElement('button', componentProps, {
         state,
-        ref: [buttonRef, ref, registerTrigger, setTriggerElement],
+        ref: [buttonRef, ref, registerTrigger, triggerElementRef],
         props: [
             localProps.getReferenceProps(),
             hoverProps,
@@ -193,12 +190,11 @@ export function PopoverTrigger(componentProps: PopoverTrigger.Props) {
                 );
             });
 
-            let nextTabbable = getTabbableAfterElement(triggerElement);
+            let nextTabbable = getTabbableAfterElement(
+                store.context.triggerFocusTargetRef.current || triggerElementRef.current
+            );
 
-            while (
-                (nextTabbable !== null && contains(positionerElement, nextTabbable))
-                || nextTabbable?.hasAttribute('aria-hidden')
-            ) {
+            while (nextTabbable !== null && contains(positionerElement, nextTabbable)) {
                 const prevTabbable = nextTabbable;
                 nextTabbable = getNextTabbable(nextTabbable);
                 if (nextTabbable === prevTabbable) {
