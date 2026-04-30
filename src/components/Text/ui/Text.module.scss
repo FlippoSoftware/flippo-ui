@@ -1,0 +1,197 @@
+@use 'mixins/_font.scss' as font;
+
+.Text {
+  margin: 0;
+  padding: 0;
+}
+
+// Sizes
+.display-1-default {
+  @include font.display-1('default');
+}
+
+.display-1-stronger {
+  @include font.display-1('stronger');
+}
+
+.display-1-weaker {
+  @include font.display-1('weaker');
+}
+
+.display-2-default {
+  @include font.display-2('default');
+}
+
+.display-2-stronger {
+  @include font.display-2('stronger');
+}
+
+.title-1-default {
+  @include font.title-1('default');
+}
+
+.title-1-stronger {
+  @include font.title-1('stronger');
+}
+
+.title-2-default {
+  @include font.title-2('default');
+}
+
+.title-2-stronger {
+  @include font.title-2('stronger');
+}
+
+.title-3-default {
+  @include font.title-3('default');
+}
+
+.title-3-stronger {
+  @include font.title-3('stronger');
+}
+
+.heading-1-default {
+  @include font.heading-1('default');
+}
+
+.heading-1-stronger {
+  @include font.heading-1('stronger');
+}
+
+.heading-2-default {
+  @include font.heading-2('default');
+}
+
+.heading-2-weaker {
+  @include font.heading-2('weaker');
+}
+
+.heading-3-default {
+  @include font.heading-3('default');
+}
+
+.heading-3-stronger {
+  @include font.heading-3('stronger');
+}
+
+.body-plus-default {
+  @include font.bodyPlus('default');
+}
+
+.body-plus-stronger {
+  @include font.bodyPlus('stronger');
+}
+
+.body-default {
+  @include font.body('default');
+}
+
+.body-stronger {
+  @include font.body('stronger');
+}
+
+.body-weaker {
+  @include font.body('weaker');
+}
+
+.body-minus-default {
+  @include font.bodyMinus('default');
+}
+
+.body-minus-stronger {
+  @include font.bodyMinus('stronger');
+}
+
+.body-minus-weaker {
+  @include font.bodyMinus('weaker');
+}
+
+.label-default {
+  @include font.label('default');
+}
+
+.label-stronger {
+  @include font.label('stronger');
+}
+
+.label-weaker {
+  @include font.label('weaker');
+}
+
+// Colors
+.color-primary {
+  color: var(--f-color-text-primary);
+}
+
+.color-secondary {
+  color: var(--f-color-text-2);
+}
+
+.color-tertiary {
+  color: var(--f-color-text-3);
+}
+
+.color-quaternary {
+  color: var(--f-color-text-4);
+}
+
+.color-white {
+  color: var(--f-color-text-white);
+}
+
+.color-disabled {
+  color: var(--f-color-text-disabled);
+}
+
+.color-brand {
+  color: var(--f-color-brand);
+}
+
+.color-success {
+  color: var(--f-color-success);
+}
+
+.color-error {
+  color: var(--f-color-error);
+}
+
+.color-warning {
+  color: var(--f-color-warning);
+}
+
+// Alignment
+.align-left {
+  text-align: left;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.align-justify {
+  text-align: justify;
+}
+
+// Transform
+.transform-uppercase {
+  text-transform: uppercase;
+}
+
+.transform-lowercase {
+  text-transform: lowercase;
+}
+
+.transform-capitalize {
+  text-transform: capitalize;
+}
+
+// Truncate
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -24,12 +24,27 @@
 
 .ArrowFill {
   fill: var(--f-color-bg-2-hover);
+  transition: fill 150ms;
+
+  [data-multiple-active] & {
+    fill: var(--f-color-brand-35);
+  }
 }
 
 .ArrowOuterStroke {
   fill: var(--f-color-bg-2-hover);
+  transition: fill 150ms;
+
+  [data-multiple-active] & {
+    fill: var(--f-color-brand-35);
+  }
 }
 
 .ArrowInnerStroke {
   fill: var(--f-color-bg-2-hover);
+  transition: fill 150ms;
+
+  [data-multiple-active] & {
+    fill: var(--f-color-brand-35);
+  }
 }

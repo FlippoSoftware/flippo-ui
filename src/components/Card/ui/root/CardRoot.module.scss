@@ -1,0 +1,11 @@
+.CardRoot {
+  background-color: var(--f-color-bg-1);
+  border-radius: var(--f-border-radius-card);
+  border: 1px solid var(--f-color-stroke);
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--f-color-stroke-hover);
+  }
+}

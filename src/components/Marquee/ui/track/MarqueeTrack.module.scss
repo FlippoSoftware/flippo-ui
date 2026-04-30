@@ -1,0 +1,38 @@
+@use 'mixins/_common.scss' as common;
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0) translateY(0);
+  }
+
+  to {
+    transform: translateX(calc(-100% * var(--marquee-orientation-x, 1)))
+      translateY(calc(-100% * var(--marquee-orientation-y, 0)));
+  }
+}
+
+.MarqueeTrack {
+  @include common.reset-appearance;
+
+  // Sizing - ensures proper animation calculation (horizontal only)
+  // For vertical mode, tracks stack naturally without forced dimensions
+  min-width: var(--marquee-min-width, auto);
+
+  // Animation properties controlled by CSS variables from Root
+  animation-name: marquee-scroll;
+  animation-timing-function: linear;
+  animation-play-state: var(--marquee-play, running);
+  animation-direction: var(--marquee-direction, normal);
+  animation-duration: var(--marquee-duration, 10s);
+  animation-delay: var(--marquee-delay, 0s);
+  animation-iteration-count: var(--marquee-iteration-count, infinite);
+
+  // Orientation-based translation
+  --marquee-orientation-x: 1;
+  --marquee-orientation-y: 0;
+
+  [data-orientation='vertical'] & {
+    --marquee-orientation-x: 0;
+    --marquee-orientation-y: 1;
+  }
+}
