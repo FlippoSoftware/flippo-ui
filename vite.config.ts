@@ -8,6 +8,26 @@ import dts from 'vite-plugin-dts';
 import type { UserConfig } from 'vite';
 import type { InlineConfig } from 'vitest';
 
+// Rollup outputs all modules under src/ because the entry paths include src/ — this
+// plugin strips that prefix so the dist structure mirrors hooks/ and lib/ directly.
+function stripSrcPrefix() {
+    return {
+        name: 'strip-src-prefix',
+        generateBundle(_options: unknown, bundle: Record<string, { fileName: string }>) {
+            for (const fileName of Object.keys(bundle)) {
+                const normalized = fileName.replace(/\\/g, '/');
+                const chunk = bundle[fileName];
+                if (normalized.startsWith('src/') && chunk) {
+                    const newFileName = normalized.slice(4);
+                    chunk.fileName = newFileName;
+                    bundle[newFileName] = chunk;
+                    delete bundle[fileName];
+                }
+            }
+        }
+    };
+}
+
 const entryPoints = Object.fromEntries(
     glob.sync('src/**/*.{ts,tsx}', {
         ignore: ['src/**/*.test.{ts,tsx}']
@@ -22,9 +42,8 @@ type VitestConfigExport = {
 export default defineConfig({
     plugins: [react(), dts({
         insertTypesEntry: true,
-        beforeWriteFile: (filePath, content) => {
-            return { filePath: filePath.replace('/src', ''), content };
-        }
+        entryRoot: 'src',
+        include: ['src/hooks/**/*.ts', 'src/lib/**/*.ts']
     })],
     test: {
         globals: true,
@@ -41,10 +60,12 @@ export default defineConfig({
             formats: ['es', 'cjs']
         },
         rollupOptions: {
-            external: ['react', 'react-dom'],
+            external: (id: string) =>
+                ['react', 'react-dom', 'tabbable', 'reselect'].includes(id) ||
+                id.startsWith('use-sync-external-store'),
+            plugins: [stripSrcPrefix()],
             output: {
                 preserveModules: true,
-                preserveModulesRoot: 'src',
                 entryFileNames: '[name].[format].js',
                 chunkFileNames: '[name].[format].js'
             }
