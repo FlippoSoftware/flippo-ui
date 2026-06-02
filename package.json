@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.1.0",
   "private": false,
-  "packageManager": "pnpm@10.7.0",
+  "packageManager": "pnpm@11.1.2",
   "description": "",
   "author": "@BlackPoretsky",
   "license": "ISC",
@@ -49,6 +49,11 @@
       "types": "./dist/components/Checkbox/index.d.ts",
       "import": "./dist/components/Checkbox/index.es.js",
       "require": "./dist/components/Checkbox/index.cjs.js"
+    },
+    "./checkbox-card": {
+      "types": "./dist/components/CheckboxCard/index.d.ts",
+      "import": "./dist/components/CheckboxCard/index.es.js",
+      "require": "./dist/components/CheckboxCard/index.cjs.js"
     },
     "./checkbox-group": {
       "types": "./dist/components/CheckboxGroup/index.d.ts",
@@ -175,6 +180,11 @@
       "import": "./dist/components/Radio/index.es.js",
       "require": "./dist/components/Radio/index.cjs.js"
     },
+    "./radio-card": {
+      "types": "./dist/components/RadioCard/index.d.ts",
+      "import": "./dist/components/RadioCard/index.es.js",
+      "require": "./dist/components/RadioCard/index.cjs.js"
+    },
     "./radio-group": {
       "types": "./dist/components/RadioGroup/index.d.ts",
       "import": "./dist/components/RadioGroup/index.es.js",
@@ -184,6 +194,11 @@
       "types": "./dist/components/ScrollArea/index.d.ts",
       "import": "./dist/components/ScrollArea/index.es.js",
       "require": "./dist/components/ScrollArea/index.cjs.js"
+    },
+    "./segmented-control": {
+      "types": "./dist/components/SegmentedControl/index.d.ts",
+      "import": "./dist/components/SegmentedControl/index.es.js",
+      "require": "./dist/components/SegmentedControl/index.cjs.js"
     },
     "./select": {
       "types": "./dist/components/Select/index.d.ts",

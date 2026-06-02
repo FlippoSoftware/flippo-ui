@@ -10,7 +10,8 @@ import type { InlineConfig } from 'vitest';
 
 // Create entry points only for component indexes (matching package.json exports)
 const componentEntries = glob.sync('src/components/*/index.ts').reduce((acc, file) => {
-    const match = file.match(/src\/components\/(.+)\/index\.ts/);
+    const normalized = file.split('\\').join('/');
+    const match = normalized.match(/src\/components\/(.+)\/index\.ts/);
     if (match) {
         acc[`components/${match[1]}/index`] = path.resolve(file);
     }
