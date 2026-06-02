@@ -1,0 +1,101 @@
+.Kbd {
+  display: inline-flex;
+  align-items: center;
+
+  font-family: var(--f-font-code, ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace);
+  font-size: calc(var(--kbd-font-size-adjust, 0.9) * 1em);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.25;
+
+  border-radius: calc(3px * var(--radius-factor, 1));
+  white-space: nowrap;
+
+  box-sizing: border-box;
+  height: fit-content;
+
+  /* Nested Kbd inherits size */
+  & :where(&) {
+    font-size: inherit;
+  }
+}
+
+/* ─── Sizes ─────────────────────────────────────────────────────────────────── */
+
+.size-1 {
+  padding: 1px 4px;
+  font-size: calc(var(--font-size-1, 11px) * var(--kbd-font-size-adjust, 0.9));
+  line-height: var(--line-height-1, 16px);
+}
+
+.size-2 {
+  padding: 2px 5px;
+  font-size: calc(var(--font-size-2, 12px) * var(--kbd-font-size-adjust, 0.9));
+  line-height: var(--line-height-2, 18px);
+}
+
+.size-3 {
+  padding: 2px 6px;
+  font-size: calc(var(--font-size-3, 13px) * var(--kbd-font-size-adjust, 0.9));
+  line-height: var(--line-height-3, 20px);
+}
+
+.size-4 {
+  padding: 3px 7px;
+  font-size: calc(var(--font-size-4, 14px) * var(--kbd-font-size-adjust, 0.9));
+  line-height: var(--line-height-4, 22px);
+}
+
+.size-5 {
+  padding: 3px 8px;
+  font-size: calc(var(--font-size-5, 16px) * var(--kbd-font-size-adjust, 0.9));
+  line-height: var(--line-height-5, 24px);
+}
+
+.size-6 {
+  padding: 4px 9px;
+  font-size: calc(var(--font-size-6, 18px) * var(--kbd-font-size-adjust, 0.9));
+  line-height: var(--line-height-6, 28px);
+}
+
+.size-7 {
+  padding: 4px 10px;
+  font-size: calc(var(--font-size-7, 21px) * var(--kbd-font-size-adjust, 0.9));
+  line-height: var(--line-height-7, 32px);
+}
+
+.size-8 {
+  padding: 5px 12px;
+  font-size: calc(var(--font-size-8, 24px) * var(--kbd-font-size-adjust, 0.9));
+  line-height: var(--line-height-8, 36px);
+}
+
+.size-9 {
+  padding: 6px 14px;
+  font-size: calc(var(--font-size-9, 30px) * var(--kbd-font-size-adjust, 0.9));
+  line-height: var(--line-height-9, 44px);
+}
+
+/* ─── Variants ───────────────────────────────────────────────────────────────── */
+
+/* outline — looks like a real keyboard key (default) */
+.variant-outline {
+  background-color: var(--f-color-surface-1, #f7f7f7);
+  color: var(--f-color-text-1, inherit);
+  box-shadow:
+    0 0 0 1px var(--f-color-border, rgba(0 0 0 / 0.18)),
+    0 2px 0 0 var(--f-color-border, rgba(0 0 0 / 0.18));
+}
+
+/* soft — subtle background, no border-bottom shadow */
+.variant-soft {
+  background-color: var(--f-color-surface-2, rgba(0 0 0 / 0.06));
+  color: var(--f-color-text-1, inherit);
+  box-shadow: 0 0 0 1px var(--f-color-border, rgba(0 0 0 / 0.12));
+}
+
+/* ghost — no background, just monospace text */
+.variant-ghost {
+  background-color: transparent;
+  color: var(--f-color-text-2, inherit);
+}

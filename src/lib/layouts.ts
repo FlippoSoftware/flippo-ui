@@ -20,6 +20,20 @@ import type {
     WithStyle
 } from './types';
 
+function resolveGridColumns(
+    value: number | React.CSSProperties['gridTemplateColumns'] | undefined
+): React.CSSProperties['gridTemplateColumns'] {
+    return typeof value === 'number' ? `repeat(${value}, 1fr)` : value;
+}
+
+function resolveGridSpacing(
+    value: number | React.CSSProperties['gap'] | undefined
+): React.CSSProperties['gap'] | undefined {
+    if (value === undefined)
+        return undefined;
+    return typeof value === 'number' ? `var(--f-spacing-${value})` : value;
+}
+
 /**
  * Result type for extract functions
  */
@@ -65,6 +79,8 @@ export function extractGridChildProps<T extends GridChildProps & WithStyle>(
     props: T
 ): ExtractedLayoutProps<T, GridChildProps> {
     const {
+        colSpan,
+        rowSpan,
         gridColumn,
         gridColumnStart,
         gridColumnEnd,
@@ -81,10 +97,10 @@ export function extractGridChildProps<T extends GridChildProps & WithStyle>(
     } = props;
 
     const style: React.CSSProperties = {
-        gridColumn,
+        gridColumn: gridColumn ?? (colSpan !== undefined ? `span ${colSpan}` : undefined),
         gridColumnStart,
         gridColumnEnd,
-        gridRow,
+        gridRow: gridRow ?? (rowSpan !== undefined ? `span ${rowSpan}` : undefined),
         gridRowStart,
         gridRowEnd,
         gridArea,
@@ -160,13 +176,14 @@ export function extractGridContainerProps<T extends GridContainerProps & WithSty
         gap,
         rowGap,
         columnGap,
+        spacing,
         style: styleProp,
         ...otherProps
     } = props;
 
     const style: React.CSSProperties = {
         display: inline ? 'inline-grid' : 'grid',
-        gridTemplateColumns: columns,
+        gridTemplateColumns: resolveGridColumns(columns),
         gridTemplateRows: rows,
         gridTemplateAreas: areas,
         gridTemplate: template,
@@ -179,7 +196,7 @@ export function extractGridContainerProps<T extends GridContainerProps & WithSty
         justifyContent: justify,
         alignContent,
         placeContent,
-        gap,
+        gap: gap ?? resolveGridSpacing(spacing),
         rowGap,
         columnGap,
         ...styleProp
@@ -269,7 +286,10 @@ export function extractGridItemProps<T extends GridItemProps & WithStyle>(
         gap,
         rowGap,
         columnGap,
+        spacing,
         // Child
+        colSpan,
+        rowSpan,
         gridColumn,
         gridColumnStart,
         gridColumnEnd,
@@ -289,7 +309,7 @@ export function extractGridItemProps<T extends GridItemProps & WithStyle>(
     const style: React.CSSProperties = {
         // Container
         display: inline ? 'inline-grid' : 'grid',
-        gridTemplateColumns: columns,
+        gridTemplateColumns: resolveGridColumns(columns),
         gridTemplateRows: rows,
         gridTemplateAreas: areas,
         gridTemplate: template,
@@ -302,14 +322,14 @@ export function extractGridItemProps<T extends GridItemProps & WithStyle>(
         justifyContent: justify,
         alignContent,
         placeContent,
-        gap,
+        gap: gap ?? resolveGridSpacing(spacing),
         rowGap,
         columnGap,
         // Child
-        gridColumn,
+        gridColumn: gridColumn ?? (colSpan !== undefined ? `span ${colSpan}` : undefined),
         gridColumnStart,
         gridColumnEnd,
-        gridRow,
+        gridRow: gridRow ?? (rowSpan !== undefined ? `span ${rowSpan}` : undefined),
         gridRowStart,
         gridRowEnd,
         gridArea,
@@ -337,6 +357,8 @@ export const FLEX_CHILD_PROPS_KEYS: (keyof FlexChildProps)[] = [
 ];
 
 export const GRID_CHILD_PROPS_KEYS: (keyof GridChildProps)[] = [
+    'colSpan',
+    'rowSpan',
     'gridColumn',
     'gridColumnStart',
     'gridColumnEnd',
@@ -380,7 +402,8 @@ export const GRID_CONTAINER_PROPS_KEYS: (keyof GridContainerProps)[] = [
     'placeContent',
     'gap',
     'rowGap',
-    'columnGap'
+    'columnGap',
+    'spacing'
 ];
 
 // ============================================================================
@@ -675,6 +698,8 @@ export function extractBoxProps<T extends BoxProps & WithStyle>(
         alignSelf,
         order,
         // Grid child
+        colSpan,
+        rowSpan,
         gridColumn,
         gridColumnStart,
         gridColumnEnd,
@@ -731,10 +756,10 @@ export function extractBoxProps<T extends BoxProps & WithStyle>(
         alignSelf,
         order,
         // Grid child
-        gridColumn,
+        gridColumn: gridColumn ?? (colSpan !== undefined ? `span ${colSpan}` : undefined),
         gridColumnStart,
         gridColumnEnd,
-        gridRow,
+        gridRow: gridRow ?? (rowSpan !== undefined ? `span ${rowSpan}` : undefined),
         gridRowStart,
         gridRowEnd,
         gridArea,
@@ -894,7 +919,10 @@ export function extractGridLayoutProps<T extends GridLayoutProps & WithStyle>(
         gap,
         rowGap,
         columnGap,
+        spacing,
         // Grid child
+        colSpan,
+        rowSpan,
         gridColumn,
         gridColumnStart,
         gridColumnEnd,
@@ -949,7 +977,7 @@ export function extractGridLayoutProps<T extends GridLayoutProps & WithStyle>(
     const style: React.CSSProperties = {
         // Grid container
         display: inline ? 'inline-grid' : 'grid',
-        gridTemplateColumns: columns,
+        gridTemplateColumns: resolveGridColumns(columns),
         gridTemplateRows: rows,
         gridTemplateAreas: areas,
         gridTemplate: template,
@@ -962,14 +990,14 @@ export function extractGridLayoutProps<T extends GridLayoutProps & WithStyle>(
         justifyContent: justify,
         alignContent,
         placeContent,
-        gap,
+        gap: gap ?? resolveGridSpacing(spacing),
         rowGap,
         columnGap,
         // Grid child
-        gridColumn,
+        gridColumn: gridColumn ?? (colSpan !== undefined ? `span ${colSpan}` : undefined),
         gridColumnStart,
         gridColumnEnd,
-        gridRow,
+        gridRow: gridRow ?? (rowSpan !== undefined ? `span ${rowSpan}` : undefined),
         gridRowStart,
         gridRowEnd,
         gridArea,
@@ -1021,7 +1049,8 @@ export function extractGridLayoutProps<T extends GridLayoutProps & WithStyle>(
 const SECTION_SIZE_MAP: Record<string, string> = {
     sm: 'var(--f-spacing-6)',
     md: 'var(--f-spacing-10)',
-    lg: 'var(--f-spacing-16)'
+    lg: 'var(--f-spacing-16)',
+    xl: 'var(--f-spacing-24)'
 };
 
 /**
@@ -1048,11 +1077,13 @@ export function extractSectionLayoutProps<T extends SectionLayoutProps & WithSty
  * Container size to max-width mapping
  */
 const CONTAINER_SIZE_MAP: Record<string, string> = {
-    sm: '640px',
-    md: '768px',
-    lg: '1024px',
-    xl: '1280px',
-    full: '100%'
+    'xs': '480px',
+    'sm': '640px',
+    'md': '768px',
+    'lg': '1024px',
+    'xl': '1280px',
+    '2xl': '1536px',
+    'full': '100%'
 };
 
 /**
@@ -1061,16 +1092,19 @@ const CONTAINER_SIZE_MAP: Record<string, string> = {
 export function extractContainerLayoutProps<T extends ContainerLayoutProps & WithStyle>(
     props: T
 ): ExtractedLayoutProps<T, ContainerLayoutProps> {
-    const { size = 'lg', ...restProps } = props;
+    const { size = 'lg', align = 'center', ...restProps } = props;
     const { style: layoutStyle, otherProps } = extractLayoutProps(restProps);
 
     const containerMaxWidth = CONTAINER_SIZE_MAP[size] ?? CONTAINER_SIZE_MAP.lg;
 
+    const marginLeft = align === 'right' ? 'auto' : align === 'left' ? 0 : 'auto';
+    const marginRight = align === 'left' ? 'auto' : align === 'right' ? 0 : 'auto';
+
     const style: React.CSSProperties = {
         width: '100%',
         maxWidth: containerMaxWidth,
-        marginLeft: 'auto',
-        marginRight: 'auto',
+        marginLeft,
+        marginRight,
         ...layoutStyle
     };
 

@@ -6,15 +6,25 @@ import { extractSectionLayoutProps } from '~@lib/layouts';
 import type { SectionLayoutProps } from '~@lib/types';
 
 /**
- * Section - A semantic section element with vertical padding.
- * Use for creating vertical rhythm and spacing between page sections.
+ * Section — a semantic block with vertical padding for page-level rhythm.
+ *
+ * Sizes (paddingBlock):
+ * - sm → var(--f-spacing-6)
+ * - md → var(--f-spacing-10)  (default)
+ * - lg → var(--f-spacing-16)
+ * - xl → var(--f-spacing-24)
  *
  * @example
  * <Section size="lg">
  *   <Container>
- *     <h2>Section Title</h2>
- *     <p>Section content...</p>
+ *     <h2>Title</h2>
  *   </Container>
+ * </Section>
+ *
+ * @example
+ * // Hero section with extra vertical space
+ * <Section size="xl" as="header">
+ *   <Container size="xl">...</Container>
  * </Section>
  */
 export function Section<ElementType extends keyof React.JSX.IntrinsicElements = 'section'>(

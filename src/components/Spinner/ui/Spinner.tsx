@@ -5,7 +5,7 @@ import { cva } from 'class-variance-authority';
 
 import type { VariantProps } from 'class-variance-authority';
 
-import styles from './Spinner.module.css';
+import styles from './Spinner.module.scss';
 
 const SpinnerVariants = cva(styles.Spinner, {
     variants: {

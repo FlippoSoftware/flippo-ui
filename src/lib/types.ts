@@ -34,6 +34,10 @@ export type FlexChildProps = {
  * CSS properties for grid container children
  */
 export type GridChildProps = {
+    /** Column span shorthand — sets gridColumn: 'span N'. Overridden by explicit gridColumn prop. */
+    colSpan?: number;
+    /** Row span shorthand — sets gridRow: 'span N'. Overridden by explicit gridRow prop. */
+    rowSpan?: number;
     /** CSS grid-column */
     gridColumn?: React.CSSProperties['gridColumn'];
     /** CSS grid-column-start */
@@ -90,8 +94,8 @@ export type FlexContainerProps = {
 export type GridContainerProps = {
     /** CSS display: grid | inline-grid */
     inline?: boolean;
-    /** CSS grid-template-columns */
-    columns?: React.CSSProperties['gridTemplateColumns'];
+    /** CSS grid-template-columns. Number generates repeat(N, 1fr); string is raw CSS. */
+    columns?: number | React.CSSProperties['gridTemplateColumns'];
     /** CSS grid-template-rows */
     rows?: React.CSSProperties['gridTemplateRows'];
     /** CSS grid-template-areas */
@@ -122,6 +126,8 @@ export type GridContainerProps = {
     rowGap?: React.CSSProperties['rowGap'];
     /** CSS column-gap */
     columnGap?: React.CSSProperties['columnGap'];
+    /** Spacing between items using design system scale (spacing={2} → var(--f-spacing-2)). Overridden by explicit gap prop. */
+    spacing?: number | React.CSSProperties['gap'];
 };
 
 /**
@@ -265,12 +271,12 @@ export type GridLayoutProps = GridItemProps & Omit<LayoutProps, 'display'>;
 /**
  * Container size presets
  */
-export type ContainerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type ContainerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
 
 /**
  * Section size presets
  */
-export type SectionSize = 'sm' | 'md' | 'lg';
+export type SectionSize = 'sm' | 'md' | 'lg' | 'xl';
 
 /**
  * Section props - vertical spacing section
@@ -286,6 +292,8 @@ export type SectionLayoutProps = LayoutProps & {
 export type ContainerLayoutProps = LayoutProps & {
     /** Container max-width size */
     size?: ContainerSize;
+    /** Horizontal alignment of the container (default: 'center') */
+    align?: 'left' | 'center' | 'right';
 };
 
 /**

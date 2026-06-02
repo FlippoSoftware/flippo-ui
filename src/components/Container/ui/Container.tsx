@@ -1,24 +1,32 @@
 import type React from 'react';
 
 import { useRender } from '@flippo-ui/headless-components';
-
 import { extractContainerLayoutProps } from '~@lib/layouts';
 
 import type { ContainerLayoutProps } from '~@lib/types';
 
 /**
- * Container - A centered container with max-width.
- * Use for constraining content width and centering it on the page.
+ * Container — a centered max-width wrapper, inspired by MUI Container and Radix Container.
+ *
+ * Sizes (max-width):
+ * - xs  → 480px
+ * - sm  → 640px
+ * - md  → 768px
+ * - lg  → 1024px  (default)
+ * - xl  → 1280px
+ * - 2xl → 1536px
+ * - full → 100%
  *
  * @example
- * <Container size="lg" px={16}>
- *   <h1>Page Title</h1>
- *   <p>Content constrained to max-width...</p>
+ * <Container size="lg" px="1rem">
+ *   <h1>Page</h1>
  * </Container>
  *
  * @example
- * // Sizes: 'sm' (640px), 'md' (768px), 'lg' (1024px), 'xl' (1280px), 'full' (100%)
- * <Container size="xl">Wide content</Container>
+ * // Left-aligned container (e.g. article text column)
+ * <Container size="md" align="left">
+ *   <p>Content</p>
+ * </Container>
  */
 export function Container<ElementType extends keyof React.JSX.IntrinsicElements = 'div'>(
     props: Container.Props<ElementType>

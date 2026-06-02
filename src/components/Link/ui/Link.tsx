@@ -24,6 +24,7 @@ export function Link(props: Link.Props) {
         children,
         variant = 'neutral',
         className,
+        withArrow = true,
         ...otherProps
     } = props;
 
@@ -35,11 +36,11 @@ export function Link(props: Link.Props) {
     return (
         <a {...otherProps} className={linkClassName}>
             <span className={styles.text}>{children}</span>
-            <ArrowOutwardIcon />
+            {withArrow && <ArrowOutwardIcon />}
         </a>
     );
 }
 
 export namespace Link {
-    export type Props = VariantProps<typeof LinkVariants> & React.ComponentPropsWithRef<'a'>;
+    export type Props = VariantProps<typeof LinkVariants> & React.ComponentPropsWithRef<'a'> & {withArrow?: boolean};
 }
