@@ -1,6 +1,6 @@
 import { expect } from 'vitest';
 import { waitFor } from '@testing-library/react';
-import type { HeadlessMatcherOptions } from '../types';
+import type { CompoundPartsTestOptions, HeadlessMatcherOptions } from '../types';
 
 /**
  * Custom matchers for Flippo headless components
@@ -24,7 +24,7 @@ export const headlessMatchers = {
       
       if (!hasAccessibleName && received.tagName !== 'DIV') {
         return {
-          message: () => `Expected element to have an accessible name (aria-label, aria-labelledby, or text content)`,
+          message: () => `Expected element doesn't have an accessible name. (aria-label, aria-labelledby, or text content)`,
           pass: false,
         };
       }
@@ -69,7 +69,7 @@ export const headlessMatchers = {
     }
 
     return {
-      message: () => `Expected element to fail headless UI accessibility check`,
+      message: () => `Expected element to pass headless UI accessibility check`,
       pass: true,
     };
   },
@@ -89,8 +89,8 @@ export const headlessMatchers = {
     return {
       message: () => 
         pass 
-          ? `Expected element not to have headless focus`
-          : `Expected element to have headless focus (DOM focus or virtual focus indicators)`,
+          ?`Expected element to have headless focus (DOM focus or virtual focus indicators)`
+          :  `Expected element not to have headless focus`,
       pass,
     };
   },
@@ -98,11 +98,12 @@ export const headlessMatchers = {
   /**
    * Tests that a compound component has all required parts
    */
-  toHaveCompoundParts(received: HTMLElement, expectedParts: string[]) {
+  toHaveCompoundParts(received: HTMLElement, expectedParts: string[], options: CompoundPartsTestOptions = {}) {
+    const { componentPartDataAttribute = 'data-flippo-component', testIdDataAttribute = 'data-testid' } = options;
     const missingParts: string[] = [];
     
     expectedParts.forEach(part => {
-      const partSelector = `[data-flippo-component*="${part}"], [data-testid*="${part.toLowerCase()}"]`;
+      const partSelector = `[${componentPartDataAttribute}*="${part}"], [${testIdDataAttribute}*="${part.toLowerCase()}"]`;
       const partElement = received.querySelector(partSelector);
       
       if (!partElement) {
@@ -115,8 +116,8 @@ export const headlessMatchers = {
     return {
       message: () => 
         pass
-          ? `Expected compound component not to have all required parts`
-          : `Expected compound component to have parts: ${missingParts.join(', ')}`,
+          ? `Expected compound component to have all required parts`
+          : `Expected compound component not to have all parts: ${missingParts.join(', ')}`,
       pass,
     };
   },
@@ -135,8 +136,8 @@ export const headlessMatchers = {
     return {
       message: () => 
         hasHandler 
-          ? `Expected element not to have ${eventType} event handler`
-          : `Expected element to have ${eventType} event handler`,
+          ? `Expected element to have ${eventType} event handler`
+          : `Expected element not to have ${eventType} event handler`,
       pass: Boolean(hasHandler),
     };
   },

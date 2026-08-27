@@ -1,4 +1,4 @@
-import type { HeadlessMatcherOptions } from '../types';
+import type { CompoundPartsTestOptions, HeadlessMatcherOptions } from '../types';
 
 /**
  * Custom matcher definitions for TypeScript
@@ -21,7 +21,7 @@ declare module 'vitest' {
     /**
      * Tests that a compound component has all required parts
      */
-    toHaveCompoundParts(expectedParts: string[]): T;
+    toHaveCompoundParts(expectedParts: string[], options?: CompoundPartsTestOptions): T;
 
     /**
      * Tests that an element has proper event handler attributes

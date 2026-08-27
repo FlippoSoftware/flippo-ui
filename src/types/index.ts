@@ -98,6 +98,19 @@ export interface CompoundTestConfig {
   provider?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
+export interface CompoundPartsTestOptions {
+  /**
+   * The name of the data attribute for compound component parts
+   * @default 'data-flippo-component'
+   */
+  componentPartDataAttribute?: string;
+  /**
+   * The name of the test ID attribute
+   * @default 'data-testid'
+   */
+  testIdDataAttribute?: string;
+}
+
 /**
  * Test scenario for interaction testing
  */
