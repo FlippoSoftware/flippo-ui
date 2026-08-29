@@ -340,7 +340,9 @@
     "class-variance-authority": "catalog:"
   },
   "devDependencies": {
+    "@biomejs/biome": "catalog:",
     "@eslint-react/eslint-plugin": "catalog:",
+    "@flippo/biome": "workspace:*",
     "@flippo/eslint": "workspace:*",
     "@flippo/internal-test-utils": "workspace:*",
     "@flippo/tsconfig": "workspace:*",
