@@ -325,7 +325,9 @@
     "vite": "catalog:"
   },
   "devDependencies": {
+    "@biomejs/biome": "catalog:",
     "@eslint-react/eslint-plugin": "catalog:",
+    "@flippo/biome": "workspace:*",
     "@flippo/eslint": "workspace:*",
     "@flippo/tsconfig": "workspace:*",
     "@testing-library/jest-dom": "catalog:",
