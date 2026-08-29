@@ -1,0 +1,9 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
+	"root": false,
+	"extends": ["@flippo/biome/base", "@flippo/biome/react"],
+	"vcs": { "root": "../../../../.." },
+	"plugins": [
+		"./node_modules/@flippo/biome/src/plugins/no-node-process-import/no-node-process-import.grit"
+	]
+}

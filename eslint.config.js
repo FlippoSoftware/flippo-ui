@@ -43,41 +43,13 @@ export default createEslintConfig(
             'react-dom/no-flush-sync': 'off',
             'react/no-context-provider': 'off',
             'no-unreachable-loop': 'off',
-            'unused-imports/no-unused-vars': ['warn', {
-                varsIgnorePattern: '^_',
-                argsIgnorePattern: '^_',
-                caughtErrorsIgnorePattern: '^_'
-            }],
             'node/prefer-global/process': ['error', 'always'],
-            'perfectionist/sort-imports': ['error', {
-                type: 'natural',
-                order: 'asc',
-                newlinesBetween: 'always',
-                internalPattern: ['^~/.+', '^@/.+', '^~@.+'],
-                groups: [
-                    'react',
-                    'builtin',
-                    'builtin-type',
-                    'external',
-                    'external-type',
-                    'internal',
-                    'internal-type',
-                    'parent',
-                    'parent-type',
-                    'sibling',
-                    'sibling-type',
-                    'unknown',
-                    'index',
-                    'index-type',
-                    'object',
-                    'type'
-                ],
-                tsconfigRootDir: './tsconfig.json',
-                customGroups: [{
-                    groupName: 'react',
-                    elementNamePattern: ['^react$', '^react-.+']
-                }]
-            }]
+            // Covered by Biome (`@flippo/biome`, see this package's `biome.json`):
+            // `noUnusedVariables`/`noUnusedImports` already respect a `_`-prefix ignore
+            // pattern by default, and `organizeImports` handles import sorting. Both must be
+            // explicitly turned off (not just omitted) since `general`/antfu enable defaults.
+            'unused-imports/no-unused-vars': 'off',
+            'perfectionist/sort-imports': 'off'
         }
     }
 );

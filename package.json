@@ -369,6 +369,8 @@
     "use-sync-external-store": "catalog:"
   },
   "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@flippo/biome": "workspace:*",
     "@flippo/eslint": "workspace:*",
     "@flippo/tsconfig": "workspace:*",
     "@types/node": "catalog:",
