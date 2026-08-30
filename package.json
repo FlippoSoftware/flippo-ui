@@ -3,7 +3,6 @@
   "type": "module",
   "version": "1.0.0",
   "source": "./src/index.ts",
-  "private": true,
   "packageManager": "pnpm@10.7.0",
   "description": "",
   "author": "",
@@ -360,27 +359,42 @@
     "build:exports": "node scripts/generate-exports.js"
   },
   "peerDependencies": {
-    "react": "catalog:",
-    "react-dom": "catalog:"
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "dependencies": {
-    "reselect": "catalog:",
-    "tabbable": "catalog:",
-    "use-sync-external-store": "catalog:"
+    "reselect": "^5.1.1",
+    "tabbable": "^6.2.0",
+    "use-sync-external-store": "^1.5.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "@flippo/biome": "workspace:*",
-    "@flippo/tsconfig": "workspace:*",
-    "@types/node": "catalog:",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "@types/use-sync-external-store": "catalog:",
-    "@vitejs/plugin-react": "catalog:",
-    "glob": "catalog:",
-    "typescript": "catalog:",
-    "vite": "catalog:",
-    "vite-plugin-dts": "catalog:",
-    "vitest": "catalog:"
-  }
+    "@biomejs/biome": "^2.5.11",
+    "@flippo/biome": "^1.0.0",
+    "@flippo/tsconfig": "^1.0.0",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "@types/use-sync-external-store": "^1.5.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "glob": "^11.0.3",
+    "typescript": "^5.9.2",
+    "vite": "6.2.5",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FlippoSoftware/hooks.git"
+  },
+  "homepage": "https://github.com/FlippoSoftware/hooks#readme",
+  "bugs": {
+    "url": "https://github.com/FlippoSoftware/hooks/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false
 }
