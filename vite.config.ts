@@ -54,7 +54,7 @@ export default defineConfig({
             formats: ['es', 'cjs']
         },
         rollupOptions: {
-            external: ['react', 'react-dom'],
+            external: ['react', 'react-dom', '@flippo-ui/hooks'],
             output: {
                 entryFileNames: '[name].[format].js',
                 chunkFileNames: 'shared/[name]-[hash].[format].js',
