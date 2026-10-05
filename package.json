@@ -1,7 +1,7 @@
 {
     "name": "@flippo-software/core-components",
     "type": "module",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Framework-agnostic state machines for Flippo UI headless components.",
     "author": "BlackPoretsky (Egor Gorochkin)",
     "license": "ISC",
