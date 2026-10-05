@@ -31,12 +31,12 @@ export type PopupFloatingRootOptions<Reason extends string> = {
  * Creates a floating root kept in sync with a popup store (open state, trigger and floating elements).
  * Replacement for `useSyncedFloatingRootContext`.
  *
- * @returns The floating root and a function that stops syncing.
+ * @returns The floating root and `connect`, which starts syncing and returns a function that stops it.
  */
 export function createPopupFloatingRoot<State extends PopupStoreState<unknown>, Reason extends string = string>(
     popupStore: AnyPopupStore<State>,
     options: PopupFloatingRootOptions<Reason>
-): { floatingRoot: FloatingRootStore<Reason>; destroy: () => void } {
+): { floatingRoot: FloatingRootStore<Reason>; connect: () => () => void } {
     const { floatingId, nested, noEmit = false, treatPopupAsFloatingElement = false, onOpenChange } = options;
 
     const select = () => ({
@@ -69,8 +69,10 @@ export function createPopupFloatingRoot<State extends PopupStoreState<unknown>, 
         floatingRoot.update(valuesToSync);
     };
 
-    sync();
-    const unsubscribe = popupStore.subscribe(sync);
+    const connect = () => {
+        sync();
+        return popupStore.subscribe(sync);
+    };
 
-    return { floatingRoot, destroy: unsubscribe };
+    return { floatingRoot, connect };
 }

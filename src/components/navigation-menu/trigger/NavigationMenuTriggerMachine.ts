@@ -4,6 +4,7 @@ import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { runOnceAnimationsFinish } from '~@dom/animations';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { PATIENT_CLICK_THRESHOLD } from '~@lib/constants';
 import { getCssDimensions } from '~@lib/getCssDimensions';
 import { FloatingRootStore } from '~@packages/floating-ui/FloatingRootStore';
@@ -50,7 +51,7 @@ export type NavigationMenuTriggerOptions = {
  * State machine of `NavigationMenu.Trigger`: opens its item's content on hover or click, animates the popup
  * size between contents, keyboard opening and the focus guards around the active trigger.
  */
-export class NavigationMenuTriggerMachine {
+export class NavigationMenuTriggerMachine extends Connectable {
     readonly button: ButtonMachine;
 
     readonly floatingRoot: FloatingRootStore;
@@ -101,9 +102,8 @@ export class NavigationMenuTriggerMachine {
 
     private readonly activeEffect = new Effect(() => this.registerAsActive());
 
-    private readonly unsubscribers: (() => void)[];
-
     constructor(root: NavigationMenuRootMachine, itemValue: unknown, options: NavigationMenuTriggerOptions = {}) {
+        super();
         this.root = root;
         this.itemValue = itemValue;
         this.options = options;
@@ -120,7 +120,13 @@ export class NavigationMenuTriggerMachine {
         });
         this.hover = new HoverInteraction(this.floatingRoot, this.getHoverOptions());
         this.click = new ClickInteraction(this.floatingRoot, this.getClickOptions());
-        this.unsubscribers = [root.store.subscribe(() => this.sync()), root.transitions.store.subscribe(() => this.sync())];
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.hover);
+        this.connectChild(this.click);
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
+        this.addCleanup(this.root.transitions.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -262,12 +268,7 @@ export class NavigationMenuTriggerMachine {
         }
     };
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.hover.destroy();
-        this.click.destroy();
+    protected override onDisconnect() {
         for (const effect of [this.resizeObserverEffect, this.mutationObserverEffect, this.focusEffect, this.activeEffect]) {
             effect.destroy();
         }
@@ -430,6 +431,9 @@ export class NavigationMenuTriggerMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { root } = this;
         const { open, store, transitions } = root;
         const { positionerElement, viewportElement, popupElement } = store.state;

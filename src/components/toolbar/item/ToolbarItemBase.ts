@@ -1,4 +1,5 @@
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 
 import type { ToolbarGroupMachine } from '../group/ToolbarGroupMachine';
@@ -31,7 +32,7 @@ export type ToolbarItemOptions = {
 /**
  * Base of toolbar items: composite registration and disabled state.
  */
-export class ToolbarItemBase {
+export class ToolbarItemBase extends Connectable {
     readonly listItem: ListRegistryItem<ToolbarItemMetadata>;
 
     readonly store = new Store({ index: -1 });
@@ -41,9 +42,14 @@ export class ToolbarItemBase {
     protected readonly toolbar: ToolbarMachine;
 
     constructor(toolbar: ToolbarMachine, options: ToolbarItemOptions, metadata: ToolbarItemMetadata) {
+        super();
         this.toolbar = toolbar;
         this.options = options;
         this.listItem = new ListRegistryItem(toolbar.registry, { metadata, onIndexChange: (index) => this.store.set('index', index) });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
     }
 
     get disabled() {
@@ -62,7 +68,5 @@ export class ToolbarItemBase {
         return this.toolbar.composite.getItemProps(this.store.state.index);
     }
 
-    destroy() {
-        this.listItem.destroy();
-    }
+    protected override onDisconnect() {}
 }

@@ -3,6 +3,7 @@ import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
@@ -68,7 +69,7 @@ export type SwitchOptions = {
 /**
  * State machine of a switch: a `role="switch"` element with a hidden checkbox input.
  */
-export class SwitchMachine {
+export class SwitchMachine extends Connectable {
     readonly store: Store<{ checked: boolean }>;
 
     readonly button: ButtonMachine;
@@ -82,6 +83,7 @@ export class SwitchMachine {
     private previousChecked: boolean;
 
     constructor(options: SwitchOptions) {
+        super();
         this.options = options;
         this.store = new Store({ checked: Boolean(options.defaultChecked) });
         this.button = new ButtonMachine({ disabled: this.disabled, native: options.nativeButton ?? false });

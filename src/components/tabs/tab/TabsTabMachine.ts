@@ -3,6 +3,7 @@ import { type ListRegistry, ListRegistryItem } from '~@components/composite/list
 import { ACTIVE_COMPOSITE_ITEM } from '~@components/composite/utils/compositeKeys';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { ownerDocument } from '~@lib/owner';
 import { activeElement, contains } from '~@packages/floating-ui/utils/element';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
@@ -46,7 +47,7 @@ export type TabsTabOptions = {
 /**
  * One tab.
  */
-export class TabsTabMachine {
+export class TabsTabMachine extends Connectable {
     readonly button: ButtonMachine;
 
     readonly listItem: ListRegistryItem<TabsTabMetadata>;
@@ -66,6 +67,7 @@ export class TabsTabMachine {
     private isMainButton = false;
 
     constructor(tabs: TabsMachine, list: TabsListMachine, options: TabsTabOptions) {
+        super();
         this.tabs = tabs;
         this.list = list;
         this.options = options;
@@ -81,6 +83,10 @@ export class TabsTabMachine {
                 this.syncHighlight();
             }
         });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
     }
 
     setOptions(options: TabsTabOptions) {
@@ -220,7 +226,5 @@ export class TabsTabMachine {
         this.listItem.setElement(element);
     };
 
-    destroy() {
-        this.listItem.destroy();
-    }
+    protected override onDisconnect() {}
 }

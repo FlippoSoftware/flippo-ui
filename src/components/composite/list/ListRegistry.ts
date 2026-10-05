@@ -1,3 +1,5 @@
+import { Connectable } from '~@lib/Connectable';
+
 import type { MutableRef } from '~@lib/types';
 
 export type CompositeMetadata<CustomMetadata> = { index?: number | null } & CustomMetadata;
@@ -36,7 +38,7 @@ export type ListRegistryOptions<Metadata> = {
  * once the registry is flushed (batched in a microtask, or synchronously with {@link ListRegistry.flush}).
  * DOM reordering is detected with a `MutationObserver`.
  */
-export class ListRegistry<Metadata = Record<string, unknown>> {
+export class ListRegistry<Metadata = Record<string, unknown>> extends Connectable {
     readonly elementsRef: MutableRef<(HTMLElement | null)[]>;
 
     readonly labelsRef: MutableRef<(string | null)[]> | undefined;
@@ -60,9 +62,8 @@ export class ListRegistry<Metadata = Record<string, unknown>> {
 
     private observer: MutationObserver | null = null;
 
-    private destroyed = false;
-
     constructor(options: ListRegistryOptions<Metadata> = {}) {
+        super();
         this.options = options;
         this.elementsRef = options.elementsRef ?? { current: [] };
         this.labelsRef = options.labelsRef;
@@ -117,7 +118,7 @@ export class ListRegistry<Metadata = Record<string, unknown>> {
      * Sorts the registered elements and notifies the subscribers now.
      */
     flush = () => {
-        if (!this.dirty || this.destroyed) {
+        if (!this.dirty) {
             return;
         }
         this.dirty = false;
@@ -145,15 +146,14 @@ export class ListRegistry<Metadata = Record<string, unknown>> {
         }
     };
 
-    destroy() {
-        this.destroyed = true;
+    protected override onConnect() {
+        // Elements registered while disconnected (ref callbacks run before effects) are sorted now.
+        this.flush();
+    }
+
+    protected override onDisconnect() {
         this.observer?.disconnect();
         this.observer = null;
-        this.elementsRef.current = [];
-        if (this.labelsRef) {
-            this.labelsRef.current = [];
-        }
-        this.listeners.clear();
     }
 
     private markDirty() {
@@ -203,7 +203,7 @@ export class ListRegistry<Metadata = Record<string, unknown>> {
  * One item of a {@link ListRegistry}: registers its element and tracks its index.
  * Replacement for `useCompositeListItem`.
  */
-export class ListRegistryItem<Metadata = Record<string, unknown>> {
+export class ListRegistryItem<Metadata = Record<string, unknown>> extends Connectable {
     private readonly registry: ListRegistry<Metadata>;
 
     private element: HTMLElement | null = null;
@@ -215,8 +215,6 @@ export class ListRegistryItem<Metadata = Record<string, unknown>> {
     private metadata: Metadata | undefined;
 
     private readonly externalIndex: number | undefined;
-
-    private readonly unsubscribe: () => void;
 
     private readonly onIndexChange: (index: number) => void;
 
@@ -230,6 +228,7 @@ export class ListRegistryItem<Metadata = Record<string, unknown>> {
             onIndexChange?: ((index: number) => void) | undefined;
         } = {}
     ) {
+        super();
         this.registry = registry;
         this.externalIndex = options.index;
         this.label = options.label;
@@ -244,18 +243,25 @@ export class ListRegistryItem<Metadata = Record<string, unknown>> {
         } else {
             this.index = -1;
         }
+    }
 
-        this.unsubscribe =
-            this.externalIndex == null
-                ? registry.subscribe((map) => {
-                      const index = this.element ? map.get(this.element)?.index : null;
-                      if (index != null && index !== this.index) {
-                          this.index = index;
-                          this.writeRefs();
-                          this.onIndexChange(index);
-                      }
-                  })
-                : () => {};
+    protected override onConnect() {
+        if (this.externalIndex != null) {
+            return;
+        }
+        this.addCleanup(
+            this.registry.subscribe((map) => {
+                const index = this.element ? map.get(this.element)?.index : null;
+                if (index != null && index !== this.index) {
+                    this.index = index;
+                    this.writeRefs();
+                    this.onIndexChange(index);
+                }
+            })
+        );
+        if (this.element) {
+            this.registry.register(this.element, this.metadata);
+        }
     }
 
     getIndex() {
@@ -288,8 +294,7 @@ export class ListRegistryItem<Metadata = Record<string, unknown>> {
         this.writeRefs();
     };
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         if (this.element && this.externalIndex == null) {
             this.registry.unregister(this.element);
         }

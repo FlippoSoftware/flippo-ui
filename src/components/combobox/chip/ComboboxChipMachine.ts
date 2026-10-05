@@ -1,6 +1,7 @@
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { getNativeEvent, stopEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
 import { Store } from '~@store/Store';
@@ -13,7 +14,7 @@ import type { ComboboxRootMachine } from '../root/ComboboxRootMachine';
 /**
  * State machine of `Combobox.Chip`.
  */
-export class ComboboxChipMachine {
+export class ComboboxChipMachine extends Connectable {
     readonly index = new Store<{ index: number }>({ index: -1 });
 
     private readonly root: ComboboxRootMachine;
@@ -23,9 +24,14 @@ export class ComboboxChipMachine {
     private readonly listItem: ListRegistryItem;
 
     constructor(root: ComboboxRootMachine, chips: ComboboxChipsMachine) {
+        super();
         this.root = root;
         this.chips = chips;
         this.listItem = new ListRegistryItem(chips.registry, { onIndexChange: (index) => this.index.set('index', index) });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
     }
 
     setElement = (element: HTMLElement | null) => {
@@ -69,9 +75,8 @@ export class ComboboxChipMachine {
         );
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.listItem.setElement(null);
-        this.listItem.destroy();
     }
 
     private getNextIndex(event: KeyboardEvent): number | undefined {

@@ -3,6 +3,7 @@ import { getComputedStyle, getParentNode, isElement, isHTMLElement, isLastTraver
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { Timeout } from '~@timers/Timeout';
 
 import { createAttribute } from '../utils/createAttribute';
@@ -94,7 +95,7 @@ type TouchState = {
  * the user presses the `escape` key or outside of the floating element.
  * Replacement for `useDismiss`: document listeners are attached while the element is open.
  */
-export class DismissInteraction {
+export class DismissInteraction extends Connectable {
     private options: DismissInteractionOptions;
 
     private readonly store: FloatingRootStore;
@@ -117,11 +118,10 @@ export class DismissInteraction {
 
     private attachedKey: unknown[] = [];
 
-    private readonly unsubscribe: () => void;
-
     private readonly floatingProps: Record<string, unknown>;
 
     constructor(store: FloatingRootStore, options: DismissInteractionOptions = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.floatingProps = {
@@ -140,7 +140,10 @@ export class DismissInteraction {
             onTouchEndCapture: this.markInsideTree,
             onTouchMoveCapture: this.markInsideTree
         };
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -163,10 +166,11 @@ export class DismissInteraction {
         return { reference, floating: this.floatingProps, trigger: reference };
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.detach?.();
         this.detach = null;
+        // Re-attach on the next connection.
+        this.attachedKey = [];
         this.cancelDismissOnEndTimeout.clear();
         this.clearInsideTreeTimeout.clear();
         this.compositionTimeout.clear();
@@ -214,6 +218,9 @@ export class DismissInteraction {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { enabled, escapeKey, outsidePress, ancestorScroll, escapeKeyBubbles, outsidePressBubbles } = this.settings;
         const state = this.store.state;
         const key = [

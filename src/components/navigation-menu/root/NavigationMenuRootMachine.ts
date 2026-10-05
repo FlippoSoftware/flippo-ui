@@ -1,6 +1,7 @@
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { ownerDocument } from '~@lib/owner';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
 import { FloatingTreeStore } from '~@packages/floating-ui/FloatingTreeStore';
@@ -91,7 +92,7 @@ const blockedReturnFocusReasons = new Set<string>([REASONS.triggerHover, REASONS
  * State machine of `NavigationMenu.Root`: the active item (`value`, open when non-null), mount transitions,
  * the active trigger's floating root, sizes and focus return when closing.
  */
-export class NavigationMenuRootMachine {
+export class NavigationMenuRootMachine extends Connectable {
     readonly store: Store<NavigationMenuInternalState>;
 
     readonly transitions: TransitionStatusController;
@@ -128,9 +129,8 @@ export class NavigationMenuRootMachine {
 
     private readonly viewportComplete: OpenChangeComplete;
 
-    private readonly unsubscribe: () => void;
-
     constructor(options: NavigationMenuRootOptions, setup: NavigationMenuRootSetup) {
+        super();
         this.options = options;
         this.setup = setup;
         const value = options.value !== undefined ? options.value : (options.defaultValue ?? null);
@@ -169,8 +169,12 @@ export class NavigationMenuRootMachine {
             () => this.handleCompleteClose()
         );
         this.actions = { unmount: this.handleUnmount };
+    }
 
-        this.unsubscribe = this.store.subscribe(() => this.sync());
+    protected override onConnect() {
+        this.connectChild(this.node);
+        this.connectChild(this.transitions);
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -240,12 +244,9 @@ export class NavigationMenuRootMachine {
         return mergeProps({ 'aria-orientation': this.orientation }, elementProps);
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.popupComplete.destroy();
         this.viewportComplete.destroy();
-        this.transitions.destroy();
-        this.node.destroy();
     }
 
     private handleCompleteClose() {
@@ -278,6 +279,9 @@ export class NavigationMenuRootMachine {
     };
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const open = this.open;
         this.transitions.setOpen(open);
         if (this.store.state.value !== this.previousValue) {

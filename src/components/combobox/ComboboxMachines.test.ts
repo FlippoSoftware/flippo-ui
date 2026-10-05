@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AutocompleteRootMachine } from '~@components/autocomplete/root/AutocompleteRootMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { connected } from '~@test/utils/connected';
 
 import { ComboboxClearMachine } from './clear/ComboboxClearMachine';
 import { ComboboxInputMachine } from './input/ComboboxInputMachine';
@@ -22,7 +23,7 @@ function typeInto(input: ComboboxInputMachine, element: HTMLInputElement, value:
 }
 
 function setup(options: ConstructorParameters<typeof ComboboxRootMachine>[0]) {
-    const root = new ComboboxRootMachine(options, { defaultId: 'cb' });
+    const root = connected(new ComboboxRootMachine(options, { defaultId: 'cb' }));
     const input = new ComboboxInputMachine(root, { id: 'cb-input' });
     const inputElement = document.createElement('input');
     document.body.append(inputElement);
@@ -65,12 +66,12 @@ describe('Combobox machines', () => {
     it('selects an item, fills the input and closes', () => {
         const onSelectedValueChange = vi.fn();
         const { root } = setup({ items: fruits, selectionMode: 'single', onSelectedValueChange, defaultOpen: true });
-        const list = new ComboboxListMachine(root, false);
+        const list = connected(new ComboboxListMachine(root, false));
         const listElement = document.createElement('div');
         document.body.append(listElement);
         list.setElement(listElement);
 
-        const item = new ComboboxItemMachine(root, { value: 'Banana', index: 1 }, { registry: null });
+        const item = connected(new ComboboxItemMachine(root, { value: 'Banana', index: 1 }, { registry: null }));
         const itemElement = document.createElement('div');
         listElement.append(itemElement);
         item.setElement(itemElement);
@@ -99,7 +100,7 @@ describe('Combobox machines', () => {
         expect(root.store.state.selectedValue).toEqual(['Apple', 'Cherry']);
         expect(root.getHiddenInputs()).toHaveLength(2);
 
-        const clear = new ComboboxClearMachine(root);
+        const clear = connected(new ComboboxClearMachine(root));
         expect(clear.visible).toBe(true);
         clear.getClearProps().onClick(new MouseEvent('click'));
         expect(root.store.state.selectedValue).toEqual([]);
@@ -121,7 +122,7 @@ describe('Combobox machines', () => {
 
     it('autocomplete keeps the typed value as its value', () => {
         const onValueChange = vi.fn();
-        const autocomplete = new AutocompleteRootMachine({ items: fruits, onValueChange }, { defaultId: 'ac' });
+        const autocomplete = connected(new AutocompleteRootMachine({ items: fruits, onValueChange }, { defaultId: 'ac' }));
         autocomplete.combobox.setInputValue('ch', createChangeEventDetails(REASONS.inputChange));
         expect(onValueChange).toHaveBeenCalledWith('ch', expect.anything());
         expect(autocomplete.getValue()).toBe('ch');

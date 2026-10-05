@@ -1,3 +1,4 @@
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY } from '~@lib/constants';
 import { Timeout } from '~@timers/Timeout';
 
@@ -55,7 +56,7 @@ export type TypeaheadInteractionOptions = {
  * Matches list items as the user types (focus/highlight follows the typed prefix).
  * Replacement for `useTypeahead`.
  */
-export class TypeaheadInteraction {
+export class TypeaheadInteraction extends Connectable {
     private options: TypeaheadInteractionOptions;
 
     private readonly store: FloatingRootStore;
@@ -70,20 +71,22 @@ export class TypeaheadInteraction {
 
     private previousOpen: boolean;
 
-    private readonly unsubscribe: () => void;
-
     private readonly reference: Record<string, unknown>;
 
     private readonly floating: Record<string, unknown>;
 
     constructor(store: FloatingRootStore, options: TypeaheadInteractionOptions) {
+        super();
         this.store = store;
         this.options = options;
         this.prevIndex = options.selectedIndex ?? options.activeIndex ?? -1;
         this.previousOpen = store.select('open');
         this.reference = { onKeyDown: this.onKeyDown };
         this.floating = { onKeyDown: this.onKeyDown, onKeyUp: this.onKeyUp };
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync(true);
     }
 
@@ -96,12 +99,14 @@ export class TypeaheadInteraction {
         return this.options.enabled === false ? {} : { reference: this.reference, floating: this.floating };
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.timeout.clear();
     }
 
     private sync(initial = false) {
+        if (!this.connected) {
+            return;
+        }
         const open = this.store.select('open');
 
         if (open && (initial || !this.previousOpen)) {

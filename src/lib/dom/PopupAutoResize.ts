@@ -1,5 +1,6 @@
 import type { Dimensions } from '@floating-ui/utils';
 
+import { Connectable } from '~@lib/Connectable';
 import { getCssDimensions } from '~@lib/getCssDimensions';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
@@ -52,7 +53,7 @@ function overrideElementStyle(element: HTMLElement, property: string, value: str
  * `--popup-width`/`--popup-height` and `--positioner-width`/`--positioner-height`.
  * Replacement for `usePopupAutoResize`; call {@link PopupAutoResize.setOptions} whenever an option changes.
  */
-export class PopupAutoResize {
+export class PopupAutoResize extends Connectable {
     private options: PopupAutoResizeOptions;
 
     private isInitialRender = true;
@@ -68,7 +69,11 @@ export class PopupAutoResize {
     private deps: unknown[] | null = null;
 
     constructor(options: PopupAutoResizeOptions) {
+        super();
         this.options = options;
+    }
+
+    protected override onConnect() {
         this.sync();
     }
 
@@ -77,12 +82,15 @@ export class PopupAutoResize {
         this.sync();
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.cleanup?.();
         this.cleanup = null;
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { content, popupElement, positionerElement, enabled, mounted } = this.options;
         const deps = [content, popupElement, positionerElement, enabled, mounted];
         if (this.deps && deps.every((dep, index) => Object.is(dep, this.deps?.[index]))) {

@@ -2,6 +2,7 @@ import { isElement } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { ownerDocument } from '~@lib/owner';
 
 import type { FloatingOpenChangeDetails } from '~@events/changeEventDetails';
@@ -61,7 +62,7 @@ export type HoverInteractionOptions = {
  * Opens the floating element while hovering over the reference element, like CSS `:hover`.
  * Replacement for `useHover` (reference and floating listeners in one object).
  */
-export class HoverInteraction {
+export class HoverInteraction extends Connectable {
     private options: HoverInteractionOptions;
 
     private readonly store: FloatingRootStore;
@@ -76,8 +77,6 @@ export class HoverInteraction {
 
     private readonly pointerEventsBlock: Effect;
 
-    private readonly unsubscribe: () => void;
-
     private readonly reference: Record<string, unknown>;
 
     private previousOpen: boolean;
@@ -85,6 +84,7 @@ export class HoverInteraction {
     private previousDomReference: Element | null;
 
     constructor(store: FloatingRootStore, options: HoverInteractionOptions = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.previousOpen = store.select('open');
@@ -98,7 +98,10 @@ export class HoverInteraction {
             onPointerEnter: this.setPointerType,
             onMouseMove: this.onMouseMove
         };
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -111,8 +114,7 @@ export class HoverInteraction {
         return { reference: this.reference };
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.openChangeListener.destroy();
         this.documentLeaveListener.destroy();
         this.elementListeners.destroy();
@@ -129,6 +131,9 @@ export class HoverInteraction {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { move, tree, parentId, handleClose } = this.settings;
         const { open, floatingElement, domReferenceElement } = this.store.state;
 

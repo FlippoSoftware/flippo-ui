@@ -4,6 +4,7 @@ import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { isMouseWithinBounds } from '~@dom/isMouseWithinBounds';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { compareItemEquality, removeItem } from '~@lib/itemEquality';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
@@ -48,7 +49,7 @@ type MouseLikeEvent =
  * State machine of `Select.Item`: registration (value, label, index), highlight on hover,
  * selection on click or on release after pressing the trigger.
  */
-export class SelectItemMachine {
+export class SelectItemMachine extends Connectable {
     readonly button: ButtonMachine;
 
     readonly index = new Store<{ index: number }>({ index: -1 });
@@ -77,6 +78,7 @@ export class SelectItemMachine {
     private readonly selectedIndexEffect = new Effect(() => this.syncSelectedIndex());
 
     constructor(root: SelectRootMachine, registry: ListRegistry, options: SelectItemOptions = {}) {
+        super();
         this.root = root;
         this.options = options;
         this.button = new ButtonMachine({ disabled: options.disabled, focusableWhenDisabled: true, native: options.nativeButton ?? false });
@@ -89,6 +91,10 @@ export class SelectItemMachine {
             }
         });
         this.index.set('index', this.listItem.getIndex());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
         this.sync();
     }
 
@@ -239,12 +245,11 @@ export class SelectItemMachine {
         }
     };
 
-    destroy() {
+    protected override onDisconnect() {
         this.valueEffect.destroy();
         this.selectedIndexEffect.destroy();
         this.highlightTimeout.clear();
         this.listItem.setElement(null);
-        this.listItem.destroy();
     }
 
     private commitSelection(event: MouseEvent) {
@@ -263,6 +268,9 @@ export class SelectItemMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const index = this.index.state.index;
         this.valueEffect.sync([this.hasRegistered, index, this.value]);
         this.selectedIndexEffect.sync([

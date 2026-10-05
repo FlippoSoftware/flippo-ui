@@ -1,6 +1,7 @@
 import { acquireScrollLock } from '~@dom/scrollLock';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { FloatingTreeStore } from '~@packages/floating-ui/FloatingTreeStore';
 import { DismissInteraction } from '~@packages/floating-ui/interactions/DismissInteraction';
 import { mergeInteractionProps } from '~@packages/floating-ui/interactions/mergeInteractionProps';
@@ -71,7 +72,7 @@ export type PopoverRootActions = {
  * scroll lock for modal popovers and the props shared with triggers and the popup.
  * Replacement for `PopoverRoot`'s hooks.
  */
-export class PopoverRootMachine<Payload = unknown> {
+export class PopoverRootMachine<Payload = unknown> extends Connectable {
     readonly store: PopoverStore<Payload>;
 
     readonly tree: FloatingTreeStore;
@@ -99,9 +100,8 @@ export class PopoverRootMachine<Payload = unknown> {
 
     private readonly propsEffect = new Effect(() => this.updateSharedProps());
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(options: PopoverRootOptions, setup: PopoverRootSetup<Payload>) {
+        super();
         const { open, defaultOpen = false, modal = false, triggerId, defaultTriggerId = null } = options;
 
         this.options = options;
@@ -147,12 +147,14 @@ export class PopoverRootMachine<Payload = unknown> {
             }
         };
 
-        this.unsubscribers.push(
-            this.interactionType.store.subscribe(() => this.sync()),
-            this.floatingRoot.subscribe(() => this.sync())
-        );
-
         this.store.update({ modal, nested: setup.nested ?? false });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.controller);
+        this.connectChild(this.dismiss);
+        this.addCleanup(this.interactionType.store.subscribe(() => this.sync()));
+        this.addCleanup(this.floatingRoot.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -168,14 +170,8 @@ export class PopoverRootMachine<Payload = unknown> {
         return { payload: this.store.select('payload') as Payload | undefined };
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.scrollLock.destroy();
+    protected override onDisconnect() {
         this.propsEffect.destroy();
-        this.dismiss.destroy();
-        this.controller.destroy();
         this.store.destroy();
     }
 
@@ -207,6 +203,9 @@ export class PopoverRootMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store } = this;
         const open = store.select('open');
 

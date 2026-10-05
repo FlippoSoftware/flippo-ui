@@ -1,4 +1,5 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
+import { Connectable } from '~@lib/Connectable';
 import { clamp } from '~@lib/clamp';
 import { isWebKit } from '~@lib/detectBrowser';
 import { styleDisableScrollbar } from '~@lib/disableScrollbar';
@@ -131,7 +132,7 @@ type ScrollAreaPointerEvent = PointerEvent & { currentTarget: EventTarget | null
  * State machine of a scroll area: custom scrollbars, thumb sizes and positions, overflow edges,
  * hover/scrolling flags and thumb dragging.
  */
-export class ScrollAreaMachine {
+export class ScrollAreaMachine extends Connectable {
     readonly store = new Store<ScrollAreaInternalState>({
         hovering: false,
         scrollingX: false,
@@ -196,6 +197,7 @@ export class ScrollAreaMachine {
     private recomputeDeps: unknown[] = [];
 
     constructor(options: ScrollAreaOptions = {}) {
+        super();
         this.options = options;
         this.visibleEffect = new Effect(() => this.observeVisibility());
         this.resizeEffect = new Effect(() => this.observeViewportResize());
@@ -204,7 +206,16 @@ export class ScrollAreaMachine {
             vertical: new Effect(() => this.attachWheel('vertical')),
             horizontal: new Effect(() => this.attachWheel('horizontal'))
         };
-        this.store.subscribe(() => this.scheduleRecompute());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.scheduleRecompute()));
+        this.visibleEffect.sync([this.viewport]);
+        this.resizeEffect.sync([this.viewport]);
+        this.contentResizeEffect.sync([this.content]);
+        this.checkViewportHover();
+        this.syncWheel();
+        this.scheduleRecompute(true);
     }
 
     setOptions(options: ScrollAreaOptions) {
@@ -243,7 +254,7 @@ export class ScrollAreaMachine {
         return getStyleHookProps(state, scrollAreaStateAttributesMapping);
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.visibleEffect.destroy();
         this.resizeEffect.destroy();
         this.contentResizeEffect.destroy();
@@ -263,19 +274,21 @@ export class ScrollAreaMachine {
 
     setViewport = (element: HTMLElement | null) => {
         this.viewport = element;
+        if (!this.connected) {
+            return;
+        }
         this.visibleEffect.sync([element]);
         this.resizeEffect.sync([element]);
-        // `onMouseEnter` doesn't fire upon load, so check if the viewport is already hovered.
-        if (element?.matches(':hover')) {
-            this.store.set('hovering', true);
-        }
+        this.checkViewportHover();
         this.syncWheel();
         this.scheduleRecompute(true);
     };
 
     setContent = (element: HTMLElement | null) => {
         this.content = element;
-        this.contentResizeEffect.sync([element]);
+        if (this.connected) {
+            this.contentResizeEffect.sync([element]);
+        }
     };
 
     setScrollbar = (orientation: ScrollAreaOrientation, element: HTMLElement | null) => {
@@ -622,7 +635,19 @@ export class ScrollAreaMachine {
         this.handlePointerDown(event);
     }
 
+    /**
+     * `onMouseEnter` doesn't fire upon load, so checks whether the viewport is already hovered.
+     */
+    private checkViewportHover() {
+        if (this.viewport?.matches(':hover')) {
+            this.store.set('hovering', true);
+        }
+    }
+
     private syncWheel() {
+        if (!this.connected) {
+            return;
+        }
         this.wheelEffects.vertical.sync([this.scrollbarY, this.viewport]);
         this.wheelEffects.horizontal.sync([this.scrollbarX, this.viewport]);
     }
@@ -746,6 +771,9 @@ export class ScrollAreaMachine {
 
     // Recompute after the hidden state or direction changes (waits for scrollbar elements to be set).
     private scheduleRecompute(force = false) {
+        if (!this.connected) {
+            return;
+        }
         const deps = [this.store.state.hiddenState, this.direction];
         if (!force && deps.every((dep, index) => Object.is(dep, this.recomputeDeps[index]))) {
             return;

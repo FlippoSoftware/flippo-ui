@@ -1,4 +1,5 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
+import { Connectable } from '~@lib/Connectable';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { activeElement, contains, getTarget, matchesFocusVisible } from '~@packages/floating-ui/utils/element';
@@ -23,7 +24,7 @@ type FocusLikeEvent = FocusEvent | { relatedTarget: EventTarget | null };
  * State machine of `Toast.Viewport`: pauses timers while hovered/focused or when the window
  * is blurred, F6 to focus the viewport, and the focus guards returning focus to the page.
  */
-export class ToastViewportMachine {
+export class ToastViewportMachine extends Connectable {
     private readonly provider: ToastProviderMachine;
 
     private handlingFocusGuard = false;
@@ -40,11 +41,13 @@ export class ToastViewportMachine {
 
     private readonly transitionsSettledEffect = new Effect(() => this.handleTransitionsSettled());
 
-    private readonly unsubscribe: () => void;
-
     constructor(provider: ToastProviderMachine) {
+        super();
         this.provider = provider;
-        this.unsubscribe = provider.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.provider.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -120,8 +123,7 @@ export class ToastViewportMachine {
         }
     };
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.keyDownEffect.destroy();
         this.windowFocusEffect.destroy();
         this.pointerDownEffect.destroy();
@@ -130,6 +132,9 @@ export class ToastViewportMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const viewport = this.provider.viewportRef.current;
         const { toasts } = this.provider.store.state;
         const numToasts = toasts.length;

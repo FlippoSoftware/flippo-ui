@@ -3,6 +3,7 @@ import { pressableTriggerOpenStateMapping, triggerOpenStateMapping } from '~@att
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { CLICK_TRIGGER_IDENTIFIER, OPEN_DELAY } from '~@lib/constants';
 import { ClickInteraction } from '~@packages/floating-ui/interactions/ClickInteraction';
 import { HoverReferenceInteraction } from '~@packages/floating-ui/interactions/hover/HoverReferenceInteraction';
@@ -60,7 +61,7 @@ type FocusLikeEvent = FocusEvent | { nativeEvent: FocusEvent; currentTarget: Eve
  * State machine of `Popover.Trigger`: registration in the popover, click and hover interactions,
  * and the focus guards rendered around the active trigger.
  */
-export class PopoverTriggerMachine<Payload = unknown> {
+export class PopoverTriggerMachine<Payload = unknown> extends Connectable {
     readonly store: PopoverStore<Payload>;
 
     readonly button: ButtonMachine;
@@ -83,14 +84,17 @@ export class PopoverTriggerMachine<Payload = unknown> {
 
     private readonly handleClose = safePolygon();
 
-    private readonly unsubscribe: () => void;
-
     constructor(store: PopoverStore<Payload>, options: PopoverTriggerOptions<Payload>) {
+        super();
         this.store = store;
         this.options = options;
         this.button = new ButtonMachine({ disabled: options.disabled, native: options.nativeButton });
         this.registration = new PopupTriggerRegistration(store, options.id, this.getForwardedState());
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registration);
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -204,9 +208,9 @@ export class PopoverTriggerMachine<Payload = unknown> {
         nextTabbable?.focus();
     };
 
-    destroy() {
-        this.unsubscribe();
-        this.registration.destroy();
+    protected override onDisconnect() {
+        this.mountedByThisTrigger = false;
+        this.floatingRoot = null;
         this.destroyInteractions();
     }
 
@@ -224,12 +228,17 @@ export class PopoverTriggerMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.store.select('floatingRootContext');
         if (floatingRoot !== this.floatingRoot) {
             this.destroyInteractions();
             this.floatingRoot = floatingRoot;
             this.click = new ClickInteraction(floatingRoot, this.getClickOptions());
+            this.click.connect();
             this.hover = new HoverReferenceInteraction(floatingRoot, this.getHoverOptions());
+            this.hover.connect();
         } else {
             this.click?.setOptions(this.getClickOptions());
             this.hover?.setOptions(this.getHoverOptions());

@@ -3,6 +3,7 @@ import { ListRegistry } from '~@components/composite/list/ListRegistry';
 import { END, HOME } from '~@components/composite/utils/compositeKeys';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { isElementDisabled } from '~@lib/isElementDisabled';
 import { warn } from '~@lib/warn';
 import { ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, ARROW_UP } from '~@packages/floating-ui/utils/constants';
@@ -71,7 +72,7 @@ export type AccordionOptions = {
 /**
  * State machine of an accordion: the list of open item values.
  */
-export class AccordionMachine {
+export class AccordionMachine extends Connectable {
     readonly store: Store<{ value: AccordionValue }>;
 
     readonly registry = new ListRegistry();
@@ -79,11 +80,16 @@ export class AccordionMachine {
     private options: AccordionOptions;
 
     constructor(options: AccordionOptions = {}) {
+        super();
         this.options = options;
         this.store = new Store({
             value: options.value === undefined ? (options.defaultValue ?? EMPTY_ACCORDION_VALUE) : EMPTY_ACCORDION_VALUE
         });
         this.warn();
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registry);
     }
 
     setOptions(options: AccordionOptions) {
@@ -244,7 +250,5 @@ export class AccordionMachine {
         }
     };
 
-    destroy() {
-        this.registry.destroy();
-    }
+    protected override onDisconnect() {}
 }

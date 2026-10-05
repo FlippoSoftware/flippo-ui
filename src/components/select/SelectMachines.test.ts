@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { connected } from '~@test/utils/connected';
 
 import { SelectItemMachine } from './item/SelectItemMachine';
 import { SelectPopupMachine } from './popup/SelectPopupMachine';
@@ -18,14 +19,14 @@ function click(handler: (event: MouseEvent) => void, target: Element) {
 }
 
 function setup(options: ConstructorParameters<typeof SelectRootMachine>[0] = {}) {
-    const root = new SelectRootMachine(options, { defaultId: 'select' });
-    const trigger = new SelectTriggerMachine(root);
+    const root = connected(new SelectRootMachine(options, { defaultId: 'select' }));
+    const trigger = connected(new SelectTriggerMachine(root));
     const triggerElement = document.createElement('button');
     document.body.append(triggerElement);
     trigger.setElement(triggerElement);
 
-    const positioner = new SelectPositionerMachine(root, { alignItemWithTrigger: false });
-    const popup = new SelectPopupMachine(root, { positioner });
+    const positioner = connected(new SelectPositionerMachine(root, { alignItemWithTrigger: false }));
+    const popup = connected(new SelectPopupMachine(root, { positioner }));
     const positionerElement = document.createElement('div');
     const popupElement = document.createElement('div');
     positionerElement.append(popupElement);
@@ -34,7 +35,7 @@ function setup(options: ConstructorParameters<typeof SelectRootMachine>[0] = {})
     popup.setElement(popupElement);
 
     const items = ['apple', 'banana'].map((value) => {
-        const item = new SelectItemMachine(root, positioner.items, { value, label: value });
+        const item = connected(new SelectItemMachine(root, positioner.items, { value, label: value }));
         const element = document.createElement('div');
         popupElement.append(element);
         item.setElement(element);
@@ -116,7 +117,7 @@ describe('Select machines', () => {
         expect(positioner.getPositionerProps().hidden).toBe(false);
         expect(positioner.shouldRenderInternalBackdrop()).toBe(true);
 
-        const arrow = new SelectScrollArrowMachine(root, positioner, 'down');
+        const arrow = connected(new SelectScrollArrowMachine(root, positioner, 'down'));
         expect(root.store.state.hasScrollArrows).toBe(true);
         expect(arrow.shouldRender()).toBe(false);
         arrow.destroy();

@@ -3,6 +3,7 @@ import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '~@lib/constants';
 import { defaultItemEquality, findItemIndex } from '~@lib/itemEquality';
 import { stringifyAsValue } from '~@lib/valueLabel';
@@ -128,7 +129,7 @@ export type SelectRootRefs = {
  * State machine of `Select.Root`: value and open state (controlled or not), mount transitions,
  * click/dismiss/list navigation/typeahead interactions, form field integration and the hidden input.
  */
-export class SelectRootMachine {
+export class SelectRootMachine extends Connectable {
     readonly store: Store<SelectState>;
 
     readonly floatingRoot: FloatingRootStore<SelectChangeEventReason>;
@@ -165,9 +166,8 @@ export class SelectRootMachine {
 
     private readonly propsEffect = new Effect(() => this.updateSharedProps());
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(options: SelectRootOptions, setup: SelectRootSetup) {
+        super();
         this.options = options;
         this.setup = setup;
 
@@ -244,18 +244,24 @@ export class SelectRootMachine {
         });
 
         this.actions = { unmount: this.handleUnmount };
+    }
 
-        this.unsubscribers.push(
-            this.store.subscribe(() => this.sync()),
+    protected override onConnect() {
+        this.connectChild(this.transitions);
+        this.connectChild(this.click);
+        this.connectChild(this.dismiss);
+        this.connectChild(this.listNavigation);
+        this.connectChild(this.typeahead);
+        this.addCleanup(this.store.subscribe(() => this.sync()));
+        this.addCleanup(
             this.transitions.store.subscribe(() => {
                 this.store.update({
                     mounted: this.transitions.state.mounted,
                     transitionStatus: this.transitions.state.transitionStatus
                 });
-            }),
-            this.openMethodStore.subscribe(() => this.store.set('openMethod', this.openMethodStore.state.openMethod))
+            })
         );
-
+        this.addCleanup(this.openMethodStore.subscribe(() => this.store.set('openMethod', this.openMethodStore.state.openMethod)));
         this.sync();
     }
 
@@ -494,18 +500,9 @@ export class SelectRootMachine {
         this.field.inputRef.current = element;
     };
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.selectedIndexEffect.destroy();
+    protected override onDisconnect() {
         this.propsEffect.destroy();
-        this.click.destroy();
-        this.dismiss.destroy();
-        this.listNavigation.destroy();
-        this.typeahead.destroy();
         this.openChangeComplete.destroy();
-        this.transitions.destroy();
     }
 
     private readonly handleUnmount = () => {
@@ -594,6 +591,9 @@ export class SelectRootMachine {
     };
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store, field } = this;
         const { open, value, triggerElement, positionerElement } = store.state;
 

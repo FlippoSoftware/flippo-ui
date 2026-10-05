@@ -1,6 +1,7 @@
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
+import { Connectable } from '~@lib/Connectable';
 import { DROPDOWN_COLLISION_AVOIDANCE, POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
 import { ownerWindow } from '~@lib/owner';
 import { adaptiveOrigin } from '~@packages/floating-ui/middleware/adaptiveOriginMiddleware';
@@ -32,12 +33,12 @@ export type NavigationMenuPositionerState = {
  * State machine of `NavigationMenu.Positioner`: positions the popup against the active trigger and keeps
  * the portal's content tabbable only once focus entered it.
  */
-export class NavigationMenuPositionerMachine {
+export class NavigationMenuPositionerMachine extends Connectable {
     readonly store = new Store<{ instant: boolean }>({ instant: false });
 
-    private positioner: AnchorPositioner | null = null;
+    private positioner: AnchorPositioner;
 
-    private positionerRoot: FloatingRootStore | undefined | null = null;
+    private positionerRoot: FloatingRootStore | undefined | null;
 
     private options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined };
 
@@ -47,18 +48,24 @@ export class NavigationMenuPositionerMachine {
 
     private readonly listeners = new Set<() => void>();
 
-    private positionerUnsubscribe: (() => void) | null = null;
+    private disconnectPositioner: (() => void) | null = null;
 
     private readonly focusEffect = new Effect(() => this.manageFocusInside());
 
     private readonly resizeEffect = new Effect(() => this.trackResize());
 
-    private readonly unsubscribers: (() => void)[];
-
     constructor(root: NavigationMenuRootMachine, options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined } = {}) {
+        super();
         this.root = root;
         this.options = options;
-        this.unsubscribers = [root.store.subscribe(() => this.sync()), root.transitions.store.subscribe(() => this.sync())];
+        this.positionerRoot = root.store.state.floatingRootContext;
+        this.positioner = new AnchorPositioner(this.positionerRoot ?? EMPTY_ROOT_CONTEXT, this.getAnchorOptions());
+    }
+
+    protected override onConnect() {
+        this.connectPositioner();
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
+        this.addCleanup(this.root.transitions.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -68,7 +75,7 @@ export class NavigationMenuPositionerMachine {
     }
 
     get anchorPositioner(): AnchorPositioner {
-        return this.positioner as AnchorPositioner;
+        return this.positioner;
     }
 
     /**
@@ -113,16 +120,29 @@ export class NavigationMenuPositionerMachine {
         );
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.positionerUnsubscribe?.();
-        this.positioner?.destroy();
+    protected override onDisconnect() {
+        this.disconnectPositioner?.();
+        this.disconnectPositioner = null;
         this.focusEffect.destroy();
         this.resizeEffect.destroy();
         this.resizeTimeout.clear();
-        this.listeners.clear();
+    }
+
+    /**
+     * Connects the current anchor positioner and forwards its position changes to the listeners.
+     */
+    private connectPositioner() {
+        const { positioner } = this;
+        const disconnect = positioner.connect();
+        const unsubscribe = positioner.store.subscribe(() => {
+            for (const listener of this.listeners) {
+                listener();
+            }
+        });
+        this.disconnectPositioner = () => {
+            unsubscribe();
+            disconnect();
+        };
     }
 
     private getAnchorOptions() {
@@ -140,18 +160,16 @@ export class NavigationMenuPositionerMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { root } = this;
         const floatingRoot = root.store.state.floatingRootContext;
-        if (this.positioner === null || floatingRoot !== this.positionerRoot) {
-            this.positionerUnsubscribe?.();
-            this.positioner?.destroy();
+        if (floatingRoot !== this.positionerRoot) {
+            this.disconnectPositioner?.();
             this.positionerRoot = floatingRoot;
             this.positioner = new AnchorPositioner(floatingRoot ?? EMPTY_ROOT_CONTEXT, this.getAnchorOptions());
-            this.positionerUnsubscribe = this.positioner.store.subscribe(() => {
-                for (const listener of this.listeners) {
-                    listener();
-                }
-            });
+            this.connectPositioner();
         } else {
             this.positioner.setOptions(this.getAnchorOptions());
         }

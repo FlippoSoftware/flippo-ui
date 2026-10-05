@@ -2,6 +2,7 @@ import { isNode } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
@@ -56,7 +57,7 @@ type GuardRef = MutableRef<HTMLSpanElement | null>;
  * reference using “outside” focus guards, and disables tabbing into it until it is focused.
  * Replacement for the logic of `FloatingPortal`; the adapter renders the portal and the guards.
  */
-export class FloatingPortalController {
+export class FloatingPortalController extends Connectable {
     readonly beforeOutsideRef: GuardRef = { current: null };
 
     readonly afterOutsideRef: GuardRef = { current: null };
@@ -75,11 +76,13 @@ export class FloatingPortalController {
 
     private readonly focusListeners: Effect;
 
-    private readonly unsubscribe: () => void;
-
     constructor() {
+        super();
         this.focusListeners = new Effect(() => this.attachFocusListeners());
-        this.unsubscribe = this.state.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.state.subscribe(() => this.sync()));
     }
 
     get portalNode() {
@@ -136,12 +139,14 @@ export class FloatingPortalController {
         }
     };
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.focusListeners.destroy();
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { portalNode, focusManagerState } = this.state.state;
         this.focusListeners.sync([portalNode, focusManagerState?.modal]);
 

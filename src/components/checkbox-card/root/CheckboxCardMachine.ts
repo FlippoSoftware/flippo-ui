@@ -2,6 +2,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_OBJECT } from '~@lib/constants';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
@@ -60,7 +61,7 @@ export type CheckboxCardOptions = {
 /**
  * State machine of a checkbox card: the whole card is the interactive target.
  */
-export class CheckboxCardMachine {
+export class CheckboxCardMachine extends Connectable {
     readonly store: Store<{ checked: boolean }>;
 
     readonly cardRef: MutableRef<HTMLElement | null> = { current: null };
@@ -74,6 +75,7 @@ export class CheckboxCardMachine {
     private previousChecked: boolean;
 
     constructor(options: CheckboxCardOptions) {
+        super();
         this.options = options;
         this.store = new Store({ checked: options.group ? false : (options.defaultChecked ?? false) });
         this.previousChecked = this.checked;

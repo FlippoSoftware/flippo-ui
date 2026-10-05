@@ -7,6 +7,7 @@ import { isMouseWithinBounds } from '~@dom/isMouseWithinBounds';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { clamp } from '~@lib/clamp';
 import { isWebKit } from '~@lib/detectBrowser';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
@@ -55,7 +56,7 @@ export type SelectPopupSetup = {
  * State machine of `Select.Popup`: placement of the popup over the trigger (aligning the selected
  * item's text with the trigger's value, growing while scrolling), focus management and the popup's props.
  */
-export class SelectPopupMachine {
+export class SelectPopupMachine extends Connectable {
     readonly focusManager: FocusManager;
 
     private options: SelectPopupOptions;
@@ -88,9 +89,8 @@ export class SelectPopupMachine {
 
     private readonly resizeEffect = new Effect(() => this.closeOnResize());
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(root: SelectRootMachine, setup: SelectPopupSetup, options: SelectPopupOptions = {}) {
+        super();
         this.root = root;
         this.setup = setup;
         this.options = options;
@@ -101,10 +101,12 @@ export class SelectPopupMachine {
             }
         });
         root.refs.scrollHandlerRef.current = this.handleScroll;
-        this.unsubscribers.push(
-            root.store.subscribe(() => this.sync()),
-            setup.positioner.store.subscribe(() => this.sync())
-        );
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.focusManager);
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
+        this.addCleanup(this.setup.positioner.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -178,15 +180,10 @@ export class SelectPopupMachine {
         );
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.originalStylesEffect.destroy();
+    protected override onDisconnect() {
         this.resetEffect.destroy();
         this.placementEffect.destroy();
         this.resizeEffect.destroy();
-        this.focusManager.destroy();
         this.openChangeComplete.destroy();
         this.scrollArrowFrame.cancel();
         this.highlightTimeout.clear();
@@ -306,6 +303,9 @@ export class SelectPopupMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store, refs } = this.root;
         const { open, positionerElement, triggerElement, listElement } = store.state;
         const alignActive = this.setup.positioner.alignItemWithTriggerActive;

@@ -1,6 +1,7 @@
 import { acquireScrollLock } from '~@dom/scrollLock';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY, TYPEAHEAD_RESET_MS } from '~@lib/constants';
 import { warn } from '~@lib/warn';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
@@ -115,7 +116,7 @@ type KeyboardEventWithPropagation = KeyboardEvent & { isPropagationStopped?: () 
  * open state, transitions, dismissal, list navigation, typeahead and the props shared with triggers,
  * the popup and items.
  */
-export class MenuRootMachine<Payload = unknown> {
+export class MenuRootMachine<Payload = unknown> extends Connectable {
     readonly store: MenuStore<Payload>;
 
     readonly floatingRoot: FloatingRootStore;
@@ -162,8 +163,6 @@ export class MenuRootMachine<Payload = unknown> {
 
     private readonly propsEffect = new Effect(() => this.updateSharedProps());
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     private readonly interactionTypeProps = {
         onPointerDown: (event: PointerEvent) => {
             this.openMethod.set('openMethod', event.pointerType === 'touch' ? 'touch' : 'mouse');
@@ -174,6 +173,7 @@ export class MenuRootMachine<Payload = unknown> {
     };
 
     constructor(options: MenuRootOptions, setup: MenuRootSetup<Payload>) {
+        super();
         const { open, defaultOpen = false, triggerId, defaultTriggerId = null } = options;
         const parent = setup.parent ?? { type: undefined };
 
@@ -235,17 +235,21 @@ export class MenuRootMachine<Payload = unknown> {
                 this.store.setOpen(false, createChangeEventDetails(REASONS.imperativeAction));
             }
         };
+    }
 
+    protected override onConnect() {
+        this.addCleanup(this.store.connectParent());
+        this.connectChild(this.node);
+        this.connectChild(this.controller);
+        this.connectChild(this.dismiss);
+        this.connectChild(this.listNavigation);
+        this.connectChild(this.typeahead);
         const handleSetOpenEvent = ({ open: nextOpen, eventDetails }: { open: boolean; eventDetails: MenuChangeEventDetails }) =>
             this.setOpen(nextOpen, eventDetails);
         this.floatingRoot.context.events.on('setOpen', handleSetOpenEvent);
-
-        this.unsubscribers.push(
-            () => this.floatingRoot.context.events.off('setOpen', handleSetOpenEvent),
-            this.openMethod.subscribe(() => this.sync()),
-            this.floatingRoot.subscribe(() => this.sync())
-        );
-
+        this.addCleanup(() => this.floatingRoot.context.events.off('setOpen', handleSetOpenEvent));
+        this.addCleanup(this.openMethod.subscribe(() => this.sync()));
+        this.addCleanup(this.floatingRoot.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -372,21 +376,11 @@ export class MenuRootMachine<Payload = unknown> {
         store.update(updatedState);
     };
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.scrollLock.destroy();
+    protected override onDisconnect() {
         this.openEffect.destroy();
         this.propsEffect.destroy();
-        this.dismiss.destroy();
-        this.listNavigation.destroy();
-        this.typeahead.destroy();
         this.allowOutsidePressDismissalTimeout.clear();
         this.allowTouchToCloseTimeout.clear();
-        this.controller.destroy();
-        this.node.destroy();
-        this.store.destroy();
     }
 
     private getParentNodeId(parent: MenuParent): string | null {
@@ -494,6 +488,9 @@ export class MenuRootMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store } = this;
         const open = store.select('open');
         const parent = store.select('parent');

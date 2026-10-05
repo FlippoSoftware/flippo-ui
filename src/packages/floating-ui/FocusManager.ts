@@ -3,6 +3,7 @@ import { focusable, isTabbable, tabbable } from 'tabbable';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { CLICK_TRIGGER_IDENTIFIER } from '~@lib/constants';
 import { NOOP } from '~@lib/noop';
 import { ownerWindow } from '~@lib/owner';
@@ -217,7 +218,7 @@ const DEFAULT_GET_INSIDE_ELEMENTS = () => [];
  * Replacement for `FloatingFocusManager`; the adapter renders the focus guards using
  * {@link FocusManager.shouldRenderGuards} and the guard handlers.
  */
-export class FocusManager {
+export class FocusManager extends Connectable {
     private options: FocusManagerOptions;
 
     private readonly store: FloatingRootStore;
@@ -246,9 +247,8 @@ export class FocusManager {
 
     private readonly effects: { name: string; effect: Effect; deps: () => unknown[] }[];
 
-    private readonly unsubscribe: () => void;
-
     constructor(store: FloatingRootStore, options: FocusManagerOptions = {}) {
+        super();
         this.store = store;
         this.options = options;
 
@@ -345,8 +345,10 @@ export class FocusManager {
                 () => [s().disabled, state().open, this.floatingFocusElement]
             )
         ];
+    }
 
-        this.unsubscribe = store.subscribe(() => this.sync());
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -355,8 +357,7 @@ export class FocusManager {
         this.sync();
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         for (const { effect } of this.effects) {
             effect.destroy();
         }
@@ -507,6 +508,9 @@ export class FocusManager {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         for (const { effect, deps } of this.effects) {
             effect.sync(deps());
         }

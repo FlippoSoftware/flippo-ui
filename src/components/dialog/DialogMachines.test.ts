@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { connected } from '~@test/utils/connected';
+
 import { DialogBackdrop } from './backdrop/DialogBackdrop';
 import { DialogCloseMachine } from './close/DialogCloseMachine';
 import { DialogPopupMachine } from './popup/DialogPopupMachine';
@@ -25,14 +27,14 @@ describe('Dialog machines', () => {
 
     it('opens from the trigger, renders the popup props and closes with Close', () => {
         const onOpenChange = vi.fn();
-        const root = new DialogRootMachine({ onOpenChange }, { fallbackReferenceId: 'ref' });
-        const trigger = new DialogTriggerMachine(root.store, { id: 'trigger' });
+        const root = connected(new DialogRootMachine({ onOpenChange }, { fallbackReferenceId: 'ref' }));
+        const trigger = connected(new DialogTriggerMachine(root.store, { id: 'trigger' }));
         const triggerElement = document.createElement('button');
         triggerElement.id = 'trigger';
         document.body.append(triggerElement);
         trigger.setElement(triggerElement);
 
-        const popup = new DialogPopupMachine(root.store);
+        const popup = connected(new DialogPopupMachine(root.store));
         const popupElement = document.createElement('div');
         document.body.append(popupElement);
         popup.setElement(popupElement);
@@ -61,8 +63,8 @@ describe('Dialog machines', () => {
     });
 
     it('tracks nested open dialogs', () => {
-        const parent = new DialogRootMachine({ defaultOpen: true }, { fallbackReferenceId: 'parent' });
-        const child = new DialogRootMachine({}, { fallbackReferenceId: 'child', parentStore: parent.store as never });
+        const parent = connected(new DialogRootMachine({ defaultOpen: true }, { fallbackReferenceId: 'parent' }));
+        const child = connected(new DialogRootMachine({}, { fallbackReferenceId: 'child', parentStore: parent.store as never }));
 
         expect(child.store.select('nested')).toBe(true);
         expect(DialogBackdrop.shouldRender(child.store as never)).toBe(false);

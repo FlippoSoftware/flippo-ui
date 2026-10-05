@@ -3,6 +3,7 @@ import { pressableTriggerOpenStateMapping } from '~@attributes/popupStateMapping
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { PATIENT_CLICK_THRESHOLD } from '~@lib/constants';
 import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
 import { ownerDocument } from '~@lib/owner';
@@ -79,7 +80,7 @@ type FocusLikeEvent = FocusEvent | { nativeEvent: FocusEvent; currentTarget: Eve
  * State machine of `Menu.Trigger`: registration (forwarding the parent and tree to the menu),
  * click/hover/focus interactions, the "press, drag and release on an item" gesture and the focus guards.
  */
-export class MenuTriggerMachine<Payload = unknown> {
+export class MenuTriggerMachine<Payload = unknown> extends Connectable {
     readonly button: ButtonMachine;
 
     private options: MenuTriggerOptions<Payload>;
@@ -116,16 +117,19 @@ export class MenuTriggerMachine<Payload = unknown> {
 
     private readonly openedByThisTriggerEffect = new Effect(() => this.handleOpenedByThisTrigger());
 
-    private readonly unsubscribe: () => void;
-
     constructor(store: MenuStore<Payload>, options: MenuTriggerOptions<Payload>, setup: MenuTriggerSetup = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.setup = setup;
         this.handleClose = safePolygon({ blockPointerEvents: this.parent.type !== 'menubar' });
         this.button = new ButtonMachine({ disabled: this.disabled, native: options.nativeButton });
         this.registration = new PopupTriggerRegistration(store, options.id, this.getForwardedState());
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registration);
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -231,9 +235,9 @@ export class MenuTriggerMachine<Payload = unknown> {
         nextTabbable?.focus();
     };
 
-    destroy() {
-        this.unsubscribe();
-        this.registration.destroy();
+    protected override onDisconnect() {
+        this.mountedByThisTrigger = false;
+        this.floatingRoot = null;
         this.openedByThisTriggerEffect.destroy();
         this.stickIfOpenTimeout.clear();
         this.allowMouseUpTriggerTimeout.clear();
@@ -371,13 +375,19 @@ export class MenuTriggerMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.store.select('floatingRootContext');
         if (floatingRoot !== this.floatingRoot) {
             this.destroyInteractions();
             this.floatingRoot = floatingRoot;
             this.click = new ClickInteraction(floatingRoot, this.getClickOptions());
+            this.click.connect();
             this.hover = new HoverReferenceInteraction(floatingRoot, this.getHoverOptions());
+            this.hover.connect();
             this.focus = new FocusInteraction(floatingRoot, { enabled: !this.disabled && this.parentMenubarHasSubmenuOpen });
+            this.focus.connect();
         } else {
             this.click?.setOptions(this.getClickOptions());
             this.hover?.setOptions(this.getHoverOptions());

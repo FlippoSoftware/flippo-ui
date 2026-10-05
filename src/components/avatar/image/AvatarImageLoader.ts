@@ -1,3 +1,4 @@
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 
 import type { AvatarMachine, ImageLoadingStatus } from '../root/AvatarMachine';
@@ -13,7 +14,7 @@ export type AvatarImageOptions = {
  * Preloads the avatar image and reports its loading status to the avatar.
  * Replacement for `useImageLoadingStatus` + `AvatarImage`; the image renders only when `loaded`.
  */
-export class AvatarImageLoader {
+export class AvatarImageLoader extends Connectable {
     readonly store = new Store<{ status: ImageLoadingStatus }>({ status: 'idle' });
 
     private options: AvatarImageOptions;
@@ -25,8 +26,12 @@ export class AvatarImageLoader {
     private deps: unknown[] = [];
 
     constructor(avatar: AvatarMachine, options: AvatarImageOptions) {
+        super();
         this.avatar = avatar;
         this.options = options;
+    }
+
+    protected override onConnect() {
         this.load();
     }
 
@@ -39,7 +44,7 @@ export class AvatarImageLoader {
         return this.store.state.status;
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.cancel?.();
         this.cancel = null;
     }
@@ -55,6 +60,9 @@ export class AvatarImageLoader {
     private load() {
         const { src, crossOrigin, referrerPolicy } = this.options;
         const deps = [src, crossOrigin, referrerPolicy];
+        if (!this.connected) {
+            return;
+        }
         if (this.cancel !== null && deps.every((dep, index) => Object.is(dep, this.deps[index]))) {
             return;
         }

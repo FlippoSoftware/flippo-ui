@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { connected } from '~@test/utils/connected';
 
 import { convexHull, isPointInPolygon, multipleSafePolygon } from './multiple/multipleSafePolygon';
 import { TooltipMultipleMachine } from './multiple/TooltipMultipleMachine';
@@ -24,16 +25,16 @@ describe('Tooltip machines', () => {
     });
 
     it('opens on focus of the trigger and exposes popup and positioner state', () => {
-        const provider = new TooltipProviderMachine({ delay: 100 });
-        const root = new TooltipRootMachine({});
-        const trigger = new TooltipTriggerMachine(root.store, { id: 'trigger' }, { delayGroup: provider.delayGroup });
+        const provider = connected(new TooltipProviderMachine({ delay: 100 }));
+        const root = connected(new TooltipRootMachine({}));
+        const trigger = connected(new TooltipTriggerMachine(root.store, { id: 'trigger' }, { delayGroup: provider.delayGroup }));
         const triggerElement = document.createElement('button');
         triggerElement.id = 'trigger';
         document.body.append(triggerElement);
         trigger.setElement(triggerElement);
 
-        const positioner = new TooltipPositionerMachine(root);
-        const popup = new TooltipPopupMachine(root, { positioner: positioner as never });
+        const positioner = connected(new TooltipPositionerMachine(root));
+        const popup = connected(new TooltipPopupMachine(root, { positioner: positioner as never }));
 
         root.store.setOpen(true, createChangeEventDetails(REASONS.triggerFocus, undefined, triggerElement));
         expect(root.getOpenState()).toBe(true);
@@ -55,8 +56,8 @@ describe('Tooltip machines', () => {
     });
 
     it('keeps the multiple tooltip open inside the group safe area', () => {
-        const multiple = new TooltipMultipleMachine();
-        const root = new TooltipRootMachine({}, { multiple });
+        const multiple = connected(new TooltipMultipleMachine());
+        const root = connected(new TooltipRootMachine({}, { multiple }));
         const trigger = document.createElement('button');
         trigger.getBoundingClientRect = () => DOMRect.fromRect({ x: 0, y: 0, width: 20, height: 20 });
         root.store.context.triggerElements.add('t', trigger);
@@ -84,9 +85,9 @@ describe('Tooltip machines', () => {
     });
 
     it('shares the open state inside Tooltip.Multiple', () => {
-        const multiple = new TooltipMultipleMachine({ defaultOpen: false });
-        const first = new TooltipRootMachine({}, { multiple });
-        const second = new TooltipRootMachine({}, { multiple });
+        const multiple = connected(new TooltipMultipleMachine({ defaultOpen: false }));
+        const first = connected(new TooltipRootMachine({}, { multiple }));
+        const second = connected(new TooltipRootMachine({}, { multiple }));
 
         first.store.setOpen(true, createChangeEventDetails(REASONS.triggerHover));
         expect(multiple.store.select('open')).toBe(true);

@@ -1,5 +1,6 @@
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
@@ -85,7 +86,7 @@ export type DelayGroupMemberOptions = {
  * Membership of one floating element in a {@link FloatingDelayGroup}.
  * Replacement for `useDelayGroup`; `state.isInstantPhase` tells whether animations should be removed.
  */
-export class DelayGroupMember {
+export class DelayGroupMember extends Connectable {
     readonly state = new Store({ isInstantPhase: false });
 
     private options: DelayGroupMemberOptions;
@@ -101,6 +102,7 @@ export class DelayGroupMember {
     private readonly memberContext: GroupMemberContext;
 
     constructor(store: FloatingRootStore, group: FloatingDelayGroup, options: DelayGroupMemberOptions) {
+        super();
         this.store = store;
         this.group = group;
         this.options = options;
@@ -108,6 +110,9 @@ export class DelayGroupMember {
             onOpenChange: (open, details) => store.setOpen(open, details),
             setIsInstantPhase: (value) => this.state.set('isInstantPhase', value)
         };
+    }
+
+    protected override onConnect() {
         this.sync();
     }
 
@@ -128,6 +133,9 @@ export class DelayGroupMember {
      * Re-evaluates the membership (call when the floating id changes).
      */
     sync() {
+        if (!this.connected) {
+            return;
+        }
         const { enabled = true, open } = this.options;
         const floatingId = this.store.select('floatingId');
         const deps = [enabled, open, floatingId, this.group.timeoutMs];
@@ -142,7 +150,8 @@ export class DelayGroupMember {
         this.handleOpen(enabled, open, floatingId);
     }
 
-    destroy() {
+    protected override onDisconnect() {
+        this.previous = null;
         this.cleanupClose?.();
         this.cleanupClose = null;
         this.group.currentContextRef.current = null;

@@ -1,5 +1,6 @@
 import type { Dimensions } from '@floating-ui/utils';
 
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY } from '~@lib/constants';
 import { isElementDisabled } from '~@lib/isElementDisabled';
 import {
@@ -96,7 +97,7 @@ type CompositeKeyboardEvent = KeyboardEvent & { target: EventTarget | null };
  * (toolbars, tabs, radio groups, toggle groups, menubars).
  * Replacement for `useCompositeRoot` + `CompositeRoot`.
  */
-export class CompositeRootMachine {
+export class CompositeRootMachine extends Connectable {
     /**
      * Internal (uncontrolled) highlighted index.
      */
@@ -111,8 +112,13 @@ export class CompositeRootMachine {
     private hasSetDefaultIndex = false;
 
     constructor(options: CompositeRootOptions) {
+        super();
         this.options = options;
         this.registry = new ListRegistry({ onMapChange: this.onMapChange });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registry);
     }
 
     setOptions(options: CompositeRootOptions) {
@@ -190,9 +196,7 @@ export class CompositeRootMachine {
         this.onKeyDown(event as CompositeKeyboardEvent);
     };
 
-    destroy() {
-        this.registry.destroy();
-    }
+    protected override onDisconnect() {}
 
     private readonly onMapChange = (map: ListRegistryMap<Record<string, unknown>>) => {
         if (map.size === 0 || this.hasSetDefaultIndex) {

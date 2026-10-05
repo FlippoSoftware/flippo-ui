@@ -1,5 +1,6 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
+import { Connectable } from '~@lib/Connectable';
 
 import { snippetRootStateAttributesMapping } from './snippetRootStateAttributesMapping';
 
@@ -23,13 +24,18 @@ export type SnippetOptions = {
 /**
  * State of a code snippet: its lines (in DOM order) and copying them to the clipboard.
  */
-export class SnippetMachine {
+export class SnippetMachine extends Connectable {
     readonly registry = new ListRegistry<{ text: string | null | undefined }>();
 
     private options: SnippetOptions;
 
     constructor(options: SnippetOptions = {}) {
+        super();
         this.options = options;
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registry);
     }
 
     setOptions(options: SnippetOptions) {
@@ -59,7 +65,5 @@ export class SnippetMachine {
             .join('\n');
     }
 
-    destroy() {
-        this.registry.destroy();
-    }
+    protected override onDisconnect() {}
 }

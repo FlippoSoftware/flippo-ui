@@ -2,6 +2,7 @@ import { collapsibleTriggerOpenStateMapping } from '~@attributes/collapsibleOpen
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CollapsibleMachine } from '~@components/collapsible/root/CollapsibleMachine';
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
+import { Connectable } from '~@lib/Connectable';
 import { warn } from '~@lib/warn';
 import { mergeProps } from '~@props/mergeProps';
 import { Store } from '~@store/Store';
@@ -52,7 +53,7 @@ export type AccordionItemOptions = {
 /**
  * One accordion item: a collapsible whose open state is driven by the accordion value.
  */
-export class AccordionItemMachine {
+export class AccordionItemMachine extends Connectable {
     readonly collapsible: CollapsibleMachine;
 
     readonly listItem: ListRegistryItem;
@@ -63,15 +64,19 @@ export class AccordionItemMachine {
 
     private readonly accordion: AccordionMachine;
 
-    private readonly unsubscribe: () => void;
-
     constructor(accordion: AccordionMachine, options: AccordionItemOptions) {
+        super();
         this.accordion = accordion;
         this.options = options;
         this.store = new Store<{ index: number; triggerId: string | undefined }>({ index: -1, triggerId: options.defaultTriggerId });
         this.listItem = new ListRegistryItem(accordion.registry, { onIndexChange: (index) => this.store.set('index', index) });
         this.collapsible = new CollapsibleMachine(this.getCollapsibleOptions());
-        this.unsubscribe = accordion.store.subscribe(() => this.collapsible.setOptions(this.getCollapsibleOptions()));
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
+        this.connectChild(this.collapsible);
+        this.addCleanup(this.accordion.store.subscribe(() => this.collapsible.setOptions(this.getCollapsibleOptions())));
     }
 
     setOptions(options: AccordionItemOptions) {
@@ -177,9 +182,5 @@ export class AccordionItemMachine {
         });
     }
 
-    destroy() {
-        this.unsubscribe();
-        this.listItem.destroy();
-        this.collapsible.destroy();
-    }
+    protected override onDisconnect() {}
 }

@@ -3,6 +3,7 @@ import { CompositeRootMachine } from '~@components/composite/root/CompositeRootM
 import { SHIFT } from '~@components/composite/utils/compositeKeys';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { fieldValidityMapping } from '~@components/field/utils/fieldValidity';
+import { Connectable } from '~@lib/Connectable';
 import { NOOP } from '~@lib/noop';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { contains } from '~@packages/floating-ui/utils/element';
@@ -49,7 +50,7 @@ const MODIFIER_KEYS: ModifierKey[] = [SHIFT];
 /**
  * State machine of a radio group: the checked value shared by its radios, plus composite navigation.
  */
-export class RadioGroupMachine {
+export class RadioGroupMachine extends Connectable {
     readonly store: Store<{ checkedValue: unknown; touched: boolean }>;
 
     readonly composite: CompositeRootMachine;
@@ -63,11 +64,16 @@ export class RadioGroupMachine {
     private previousValue: unknown;
 
     constructor(options: RadioGroupOptions) {
+        super();
         this.options = options;
         this.store = new Store<{ checkedValue: unknown; touched: boolean }>({ checkedValue: options.defaultValue, touched: false });
         this.composite = new CompositeRootMachine(this.getCompositeOptions());
         this.previousValue = this.checkedValue;
         this.store.subscribe(() => this.onValueChanged());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.composite);
     }
 
     setOptions(options: RadioGroupOptions) {
@@ -229,9 +235,7 @@ export class RadioGroupMachine {
         this.field.inputRef.current = element;
     };
 
-    destroy() {
-        this.composite.destroy();
-    }
+    protected override onDisconnect() {}
 
     private onValueChanged() {
         const checkedValue = this.checkedValue;

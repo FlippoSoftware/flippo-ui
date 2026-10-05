@@ -2,6 +2,7 @@ import { getWindow, isElement, isHTMLElement } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { isMac, isSafari } from '~@lib/detectBrowser';
 import { Timeout } from '~@timers/Timeout';
 
@@ -39,7 +40,7 @@ export type FocusInteractionOptions = {
  * Opens the floating element while the reference element has focus, like CSS `:focus`.
  * Replacement for `useFocus`.
  */
-export class FocusInteraction {
+export class FocusInteraction extends Connectable {
     private options: FocusInteractionOptions;
 
     private readonly store: FloatingRootStore;
@@ -54,11 +55,10 @@ export class FocusInteraction {
 
     private readonly openChangeListener: Effect;
 
-    private readonly unsubscribe: () => void;
-
     private readonly reference: Record<string, unknown>;
 
     constructor(store: FloatingRootStore, options: FocusInteractionOptions = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.windowListeners = new Effect(() => this.attachWindowListeners());
@@ -68,7 +68,10 @@ export class FocusInteraction {
             onFocus: this.onFocus,
             onBlur: this.onBlur
         };
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -81,14 +84,16 @@ export class FocusInteraction {
         return this.options.enabled === false ? {} : { reference: this.reference, trigger: this.reference };
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.windowListeners.destroy();
         this.openChangeListener.destroy();
         this.timeout.clear();
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const enabled = this.options.enabled !== false;
         this.windowListeners.sync([enabled, this.store.select('domReferenceElement')]);
         this.openChangeListener.sync([enabled]);

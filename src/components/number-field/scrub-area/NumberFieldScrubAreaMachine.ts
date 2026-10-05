@@ -1,5 +1,6 @@
 import { createGenericEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { isWebKit } from '~@lib/detectBrowser';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
@@ -37,7 +38,7 @@ const runImmediately = (fn: () => void) => fn();
 /**
  * Scrub area of a number field: dragging changes the value; with pointer lock a virtual cursor is shown.
  */
-export class NumberFieldScrubAreaMachine {
+export class NumberFieldScrubAreaMachine extends Connectable {
     readonly store = new Store({ isTouchInput: false, isPointerLockDenied: false });
 
     private options: NumberFieldScrubAreaOptions;
@@ -60,9 +61,8 @@ export class NumberFieldScrubAreaMachine {
 
     private readonly visualViewportListener: Effect;
 
-    private readonly unsubscribe: () => void;
-
     constructor(field: NumberFieldMachine, options: NumberFieldScrubAreaOptions = {}) {
+        super();
         this.field = field;
         this.options = options;
         this.scrubListeners = new Effect(() => this.attachScrubListeners());
@@ -75,7 +75,10 @@ export class NumberFieldScrubAreaMachine {
                 this.visualScale = scale;
             });
         });
-        this.unsubscribe = field.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.field.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -84,8 +87,7 @@ export class NumberFieldScrubAreaMachine {
         this.sync();
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.scrubListeners.destroy();
         this.touchListeners.destroy();
         this.visualViewportListener.destroy();
@@ -122,6 +124,9 @@ export class NumberFieldScrubAreaMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const field = this.field;
         const { direction = 'horizontal', pixelSensitivity = 2 } = this.options;
         this.scrubListeners.sync([

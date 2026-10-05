@@ -1,4 +1,5 @@
 import { MenuRootMachine } from '~@components/menu/root/MenuRootMachine';
+import { Connectable } from '~@lib/Connectable';
 
 import type { MenuRootOptions, MenuRootSetup } from '~@components/menu/root/MenuRootMachine';
 import type { ContextMenuParentContext } from '~@components/menu/store/MenuStore';
@@ -11,7 +12,7 @@ import type { ContextMenuAnchor } from '../utils/ContextMenuAnchor';
 /**
  * State machine of `ContextMenu.Root`: a menu anchored at the cursor, opened by the trigger.
  */
-export class ContextMenuRootMachine<Payload = unknown> {
+export class ContextMenuRootMachine<Payload = unknown> extends Connectable {
     readonly context: ContextMenuParentContext & {
         anchor: ContextMenuAnchor;
         backdropRef: MutableRef<HTMLDivElement | null>;
@@ -24,6 +25,7 @@ export class ContextMenuRootMachine<Payload = unknown> {
     readonly menu: MenuRootMachine<Payload>;
 
     constructor(options: MenuRootOptions, setup: Omit<MenuRootSetup<Payload>, 'parent'>) {
+        super();
         this.context = {
             anchor: createAnchor(0, 0, 0),
             backdropRef: { current: null },
@@ -54,7 +56,7 @@ export class ContextMenuRootMachine<Payload = unknown> {
         this.menu.store.notifyAll();
     }
 
-    destroy() {
-        this.menu.destroy();
+    protected override onConnect() {
+        this.connectChild(this.menu);
     }
 }

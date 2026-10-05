@@ -5,6 +5,7 @@ import { ACTIVE_COMPOSITE_ITEM } from '~@components/composite/utils/compositeKey
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
@@ -56,7 +57,7 @@ export type RadioOptions = {
 /**
  * State machine of a radio button (a composite item of its radio group).
  */
-export class RadioMachine {
+export class RadioMachine extends Connectable {
     readonly button: ButtonMachine;
 
     readonly radioRef: MutableRef<HTMLElement | null> = { current: null };
@@ -75,6 +76,7 @@ export class RadioMachine {
     private readonly detachedField = createDetachedField();
 
     constructor(options: RadioOptions) {
+        super();
         this.options = options;
         this.button = new ButtonMachine({ disabled: this.disabled, native: options.nativeButton ?? false });
         this.listItem = options.group
@@ -82,7 +84,7 @@ export class RadioMachine {
             : null;
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.listItem?.destroy();
     }
 

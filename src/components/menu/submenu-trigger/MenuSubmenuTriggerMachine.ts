@@ -52,8 +52,6 @@ export class MenuSubmenuTriggerMachine extends MenuItemMachine<MenuSubmenuTrigge
 
     private readonly handleClose = safePolygon({ blockPointerEvents: true });
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(store: MenuStore<unknown>, parentStore: MenuStore<unknown>, options: MenuSubmenuTriggerOptions, setup: MenuItemSetup) {
         let self: MenuSubmenuTriggerMachine | null = null;
         super(store, options, setup, {
@@ -71,10 +69,18 @@ export class MenuSubmenuTriggerMachine extends MenuItemMachine<MenuSubmenuTrigge
         this.parentStore = parentStore;
         this.button.setOptions({ disabled: this.disabled, focusableWhenDisabled: true, native: options.nativeButton ?? false });
         store.syncValue('closeDelay', options.closeDelay ?? 0);
-        this.unsubscribers.push(
-            store.subscribe(() => this.sync()),
-            parentStore.subscribe(() => this.sync())
-        );
+    }
+
+    protected override onConnect() {
+        super.onConnect();
+        const { store } = this;
+        const element = this.element;
+        if (element) {
+            store.context.triggerElements.add(this.options.id, element);
+            this.unregisterTrigger = () => store.context.triggerElements.delete(this.options.id);
+        }
+        this.addCleanup(store.subscribe(() => this.sync()));
+        this.addCleanup(this.parentStore.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -149,14 +155,16 @@ export class MenuSubmenuTriggerMachine extends MenuItemMachine<MenuSubmenuTrigge
         );
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
+    protected override onDisconnect() {
         this.unregisterTrigger?.();
+        this.unregisterTrigger = null;
         this.click?.destroy();
         this.hover?.destroy();
-        super.destroy();
+        this.click = null;
+        this.hover = null;
+        // Recreate the interactions on the next connection.
+        this.floatingRoot = null;
+        super.onDisconnect();
     }
 
     private getHoverOptions() {
@@ -186,6 +194,9 @@ export class MenuSubmenuTriggerMachine extends MenuItemMachine<MenuSubmenuTrigge
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         if (!this.parentStore) {
             return;
         }
@@ -196,6 +207,8 @@ export class MenuSubmenuTriggerMachine extends MenuItemMachine<MenuSubmenuTrigge
             this.floatingRoot = floatingRoot;
             this.click = new ClickInteraction(floatingRoot, this.getClickOptions());
             this.hover = new HoverReferenceInteraction(floatingRoot, this.getHoverOptions());
+            this.click.connect();
+            this.hover.connect();
         } else {
             this.click?.setOptions(this.getClickOptions());
             this.hover?.setOptions(this.getHoverOptions());

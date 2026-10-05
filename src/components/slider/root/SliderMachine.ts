@@ -6,6 +6,7 @@ import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { createChangeEventDetails, createGenericEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { areArraysEqual } from '~@lib/areArraysEqual';
+import { Connectable } from '~@lib/Connectable';
 import { clamp } from '~@lib/clamp';
 import { formatNumber } from '~@lib/formatNumber';
 import { ownerDocument } from '~@lib/owner';
@@ -157,7 +158,7 @@ type Coords = { x: number; y: number };
  * State machine of a slider: values (single or range), dragging over the control, keyboard input
  * on the thumbs, thumb collisions and field integration.
  */
-export class SliderMachine {
+export class SliderMachine extends Connectable {
     readonly store: Store<SliderInternalState>;
 
     readonly thumbRegistry: ListRegistry<SliderThumbMetadata>;
@@ -212,6 +213,7 @@ export class SliderMachine {
     private detachTouchStart: (() => void) | null = null;
 
     constructor(options: SliderOptions) {
+        super();
         this.options = options;
         this.store = new Store<SliderInternalState>({
             value: options.defaultValue ?? options.min ?? 0,
@@ -226,17 +228,20 @@ export class SliderMachine {
         this.warn();
     }
 
+    protected override onConnect() {
+        this.connectChild(this.thumbRegistry);
+    }
+
     setOptions(options: SliderOptions) {
         this.options = options;
         this.warn();
         this.sync();
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.detachTouchStart?.();
         this.focusFrame.cancel();
         this.stopListening();
-        this.thumbRegistry.destroy();
     }
 
     private warn() {
@@ -437,6 +442,9 @@ export class SliderMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const value = this.rawValue;
         if (value !== this.previousValue) {
             this.previousValue = value;

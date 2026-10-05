@@ -4,6 +4,7 @@ import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { ACTIVE_COMPOSITE_ITEM } from '~@components/composite/utils/compositeKeys';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
 import { Store } from '~@store/Store';
@@ -34,7 +35,7 @@ export type SegmentedControlItemOptions = {
 /**
  * One segment.
  */
-export class SegmentedControlItemMachine {
+export class SegmentedControlItemMachine extends Connectable {
     readonly button: ButtonMachine;
 
     readonly listItem: ListRegistryItem;
@@ -46,10 +47,15 @@ export class SegmentedControlItemMachine {
     private readonly control: SegmentedControlMachine;
 
     constructor(control: SegmentedControlMachine, options: SegmentedControlItemOptions) {
+        super();
         this.control = control;
         this.options = options;
         this.button = new ButtonMachine({ disabled: this.disabled, native: options.nativeButton ?? true });
         this.listItem = new ListRegistryItem(control.composite.registry, { onIndexChange: (index) => this.store.set('index', index) });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
     }
 
     setOptions(options: SegmentedControlItemOptions) {
@@ -101,7 +107,5 @@ export class SegmentedControlItemMachine {
         );
     }
 
-    destroy() {
-        this.listItem.destroy();
-    }
+    protected override onDisconnect() {}
 }

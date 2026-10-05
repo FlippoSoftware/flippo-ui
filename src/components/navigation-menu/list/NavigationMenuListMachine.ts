@@ -1,4 +1,5 @@
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
+import { Connectable } from '~@lib/Connectable';
 import { DismissInteraction } from '~@packages/floating-ui/interactions/DismissInteraction';
 import { getTarget } from '~@packages/floating-ui/utils/element';
 import { mergeProps } from '~@props/mergeProps';
@@ -16,7 +17,7 @@ import type { NavigationMenuRootMachine } from '../root/NavigationMenuRootMachin
  * State machine of `NavigationMenu.List`: dismissal of the open item and composite navigation
  * between triggers (`dismissProps.reference` goes on each trigger).
  */
-export class NavigationMenuListMachine {
+export class NavigationMenuListMachine extends Connectable {
     readonly composite: CompositeRootMachine | null;
 
     private readonly root: NavigationMenuRootMachine;
@@ -25,13 +26,15 @@ export class NavigationMenuListMachine {
 
     private dismiss: DismissInteraction | null = null;
 
-    private readonly unsubscribe: () => void;
-
     constructor(root: NavigationMenuRootMachine, direction: TextDirection = 'ltr') {
+        super();
         this.root = root;
         // Nested lists take part in the parent content's composite navigation.
         this.composite = root.nested ? null : new CompositeRootMachine({ orientation: root.orientation, loopFocus: false, direction });
-        this.unsubscribe = root.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -66,9 +69,10 @@ export class NavigationMenuListMachine {
         return mergeProps(this.composite?.getRootProps(), dismissProps?.floating as Props | undefined, keyDownProps, elementProps);
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.dismiss?.destroy();
+        this.dismiss = null;
+        this.floatingRoot = undefined;
         this.composite?.destroy();
     }
 
@@ -85,11 +89,15 @@ export class NavigationMenuListMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.root.store.state.floatingRootContext;
         if (floatingRoot !== this.floatingRoot) {
             this.dismiss?.destroy();
             this.floatingRoot = floatingRoot;
             this.dismiss = new DismissInteraction(floatingRoot ?? EMPTY_ROOT_CONTEXT, this.getDismissOptions());
+            this.dismiss.connect();
         } else {
             this.dismiss?.setOptions(this.getDismissOptions());
         }

@@ -1,6 +1,7 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
+import { Connectable } from '~@lib/Connectable';
 import { NOOP } from '~@lib/noop';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { contains } from '~@packages/floating-ui/utils/element';
@@ -53,7 +54,7 @@ export type SegmentedControlOptions = {
 /**
  * State machine of a segmented control: a radio group of buttons with a hidden input.
  */
-export class SegmentedControlMachine {
+export class SegmentedControlMachine extends Connectable {
     readonly store: Store<{ value: string | null }>;
 
     readonly composite: CompositeRootMachine;
@@ -67,11 +68,16 @@ export class SegmentedControlMachine {
     private previousValue: string | null;
 
     constructor(options: SegmentedControlOptions) {
+        super();
         this.options = options;
         this.store = new Store<{ value: string | null }>({ value: options.defaultValue ?? null });
         this.composite = new CompositeRootMachine(this.getCompositeOptions());
         this.previousValue = this.value;
         this.store.subscribe(() => this.onValueChanged());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.composite);
     }
 
     setOptions(options: SegmentedControlOptions) {
@@ -212,9 +218,7 @@ export class SegmentedControlMachine {
         this.field.inputRef.current = element;
     };
 
-    destroy() {
-        this.composite.destroy();
-    }
+    protected override onDisconnect() {}
 
     private onValueChanged() {
         const value = this.value;

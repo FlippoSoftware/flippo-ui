@@ -1,5 +1,6 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
+import { Connectable } from '~@lib/Connectable';
 import { mergeProps } from '~@props/mergeProps';
 import { Store } from '~@store/Store';
 
@@ -37,7 +38,7 @@ export type ToolbarOptions = {
 /**
  * State machine of a toolbar: composite navigation over buttons, inputs and links.
  */
-export class ToolbarMachine {
+export class ToolbarMachine extends Connectable {
     readonly composite: CompositeRootMachine;
 
     readonly store = new Store<{ itemMap: ListRegistryMap<ToolbarItemMetadata> }>({ itemMap: new Map() });
@@ -45,6 +46,7 @@ export class ToolbarMachine {
     private options: ToolbarOptions;
 
     constructor(options: ToolbarOptions = {}) {
+        super();
         this.options = options;
         this.composite = new CompositeRootMachine(this.getCompositeOptions());
         this.composite.registry.setOptions({
@@ -53,6 +55,10 @@ export class ToolbarMachine {
                 this.composite.setOptions(this.getCompositeOptions());
             }
         });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.composite);
     }
 
     setOptions(options: ToolbarOptions) {
@@ -107,7 +113,5 @@ export class ToolbarMachine {
         return mergeProps(this.composite.getRootProps(), { 'aria-orientation': this.orientation, role: 'toolbar' }, elementProps);
     }
 
-    destroy() {
-        this.composite.destroy();
-    }
+    protected override onDisconnect() {}
 }

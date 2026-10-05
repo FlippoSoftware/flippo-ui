@@ -28,6 +28,7 @@ import { ToolbarGroupMachine } from '~@components/toolbar/group/ToolbarGroupMach
 import { ToolbarMachine } from '~@components/toolbar/root/ToolbarMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { connected } from '~@test/utils/connected';
 
 const details = () => createChangeEventDetails(REASONS.none);
 
@@ -43,7 +44,7 @@ afterEach(() => {
 describe('Collapsible and Accordion', () => {
     it('opens a collapsible from its trigger', () => {
         const onOpenChange = vi.fn();
-        const collapsible = new CollapsibleMachine({ defaultPanelId: 'panel', onOpenChange });
+        const collapsible = connected(new CollapsibleMachine({ defaultPanelId: 'panel', onOpenChange }));
         const triggerProps = collapsible.getTriggerProps(new ButtonMachine());
         expect(triggerProps['aria-expanded']).toBe(false);
         collapsible.handleTrigger(new MouseEvent('click'));
@@ -55,9 +56,13 @@ describe('Collapsible and Accordion', () => {
     });
 
     it('keeps one accordion item open unless multiple', () => {
-        const accordion = new AccordionMachine({ defaultValue: ['a'] });
-        const a = new AccordionItemMachine(accordion, { value: 'a', fallbackValue: 'a', defaultTriggerId: 'ta', defaultPanelId: 'pa' });
-        const b = new AccordionItemMachine(accordion, { value: 'b', fallbackValue: 'b', defaultTriggerId: 'tb', defaultPanelId: 'pb' });
+        const accordion = connected(new AccordionMachine({ defaultValue: ['a'] }));
+        const a = connected(
+            new AccordionItemMachine(accordion, { value: 'a', fallbackValue: 'a', defaultTriggerId: 'ta', defaultPanelId: 'pa' })
+        );
+        const b = connected(
+            new AccordionItemMachine(accordion, { value: 'b', fallbackValue: 'b', defaultTriggerId: 'tb', defaultPanelId: 'pb' })
+        );
         expect(a.isOpen).toBe(true);
         accordion.handleValueChange('b', true);
         expect(accordion.value).toEqual(['b']);
@@ -76,15 +81,15 @@ describe('Collapsible and Accordion', () => {
 describe('Tabs', () => {
     it('selects a tab and links tabs with panels', () => {
         const onValueChange = vi.fn();
-        const tabs = new TabsMachine({ defaultValue: 'one', onValueChange });
-        const list = new TabsListMachine(tabs);
+        const tabs = connected(new TabsMachine({ defaultValue: 'one', onValueChange }));
+        const list = connected(new TabsListMachine(tabs));
         const listElement = document.createElement('div');
         document.body.append(listElement);
         list.setListElement(listElement);
 
-        const one = new TabsTabMachine(tabs, list, { id: 'tab-one', value: 'one' });
-        const two = new TabsTabMachine(tabs, list, { id: 'tab-two', value: 'two' });
-        const panel = new TabsPanelMachine(tabs, { id: 'panel-two', value: 'two' });
+        const one = connected(new TabsTabMachine(tabs, list, { id: 'tab-one', value: 'one' }));
+        const two = connected(new TabsTabMachine(tabs, list, { id: 'tab-two', value: 'two' }));
+        const panel = connected(new TabsPanelMachine(tabs, { id: 'panel-two', value: 'two' }));
         const oneElement = document.createElement('button');
         const twoElement = document.createElement('button');
         listElement.append(oneElement, twoElement);
@@ -112,7 +117,7 @@ describe('Tabs', () => {
 describe('Slider', () => {
     it('updates values and keeps ranges ordered', () => {
         const onValueChange = vi.fn();
-        const slider = new SliderMachine({ id: 'slider', defaultValue: [20, 80], onValueChange });
+        const slider = connected(new SliderMachine({ id: 'slider', defaultValue: [20, 80], onValueChange }));
         expect(slider.range).toBe(true);
         expect(slider.values).toEqual([20, 80]);
         slider.setValue([30, 80], createChangeEventDetails(REASONS.none) as never);
@@ -120,12 +125,14 @@ describe('Slider', () => {
         expect(slider.values).toEqual([30, 80]);
         expect(slider.getState()).toMatchObject({ min: 0, max: 100, orientation: 'horizontal' });
 
-        const thumb = new SliderThumbMachine(slider, {
-            id: 'thumb',
-            index: 0,
-            defaultInputId: 'thumb-input',
-            labelableInputId: 'thumb-input'
-        });
+        const thumb = connected(
+            new SliderThumbMachine(slider, {
+                id: 'thumb',
+                index: 0,
+                defaultInputId: 'thumb-input',
+                labelableInputId: 'thumb-input'
+            })
+        );
         expect(thumb.getInputProps()).toMatchObject({ type: 'range', min: 0, max: 100 });
         thumb.destroy();
         slider.destroy();
@@ -139,7 +146,7 @@ describe('Slider', () => {
 describe('NumberField', () => {
     it('increments, clamps and formats', () => {
         const onValueChange = vi.fn();
-        const field = new NumberFieldMachine({ defaultId: 'nf', defaultValue: 9, max: 10, onValueChange });
+        const field = connected(new NumberFieldMachine({ defaultId: 'nf', defaultValue: 9, max: 10, onValueChange }));
         field.incrementValue(1, { direction: 1, reason: REASONS.incrementPress });
         expect(field.value).toBe(10);
         field.incrementValue(5, { direction: 1, reason: REASONS.incrementPress });
@@ -162,7 +169,7 @@ describe('PinInput', () => {
         expect(getFirstEmptyIndex(['1', '', '3'])).toBe(1);
 
         const onValueComplete = vi.fn();
-        const pinInput = new PinInputMachine({ id: 'pin', onValueComplete });
+        const pinInput = connected(new PinInputMachine({ id: 'pin', onValueComplete }));
         expect(pinInput.getState()).toMatchObject({ disabled: false });
         pinInput.destroy?.();
     });
@@ -171,8 +178,8 @@ describe('PinInput', () => {
 describe('SegmentedControl', () => {
     it('selects an item', () => {
         const onValueChange = vi.fn();
-        const control = new SegmentedControlMachine({ id: 'sc', defaultValue: 'list', onValueChange });
-        const grid = new SegmentedControlItemMachine(control, { value: 'grid' });
+        const control = connected(new SegmentedControlMachine({ id: 'sc', defaultValue: 'list', onValueChange }));
+        const grid = connected(new SegmentedControlItemMachine(control, { value: 'grid' }));
         expect(grid.getState().selected).toBe(false);
         control.setValue('grid', details() as never);
         expect(onValueChange).toHaveBeenCalledWith('grid', expect.anything());
@@ -184,9 +191,9 @@ describe('SegmentedControl', () => {
 
 describe('Toolbar', () => {
     it('reports disabled state of groups and items', () => {
-        const toolbar = new ToolbarMachine({ orientation: 'vertical' });
+        const toolbar = connected(new ToolbarMachine({ orientation: 'vertical' }));
         const group = new ToolbarGroupMachine(toolbar, true);
-        const button = new ToolbarButtonMachine(toolbar, { group });
+        const button = connected(new ToolbarButtonMachine(toolbar, { group }));
         expect(toolbar.getRootProps().role).toBe('toolbar');
         expect(group.disabled).toBe(true);
         expect(button.disabled).toBe(true);
@@ -212,13 +219,13 @@ describe('Fieldset and Labelable', () => {
 
 describe('Snippet, Marquee, ScrollArea and QrCode', () => {
     it('reads the snippet text', () => {
-        const snippet = new SnippetMachine();
+        const snippet = connected(new SnippetMachine());
         expect(SnippetMachine.attrs(snippet.getState())).toBeDefined();
         snippet.destroy();
     });
 
     it('computes marquee styles', () => {
-        const marquee = new MarqueeMachine({ speed: 50, direction: 'reverse' });
+        const marquee = connected(new MarqueeMachine({ speed: 50, direction: 'reverse' }));
         expect(marquee.getRootStyle()).toBeDefined();
         expect(marquee.getTrackStyle()).toBeDefined();
         expect(marquee.getState()).toBeDefined();
@@ -226,7 +233,7 @@ describe('Snippet, Marquee, ScrollArea and QrCode', () => {
     });
 
     it('creates a scroll area state', () => {
-        const scrollArea = new ScrollAreaMachine();
+        const scrollArea = connected(new ScrollAreaMachine());
         expect(scrollArea.getState()).toBeDefined();
         expect(scrollArea.getScrollbarState('vertical')).toBeDefined();
         scrollArea.destroy();

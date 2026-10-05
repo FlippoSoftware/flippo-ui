@@ -3,6 +3,7 @@ import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
 import { createChangeEventDetails, createGenericEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '~@lib/constants';
 import { defaultItemEquality, findItemIndex, itemIncludes, removeItem } from '~@lib/itemEquality';
 import { NOOP } from '~@lib/noop';
@@ -176,7 +177,7 @@ function toInputString(value: ComboboxRootOptions['inputValue']): string {
  * `store` holds the shared state and callbacks read by the parts, `inputValue` the text of the input and
  * `derived` the query and the filtered items.
  */
-export class ComboboxRootMachine {
+export class ComboboxRootMachine extends Connectable {
     readonly store: Store<ComboboxState>;
 
     readonly inputValue: Store<{ inputValue: string }>;
@@ -238,9 +239,8 @@ export class ComboboxRootMachine {
 
     private readonly propsEffect = new Effect(() => this.updateSharedProps());
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(options: ComboboxRootOptions, setup: ComboboxRootSetup) {
+        super();
         this.options = options;
         this.setup = setup;
 
@@ -369,17 +369,23 @@ export class ComboboxRootMachine {
         });
         this.actions = { unmount: this.handleUnmount };
 
-        this.unsubscribers.push(
-            this.store.subscribe(() => this.sync()),
-            this.inputValue.subscribe(() => this.sync()),
-            this.internal.subscribe(() => this.sync()),
+        this.syncOptions();
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.transitions);
+        this.connectChild(this.click);
+        this.connectChild(this.dismiss);
+        this.connectChild(this.listNavigation);
+        this.addCleanup(this.store.subscribe(() => this.sync()));
+        this.addCleanup(this.inputValue.subscribe(() => this.sync()));
+        this.addCleanup(this.internal.subscribe(() => this.sync()));
+        this.addCleanup(
             this.transitions.store.subscribe(() => {
                 this.store.update({ mounted: this.transitions.state.mounted, transitionStatus: this.transitions.state.transitionStatus });
-            }),
-            this.openMethodStore.subscribe(() => this.store.set('openMethod', this.openMethodStore.state.openMethod))
+            })
         );
-
-        this.syncOptions();
+        this.addCleanup(this.openMethodStore.subscribe(() => this.store.set('openMethod', this.openMethodStore.state.openMethod)));
         this.sync();
     }
 
@@ -737,25 +743,8 @@ export class ComboboxRootMachine {
         this.field.inputRef.current = element;
     };
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        for (const effect of [
-            this.selectedIndexEffect,
-            this.valuesEffect,
-            this.highlightEffect,
-            this.pruneEffect,
-            this.emptyListEffect,
-            this.propsEffect
-        ]) {
-            effect.destroy();
-        }
-        this.click.destroy();
-        this.dismiss.destroy();
-        this.listNavigation.destroy();
+    protected override onDisconnect() {
         this.openChangeComplete.destroy();
-        this.transitions.destroy();
     }
 
     private handleAutofill(nextValue: string, details: ComboboxChangeEventDetails) {
@@ -937,6 +926,9 @@ export class ComboboxRootMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store, field } = this;
         const { open, selectedValue, inline, inputInsidePopup, triggerElement, inputElement, positionerElement } = store.state;
         const inputValue = this.inputValue.state.inputValue;

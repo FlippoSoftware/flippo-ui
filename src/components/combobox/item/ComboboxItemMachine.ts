@@ -1,6 +1,7 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { type ListRegistry, ListRegistryItem } from '~@components/composite/list/ListRegistry';
+import { Connectable } from '~@lib/Connectable';
 import { compareItemEquality, findItemIndex } from '~@lib/itemEquality';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
@@ -47,7 +48,7 @@ export type ComboboxItemSetup = {
 /**
  * State machine of `Combobox.Item`.
  */
-export class ComboboxItemMachine {
+export class ComboboxItemMachine extends Connectable {
     readonly button: ButtonMachine;
 
     readonly listIndex = new Store<{ index: number }>({ index: -1 });
@@ -72,9 +73,8 @@ export class ComboboxItemMachine {
 
     private readonly selectedIndexEffect = new Effect(() => this.syncSelectedIndex());
 
-    private readonly unsubscribe: () => void;
-
     constructor(root: ComboboxRootMachine, options: ComboboxItemOptions, setup: ComboboxItemSetup) {
+        super();
         this.root = root;
         this.options = options;
         this.setup = setup;
@@ -90,7 +90,10 @@ export class ComboboxItemMachine {
               })
             : null;
         this.listIndex.set('index', this.listItem?.getIndex() ?? options.index ?? -1);
-        this.unsubscribe = root.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -202,8 +205,7 @@ export class ComboboxItemMachine {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.listRefEffect.destroy();
         this.valueEffect.destroy();
         this.selectedIndexEffect.destroy();
@@ -212,6 +214,9 @@ export class ComboboxItemMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store } = this.root;
         const index = this.index;
         this.listRefEffect.sync([this.hasRegistered, store.state.virtualized, index, this.options.index, this.element]);

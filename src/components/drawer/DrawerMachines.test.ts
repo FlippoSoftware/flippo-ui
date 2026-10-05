@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { connected } from '~@test/utils/connected';
+
 import { DrawerDragMachine } from './drag/DrawerDragMachine';
 import { DrawerGesture } from './drag/DrawerGesture';
 import { getDrawerPopupProps } from './popup/getDrawerPopupProps';
@@ -41,13 +43,13 @@ describe('Drawer machines', () => {
 
     it('closes the dialog when swiped down past the threshold', () => {
         const onDragEnd = vi.fn();
-        const root = new DrawerRootMachine({ defaultOpen: true, onDragEnd }, { fallbackReferenceId: 'ref' });
+        const root = connected(new DrawerRootMachine({ defaultOpen: true, onDragEnd }, { fallbackReferenceId: 'ref' }));
         const popup = document.createElement('div');
         popup.setAttribute('role', 'dialog');
         document.body.append(popup);
         root.store.set('popupElement', popup);
 
-        const drag = new DrawerDragMachine(root.drawerStore, root.store as never, { closeThreshold: 50 });
+        const drag = connected(new DrawerDragMachine(root.drawerStore, root.store as never, { closeThreshold: 50 }));
         const handle = document.createElement('div');
         popup.append(handle);
         drag.setElement(handle);
@@ -70,7 +72,7 @@ describe('Drawer machines', () => {
     });
 
     it('resets the snap point when closed', () => {
-        const root = new DrawerRootMachine({ defaultOpen: true, snapPoints: ['50%', '100%'] }, { fallbackReferenceId: 'ref' });
+        const root = connected(new DrawerRootMachine({ defaultOpen: true, snapPoints: ['50%', '100%'] }, { fallbackReferenceId: 'ref' }));
         root.drawerStore.setActiveSnapPoint(1);
         root.dialog.actions.close();
         expect(root.drawerStore.select('activeSnapPointIndex')).toBe(0);
@@ -81,14 +83,18 @@ describe('Drawer machines', () => {
     it('closes an up drawer past the distance threshold and ignores swipes the other way', () => {
         const draggableRef = { current: document.createElement('div') };
         const onDragEnd = vi.fn();
-        const gesture = new DrawerGesture({
-            swipeDirection: 'up',
-            draggableRef,
-            panel: null,
-            closeThreshold: 50,
-            velocityThreshold: 1000,
-            onDragEnd
-        });
+        const gesture = connected(
+            connected(
+                new DrawerGesture({
+                    swipeDirection: 'up',
+                    draggableRef,
+                    panel: null,
+                    closeThreshold: 50,
+                    velocityThreshold: 1000,
+                    onDragEnd
+                })
+            )
+        );
         const drag = (deltaY: number) => {
             gesture.onPointerDown(pointer('pointerdown', { clientY: 300 }));
             gesture.onPointerMove(pointer('pointermove', { clientY: 300 }));
@@ -107,7 +113,7 @@ describe('Drawer machines', () => {
 
     it('ignores presses on interactive elements', () => {
         const draggableRef = { current: document.createElement('div') };
-        const gesture = new DrawerGesture({ swipeDirection: 'down', draggableRef, panel: null });
+        const gesture = connected(new DrawerGesture({ swipeDirection: 'down', draggableRef, panel: null }));
         const button = document.createElement('button');
         gesture.onPointerDown(pointer('pointerdown', { target: button }));
         expect(gesture.isGesturing).toBe(false);

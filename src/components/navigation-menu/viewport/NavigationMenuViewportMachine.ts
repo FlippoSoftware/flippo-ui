@@ -1,3 +1,4 @@
+import { Connectable } from '~@lib/Connectable';
 import { contains } from '~@packages/floating-ui/utils/element';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { getNextTabbable, getPreviousTabbable, isOutsideEvent } from '~@packages/floating-ui/utils/tabbable';
@@ -12,17 +13,19 @@ type FocusLikeEvent = FocusEvent | { nativeEvent: FocusEvent; currentTarget: Eve
 /**
  * State machine of `NavigationMenu.Viewport`: hosts the active content and the inside focus guards.
  */
-export class NavigationMenuViewportMachine {
+export class NavigationMenuViewportMachine extends Connectable {
     private readonly root: NavigationMenuRootMachine;
 
     private readonly hasPositioner: boolean;
 
-    private readonly unsubscribe: () => void;
-
     constructor(root: NavigationMenuRootMachine, hasPositioner: boolean) {
+        super();
         this.root = root;
         this.hasPositioner = hasPositioner;
-        this.unsubscribe = root.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -89,9 +92,7 @@ export class NavigationMenuViewportMachine {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
-    }
+    protected override onDisconnect() {}
 
     private get referenceElement() {
         const { positionerElement, viewportElement } = this.root.store.state;
@@ -99,6 +100,9 @@ export class NavigationMenuViewportMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const domReference = this.root.store.state.floatingRootContext?.select('domReferenceElement');
         if (domReference) {
             this.root.prevTriggerElementRef.current = domReference;

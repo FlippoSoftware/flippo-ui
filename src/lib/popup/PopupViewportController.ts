@@ -1,6 +1,7 @@
 import type { Dimensions } from '@floating-ui/utils';
 
 import { runOnceAnimationsFinish } from '~@dom/animations';
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
@@ -74,7 +75,7 @@ function calculateRelativePosition(from: Element, to: Element): Offset {
  * {@link PopupViewportController.getState} says `transitioning`), and calls
  * {@link PopupViewportController.captureContent} after every render.
  */
-export class PopupViewportController<State extends PopupStoreState<unknown>> {
+export class PopupViewportController<State extends PopupStoreState<unknown>> extends Connectable {
     readonly store = new Store<ViewportInternalState>({
         previousContentNode: null,
         previousContentDimensions: null,
@@ -102,11 +103,13 @@ export class PopupViewportController<State extends PopupStoreState<unknown>> {
 
     private readonly animationFrame = new AnimationFrame();
 
-    private readonly unsubscribe: () => void;
-
     constructor(popupStore: AnyPopupStore<State>) {
+        super();
         this.popupStore = popupStore;
-        this.unsubscribe = popupStore.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.popupStore.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -166,15 +169,19 @@ export class PopupViewportController<State extends PopupStoreState<unknown>> {
         };
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.detachEvents();
+        // Attach the events again on the next connection.
+        this.floatingRoot = null;
         this.cleanupFrame.cancel();
         this.animationFrame.cancel();
         this.abortController?.abort();
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.popupStore.select('floatingRootContext');
         if (floatingRoot !== this.floatingRoot) {
             this.detachEvents();

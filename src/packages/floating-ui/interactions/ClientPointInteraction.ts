@@ -1,5 +1,7 @@
 import { getWindow } from '@floating-ui/utils/dom';
 
+import { Connectable } from '~@lib/Connectable';
+
 import type { MutableRef } from '~@lib/types';
 
 import { Effect } from '../utils/Effect';
@@ -101,7 +103,7 @@ export type ClientPointInteractionOptions = {
  * by setting a virtual `positionReference` on the floating root.
  * Replacement for `useClientPoint`.
  */
-export class ClientPointInteraction {
+export class ClientPointInteraction extends Connectable {
     private options: ClientPointInteractionOptions;
 
     private readonly store: FloatingRootStore;
@@ -116,8 +118,6 @@ export class ClientPointInteraction {
 
     private readonly listener: Effect;
 
-    private readonly unsubscribe: () => void;
-
     private readonly reference: Record<string, unknown>;
 
     private previousFloating: HTMLElement | null = null;
@@ -127,6 +127,7 @@ export class ClientPointInteraction {
     private previousExplicit: unknown[] | null = null;
 
     constructor(store: FloatingRootStore, options: ClientPointInteractionOptions = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.listener = new Effect(() => this.addListener());
@@ -136,7 +137,10 @@ export class ClientPointInteraction {
             onMouseMove: this.handleReferenceEnterOrMove,
             onMouseEnter: this.handleReferenceEnterOrMove
         };
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -149,9 +153,10 @@ export class ClientPointInteraction {
         return this.options.enabled === false ? {} : { reference: this.reference };
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.listener.destroy();
+        // Re-apply explicit coordinates on the next connection.
+        this.previousExplicit = null;
     }
 
     private get settings() {
@@ -160,6 +165,9 @@ export class ClientPointInteraction {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { enabled, x, y, axis } = this.settings;
         const open = this.store.select('open');
         const floating = this.store.select('floatingElement');

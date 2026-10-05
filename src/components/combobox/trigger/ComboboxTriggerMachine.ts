@@ -4,6 +4,7 @@ import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { fieldValidityMapping } from '~@components/field/utils/fieldValidity';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
 import { ownerDocument } from '~@lib/owner';
 import { ClickInteraction } from '~@packages/floating-ui/interactions/ClickInteraction';
@@ -41,7 +42,7 @@ export type ComboboxTriggerOptions = {
  * State machine of `Combobox.Trigger`: opens the popup (the input may live inside it), typeahead
  * selection while closed and the press-drag-release gesture.
  */
-export class ComboboxTriggerMachine {
+export class ComboboxTriggerMachine extends Connectable {
     readonly button: ButtonMachine;
 
     private options: ComboboxTriggerOptions;
@@ -56,15 +57,19 @@ export class ComboboxTriggerMachine {
 
     private readonly focusTimeout = new Timeout();
 
-    private readonly unsubscribe: () => void;
-
     constructor(root: ComboboxRootMachine, options: ComboboxTriggerOptions = {}) {
+        super();
         this.root = root;
         this.options = options;
         this.button = new ButtonMachine({ disabled: this.disabled, native: options.nativeButton });
         this.typeahead = new TypeaheadInteraction(root.floatingRoot, this.getTypeaheadOptions());
         this.click = new ClickInteraction(root.floatingRoot, this.getClickOptions());
-        this.unsubscribe = root.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.typeahead);
+        this.connectChild(this.click);
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -144,10 +149,7 @@ export class ComboboxTriggerMachine {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
-        this.typeahead.destroy();
-        this.click.destroy();
+    protected override onDisconnect() {
         this.focusTimeout.clear();
     }
 
@@ -223,6 +225,9 @@ export class ComboboxTriggerMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store, floatingRoot } = this.root;
         const { inputInsidePopup, triggerElement } = store.state;
         this.button.setOptions({ disabled: this.disabled, native: this.options.nativeButton });

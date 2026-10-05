@@ -2,6 +2,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
 import { getInternalBackdropProps } from '~@dom/internalBackdrop';
 import { acquireScrollLock } from '~@dom/scrollLock';
+import { Connectable } from '~@lib/Connectable';
 import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { AnchorPositioner } from '~@positioning/AnchorPositioner';
@@ -24,7 +25,7 @@ export type ComboboxPositionerState = {
 /**
  * State machine of `Combobox.Positioner`: anchored to the input (or the trigger when the input is in the popup).
  */
-export class ComboboxPositionerMachine {
+export class ComboboxPositionerMachine extends Connectable {
     readonly positioner: AnchorPositioner;
 
     private options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined };
@@ -39,16 +40,17 @@ export class ComboboxPositionerMachine {
         return acquireScrollLock(triggerElement);
     });
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(root: ComboboxRootMachine, options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined } = {}) {
+        super();
         this.root = root;
         this.options = options;
         this.positioner = new AnchorPositioner(root.floatingRoot, this.getAnchorOptions());
-        this.unsubscribers.push(
-            root.store.subscribe(() => this.sync()),
-            this.positioner.store.subscribe(() => this.syncSide())
-        );
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.positioner);
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
+        this.addCleanup(this.positioner.store.subscribe(() => this.syncSide()));
         this.sync();
     }
 
@@ -99,13 +101,7 @@ export class ComboboxPositionerMachine {
         return getInternalBackdropProps(inputElement ?? triggerElement, !open);
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.scrollLock.destroy();
-        this.positioner.destroy();
-    }
+    protected override onDisconnect() {}
 
     private getAnchorOptions() {
         const { store } = this.root;
@@ -120,6 +116,9 @@ export class ComboboxPositionerMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { open, modal, openMethod, triggerElement } = this.root.store.state;
         this.positioner.setOptions(this.getAnchorOptions());
         this.scrollLock.sync([open, modal, openMethod, triggerElement]);

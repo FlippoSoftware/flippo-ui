@@ -1,6 +1,7 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
+import { Connectable } from '~@lib/Connectable';
 import { getEventKey } from '~@lib/eventKey';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { contains } from '~@packages/floating-ui/utils/element';
@@ -102,7 +103,7 @@ type PinInputInternalState = {
 /**
  * State machine of a PIN input: one character per pin, completion detection and focus movement.
  */
-export class PinInputMachine {
+export class PinInputMachine extends Connectable {
     readonly store: Store<PinInputInternalState>;
 
     readonly registry = new ListRegistry();
@@ -116,6 +117,7 @@ export class PinInputMachine {
     private previousValue: string;
 
     constructor(options: PinInputOptions) {
+        super();
         this.options = options;
         const checkedValue = options.value ?? options.defaultValue ?? '';
         this.store = new Store<PinInputInternalState>({
@@ -127,6 +129,10 @@ export class PinInputMachine {
         });
         this.previousValue = this.checkedValue;
         this.store.subscribe(() => this.onValueChanged());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registry);
     }
 
     setOptions(options: PinInputOptions) {
@@ -376,9 +382,7 @@ export class PinInputMachine {
         };
     }
 
-    destroy() {
-        this.registry.destroy();
-    }
+    protected override onDisconnect() {}
 
     private onValueChanged() {
         const checkedValue = this.checkedValue;

@@ -1,4 +1,4 @@
-# @flippo-ui/core
+# @flippo-software/core-components
 
 Framework-agnostic state machines for [`@flippo-ui/headless-components`](https://github.com/FlippoSoftware/headless-components).
 
@@ -12,7 +12,7 @@ they subscribe to stores, pass DOM elements in and render.
 ## Install
 
 ```sh
-pnpm add @flippo-ui/core
+pnpm add @flippo-software/core-components
 ```
 
 ## Source layout
@@ -33,23 +33,23 @@ import each other relatively.
 
 ## Entry points
 
-`@flippo-ui/core` re-exports everything; every module and component also has its own entry point.
+`@flippo-software/core-components` re-exports everything; every module and component also has its own entry point.
 
 ### Infrastructure
 
 | Entry | Contents |
 | --- | --- |
-| `@flippo-ui/core/store` | `Store`, `ComponentStore`, `createSelector`, `createSelectorMemoized` |
-| `@flippo-ui/core/events` | `REASONS`, `createChangeEventDetails`, `createGenericEventDetails`, `EventEmitter`, `createEventEmitter` |
-| `@flippo-ui/core/timers` | `Timeout`, `AnimationFrame` |
-| `@flippo-ui/core/dom` | `whenConnected`, `runOnceAnimationsFinish`, `OpenChangeComplete`, `TransitionStatusController`, `PopupAutoResize`, `acquireScrollLock`, `getInternalBackdropProps` |
-| `@flippo-ui/core/props` | `mergeProps`, `mergePropsN`, `makeEventPreventable` |
-| `@flippo-ui/core/attributes` | `getStyleHookProps`, popup/trigger/transition state attribute mappings |
-| `@flippo-ui/core/patterns` | `OpenInteractionType`, `Clipboard` |
-| `@flippo-ui/core/lib` | Shared types (`MutableRef`, `ElementProps`, `TransitionStatus`, …), constants, item equality, value labels |
-| `@flippo-ui/core/floating` | `FloatingRootStore`, `FloatingTreeStore`, `FocusManager`, interactions (`ClickInteraction`, `DismissInteraction`, `FocusInteraction`, `Hover*Interaction`, `ListNavigationInteraction`, `TypeaheadInteraction`, `ClientPointInteraction`, `getRoleProps`), `safePolygon`, `FloatingDelayGroup`, `FloatingPortalController` |
-| `@flippo-ui/core/positioning` | `AnchorPositioner` (on `@floating-ui/dom`) |
-| `@flippo-ui/core/popup` | Popup state and selectors, `PopupRootController`, `PopupPositionerController`, `PopupViewportController`, `PopupTriggerRegistration`, `PopupTransitions` |
+| `@flippo-software/core-components/store` | `Store`, `ComponentStore`, `createSelector`, `createSelectorMemoized` |
+| `@flippo-software/core-components/events` | `REASONS`, `createChangeEventDetails`, `createGenericEventDetails`, `EventEmitter`, `createEventEmitter` |
+| `@flippo-software/core-components/timers` | `Timeout`, `AnimationFrame` |
+| `@flippo-software/core-components/dom` | `whenConnected`, `runOnceAnimationsFinish`, `OpenChangeComplete`, `TransitionStatusController`, `PopupAutoResize`, `acquireScrollLock`, `getInternalBackdropProps` |
+| `@flippo-software/core-components/props` | `mergeProps`, `mergePropsN`, `makeEventPreventable` |
+| `@flippo-software/core-components/attributes` | `getStyleHookProps`, popup/trigger/transition state attribute mappings |
+| `@flippo-software/core-components/patterns` | `OpenInteractionType`, `Clipboard` |
+| `@flippo-software/core-components/lib` | Shared types (`MutableRef`, `ElementProps`, `TransitionStatus`, …), constants, item equality, value labels |
+| `@flippo-software/core-components/floating` | `FloatingRootStore`, `FloatingTreeStore`, `FocusManager`, interactions (`ClickInteraction`, `DismissInteraction`, `FocusInteraction`, `Hover*Interaction`, `ListNavigationInteraction`, `TypeaheadInteraction`, `ClientPointInteraction`, `getRoleProps`), `safePolygon`, `FloatingDelayGroup`, `FloatingPortalController` |
+| `@flippo-software/core-components/positioning` | `AnchorPositioner` (on `@floating-ui/dom`) |
+| `@flippo-software/core-components/popup` | Popup state and selectors, `PopupRootController`, `PopupPositionerController`, `PopupViewportController`, `PopupTriggerRegistration`, `PopupTransitions` |
 
 ### Components
 
@@ -77,8 +77,8 @@ element setters for ref callbacks and `destroy()`.
 ## Usage without a framework
 
 ```ts
-import { createChangeEventDetails, REASONS } from '@flippo-ui/core/events';
-import { PopoverStore } from '@flippo-ui/core/popover';
+import { createChangeEventDetails, REASONS } from '@flippo-software/core-components/events';
+import { PopoverStore } from '@flippo-software/core-components/popover';
 
 const store = new PopoverStore();
 store.setContextValue('onOpenChange', (open, details) => {

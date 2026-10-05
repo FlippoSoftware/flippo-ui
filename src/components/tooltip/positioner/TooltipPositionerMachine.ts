@@ -1,6 +1,7 @@
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
+import { Connectable } from '~@lib/Connectable';
 import { PopupPositionerController } from '~@popup/PopupPositionerController';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -29,14 +30,19 @@ export type TooltipArrowState = {
 /**
  * State machine of `Tooltip.Positioner` (default side: `top`).
  */
-export class TooltipPositionerMachine<Payload = unknown> {
+export class TooltipPositionerMachine<Payload = unknown> extends Connectable {
     readonly controller: PopupPositionerController<TooltipState<Payload>>;
 
     private readonly root: TooltipRootMachine<Payload>;
 
     constructor(root: TooltipRootMachine<Payload>, options: PopupPositionerOptions = {}) {
+        super();
         this.root = root;
         this.controller = new PopupPositionerController(root.store, { getOpen: () => root.getOpenState() }, withDefaults(options));
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.controller);
     }
 
     setOptions(options: PopupPositionerOptions) {
@@ -77,9 +83,7 @@ export class TooltipPositionerMachine<Payload = unknown> {
         return mergeProps({ style: this.controller.getArrowStyles(), 'aria-hidden': true }, elementProps);
     }
 
-    destroy() {
-        this.controller.destroy();
-    }
+    protected override onDisconnect() {}
 }
 
 function withDefaults(options: PopupPositionerOptions): PopupPositionerOptions {

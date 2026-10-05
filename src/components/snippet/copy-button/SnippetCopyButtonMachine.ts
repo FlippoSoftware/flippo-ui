@@ -1,4 +1,5 @@
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
+import { Connectable } from '~@lib/Connectable';
 import { Clipboard } from '~@patterns/Clipboard';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -25,7 +26,7 @@ export type SnippetCopyButtonOptions = {
 /**
  * The button that copies the snippet.
  */
-export class SnippetCopyButtonMachine {
+export class SnippetCopyButtonMachine extends Connectable {
     readonly clipboard: Clipboard;
 
     readonly button: ButtonMachine;
@@ -35,6 +36,7 @@ export class SnippetCopyButtonMachine {
     private readonly snippet: SnippetMachine;
 
     constructor(snippet: SnippetMachine, options: SnippetCopyButtonOptions = {}) {
+        super();
         this.snippet = snippet;
         this.options = options;
         this.clipboard = new Clipboard(options.resetDelay ?? 2000);
@@ -79,7 +81,7 @@ export class SnippetCopyButtonMachine {
         );
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.clipboard.destroy();
     }
 }

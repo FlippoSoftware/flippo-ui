@@ -1,4 +1,5 @@
 export * from './areArraysEqual';
+export * from './Connectable';
 export * from './clamp';
 export * from './constants';
 export * from './detectBrowser';

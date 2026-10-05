@@ -3,6 +3,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
 import { transitionStatusMapping } from '~@attributes/styleHookMapping';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
+import { Connectable } from '~@lib/Connectable';
 import { FocusManager } from '~@packages/floating-ui/FocusManager';
 import { contains, getTarget } from '~@packages/floating-ui/utils/element';
 import { mergeProps } from '~@props/mergeProps';
@@ -31,7 +32,7 @@ export type ComboboxPopupOptions = {
 /**
  * State machine of `Combobox.Popup`: focus management (the input inside the popup gets focus) and props.
  */
-export class ComboboxPopupMachine {
+export class ComboboxPopupMachine extends Connectable {
     readonly focusManager: FocusManager;
 
     private options: ComboboxPopupOptions;
@@ -42,9 +43,8 @@ export class ComboboxPopupMachine {
 
     private readonly openChangeComplete: OpenChangeComplete;
 
-    private readonly unsubscribe: () => void;
-
     constructor(root: ComboboxRootMachine, positioner: ComboboxPositionerMachine | null, options: ComboboxPopupOptions = {}) {
+        super();
         this.root = root;
         this.positioner = positioner;
         this.options = options;
@@ -54,7 +54,11 @@ export class ComboboxPopupMachine {
                 root.store.state.onOpenChangeComplete(true);
             }
         });
-        this.unsubscribe = root.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.focusManager);
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -103,9 +107,7 @@ export class ComboboxPopupMachine {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
-        this.focusManager.destroy();
+    protected override onDisconnect() {
         this.openChangeComplete.destroy();
     }
 
@@ -129,6 +131,9 @@ export class ComboboxPopupMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         this.focusManager.setOptions(this.getFocusManagerOptions());
         this.openChangeComplete.sync(this.root.store.state.open);
     }

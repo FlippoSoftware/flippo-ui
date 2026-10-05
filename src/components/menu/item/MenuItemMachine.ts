@@ -1,6 +1,7 @@
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { isMac } from '~@lib/detectBrowser';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
@@ -54,7 +55,7 @@ export type MenuItemBaseOptions = {
  * Behaviour shared by all menu items: list registration, highlight, closing on click,
  * the press-drag-release gesture and the item's props. Replacement for `useMenuItem` + `useMenuItemCommonProps`.
  */
-export class MenuItemMachine<Options extends MenuItemBaseOptions = MenuItemBaseOptions> {
+export class MenuItemMachine<Options extends MenuItemBaseOptions = MenuItemBaseOptions> extends Connectable {
     readonly button: ButtonMachine;
 
     /**
@@ -82,6 +83,7 @@ export class MenuItemMachine<Options extends MenuItemBaseOptions = MenuItemBaseO
         setup: MenuItemSetup,
         defaults: { closeOnClick: boolean; metadata?: ItemMetadata } = { closeOnClick: true }
     ) {
+        super();
         this.store = store;
         this.options = options;
         this.setup = setup;
@@ -92,6 +94,10 @@ export class MenuItemMachine<Options extends MenuItemBaseOptions = MenuItemBaseO
             label: options.label,
             onIndexChange: (index) => this.index.set('index', index)
         });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
     }
 
     setOptions(options: Options) {
@@ -139,11 +145,6 @@ export class MenuItemMachine<Options extends MenuItemBaseOptions = MenuItemBaseO
             },
             (props: Props) => this.button.getButtonProps(props)
         );
-    }
-
-    destroy() {
-        this.listItem.setElement(null);
-        this.listItem.destroy();
     }
 
     protected handleElement(element: HTMLElement | null) {

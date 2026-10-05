@@ -1,3 +1,4 @@
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 
 import type { Orientation, Style } from '~@lib/types';
@@ -62,7 +63,7 @@ type MarqueeSizes = {
 /**
  * Measures a marquee and computes how many copies of the content are needed and the animation duration.
  */
-export class MarqueeMachine {
+export class MarqueeMachine extends Connectable {
     readonly store = new Store<MarqueeSizes>({ containerSize: 0, marqueeSize: 0, multiplier: 1 });
 
     private options: MarqueeOptions;
@@ -74,6 +75,7 @@ export class MarqueeMachine {
     private observer: ResizeObserver | null = null;
 
     constructor(options: MarqueeOptions = {}) {
+        super();
         this.options = options;
     }
 
@@ -182,7 +184,11 @@ export class MarqueeMachine {
         return { ...this.getTrackStyle(), position: 'absolute', visibility: 'hidden', pointerEvents: 'none', top: 0, left: 0 };
     }
 
-    destroy() {
+    protected override onConnect() {
+        this.observe();
+    }
+
+    protected override onDisconnect() {
         this.observer?.disconnect();
         this.observer = null;
     }
@@ -191,7 +197,7 @@ export class MarqueeMachine {
         this.observer?.disconnect();
         this.observer = null;
 
-        if (!this.root || !this.content) {
+        if (!this.connected || !this.root || !this.content) {
             return;
         }
 

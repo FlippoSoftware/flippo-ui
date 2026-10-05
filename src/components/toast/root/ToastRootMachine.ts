@@ -1,5 +1,6 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
+import { Connectable } from '~@lib/Connectable';
 import { ownerDocument } from '~@lib/owner';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { activeElement, contains, getTarget } from '~@packages/floating-ui/utils/element';
@@ -108,7 +109,7 @@ function getElementTransform(element: HTMLElement): Transform {
  * State machine of `Toast.Root`: swipe to dismiss, height measurement for stacking,
  * removal after the exit animation and the toast's props.
  */
-export class ToastRootMachine {
+export class ToastRootMachine extends Connectable {
     readonly store: Store<SwipeState>;
 
     readonly rootRef: MutableRef<HTMLElement | null> = { current: null };
@@ -137,9 +138,8 @@ export class ToastRootMachine {
 
     private readonly touchMoveEffect = new Effect(() => this.preventTouchMove());
 
-    private readonly unsubscribe: () => void;
-
     constructor(provider: ToastProviderMachine, options: ToastRootOptions) {
+        super();
         this.provider = provider;
         this.options = options;
         this.store = new Store<SwipeState>({
@@ -158,7 +158,10 @@ export class ToastRootMachine {
                 provider.remove(this.toast.id);
             }
         });
-        this.unsubscribe = provider.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.provider.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -232,8 +235,7 @@ export class ToastRootMachine {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.heightEffect.destroy();
         this.touchMoveEffect.destroy();
         this.openChangeComplete.destroy();
@@ -245,6 +247,9 @@ export class ToastRootMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         this.openChangeComplete.sync(this.toast.transitionStatus !== 'ending');
         this.heightEffect.sync([this.rootRef.current, this.toast.id]);
         this.touchMoveEffect.sync([this.rootRef.current]);

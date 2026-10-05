@@ -1,5 +1,7 @@
 import type { Placement } from '@floating-ui/dom';
 
+import { Connectable } from '~@lib/Connectable';
+
 import { attachFloatingNodeContext, createFloatingNodeContext } from './FloatingNodeContext';
 
 import type { FloatingRootStore } from './FloatingRootStore';
@@ -8,16 +10,20 @@ import type { FloatingNodeType } from './types';
 
 /**
  * Registers a floating element as a node of a floating tree (nested popups) and attaches
- * the floating root's node context to it. Replacement for `<FloatingNode>` + `useFloating({ nodeId })`.
+ * the floating root's node context to it. The node is in the tree while connected. Replacement for `<FloatingNode>` + `useFloating({ nodeId })`.
  */
-export class FloatingNodeRegistration {
+export class FloatingNodeRegistration extends Connectable {
     readonly node: FloatingNodeType;
 
     private readonly tree: FloatingTreeStore | null;
 
     constructor(tree: FloatingTreeStore | null | undefined, id: string, parentId: string | null = null) {
+        super();
         this.tree = tree ?? null;
         this.node = { id, parentId };
+    }
+
+    protected override onConnect() {
         this.tree?.addNode(this.node);
     }
 
@@ -30,7 +36,7 @@ export class FloatingNodeRegistration {
         attachFloatingNodeContext(store, context, this.tree);
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.tree?.removeNode(this.node);
     }
 }

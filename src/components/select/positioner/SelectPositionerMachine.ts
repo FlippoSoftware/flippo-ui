@@ -6,6 +6,7 @@ import { getInternalBackdropProps } from '~@dom/internalBackdrop';
 import { acquireScrollLock } from '~@dom/scrollLock';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
 import { findItemIndex, selectedValueIncludes } from '~@lib/itemEquality';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
@@ -45,7 +46,7 @@ type PositionerInternalState = {
  * State machine of `Select.Positioner`: anchor positioning or alignment of the selected item with the trigger,
  * the item registry (pruning values whose items disappeared), scroll lock and the internal backdrop.
  */
-export class SelectPositionerMachine {
+export class SelectPositionerMachine extends Connectable {
     readonly positioner: AnchorPositioner;
 
     readonly store: Store<PositionerInternalState>;
@@ -70,9 +71,8 @@ export class SelectPositionerMachine {
         return acquireScrollLock(triggerElement);
     });
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(root: SelectRootMachine, options: SelectPositionerOptions = {}) {
+        super();
         this.root = root;
         this.options = options;
         this.store = new Store<PositionerInternalState>({ controlledAlignItemWithTrigger: options.alignItemWithTrigger ?? true });
@@ -82,10 +82,13 @@ export class SelectPositionerMachine {
             labelsRef: root.refs.labelsRef,
             onMapChange: this.onMapChange
         });
-        this.unsubscribers.push(
-            root.store.subscribe(() => this.sync()),
-            this.store.subscribe(() => this.sync())
-        );
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.positioner);
+        this.connectChild(this.items);
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -154,14 +157,7 @@ export class SelectPositionerMachine {
         return getInternalBackdropProps(triggerElement, !open);
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.scrollLock.destroy();
-        this.positioner.destroy();
-        this.items.destroy();
-    }
+    protected override onDisconnect() {}
 
     private getAnchorOptions() {
         const { alignItemWithTrigger: _alignItemWithTrigger, ...options } = this.options;
@@ -177,6 +173,9 @@ export class SelectPositionerMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store } = this.root;
         const { alignItemWithTrigger = true } = this.options;
 

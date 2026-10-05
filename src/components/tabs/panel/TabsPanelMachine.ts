@@ -1,4 +1,5 @@
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 
 import type { Props } from '~@props/mergeProps';
@@ -31,7 +32,7 @@ export type TabsPanelOptions = {
 /**
  * One tab panel.
  */
-export class TabsPanelMachine {
+export class TabsPanelMachine extends Connectable {
     readonly listItem: ListRegistryItem<TabsPanelMetadata>;
 
     readonly store = new Store({ index: -1 });
@@ -41,12 +42,17 @@ export class TabsPanelMachine {
     private readonly tabs: TabsMachine;
 
     constructor(tabs: TabsMachine, options: TabsPanelOptions) {
+        super();
         this.tabs = tabs;
         this.options = options;
         this.listItem = new ListRegistryItem(tabs.panelRegistry, {
             metadata: { id: options.id, value: options.value },
             onIndexChange: (index) => this.store.set('index', index)
         });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
     }
 
     setOptions(options: TabsPanelOptions) {
@@ -86,7 +92,5 @@ export class TabsPanelMachine {
         this.listItem.setElement(element);
     };
 
-    destroy() {
-        this.listItem.destroy();
-    }
+    protected override onDisconnect() {}
 }

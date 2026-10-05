@@ -1,3 +1,4 @@
+import { Connectable } from '~@lib/Connectable';
 import { generateId } from '~@lib/generateId';
 import { ownerDocument } from '~@lib/owner';
 import { activeElement, contains, matchesFocusVisible } from '~@packages/floating-ui/utils/element';
@@ -43,7 +44,7 @@ export type ToastProviderOptions = {
  * State machine of `Toast.Provider` (its `store` holds the toasts): the list of toasts, their auto-dismiss timers (paused while
  * hovered, focused or the window is blurred), stacking limit and focus management on close.
  */
-export class ToastProviderMachine {
+export class ToastProviderMachine extends Connectable {
     readonly store = new Store<ToastProviderState>({ toasts: [], hovering: false, focused: false, prevFocusElement: null });
 
     readonly viewportRef: MutableRef<HTMLElement | null> = { current: null };
@@ -59,8 +60,15 @@ export class ToastProviderMachine {
     private unsubscribeManager: (() => void) | null = null;
 
     constructor(options: ToastProviderOptions = {}) {
+        super();
         this.options = options;
+    }
+
+    protected override onConnect() {
         this.subscribeManager();
+        // Timers paused by a previous disconnection continue with their remaining time.
+        this.resumeTimers();
+        this.pauseIfInactive();
     }
 
     setOptions(options: ToastProviderOptions) {
@@ -243,13 +251,10 @@ export class ToastProviderMachine {
         this.timers.set(id, { timeout, start: shouldStartActive ? Date.now() : 0, delay, remaining: delay, callback });
     };
 
-    destroy() {
+    protected override onDisconnect() {
         this.unsubscribeManager?.();
         this.unsubscribeManager = null;
-        for (const timer of this.timers.values()) {
-            timer.timeout?.clear();
-        }
-        this.timers.clear();
+        this.pauseTimers();
     }
 
     private pauseIfInactive() {
@@ -285,7 +290,7 @@ export class ToastProviderMachine {
         this.unsubscribeManager?.();
         this.unsubscribeManager = null;
         const manager = this.options.toastManager;
-        if (!manager) {
+        if (!manager || !this.connected) {
             return;
         }
 

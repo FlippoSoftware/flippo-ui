@@ -4,6 +4,7 @@ import type { Dimensions } from '@floating-ui/utils';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 
 import type { MutableRef } from '~@lib/types';
 
@@ -192,7 +193,7 @@ type ItemEvent = { currentTarget: EventTarget | null };
  * Arrow-key navigation of a list of items, with real DOM focus or virtual focus.
  * Replacement for `useListNavigation`.
  */
-export class ListNavigationInteraction {
+export class ListNavigationInteraction extends Connectable {
     private options: ListNavigationInteractionOptions;
 
     private readonly store: FloatingRootStore;
@@ -217,8 +218,6 @@ export class ListNavigationInteraction {
 
     private effectDeps: Record<string, unknown[]> = {};
 
-    private readonly unsubscribe: () => void;
-
     private readonly itemProps: Record<string, unknown>;
 
     private readonly floatingHandlers: Record<string, unknown>;
@@ -226,6 +225,7 @@ export class ListNavigationInteraction {
     private readonly triggerProps: Record<string, unknown>;
 
     constructor(store: FloatingRootStore, options: ListNavigationInteractionOptions) {
+        super();
         this.store = store;
         this.options = options;
         this.focusItemOnOpen = options.focusItemOnOpen ?? 'auto';
@@ -253,8 +253,10 @@ export class ListNavigationInteraction {
             onMouseDown: this.checkVirtualMouse,
             onClick: this.checkVirtualMouse
         };
+    }
 
-        this.unsubscribe = store.subscribe(() => this.sync());
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -287,8 +289,9 @@ export class ListNavigationInteraction {
         };
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
+        // Re-run the effects on the next connection.
+        this.effectDeps = {};
     }
 
     private get settings() {
@@ -378,6 +381,9 @@ export class ListNavigationInteraction {
      * Runs the layout-effect equivalents in their original order.
      */
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { enabled, selectedIndex, activeIndex, nested, orientation, rtl, tree, parentId, virtual, focusItemOnOpen, listRef } =
             this.settings;
         const open = this.store.select('open');

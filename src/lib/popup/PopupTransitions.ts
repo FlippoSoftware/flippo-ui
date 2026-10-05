@@ -1,4 +1,5 @@
 import { runOnceAnimationsFinish } from '~@dom/animations';
+import { Connectable } from '~@lib/Connectable';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
 import type { PopupStoreState } from './popupStoreState';
@@ -24,14 +25,12 @@ export type PopupTransitionsOptions = {
  * - closing sets `transitionStatus: 'ending'`, waits for the popup's animations to finish
  *   and then unmounts it (unless `preventUnmountingOnClose` is set).
  */
-export class PopupTransitions<State extends PopupStoreState<unknown>> {
+export class PopupTransitions<State extends PopupStoreState<unknown>> extends Connectable {
     private readonly frame = new AnimationFrame();
 
     private readonly animationFrame = new AnimationFrame();
 
     private abortController: AbortController | null = null;
-
-    private unsubscribe: (() => void) | null = null;
 
     private readonly store: AnyPopupStore<State>;
 
@@ -40,6 +39,7 @@ export class PopupTransitions<State extends PopupStoreState<unknown>> {
     private getOpen: () => boolean;
 
     constructor(store: AnyPopupStore<State>, options: PopupTransitionsOptions = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.getOpen = () => store.select('open');
@@ -50,17 +50,19 @@ export class PopupTransitions<State extends PopupStoreState<unknown>> {
     }
 
     /**
-     * Starts following the store's `open` state.
+     * Sets the open state to follow (e.g. a shared one from a group) and connects.
      *
-     * @param getOpen Reads the open state to follow; defaults to the store's (a group may share one).
-     * @returns A cleanup function (same as {@link destroy}).
+     * @param getOpen Reads the open state to follow; defaults to the store's.
+     * @returns The disconnect function.
      */
     public start(getOpen?: () => boolean): () => void {
-        this.destroy();
         if (getOpen) {
             this.getOpen = getOpen;
         }
+        return this.connect();
+    }
 
+    protected override onConnect() {
         let previous: boolean | undefined;
         const onChange = () => {
             const next = this.getOpen();
@@ -71,9 +73,7 @@ export class PopupTransitions<State extends PopupStoreState<unknown>> {
         };
 
         onChange();
-        this.unsubscribe = this.store.subscribe(onChange);
-
-        return () => this.destroy();
+        this.addCleanup(this.store.subscribe(onChange));
     }
 
     /**
@@ -91,9 +91,7 @@ export class PopupTransitions<State extends PopupStoreState<unknown>> {
         this.store.context.onOpenChangeComplete?.(false);
     };
 
-    public destroy() {
-        this.unsubscribe?.();
-        this.unsubscribe = null;
+    protected override onDisconnect() {
         this.frame.cancel();
         this.abort();
     }

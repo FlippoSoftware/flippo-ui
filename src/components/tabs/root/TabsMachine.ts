@@ -1,5 +1,6 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 
 import type { ListRegistryMap } from '~@components/composite/list/ListRegistry';
@@ -47,7 +48,7 @@ export type TabsOptions = {
 /**
  * State machine of tabs: the active value, the activation direction, and tab/panel associations.
  */
-export class TabsMachine {
+export class TabsMachine extends Connectable {
     readonly store: Store<TabsInternalState>;
 
     readonly panelRegistry: ListRegistry<TabsPanelMetadata>;
@@ -55,6 +56,7 @@ export class TabsMachine {
     private options: TabsOptions;
 
     constructor(options: TabsOptions = {}) {
+        super();
         this.options = options;
         this.store = new Store<TabsInternalState>({
             value: options.defaultValue === undefined ? 0 : options.defaultValue,
@@ -63,6 +65,10 @@ export class TabsMachine {
             panelMap: new Map() as ListRegistryMap<TabsPanelMetadata>
         });
         this.panelRegistry = new ListRegistry<TabsPanelMetadata>({ onMapChange: (map) => this.store.set('panelMap', map) });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.panelRegistry);
     }
 
     setOptions(options: TabsOptions) {
@@ -167,7 +173,5 @@ export class TabsMachine {
         return null;
     }
 
-    destroy() {
-        this.panelRegistry.destroy();
-    }
+    protected override onDisconnect() {}
 }

@@ -1,5 +1,6 @@
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { isModifierKeySet } from '~@components/composite/utils/compositeKeys';
+import { Connectable } from '~@lib/Connectable';
 import { isComposingEvent } from '~@lib/eventKey';
 import { ARABIC_RE, HAN_RE } from '~@lib/parseNumeric';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
@@ -34,7 +35,7 @@ export type PinInputPinOptions = {
 /**
  * One pin (character input).
  */
-export class PinInputPinMachine {
+export class PinInputPinMachine extends Connectable {
     readonly listItem: ListRegistryItem;
 
     readonly store = new Store({ index: -1 });
@@ -44,9 +45,14 @@ export class PinInputPinMachine {
     private readonly pinInput: PinInputMachine;
 
     constructor(pinInput: PinInputMachine, options: PinInputPinOptions) {
+        super();
         this.pinInput = pinInput;
         this.options = options;
         this.listItem = new ListRegistryItem(pinInput.registry, { onIndexChange: (index) => this.store.set('index', index) });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
     }
 
     setOptions(options: PinInputPinOptions) {
@@ -145,7 +151,5 @@ export class PinInputPinMachine {
         );
     }
 
-    destroy() {
-        this.listItem.destroy();
-    }
+    protected override onDisconnect() {}
 }

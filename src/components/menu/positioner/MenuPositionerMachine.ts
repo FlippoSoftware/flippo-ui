@@ -5,6 +5,7 @@ import { ListRegistry } from '~@components/composite/list/ListRegistry';
 import { getInternalBackdropProps } from '~@dom/internalBackdrop';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { DROPDOWN_COLLISION_AVOIDANCE, POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { PopupPositionerController } from '~@popup/PopupPositionerController';
@@ -36,7 +37,7 @@ export type MenuPositionerState = {
  * State machine of `Menu.Positioner`: positioning (submenus open to the inline end, context menus at
  * the cursor), the item list registry, and sibling/parent coordination through the floating tree.
  */
-export class MenuPositionerMachine<Payload = unknown> {
+export class MenuPositionerMachine<Payload = unknown> extends Connectable {
     readonly controller: PopupPositionerController<MenuState<Payload>>;
 
     /**
@@ -50,9 +51,8 @@ export class MenuPositionerMachine<Payload = unknown> {
 
     private readonly menuOpenChangeEffect = new Effect(() => this.emitMenuOpenChange());
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(root: MenuRootMachine<Payload>, options: PopupPositionerOptions = {}) {
+        super();
         this.root = root;
         this.options = options;
         this.items = new ListRegistry({
@@ -61,19 +61,21 @@ export class MenuPositionerMachine<Payload = unknown> {
         });
         this.controller = new PopupPositionerController(root.store, {}, this.getPositionerOptions());
         root.node.attach(root.floatingRoot, () => this.controller.anchorPositioner.store.state.placement);
+    }
 
-        const events = root.tree.events;
+    protected override onConnect() {
+        this.connectChild(this.items);
+        this.connectChild(this.controller);
+        const events = this.root.tree.events;
         events.on('menuopenchange', this.onMenuOpenChange);
         events.on('menuopenchange', this.onParentClose);
         events.on('itemhover', this.onItemHover);
-        this.unsubscribers.push(
-            () => {
-                events.off('menuopenchange', this.onMenuOpenChange);
-                events.off('menuopenchange', this.onParentClose);
-                events.off('itemhover', this.onItemHover);
-            },
-            root.store.subscribe(() => this.sync())
-        );
+        this.addCleanup(() => {
+            events.off('menuopenchange', this.onMenuOpenChange);
+            events.off('menuopenchange', this.onParentClose);
+            events.off('itemhover', this.onItemHover);
+        });
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -151,14 +153,7 @@ export class MenuPositionerMachine<Payload = unknown> {
         }
     };
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.menuOpenChangeEffect.destroy();
-        this.controller.destroy();
-        this.items.destroy();
-    }
+    protected override onDisconnect() {}
 
     private getPositionerOptions(): PopupPositionerOptions {
         const parent = this.store.select('parent');
@@ -200,6 +195,9 @@ export class MenuPositionerMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store } = this;
         // The context menu anchor and the parent type may change.
         this.controller?.setOptions(this.getPositionerOptions());

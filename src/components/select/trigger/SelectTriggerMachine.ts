@@ -2,6 +2,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
 import { ownerDocument } from '~@lib/owner';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
@@ -51,7 +52,7 @@ type FocusLikeEvent = { relatedTarget: EventTarget | null };
  * State machine of `Select.Trigger`: the combobox button, the press-drag-release gesture
  * (with delays so a quick release doesn't select) and blur validation.
  */
-export class SelectTriggerMachine {
+export class SelectTriggerMachine extends Connectable {
     readonly button: ButtonMachine;
 
     private options: SelectTriggerOptions;
@@ -70,13 +71,15 @@ export class SelectTriggerMachine {
 
     private readonly selectionEffect = new Effect(() => this.handleSelectionDelays());
 
-    private readonly unsubscribe: () => void;
-
     constructor(root: SelectRootMachine, options: SelectTriggerOptions = {}) {
+        super();
         this.root = root;
         this.options = options;
         this.button = new ButtonMachine({ disabled: this.disabled, native: options.nativeButton });
-        this.unsubscribe = root.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -178,8 +181,7 @@ export class SelectTriggerMachine {
         return props;
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.selectionEffect.destroy();
         this.timeoutFocus.clear();
         this.timeoutMouseDown.clear();
@@ -188,6 +190,9 @@ export class SelectTriggerMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store } = this.root;
         this.button.setOptions({ disabled: this.disabled, native: this.options.nativeButton });
         const hasSelectedValue = selectSelectors.hasSelectedValue(store.state);

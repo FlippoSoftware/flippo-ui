@@ -1,5 +1,6 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { triggerOpenStateMapping } from '~@attributes/popupStateMapping';
+import { Connectable } from '~@lib/Connectable';
 import { OPEN_DELAY } from '~@lib/constants';
 import { warn } from '~@lib/warn';
 import { createDefaultDelayGroup, DelayGroupMember } from '~@packages/floating-ui/FloatingDelayGroup';
@@ -64,7 +65,7 @@ export type TooltipTriggerSetup = {
  * State machine of `Tooltip.Trigger`: registration, delay group membership,
  * hover and focus interactions and `Tooltip.Multiple` active tracking.
  */
-export class TooltipTriggerMachine<Payload = unknown> {
+export class TooltipTriggerMachine<Payload = unknown> extends Connectable {
     readonly store: TooltipStore<Payload>;
 
     private options: TooltipTriggerOptions<Payload>;
@@ -95,9 +96,8 @@ export class TooltipTriggerMachine<Payload = unknown> {
 
     private readonly multipleEffect = new Effect(() => this.attachMultipleListeners());
 
-    private readonly unsubscribe: () => void;
-
     constructor(store: TooltipStore<Payload>, options: TooltipTriggerOptions<Payload>, setup: TooltipTriggerSetup = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.setup = setup;
@@ -105,7 +105,11 @@ export class TooltipTriggerMachine<Payload = unknown> {
         // Inside `Tooltip.Multiple`, the safe area spans all triggers and popups of the group.
         this.handleClose = setup.multiple ? multipleSafePolygon(setup.multiple.store) : safePolygon();
         this.registration = new PopupTriggerRegistration(store, options.id, this.getForwardedState());
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registration);
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -147,9 +151,9 @@ export class TooltipTriggerMachine<Payload = unknown> {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
-        this.registration.destroy();
+    protected override onDisconnect() {
+        this.mountedByThisTrigger = false;
+        this.floatingRoot = null;
         this.primaryEffect.destroy();
         this.multipleEffect.destroy();
         this.destroyInteractions();
@@ -250,6 +254,9 @@ export class TooltipTriggerMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.store.select('floatingRootContext');
         const isOpenedByThisTrigger = this.store.select('isOpenedByTrigger', this.options.id);
 
@@ -257,9 +264,12 @@ export class TooltipTriggerMachine<Payload = unknown> {
             this.destroyInteractions();
             this.floatingRoot = floatingRoot;
             this.hover = new HoverReferenceInteraction(floatingRoot, this.getHoverOptions());
+            this.hover.connect();
             this.focus = new FocusInteraction(floatingRoot, { enabled: !this.disabled });
+            this.focus.connect();
             const member = new DelayGroupMember(floatingRoot, this.delayGroup, { open: isOpenedByThisTrigger });
             this.delayMember = member;
+            member.connect();
             this.delayMemberUnsubscribe = member.state.subscribe(() => {
                 this.store.syncValue('isInstantPhase', member.state.state.isInstantPhase);
             });

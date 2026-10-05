@@ -2,6 +2,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { createChangeEventDetails, createGenericEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { isIOS } from '~@lib/detectBrowser';
 import { formatNumber, formatNumberMaxPrecision } from '~@lib/formatNumber';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
@@ -137,7 +138,7 @@ type InputEvent = Event & { nativeEvent?: Event; key?: string; which?: number; i
 /**
  * State machine of a number field: parsing, formatting, stepping, auto-repeat, wheel and keyboard.
  */
-export class NumberFieldMachine {
+export class NumberFieldMachine extends Connectable {
     readonly store: Store<NumberFieldInternalState>;
 
     readonly inputRef: MutableRef<HTMLInputElement | null> = { current: null };
@@ -178,6 +179,7 @@ export class NumberFieldMachine {
     private readonly wheelEffect: Effect;
 
     constructor(options: NumberFieldOptions) {
+        super();
         this.options = options;
         const initialValue = options.value !== undefined ? (options.value ?? null) : (options.defaultValue ?? null);
         this.store = new Store<NumberFieldInternalState>({
@@ -192,6 +194,9 @@ export class NumberFieldMachine {
         this.previousValue = this.value;
         this.wheelEffect = new Effect(() => this.attachWheel());
         this.store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
         this.sync();
     }
 
@@ -200,7 +205,7 @@ export class NumberFieldMachine {
         this.sync();
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.stopAutoChange();
         this.wheelEffect.destroy();
     }
@@ -309,6 +314,9 @@ export class NumberFieldMachine {
     // ---- syncing ----------------------------------------------------------------------
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const value = this.value;
         this.field.setFilled(value !== null);
 

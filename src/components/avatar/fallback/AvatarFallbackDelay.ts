@@ -1,3 +1,4 @@
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
@@ -6,19 +7,27 @@ import type { ImageLoadingStatus } from '../root/AvatarMachine';
 /**
  * Delay before the avatar fallback may be shown.
  */
-export class AvatarFallbackDelay {
+export class AvatarFallbackDelay extends Connectable {
     readonly store: Store<{ delayPassed: boolean }>;
 
     private readonly timeout = new Timeout();
 
+    private delay: number | undefined;
+
     constructor(delay: number | undefined) {
+        super();
         this.store = new Store({ delayPassed: delay === undefined });
-        this.setDelay(delay);
+        this.delay = delay;
+    }
+
+    protected override onConnect() {
+        this.setDelay(this.delay);
     }
 
     setDelay(delay: number | undefined) {
+        this.delay = delay;
         this.timeout.clear();
-        if (delay !== undefined) {
+        if (this.connected && delay !== undefined && !this.store.state.delayPassed) {
             this.timeout.start(delay, () => this.store.set('delayPassed', true));
         }
     }
@@ -30,7 +39,7 @@ export class AvatarFallbackDelay {
         return imageLoadingStatus !== 'loaded' && this.store.state.delayPassed;
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.timeout.clear();
     }
 }

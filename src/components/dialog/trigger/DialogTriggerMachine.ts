@@ -1,6 +1,7 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { triggerOpenStateMapping } from '~@attributes/popupStateMapping';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
+import { Connectable } from '~@lib/Connectable';
 import { CLICK_TRIGGER_IDENTIFIER } from '~@lib/constants';
 import { ClickInteraction } from '~@packages/floating-ui/interactions/ClickInteraction';
 import { mergeInteractionProps } from '~@packages/floating-ui/interactions/mergeInteractionProps';
@@ -36,7 +37,7 @@ export type DialogTriggerOptions<Payload> = {
 /**
  * State machine of `Dialog.Trigger`.
  */
-export class DialogTriggerMachine<Payload = unknown> {
+export class DialogTriggerMachine<Payload = unknown> extends Connectable {
     readonly button: ButtonMachine;
 
     private options: DialogTriggerOptions<Payload>;
@@ -51,14 +52,17 @@ export class DialogTriggerMachine<Payload = unknown> {
 
     private mountedByThisTrigger = false;
 
-    private readonly unsubscribe: () => void;
-
     constructor(store: DialogStore<Payload>, options: DialogTriggerOptions<Payload>) {
+        super();
         this.store = store;
         this.options = options;
         this.button = new ButtonMachine({ disabled: options.disabled, native: options.nativeButton });
         this.registration = new PopupTriggerRegistration(store, options.id, this.getForwardedState());
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registration);
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -97,9 +101,9 @@ export class DialogTriggerMachine<Payload = unknown> {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
-        this.registration.destroy();
+    protected override onDisconnect() {
+        this.mountedByThisTrigger = false;
+        this.floatingRoot = null;
         this.click?.destroy();
         this.click = null;
     }
@@ -109,11 +113,15 @@ export class DialogTriggerMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.store.select('floatingRootContext');
         if (floatingRoot !== this.floatingRoot) {
             this.click?.destroy();
             this.floatingRoot = floatingRoot;
             this.click = new ClickInteraction(floatingRoot);
+            this.click.connect();
         }
 
         const mounted = this.registration.isMountedByThisTrigger();

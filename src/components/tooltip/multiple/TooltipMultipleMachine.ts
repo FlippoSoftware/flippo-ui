@@ -1,4 +1,5 @@
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
+import { Connectable } from '~@lib/Connectable';
 
 import { TooltipMultipleStore } from '../store/TooltipMultipleStore';
 
@@ -20,7 +21,7 @@ export type TooltipMultipleOptions = {
  * State machine of `Tooltip.Multiple`: a group of tooltips sharing one open state.
  * Each `Tooltip.Root` inside registers its store and a list item (for the active index).
  */
-export class TooltipMultipleMachine {
+export class TooltipMultipleMachine extends Connectable {
     readonly store: TooltipMultipleStore;
 
     readonly registry = new ListRegistry();
@@ -28,9 +29,14 @@ export class TooltipMultipleMachine {
     private options: TooltipMultipleOptions;
 
     constructor(options: TooltipMultipleOptions = {}) {
+        super();
         this.options = options;
         this.store = new TooltipMultipleStore(options.open ?? options.defaultOpen ?? false);
         this.store.setContextValue('onOpenChange', options.onOpenChange);
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registry);
     }
 
     setOptions(options: TooltipMultipleOptions) {
@@ -50,7 +56,5 @@ export class TooltipMultipleMachine {
         return this.options.closeDelay;
     }
 
-    destroy() {
-        this.registry.destroy();
-    }
+    protected override onDisconnect() {}
 }

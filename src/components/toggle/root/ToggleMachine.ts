@@ -2,6 +2,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { Store } from '~@store/Store';
 
@@ -41,7 +42,7 @@ export type ToggleState = {
 /**
  * State machine of a toggle button.
  */
-export class ToggleMachine {
+export class ToggleMachine extends Connectable {
     readonly store: Store<{ pressed: boolean; index: number }>;
 
     /**
@@ -52,6 +53,7 @@ export class ToggleMachine {
     private options: ToggleOptions;
 
     constructor(options: ToggleOptions = {}) {
+        super();
         this.options = options;
         this.store = new Store({ pressed: options.group ? false : (options.defaultPressed ?? false), index: -1 });
         this.listItem = options.group
@@ -63,7 +65,7 @@ export class ToggleMachine {
         this.listItem?.setElement(element);
     };
 
-    destroy() {
+    protected override onDisconnect() {
         this.listItem?.destroy();
     }
 

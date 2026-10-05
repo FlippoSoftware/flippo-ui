@@ -1,5 +1,6 @@
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 import { Timeout } from '~@timers/Timeout';
 
@@ -50,7 +51,7 @@ type PointerType = 'mouse' | 'pen' | 'touch';
  * Opens or closes the floating element when clicking the reference element.
  * Replacement for `useClick`.
  */
-export class ClickInteraction {
+export class ClickInteraction extends Connectable {
     private options: ClickInteractionOptions;
 
     private pointerType: PointerType | undefined;
@@ -64,6 +65,7 @@ export class ClickInteraction {
     private readonly reference: Record<string, unknown>;
 
     constructor(store: FloatingRootStore, options: ClickInteractionOptions = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.reference = {
@@ -82,7 +84,7 @@ export class ClickInteraction {
         return this.options.enabled === false ? {} : { reference: this.reference };
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.frame.cancel();
         this.touchOpenTimeout.clear();
     }

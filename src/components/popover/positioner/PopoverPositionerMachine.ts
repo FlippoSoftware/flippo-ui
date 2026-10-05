@@ -3,6 +3,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
 import { getInternalBackdropProps } from '~@dom/internalBackdrop';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { PopupPositionerController } from '~@popup/PopupPositionerController';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -27,12 +28,13 @@ export type PopoverPositionerSetup = Omit<PopupPositionerSetup, 'onTriggerChange
 /**
  * State machine of `Popover.Positioner`.
  */
-export class PopoverPositionerMachine<Payload = unknown> {
+export class PopoverPositionerMachine<Payload = unknown> extends Connectable {
     readonly store: PopoverStore<Payload>;
 
     readonly controller: PopupPositionerController<PopoverState<Payload>>;
 
     constructor(store: PopoverStore<Payload>, setup: PopoverPositionerSetup, options: PopoverPositionerOptions = {}) {
+        super();
         this.store = store;
         this.controller = new PopupPositionerController(
             store,
@@ -43,6 +45,10 @@ export class PopoverPositionerMachine<Payload = unknown> {
             },
             options
         );
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.controller);
     }
 
     setOptions(options: PopoverPositionerOptions) {
@@ -89,7 +95,5 @@ export class PopoverPositionerMachine<Payload = unknown> {
         return getInternalBackdropProps(this.store.select('activeTriggerElement'), !this.store.select('open'));
     }
 
-    destroy() {
-        this.controller.destroy();
-    }
+    protected override onDisconnect() {}
 }

@@ -3,7 +3,7 @@
     "release-type": "node",
     "packages": {
         ".": {
-            "package-name": "@flippo-ui/core",
+            "package-name": "@flippo-software/core-components",
             "include-component-in-tag": false
         }
     }

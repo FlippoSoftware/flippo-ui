@@ -1,5 +1,6 @@
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { COMPOSITE_KEYS, END, HOME } from '~@components/composite/utils/compositeKeys';
+import { Connectable } from '~@lib/Connectable';
 import { formatNumber } from '~@lib/formatNumber';
 import { valueToPercent } from '~@lib/valueToPercent';
 import { visuallyHidden } from '~@lib/visuallyHidden';
@@ -81,7 +82,7 @@ export type SliderThumbOptions = {
 /**
  * One slider thumb with its hidden range input.
  */
-export class SliderThumbMachine {
+export class SliderThumbMachine extends Connectable {
     readonly listItem: ListRegistryItem<SliderThumbMetadata>;
 
     readonly store = new Store<{ compositeIndex: number; positionPercent: number | undefined }>({
@@ -98,12 +99,17 @@ export class SliderThumbMachine {
     private inputElement: HTMLInputElement | null = null;
 
     constructor(slider: SliderMachine, options: SliderThumbOptions) {
+        super();
         this.slider = slider;
         this.options = options;
         this.listItem = new ListRegistryItem(slider.thumbRegistry, {
             metadata: { inputId: this.inputId },
             onIndexChange: (index) => this.store.set('compositeIndex', index)
         });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.listItem);
     }
 
     setOptions(options: SliderThumbOptions) {
@@ -383,7 +389,5 @@ export class SliderThumbMachine {
         }
     }
 
-    destroy() {
-        this.listItem.destroy();
-    }
+    protected override onDisconnect() {}
 }

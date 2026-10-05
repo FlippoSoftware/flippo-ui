@@ -1,3 +1,4 @@
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
@@ -26,7 +27,7 @@ export type TransitionStatusOptions = {
  * Framework-agnostic replacement for `useTransitionStatus`: `setOpen(open)` drives it, `setMounted(false)`
  * unmounts after the exit animation (see `runOnceAnimationsFinish`).
  */
-export class TransitionStatusController {
+export class TransitionStatusController extends Connectable {
     readonly store: Store<TransitionStatusState>;
 
     private options: TransitionStatusOptions;
@@ -36,12 +37,16 @@ export class TransitionStatusController {
     private readonly frame = new AnimationFrame();
 
     constructor(open: boolean, options: TransitionStatusOptions = {}) {
+        super();
         this.options = options;
         this.open = open;
         this.store = new Store<TransitionStatusState>({
             mounted: open,
             transitionStatus: open && options.enableIdleState ? 'idle' : undefined
         });
+    }
+
+    protected override onConnect() {
         this.scheduleFrame();
     }
 
@@ -67,7 +72,7 @@ export class TransitionStatusController {
         this.sync();
     };
 
-    destroy() {
+    protected override onDisconnect() {
         this.frame.cancel();
     }
 
@@ -97,6 +102,9 @@ export class TransitionStatusController {
         const { mounted, transitionStatus } = this.store.state;
 
         this.frame.cancel();
+        if (!this.connected) {
+            return;
+        }
 
         if (!open && mounted && transitionStatus !== 'ending' && deferEndingState) {
             this.frame.request(() => this.store.set('transitionStatus', 'ending'));

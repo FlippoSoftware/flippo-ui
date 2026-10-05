@@ -16,6 +16,7 @@ import type {
 import type { Rect } from '@floating-ui/utils';
 
 import { whenConnected } from '~@dom/whenConnected';
+import { Connectable } from '~@lib/Connectable';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
 import { DEFAULT_SIDES } from '~@packages/floating-ui/middleware/adaptiveOriginMiddleware';
 import { arrow } from '~@packages/floating-ui/middleware/arrow';
@@ -207,7 +208,7 @@ function toPositionReference(node: ReferenceType | null): ReferenceType | null {
  * CSS variables, and exposes the rendered side/alignment, arrow position and styles.
  * Replacement for `useAnchorPositioning` + `@floating-ui/react-dom`.
  */
-export class AnchorPositioner {
+export class AnchorPositioner extends Connectable {
     readonly store: Store<AnchorPositionState>;
 
     private options: AnchorPositionerOptions;
@@ -222,13 +223,10 @@ export class AnchorPositioner {
 
     private readonly mountedEffect: Effect;
 
-    private readonly unsubscribeRoot: () => void;
-
     private updateId = 0;
 
-    private destroyed = false;
-
     constructor(root: FloatingRootStore, options: AnchorPositionerOptions) {
+        super();
         this.root = root;
         this.options = options;
         this.store = new Store<AnchorPositionState>({
@@ -244,7 +242,10 @@ export class AnchorPositioner {
         this.store.set('placement', this.getPlacement());
         this.autoUpdateEffect = new Effect(() => this.attachAutoUpdate());
         this.mountedEffect = new Effect(() => this.clearElementsWhenUnmounted());
-        this.unsubscribeRoot = root.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.root.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -296,7 +297,7 @@ export class AnchorPositioner {
             strategy: this.options.positionMethod ?? 'absolute',
             middleware: this.createMiddleware()
         }).then((data) => {
-            if (this.destroyed || updateId !== this.updateId) {
+            if (!this.connected || updateId !== this.updateId) {
                 return;
             }
             this.store.update({
@@ -311,9 +312,7 @@ export class AnchorPositioner {
         });
     };
 
-    destroy() {
-        this.destroyed = true;
-        this.unsubscribeRoot();
+    protected override onDisconnect() {
         this.autoUpdateEffect.destroy();
         this.mountedEffect.destroy();
     }
@@ -401,6 +400,9 @@ export class AnchorPositioner {
     // ---- internals --------------------------------------------------------------------
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { mounted, keepMounted = false, disableAnchorTracking = false } = this.options;
         this.mountedEffect.sync([mounted]);
         this.syncAnchor();

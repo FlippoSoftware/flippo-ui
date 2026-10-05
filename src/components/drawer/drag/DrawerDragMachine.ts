@@ -1,6 +1,7 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
+import { Connectable } from '~@lib/Connectable';
 import { mergeProps } from '~@props/mergeProps';
 
 import type { DialogStore } from '~@components/dialog/store/DialogStore';
@@ -36,7 +37,7 @@ const drawerDragStateAttributesMapping = {
 /**
  * State machine of `Drawer.Drag`: the drag handle running the {@link DrawerGesture}.
  */
-export class DrawerDragMachine {
+export class DrawerDragMachine extends Connectable {
     readonly gesture: DrawerGesture;
 
     private options: DrawerDragOptions;
@@ -45,19 +46,20 @@ export class DrawerDragMachine {
 
     private readonly dialogStore: DialogStore<unknown>;
 
-    private readonly unsubscribers: (() => void)[];
-
     constructor(drawerStore: DrawerStore, dialogStore: DialogStore<unknown>, options: DrawerDragOptions = {}) {
+        super();
         this.drawerStore = drawerStore;
         this.dialogStore = dialogStore;
         this.options = options;
         this.gesture = new DrawerGesture(this.getGestureOptions());
-        this.unsubscribers = [
-            this.gesture.store.subscribe(() => this.syncDrawerStore()),
-            drawerStore.subscribe(() => this.gesture.setOptions(this.getGestureOptions())),
-            dialogStore.subscribe(() => this.gesture.setOptions(this.getGestureOptions()))
-        ];
         this.syncDrawerStore();
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.gesture);
+        this.addCleanup(this.gesture.store.subscribe(() => this.syncDrawerStore()));
+        this.addCleanup(this.drawerStore.subscribe(() => this.gesture.setOptions(this.getGestureOptions())));
+        this.addCleanup(this.dialogStore.subscribe(() => this.gesture.setOptions(this.getGestureOptions())));
     }
 
     setOptions(options: DrawerDragOptions) {
@@ -93,12 +95,7 @@ export class DrawerDragMachine {
         );
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.gesture.destroy();
-    }
+    protected override onDisconnect() {}
 
     private getGestureOptions(): DrawerGestureOptions {
         const { drawerStore, dialogStore, options } = this;

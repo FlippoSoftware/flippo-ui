@@ -15,6 +15,7 @@ import { getSeparatorProps } from '~@components/separator/root/getSeparatorProps
 import { SwitchMachine } from '~@components/switch/root/SwitchMachine';
 import { ToggleMachine } from '~@components/toggle/root/ToggleMachine';
 import { ToggleGroupMachine } from '~@components/toggle-group/root/ToggleGroupMachine';
+import { connected } from '~@test/utils/connected';
 
 function clickEvent(target: Element) {
     const event = new MouseEvent('click', { bubbles: true, cancelable: true });
@@ -29,7 +30,7 @@ afterEach(() => {
 describe('Checkbox', () => {
     it('toggles through the hidden input and reports state', () => {
         const onCheckedChange = vi.fn();
-        const checkbox = new CheckboxMachine({ defaultId: 'cb', name: 'agree', onCheckedChange });
+        const checkbox = connected(new CheckboxMachine({ defaultId: 'cb', name: 'agree', onCheckedChange }));
         const control = document.createElement('button');
         const input = document.createElement('input');
         document.body.append(control, input);
@@ -54,9 +55,9 @@ describe('Checkbox', () => {
 
     it('groups checkboxes with a parent checkbox', () => {
         const onValueChange = vi.fn();
-        const group = new CheckboxGroupMachine({ allValues: ['a', 'b'], defaultValue: ['a'], onValueChange } as never);
+        const group = connected(new CheckboxGroupMachine({ allValues: ['a', 'b'], defaultValue: ['a'], onValueChange } as never));
         expect(group.value).toEqual(['a']);
-        const a = new CheckboxMachine({ defaultId: 'a', value: 'a', group } as never);
+        const a = connected(new CheckboxMachine({ defaultId: 'a', value: 'a', group } as never));
         expect(a.checked).toBe(true);
         group.setValue(['a', 'b'], { reason: 'none', event: new Event('x'), cancel() {}, isCanceled: false } as never);
         expect(group.value).toEqual(['a', 'b']);
@@ -65,7 +66,7 @@ describe('Checkbox', () => {
 
 describe('Switch', () => {
     it('reflects the checked state', () => {
-        const switchMachine = new SwitchMachine({ defaultId: 'sw', defaultInputId: 'sw-input', defaultChecked: true });
+        const switchMachine = connected(new SwitchMachine({ defaultId: 'sw', defaultInputId: 'sw-input', defaultChecked: true }));
         expect(switchMachine.checked).toBe(true);
         expect(SwitchMachine.attrs(switchMachine.getState())).toHaveProperty('data-checked', '');
         expect(switchMachine.getRootProps().role).toBe('switch');
@@ -79,7 +80,7 @@ describe('Switch', () => {
 describe('Toggle and ToggleGroup', () => {
     it('toggles pressed state', () => {
         const onPressedChange = vi.fn();
-        const toggle = new ToggleMachine({ onPressedChange });
+        const toggle = connected(new ToggleMachine({ onPressedChange }));
         const element = document.createElement('button');
         toggle.setElement(element);
         toggle.onClick(clickEvent(element));
@@ -90,8 +91,8 @@ describe('Toggle and ToggleGroup', () => {
     });
 
     it('keeps a single pressed value in a group', () => {
-        const group = new ToggleGroupMachine({ defaultValue: ['bold'] });
-        const italic = new ToggleMachine({ value: 'italic', group });
+        const group = connected(new ToggleGroupMachine({ defaultValue: ['bold'] }));
+        const italic = connected(new ToggleMachine({ value: 'italic', group }));
         const element = document.createElement('button');
         italic.setElement(element);
         italic.onClick(clickEvent(element));
@@ -110,9 +111,9 @@ describe('Toggle and ToggleGroup', () => {
 describe('Radio', () => {
     it('checks the radio of the group value', () => {
         const onValueChange = vi.fn();
-        const group = new RadioGroupMachine({ id: 'rg', name: 'size', onValueChange });
-        const small = new RadioMachine({ value: 'small', group, defaultId: 'r1', defaultInputId: 'r1-input' });
-        const large = new RadioMachine({ value: 'large', group, defaultId: 'r2', defaultInputId: 'r2-input' });
+        const group = connected(new RadioGroupMachine({ id: 'rg', name: 'size', onValueChange }));
+        const small = connected(new RadioMachine({ value: 'small', group, defaultId: 'r1', defaultInputId: 'r1-input' }));
+        const large = connected(new RadioMachine({ value: 'large', group, defaultId: 'r2', defaultInputId: 'r2-input' }));
         const element = document.createElement('button');
         document.body.append(element);
         small.setRadioElement(element);
@@ -156,11 +157,11 @@ describe('Avatar', () => {
     it('tracks the image loading status and delays the fallback', () => {
         vi.useFakeTimers();
         const avatar = new AvatarMachine();
-        const loader = new AvatarImageLoader(avatar, { src: undefined });
+        const loader = connected(new AvatarImageLoader(avatar, { src: undefined }));
         expect(loader.status).toBe('error');
         expect(avatar.getState().imageLoadingStatus).toBe('error');
 
-        const fallback = new AvatarFallbackDelay(100);
+        const fallback = connected(new AvatarFallbackDelay(100));
         expect(fallback.isRendered('error')).toBe(false);
         vi.advanceTimersByTime(100);
         expect(fallback.isRendered('error')).toBe(true);

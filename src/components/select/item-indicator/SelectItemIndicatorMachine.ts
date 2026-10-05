@@ -2,6 +2,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { transitionStatusMapping } from '~@attributes/styleHookMapping';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
+import { Connectable } from '~@lib/Connectable';
 import { mergeProps } from '~@props/mergeProps';
 
 import type { MutableRef, TransitionStatus } from '~@lib/types';
@@ -15,7 +16,7 @@ export type SelectItemIndicatorState = {
 /**
  * State machine of `Select.ItemIndicator` (rendered when `keepMounted || selected`).
  */
-export class SelectItemIndicatorMachine {
+export class SelectItemIndicatorMachine extends Connectable {
     readonly transitions: TransitionStatusController;
 
     readonly ref: MutableRef<HTMLElement | null> = { current: null };
@@ -25,6 +26,7 @@ export class SelectItemIndicatorMachine {
     private readonly openChangeComplete: OpenChangeComplete;
 
     constructor(selected: boolean) {
+        super();
         this.selected = selected;
         this.transitions = new TransitionStatusController(selected);
         this.openChangeComplete = new OpenChangeComplete(this.ref, () => {
@@ -33,6 +35,10 @@ export class SelectItemIndicatorMachine {
             }
         });
         this.openChangeComplete.sync(selected);
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.transitions);
     }
 
     setSelected(selected: boolean) {
@@ -61,8 +67,7 @@ export class SelectItemIndicatorMachine {
         return mergeProps({ 'aria-hidden': true }, elementProps);
     }
 
-    destroy() {
-        this.transitions.destroy();
+    protected override onDisconnect() {
         this.openChangeComplete.destroy();
     }
 }

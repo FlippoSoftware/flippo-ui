@@ -4,6 +4,7 @@ import { COMPOSITE_KEYS } from '~@components/composite/utils/compositeKeys';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { PopupAutoResize } from '~@dom/PopupAutoResize';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_OBJECT } from '~@lib/constants';
 import { FocusManager } from '~@packages/floating-ui/FocusManager';
 import { HoverFloatingInteraction } from '~@packages/floating-ui/interactions/hover/HoverFloatingInteraction';
@@ -59,7 +60,7 @@ export type PopoverPopupSetup = {
  * State machine of `Popover.Popup`: focus management, hover close, auto-resize between triggers
  * and the popup's props.
  */
-export class PopoverPopupMachine<Payload = unknown> {
+export class PopoverPopupMachine<Payload = unknown> extends Connectable {
     readonly store: PopoverStore<Payload>;
 
     private options: PopoverPopupOptions;
@@ -76,9 +77,8 @@ export class PopoverPopupMachine<Payload = unknown> {
 
     private readonly openChangeComplete: OpenChangeComplete;
 
-    private readonly unsubscribe: () => void;
-
     constructor(store: PopoverStore<Payload>, setup: PopoverPopupSetup, options: PopoverPopupOptions = {}) {
+        super();
         this.store = store;
         this.setup = setup;
         this.options = options;
@@ -88,7 +88,11 @@ export class PopoverPopupMachine<Payload = unknown> {
             }
         });
         this.autoResize = new PopupAutoResize(this.getAutoResizeOptions());
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.autoResize);
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -146,10 +150,8 @@ export class PopoverPopupMachine<Payload = unknown> {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.destroyInteractions();
-        this.autoResize.destroy();
         this.openChangeComplete.destroy();
     }
 
@@ -224,6 +226,9 @@ export class PopoverPopupMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.store.select('floatingRootContext');
 
         if (floatingRoot !== this.floatingRoot) {
@@ -231,6 +236,8 @@ export class PopoverPopupMachine<Payload = unknown> {
             this.floatingRoot = floatingRoot;
             this.focusManagerInstance = new FocusManager(floatingRoot, this.getFocusManagerOptions());
             this.hover = new HoverFloatingInteraction(floatingRoot, this.getHoverOptions());
+            this.focusManagerInstance.connect();
+            this.hover.connect();
         } else {
             this.focusManagerInstance?.setOptions(this.getFocusManagerOptions());
             this.hover?.setOptions(this.getHoverOptions());
@@ -245,5 +252,6 @@ export class PopoverPopupMachine<Payload = unknown> {
         this.hover?.destroy();
         this.focusManagerInstance = null;
         this.hover = null;
+        this.floatingRoot = null;
     }
 }

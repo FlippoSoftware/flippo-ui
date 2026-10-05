@@ -1,6 +1,7 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { acquireScrollLock } from '~@dom/scrollLock';
+import { Connectable } from '~@lib/Connectable';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
 import { FloatingTreeStore } from '~@packages/floating-ui/FloatingTreeStore';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
@@ -66,7 +67,7 @@ type MenubarInternalState = {
  *
  * `context` is passed to the menus as their `{ type: 'menubar' }` parent.
  */
-export class MenubarMachine {
+export class MenubarMachine extends Connectable {
     readonly store = new Store<MenubarInternalState>({ contentElement: null, hasSubmenuOpen: false, openMethod: null });
 
     readonly tree = new FloatingTreeStore();
@@ -89,15 +90,20 @@ export class MenubarMachine {
         return acquireScrollLock(contentElement);
     });
 
-    private readonly unsubscribe: () => void;
-
     constructor(options: MenubarOptions, setup: MenubarSetup) {
+        super();
         this.options = options;
         this.setup = setup;
         this.node = new FloatingNodeRegistration(this.tree, setup.nodeId, null);
         this.composite = new CompositeRootMachine(this.getCompositeOptions());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.node);
+        this.connectChild(this.composite);
         this.tree.events.on('menuopenchange', this.onSubmenuOpenChange);
-        this.unsubscribe = this.store.subscribe(() => this.sync());
+        this.addCleanup(() => this.tree.events.off('menuopenchange', this.onSubmenuOpenChange));
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -162,12 +168,8 @@ export class MenubarMachine {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
-        this.tree.events.off('menuopenchange', this.onSubmenuOpenChange);
+    protected override onDisconnect() {
         this.scrollLock.destroy();
-        this.composite.destroy();
-        this.node.destroy();
     }
 
     private getCompositeOptions() {
@@ -180,6 +182,9 @@ export class MenubarMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         if (!this.store.state.hasSubmenuOpen && this.store.state.openMethod !== null) {
             this.store.set('openMethod', null);
         }

@@ -1,6 +1,7 @@
 import { acquireScrollLock } from '~@dom/scrollLock';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { DismissInteraction } from '~@packages/floating-ui/interactions/DismissInteraction';
 import { mergeInteractionProps } from '~@packages/floating-ui/interactions/mergeInteractionProps';
 import { getRoleProps } from '~@packages/floating-ui/interactions/role';
@@ -70,7 +71,7 @@ export type DialogRootActions = {
  * open state, transitions, dismissal (only the topmost of nested dialogs), scroll lock
  * and the count of nested open dialogs.
  */
-export class DialogRootMachine<Payload = unknown> {
+export class DialogRootMachine<Payload = unknown> extends Connectable {
     readonly store: DialogStore<Payload>;
 
     readonly floatingRoot: FloatingRootStore;
@@ -98,9 +99,8 @@ export class DialogRootMachine<Payload = unknown> {
 
     private readonly propsEffect = new Effect(() => this.updateSharedProps());
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(options: DialogRootOptions, setup: DialogRootSetup<Payload>) {
+        super();
         const { open, defaultOpen = false, modal = true, disablePointerDismissal = false, triggerId, defaultTriggerId = null } = options;
         const nested = setup.parentStore != null;
 
@@ -149,11 +149,13 @@ export class DialogRootMachine<Payload = unknown> {
                 this.store.setOpen(false, createChangeEventDetails(REASONS.imperativeAction) as never);
             }
         };
+    }
 
-        this.unsubscribers.push(
-            this.interactionType.store.subscribe(() => this.sync()),
-            this.floatingRoot.subscribe(() => this.sync())
-        );
+    protected override onConnect() {
+        this.connectChild(this.controller);
+        this.connectChild(this.dismiss);
+        this.addCleanup(this.interactionType.store.subscribe(() => this.sync()));
+        this.addCleanup(this.floatingRoot.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -172,15 +174,9 @@ export class DialogRootMachine<Payload = unknown> {
         return { payload: this.store.select('payload') as Payload | undefined };
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.scrollLock.destroy();
+    protected override onDisconnect() {
         this.parentNotifyEffect.destroy();
         this.propsEffect.destroy();
-        this.dismiss.destroy();
-        this.controller.destroy();
     }
 
     private get isTopmost() {
@@ -237,6 +233,9 @@ export class DialogRootMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store } = this;
 
         this.interactionType.setOpen(store.select('open'));

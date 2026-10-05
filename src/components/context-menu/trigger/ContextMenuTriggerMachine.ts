@@ -3,6 +3,7 @@ import { pressableTriggerOpenStateMapping } from '~@attributes/popupStateMapping
 import { findRootOwnerId } from '~@components/menu/utils/findRootOwnerId';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { ownerDocument } from '~@lib/owner';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { contains, getTarget } from '~@packages/floating-ui/utils/element';
@@ -26,7 +27,7 @@ type TouchLikeEvent = { touches: ArrayLike<{ clientX: number; clientY: number }>
 /**
  * State machine of `ContextMenu.Trigger`: opens on right click or long press at the pointer.
  */
-export class ContextMenuTriggerMachine {
+export class ContextMenuTriggerMachine extends Connectable {
     private readonly root: ContextMenuRootMachine;
 
     private element: HTMLElement | null = null;
@@ -42,12 +43,19 @@ export class ContextMenuTriggerMachine {
     private readonly documentContextMenuEffect = new Effect(() => this.attachDocumentContextMenu());
 
     constructor(root: ContextMenuRootMachine) {
+        super();
         this.root = root;
+    }
+
+    protected override onConnect() {
+        this.documentContextMenuEffect.sync([this.element]);
     }
 
     setElement = (element: HTMLElement | null) => {
         this.element = element;
-        this.documentContextMenuEffect.sync([element]);
+        if (this.connected) {
+            this.documentContextMenuEffect.sync([element]);
+        }
     };
 
     getState(): { open: boolean } {
@@ -72,7 +80,7 @@ export class ContextMenuTriggerMachine {
         );
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.longPressTimeout.clear();
         this.allowMouseUpTimeout.clear();
         this.documentContextMenuEffect.destroy();

@@ -1,5 +1,7 @@
 import type { ComponentStore } from '~@store/ComponentStore';
 
+import { Connectable } from '../Connectable';
+
 import type { PopupStoreContext, PopupStoreSelectors, PopupStoreState } from './popupStoreState';
 
 /**
@@ -32,8 +34,9 @@ export function registerTrigger(store: Pick<AnyPopupStore, 'context'>, id: strin
  * Replaces `useTriggerRegistration` + `useTriggerDataForwarding`: adapters call
  * {@link PopupTriggerRegistration.setElement} from their ref callback and
  * {@link PopupTriggerRegistration.sync} when the trigger becomes the one that mounted the popup.
+ * The element is only registered while connected; it is kept across reconnections.
  */
-export class PopupTriggerRegistration<State extends PopupStoreState<unknown>> {
+export class PopupTriggerRegistration<State extends PopupStoreState<unknown>> extends Connectable {
     private registeredId: string | null = null;
 
     private element: Element | null = null;
@@ -45,6 +48,7 @@ export class PopupTriggerRegistration<State extends PopupStoreState<unknown>> {
     private stateUpdates: TriggerStateUpdates<State>;
 
     constructor(store: AnyPopupStore<State>, triggerId: string | undefined, stateUpdates = {} as TriggerStateUpdates<State>) {
+        super();
         this.store = store;
         this.triggerId = triggerId;
         this.stateUpdates = stateUpdates;
@@ -76,8 +80,20 @@ export class PopupTriggerRegistration<State extends PopupStoreState<unknown>> {
     public setElement = (element: Element | null) => {
         this.unregister();
         this.element = element;
+        this.register();
+    };
 
-        if (this.triggerId === undefined || element === null) {
+    protected override onConnect() {
+        this.register();
+    }
+
+    protected override onDisconnect() {
+        this.unregister();
+    }
+
+    private register() {
+        const { element } = this;
+        if (!this.connected || this.triggerId === undefined || element === null) {
             return;
         }
 
@@ -110,27 +126,19 @@ export class PopupTriggerRegistration<State extends PopupStoreState<unknown>> {
                 ...this.stateUpdates
             } as Partial<State>);
         }
-    };
+    }
 
     /**
      * Forwards the trigger element and its state to the store if this trigger mounted the popup.
      * Call it whenever `isMountedByThisTrigger()` or the state updates change.
      */
     public sync() {
-        if (this.isMountedByThisTrigger()) {
+        if (this.connected && this.isMountedByThisTrigger()) {
             this.store.update({
                 activeTriggerElement: this.element,
                 ...this.stateUpdates
             } as Partial<State>);
         }
-    }
-
-    /**
-     * Unregisters the trigger element.
-     */
-    public destroy() {
-        this.unregister();
-        this.element = null;
     }
 
     private unregister() {

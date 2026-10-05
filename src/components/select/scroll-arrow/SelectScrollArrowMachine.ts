@@ -1,5 +1,6 @@
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
+import { Connectable } from '~@lib/Connectable';
 import { mergeProps } from '~@props/mergeProps';
 import { Timeout } from '~@timers/Timeout';
 
@@ -19,7 +20,7 @@ export type SelectScrollArrowState = {
 /**
  * State machine of `Select.ScrollUpArrow` / `Select.ScrollDownArrow`: scrolls item by item while hovered.
  */
-export class SelectScrollArrowMachine {
+export class SelectScrollArrowMachine extends Connectable {
     readonly transitions: TransitionStatusController;
 
     private readonly root: SelectRootMachine;
@@ -32,9 +33,8 @@ export class SelectScrollArrowMachine {
 
     private readonly openChangeComplete: OpenChangeComplete;
 
-    private readonly unsubscribe: () => void;
-
     constructor(root: SelectRootMachine, positioner: SelectPositionerMachine, direction: 'up' | 'down') {
+        super();
         this.root = root;
         this.positioner = positioner;
         this.direction = direction;
@@ -44,14 +44,16 @@ export class SelectScrollArrowMachine {
                 this.transitions.setMounted(false);
             }
         });
+    }
 
-        const { store, refs } = root;
+    protected override onConnect() {
+        this.connectChild(this.transitions);
+        const { store, refs } = this.root;
         refs.scrollArrowsMountedCountRef.current += 1;
         if (!store.state.hasScrollArrows) {
             store.set('hasScrollArrows', true);
         }
-
-        this.unsubscribe = store.subscribe(() => this.sync());
+        this.addCleanup(store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -105,11 +107,9 @@ export class SelectScrollArrowMachine {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.timeout.clear();
         this.openChangeComplete.destroy();
-        this.transitions.destroy();
         const { store, refs } = this.root;
         refs.scrollArrowsMountedCountRef.current = Math.max(0, refs.scrollArrowsMountedCountRef.current - 1);
         if (refs.scrollArrowsMountedCountRef.current === 0 && store.state.hasScrollArrows) {
@@ -118,6 +118,9 @@ export class SelectScrollArrowMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const visible = this.visible;
         this.transitions.setOpen(visible);
         this.openChangeComplete.sync(visible);

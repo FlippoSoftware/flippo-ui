@@ -2,6 +2,7 @@ import { isElement } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 
 import { Effect } from '../../utils/Effect';
 import { getTarget, isTargetInsideEnabledTrigger } from '../../utils/element';
@@ -53,7 +54,7 @@ function getCloseDelay(value: number | (() => number), pointerType?: string) {
  * Hover interactions attached to the floating element.
  * Replacement for `useHoverFloatingInteraction`.
  */
-export class HoverFloatingInteraction {
+export class HoverFloatingInteraction extends Connectable {
     private options: HoverFloatingInteractionOptions;
 
     private readonly store: FloatingRootStore;
@@ -64,18 +65,20 @@ export class HoverFloatingInteraction {
 
     private readonly pointerEventsBlock: Effect;
 
-    private readonly unsubscribe: () => void;
-
     private previousOpen: boolean;
 
     constructor(store: FloatingRootStore, options: HoverFloatingInteractionOptions = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.instance = getHoverInteractionState(store);
         this.previousOpen = store.select('open');
         this.listeners = new Effect(() => this.attachListeners());
         this.pointerEventsBlock = new Effect(() => this.applyPointerEventsBlock());
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -84,8 +87,7 @@ export class HoverFloatingInteraction {
         this.sync();
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.listeners.destroy();
         this.pointerEventsBlock.destroy();
         this.cleanupMouseMoveHandler();
@@ -98,6 +100,9 @@ export class HoverFloatingInteraction {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { enabled, tree, parentId } = this.settings;
         const { open, floatingElement, domReferenceElement } = this.store.state;
 

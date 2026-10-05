@@ -1,61 +1,66 @@
-type AnimationFrameId = number;
+/**
+ * Handle of a scheduled frame callback. Cancelling sets `callback` to `null`.
+ * A handle only ever refers to its own callback, so cancelling a stale handle (from a frame that
+ * already ran) is a no-op and can't affect other callbacks.
+ */
+export type AnimationFrameId = {
+    callback: FrameRequestCallback | null;
+};
 
 /**
- * Unlike `setTimeout`, rAF doesn't guarantee a positive integer return value, so we can't have
- * a monomorphic `uint` type with `0` meaning empty.
- * See warning note at:
- * https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame#return_value
+ * Internal handle: also remembers the batch (queue) it was requested in.
  */
-const EMPTY = null;
+type FrameHandle = AnimationFrameId & {
+    queue: FrameHandle[];
+};
 
 let LAST_RAF: typeof globalThis.requestAnimationFrame | undefined = globalThis.requestAnimationFrame;
 
 class Scheduler {
-    /* This implementation uses an array as a backing data-structure for frame callbacks.
-     * It allows `O(1)` callback cancelling by inserting a `null` in the array, though it
-     * never calls the native `cancelAnimationFrame` if there are no frames left. This can
-     * be much more efficient if there is a call pattern that alterns as
-     * "request-cancel-request-cancel-…".
-     * But in the case of "request-request-…-cancel-cancel-…", it leaves the final animation
-     * frame to run anyway. We turn that frame into a `O(1)` no-op via `callbacksCount`. */
+    /* All callbacks requested before the next frame share one native `requestAnimationFrame`.
+     * Cancelling clears the handle's callback in `O(1)` and never calls the native
+     * `cancelAnimationFrame`: with a "request-cancel-request-cancel-…" pattern the native frame is
+     * reused, and when everything was cancelled the frame runs as an `O(1)` no-op via `pendingCount`.
+     * Handles are objects rather than counters, so there is nothing to overflow. */
 
-    callbacks = [] as (FrameRequestCallback | null)[];
+    queue: FrameHandle[] = [];
 
-    callbacksCount = 0;
-
-    nextId = 1;
-
-    startId = 1;
+    pendingCount = 0;
 
     isScheduled = false;
 
     tick = (timestamp: number) => {
         this.isScheduled = false;
 
-        const currentCallbacks = this.callbacks;
-        const currentCallbacksCount = this.callbacksCount;
+        const currentQueue = this.queue;
+        const currentPendingCount = this.pendingCount;
 
-        // Update these before iterating, callbacks could call `requestAnimationFrame` again.
-        this.callbacks = [];
-        this.callbacksCount = 0;
-        this.startId = this.nextId;
+        // Reset before running the callbacks: they may request new frames (queued for the next tick).
+        this.queue = [];
+        this.pendingCount = 0;
 
-        if (currentCallbacksCount > 0) {
-            for (const callback of currentCallbacks) {
-                callback?.(timestamp);
+        if (currentPendingCount === 0) {
+            return;
+        }
+
+        for (const handle of currentQueue) {
+            // Read the callback right before running it: an earlier callback of this frame may have cancelled it.
+            const callback = handle.callback;
+            if (callback !== null) {
+                handle.callback = null;
+                callback(timestamp);
             }
         }
     };
 
-    request(fn: FrameRequestCallback) {
-        const id = this.nextId;
-        this.nextId += 1;
-        this.callbacks.push(fn);
-        this.callbacksCount += 1;
+    request(fn: FrameRequestCallback): AnimationFrameId {
+        const handle: FrameHandle = { callback: fn, queue: this.queue };
+        this.queue.push(handle);
+        this.pendingCount += 1;
 
         /* In a test environment with fake timers, a fake `requestAnimationFrame` can be called
          * but there's no guarantee that the animation frame will actually run before the fake
-         * timers are teared, which leaves `isScheduled` set, but won't run our `tick()`. */
+         * timers are teared down, which leaves `isScheduled` set but never runs our `tick()`. */
         let didRAFChange = false;
         if (process.env.NODE_ENV === 'test' && LAST_RAF !== globalThis.requestAnimationFrame) {
             LAST_RAF = globalThis.requestAnimationFrame;
@@ -66,16 +71,20 @@ class Scheduler {
             globalThis.requestAnimationFrame(this.tick);
             this.isScheduled = true;
         }
-        return id;
+
+        return handle;
     }
 
-    cancel(id: AnimationFrameId) {
-        const index = id - this.startId;
-        if (index < 0 || index >= this.callbacks.length) {
+    cancel(handle: AnimationFrameId | null | undefined) {
+        if (handle == null || handle.callback === null) {
             return;
         }
-        this.callbacks[index] = null;
-        this.callbacksCount -= 1;
+
+        handle.callback = null;
+        // Only the pending batch is counted; a handle of the frame being run was counted in the previous batch.
+        if ((handle as FrameHandle).queue === this.queue) {
+            this.pendingCount -= 1;
+        }
     }
 }
 
@@ -90,15 +99,15 @@ export class AnimationFrame {
         return new AnimationFrame();
     }
 
-    static request(fn: FrameRequestCallback) {
+    static request(fn: FrameRequestCallback): AnimationFrameId {
         return scheduler.request(fn);
     }
 
-    static cancel(id: AnimationFrameId) {
-        return scheduler.cancel(id);
+    static cancel(handle: AnimationFrameId | null | undefined) {
+        scheduler.cancel(handle);
     }
 
-    currentId: AnimationFrameId | null = EMPTY;
+    currentId: AnimationFrameId | null = null;
 
     /**
      * Executes `fn` on the next frame, clearing any previously scheduled call.
@@ -106,15 +115,15 @@ export class AnimationFrame {
     request(fn: () => void) {
         this.cancel();
         this.currentId = scheduler.request(() => {
-            this.currentId = EMPTY;
+            this.currentId = null;
             fn();
         });
     }
 
     cancel = () => {
-        if (this.currentId !== EMPTY) {
+        if (this.currentId !== null) {
             scheduler.cancel(this.currentId);
-            this.currentId = EMPTY;
+            this.currentId = null;
         }
     };
 

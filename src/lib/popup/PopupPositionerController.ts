@@ -1,6 +1,7 @@
 import type { Middleware } from '@floating-ui/dom';
 
 import { runOnceAnimationsFinish } from '~@dom/animations';
+import { Connectable } from '~@lib/Connectable';
 import { POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
@@ -71,10 +72,10 @@ export type PopupPositionerState = {
  * floating tree node registration and the positioner element's props.
  * Replacement for `useAnchorPositioning` + `<FloatingNode>` + the positioner's default props.
  */
-export class PopupPositionerController<State extends PopupStoreState<unknown>> {
-    private positioner: AnchorPositioner | null = null;
+export class PopupPositionerController<State extends PopupStoreState<unknown>> extends Connectable {
+    private positioner: AnchorPositioner;
 
-    private floatingRoot: FloatingRootStore | null = null;
+    private floatingRoot: FloatingRootStore;
 
     private options: PopupPositionerOptions;
 
@@ -94,27 +95,40 @@ export class PopupPositionerController<State extends PopupStoreState<unknown>> {
 
     private positionerUnsubscribe: (() => void) | null = null;
 
-    private readonly unsubscribe: () => void;
-
     constructor(store: AnyPopupStore<State>, setup: PopupPositionerSetup, options: PopupPositionerOptions = {}) {
+        super();
         this.store = store;
         this.setup = setup;
         this.options = options;
         this.node = setup.nodeId === undefined ? null : new FloatingNodeRegistration(setup.tree, setup.nodeId, setup.parentNodeId ?? null);
-        this.unsubscribe = store.subscribe(() => this.sync());
+        // Created right away (state only): the parts read the position while rendering.
+        this.floatingRoot = store.select('floatingRootContext');
+        this.positioner = new AnchorPositioner(this.floatingRoot, this.getPositionerOptions());
+    }
+
+    protected override onConnect() {
+        if (this.node) {
+            this.connectChild(this.node);
+        }
+        this.addCleanup(this.store.subscribe(() => this.sync()));
+        this.connectPositioner();
         this.sync();
     }
 
     setOptions(options: PopupPositionerOptions) {
         this.options = options;
-        this.sync();
+        if (this.connected) {
+            this.sync();
+        } else {
+            this.positioner.setOptions(this.getPositionerOptions());
+        }
     }
 
     /**
      * The anchor positioner (side, alignment, arrow and position state).
      */
     get anchorPositioner(): AnchorPositioner {
-        return this.positioner as AnchorPositioner;
+        return this.positioner;
     }
 
     /**
@@ -128,7 +142,7 @@ export class PopupPositionerController<State extends PopupStoreState<unknown>> {
      * Ref callback for the arrow element.
      */
     setArrow = (element: Element | null) => {
-        this.positioner?.setArrow(element);
+        this.positioner.setArrow(element);
     };
 
     /**
@@ -178,15 +192,18 @@ export class PopupPositionerController<State extends PopupStoreState<unknown>> {
         return { role: 'presentation', hidden: !mounted, style };
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.positionerUnsubscribe?.();
-        this.positioner?.destroy();
-        this.positioner = null;
+        this.positionerUnsubscribe = null;
+        this.positioner.disconnect();
         this.triggerChangeEffect.destroy();
         this.animationFrame.cancel();
-        this.node?.destroy();
-        this.listeners.clear();
+    }
+
+    private connectPositioner() {
+        this.positioner.connect();
+        this.positionerUnsubscribe = this.positioner.store.subscribe(() => this.emit());
+        this.node?.attach(this.floatingRoot, () => this.positioner.store.state.placement);
     }
 
     private isOpen() {
@@ -206,17 +223,20 @@ export class PopupPositionerController<State extends PopupStoreState<unknown>> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.store.select('floatingRootContext');
 
         if (floatingRoot !== this.floatingRoot) {
             this.positionerUnsubscribe?.();
-            this.positioner?.destroy();
+            this.positioner.disconnect();
             this.floatingRoot = floatingRoot;
             this.positioner = new AnchorPositioner(floatingRoot, this.getPositionerOptions());
-            this.positionerUnsubscribe = this.positioner.store.subscribe(() => this.emit());
-            this.node?.attach(floatingRoot, () => this.anchorPositioner.store.state.placement);
+            this.connectPositioner();
+            this.emit();
         } else {
-            this.positioner?.setOptions(this.getPositionerOptions());
+            this.positioner.setOptions(this.getPositionerOptions());
         }
 
         if (this.setup.onTriggerChange) {

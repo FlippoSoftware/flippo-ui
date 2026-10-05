@@ -1,3 +1,4 @@
+import { Connectable } from '~@lib/Connectable';
 import { contains, getTarget } from '~@packages/floating-ui/utils/element';
 import { Store } from '~@store/Store';
 
@@ -121,7 +122,7 @@ function isCloseDirection(direction: DrawerDirection, deltaAxis: number) {
  * Attach {@link DrawerGesture.onPointerDown}/`onPointerMove`/`onPointerUp` to the drag handle and
  * read {@link DrawerGesture.getStyle}, {@link DrawerGesture.getDataAttributes} and the `store` state.
  */
-export class DrawerGesture {
+export class DrawerGesture extends Connectable {
     readonly store: Store<GestureState>;
 
     private options: DrawerGestureOptions;
@@ -146,11 +147,10 @@ export class DrawerGesture {
 
     private touchMoveElement: HTMLElement | null = null;
 
-    private readonly removeResizeListener: () => void;
-
     private windowDimensions: { innerWidth: number; innerHeight: number } | undefined;
 
     constructor(options: DrawerGestureOptions) {
+        super();
         this.options = options;
         this.store = new Store<GestureState>({
             isSwiping: false,
@@ -158,17 +158,15 @@ export class DrawerGesture {
             dragOffset: { x: 0, y: 0 },
             activeSnapPointIndex: options.activeSnapPointIndex ?? 0
         });
+    }
 
-        if (typeof window === 'undefined') {
-            this.removeResizeListener = () => {};
-        } else {
-            const onResize = () => {
-                this.windowDimensions = { innerWidth: window.innerWidth, innerHeight: window.innerHeight };
-            };
-            onResize();
-            window.addEventListener('resize', onResize);
-            this.removeResizeListener = () => window.removeEventListener('resize', onResize);
-        }
+    protected override onConnect() {
+        const onResize = () => {
+            this.windowDimensions = { innerWidth: window.innerWidth, innerHeight: window.innerHeight };
+        };
+        onResize();
+        window.addEventListener('resize', onResize);
+        this.addCleanup(() => window.removeEventListener('resize', onResize));
 
         this.syncTouchMoveListener();
         this.snapToFirstPoint();
@@ -363,8 +361,7 @@ export class DrawerGesture {
         });
     };
 
-    destroy() {
-        this.removeResizeListener();
+    protected override onDisconnect() {
         this.detachTouchMove();
     }
 
@@ -505,7 +502,7 @@ export class DrawerGesture {
     }
 
     private snapToFirstPoint() {
-        if (this.store.state.activeSnapPointIndex !== 0) {
+        if (!this.connected || this.store.state.activeSnapPointIndex !== 0) {
             return;
         }
         const first = this.measure().snapPointsOffset[0];
@@ -515,7 +512,7 @@ export class DrawerGesture {
     }
 
     private syncTouchMoveListener() {
-        const element = this.options.draggableRef.current;
+        const element = this.connected ? this.options.draggableRef.current : null;
         if (element === this.touchMoveElement) {
             return;
         }

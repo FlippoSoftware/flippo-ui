@@ -1,5 +1,6 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
@@ -52,7 +53,7 @@ const EMPTY_VALUE: readonly string[] = [];
 /**
  * State machine of a toggle group: the set of pressed toggle values.
  */
-export class ToggleGroupMachine {
+export class ToggleGroupMachine extends Connectable {
     /**
      * Internal (uncontrolled) value.
      */
@@ -66,9 +67,14 @@ export class ToggleGroupMachine {
     private options: ToggleGroupOptions;
 
     constructor(options: ToggleGroupOptions = {}) {
+        super();
         this.options = options;
         this.store = new Store({ value: options.value === undefined ? (options.defaultValue ?? []) : EMPTY_VALUE });
         this.composite = new CompositeRootMachine(this.getCompositeOptions());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.composite);
     }
 
     setOptions(options: ToggleGroupOptions) {
@@ -91,9 +97,7 @@ export class ToggleGroupMachine {
         return this.options.inToolbar ? { role: 'group' } : { ...this.composite.getRootProps(), role: 'group' };
     }
 
-    destroy() {
-        this.composite.destroy();
-    }
+    protected override onDisconnect() {}
 
     /**
      * Current value (controlled or internal).

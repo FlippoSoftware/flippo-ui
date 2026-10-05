@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { connected } from '~@test/utils/connected';
 
 import { NavigationMenuContentMachine } from './content/NavigationMenuContentMachine';
 import { getNavigationMenuLinkProps } from './link/getNavigationMenuLinkProps';
@@ -25,20 +26,20 @@ describe('NavigationMenu machines', () => {
 
     it('opens the item of the clicked trigger and closes from a link', async () => {
         const onValueChange = vi.fn();
-        const root = new NavigationMenuRootMachine({ onValueChange }, { nodeId: 'nav' });
+        const root = connected(new NavigationMenuRootMachine({ onValueChange }, { nodeId: 'nav' }));
         const rootElement = document.createElement('nav');
         document.body.append(rootElement);
         root.setRootElement(rootElement);
 
-        const list = new NavigationMenuListMachine(root);
-        const trigger = new NavigationMenuTriggerMachine(root, 'products');
+        const list = connected(new NavigationMenuListMachine(root));
+        const trigger = connected(new NavigationMenuTriggerMachine(root, 'products'));
         const triggerElement = document.createElement('button');
         rootElement.append(triggerElement);
         trigger.setElement(triggerElement);
 
-        const positioner = new NavigationMenuPositionerMachine(root);
-        const viewport = new NavigationMenuViewportMachine(root, true);
-        const content = new NavigationMenuContentMachine(root, 'products');
+        const positioner = connected(new NavigationMenuPositionerMachine(root));
+        const viewport = connected(new NavigationMenuViewportMachine(root, true));
+        const content = connected(new NavigationMenuContentMachine(root, 'products'));
         const positionerElement = document.createElement('div');
         const viewportElement = document.createElement('div');
         positionerElement.append(viewportElement);

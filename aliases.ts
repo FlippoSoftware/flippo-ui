@@ -17,5 +17,6 @@ export const alias = {
     '~@positioning': resolve('./src/lib/positioning'),
     '~@props': resolve('./src/lib/props'),
     '~@store': resolve('./src/lib/store'),
-    '~@timers': resolve('./src/lib/timers')
+    '~@timers': resolve('./src/lib/timers'),
+    '~@test': resolve('./test')
 };

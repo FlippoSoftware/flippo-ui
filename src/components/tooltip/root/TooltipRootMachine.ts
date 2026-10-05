@@ -1,6 +1,7 @@
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { ClientPointInteraction } from '~@packages/floating-ui/interactions/ClientPointInteraction';
 import { DismissInteraction } from '~@packages/floating-ui/interactions/DismissInteraction';
@@ -75,7 +76,7 @@ export type TooltipRootActions = {
  * State machine of `Tooltip.Root`: open state (own or shared with a `Tooltip.Multiple` group),
  * transitions, instant animations in delay groups and focus/dismiss/client point interactions.
  */
-export class TooltipRootMachine<Payload = unknown> {
+export class TooltipRootMachine<Payload = unknown> extends Connectable {
     readonly store: TooltipStore<Payload>;
 
     readonly floatingRoot: FloatingRootStore;
@@ -102,9 +103,8 @@ export class TooltipRootMachine<Payload = unknown> {
 
     private readonly propsEffect = new Effect(() => this.updateSharedProps());
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(options: TooltipRootOptions, setup: TooltipRootSetup<Payload> = {}) {
+        super();
         const { open, defaultOpen = false, triggerId, defaultTriggerId = null } = options;
         const multiple = setup.multiple ?? null;
 
@@ -124,12 +124,9 @@ export class TooltipRootMachine<Payload = unknown> {
         }
 
         if (multiple) {
-            this.unsubscribers.push(multiple.store.registerStore(this.store as TooltipStore<unknown>));
             this.multipleItem = new ListRegistryItem(multiple.registry, {
                 onIndexChange: (index) => this.store.set('multipleItemIndex', index)
             });
-            // Re-run transitions and derived state when the group's shared state changes.
-            this.unsubscribers.push(multiple.store.subscribe(() => this.store.notifyAll()));
         }
 
         this.controller = new PopupRootController<TooltipState<Payload>>(
@@ -156,8 +153,23 @@ export class TooltipRootMachine<Payload = unknown> {
                 this.store.setOpen(false, createChangeEventDetails(REASONS.imperativeAction));
             }
         };
+    }
 
-        this.unsubscribers.push(this.floatingRoot.subscribe(() => this.sync()));
+    protected override onConnect() {
+        const multiple = this.multiple;
+        if (multiple) {
+            this.addCleanup(multiple.store.registerStore(this.store as TooltipStore<unknown>));
+            // Re-run transitions and derived state when the group's shared state changes.
+            this.addCleanup(multiple.store.subscribe(() => this.store.notifyAll()));
+        }
+        if (this.multipleItem) {
+            this.connectChild(this.multipleItem);
+        }
+        this.connectChild(this.controller);
+        this.connectChild(this.focus);
+        this.connectChild(this.dismiss);
+        this.connectChild(this.clientPoint);
+        this.addCleanup(this.floatingRoot.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -205,16 +217,8 @@ export class TooltipRootMachine<Payload = unknown> {
         return { payload: this.store.select('payload') as Payload | undefined };
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.multipleItem?.setElement(null);
+    protected override onDisconnect() {
         this.propsEffect.destroy();
-        this.focus.destroy();
-        this.dismiss.destroy();
-        this.clientPoint.destroy();
-        this.controller.destroy();
     }
 
     private get disabled() {
@@ -260,6 +264,9 @@ export class TooltipRootMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { store } = this;
         const { trackCursorAxis = 'none', disableHoverablePopup = false } = this.options;
         const openState = this.getOpenState();

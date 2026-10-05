@@ -2,6 +2,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
+import { Connectable } from '~@lib/Connectable';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
 import { contains, getTarget } from '~@packages/floating-ui/utils/element';
 import { mergeProps } from '~@props/mergeProps';
@@ -23,7 +24,7 @@ export type NavigationMenuContentState = {
 /**
  * State machine of `NavigationMenu.Content`: rendered into the viewport while its item is active (or exiting).
  */
-export class NavigationMenuContentMachine {
+export class NavigationMenuContentMachine extends Connectable {
     readonly transitions: TransitionStatusController;
 
     readonly composite: CompositeRootMachine;
@@ -40,9 +41,8 @@ export class NavigationMenuContentMachine {
 
     private readonly node: FloatingNodeRegistration;
 
-    private readonly unsubscribers: (() => void)[];
-
     constructor(root: NavigationMenuRootMachine, itemValue: unknown, direction: TextDirection = 'ltr') {
+        super();
         this.root = root;
         this.itemValue = itemValue;
         this.transitions = new TransitionStatusController(this.open);
@@ -62,7 +62,14 @@ export class NavigationMenuContentMachine {
             }
         );
         this.node = new FloatingNodeRegistration(root.tree, `${root.nodeId}-content`, root.nodeId);
-        this.unsubscribers = [root.store.subscribe(() => this.sync()), root.transitions.store.subscribe(() => this.sync())];
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.transitions);
+        this.connectChild(this.composite);
+        this.connectChild(this.node);
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
+        this.addCleanup(this.root.transitions.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -123,17 +130,12 @@ export class NavigationMenuContentMachine {
         );
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.openChangeComplete.destroy();
-        this.transitions.destroy();
-        this.composite.destroy();
-        this.node.destroy();
-    }
+    protected override onDisconnect() {}
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const open = this.open;
         this.transitions.setOpen(open);
         this.openChangeComplete.sync(open);

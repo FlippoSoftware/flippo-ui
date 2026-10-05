@@ -1,6 +1,7 @@
 import { ComboboxRootMachine } from '~@components/combobox/root/ComboboxRootMachine';
 import { createFilter } from '~@components/combobox/utils/comboboxFilter';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { stringifyAsLabel } from '~@lib/valueLabel';
 import { Store } from '~@store/Store';
 
@@ -35,7 +36,7 @@ export type AutocompleteRootOptions = Omit<
  * State machine of `Autocomplete.Root`: a combobox without selection whose input value is the value,
  * with optional inline completion of the highlighted item (`mode: 'inline' | 'both'`).
  */
-export class AutocompleteRootMachine {
+export class AutocompleteRootMachine extends Connectable {
     readonly combobox: ComboboxRootMachine;
 
     private options: AutocompleteRootOptions;
@@ -45,11 +46,16 @@ export class AutocompleteRootMachine {
     private previousControlledValue: string | undefined;
 
     constructor(options: AutocompleteRootOptions, setup: ComboboxRootSetup) {
+        super();
         this.options = options;
         this.internal = new Store({ internalValue: options.defaultValue ?? '', inlineInputValue: '' });
         this.previousControlledValue = options.value;
         this.combobox = new ComboboxRootMachine(this.getComboboxOptions(), setup);
         this.internal.subscribe(() => this.combobox.setOptions(this.getComboboxOptions()));
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.combobox);
     }
 
     get store() {
@@ -72,9 +78,7 @@ export class AutocompleteRootMachine {
         return this.combobox.inputValue.state.inputValue;
     }
 
-    destroy() {
-        this.combobox.destroy();
-    }
+    protected override onDisconnect() {}
 
     private get isControlled() {
         return this.options.value !== undefined;

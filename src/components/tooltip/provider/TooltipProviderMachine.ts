@@ -1,3 +1,4 @@
+import { Connectable } from '~@lib/Connectable';
 import { FloatingDelayGroup } from '~@packages/floating-ui/FloatingDelayGroup';
 
 export type TooltipProviderOptions = {
@@ -19,12 +20,13 @@ export type TooltipProviderOptions = {
 /**
  * State machine of `Tooltip.Provider`: a delay group shared by its tooltips.
  */
-export class TooltipProviderMachine {
+export class TooltipProviderMachine extends Connectable {
     readonly delayGroup: FloatingDelayGroup;
 
     private options: TooltipProviderOptions;
 
     constructor(options: TooltipProviderOptions = {}) {
+        super();
         this.options = options;
         this.delayGroup = new FloatingDelayGroup({
             delay: { open: options.delay, close: options.closeDelay },
@@ -45,7 +47,7 @@ export class TooltipProviderMachine {
         return this.options.closeDelay;
     }
 
-    destroy() {
+    protected override onDisconnect() {
         this.delayGroup.destroy();
     }
 }

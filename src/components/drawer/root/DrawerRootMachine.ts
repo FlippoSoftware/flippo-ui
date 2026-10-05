@@ -1,4 +1,5 @@
 import { DialogRootMachine } from '~@components/dialog/root/DialogRootMachine';
+import { Connectable } from '~@lib/Connectable';
 
 import type { DialogRootOptions, DialogRootSetup } from '~@components/dialog/root/DialogRootMachine';
 import type { DialogStore } from '~@components/dialog/store/DialogStore';
@@ -40,12 +41,13 @@ export type DrawerRootOptions = DialogRootOptions & {
 /**
  * State machine of `Drawer.Root`: a dialog plus the drag/snap state in a {@link DrawerStore}.
  */
-export class DrawerRootMachine<Payload = unknown> {
+export class DrawerRootMachine<Payload = unknown> extends Connectable {
     readonly drawerStore: DrawerStore;
 
     readonly dialog: DialogRootMachine<Payload>;
 
     constructor(options: DrawerRootOptions, setup: DialogRootSetup<Payload>) {
+        super();
         this.drawerStore = DrawerStore.create({
             direction: 'down',
             shouldDrag: true,
@@ -71,8 +73,8 @@ export class DrawerRootMachine<Payload = unknown> {
         this.dialog.setOptions(this.getDialogOptions(options));
     }
 
-    destroy() {
-        this.dialog.destroy();
+    protected override onConnect() {
+        this.connectChild(this.dialog);
     }
 
     private getDialogOptions(options: DrawerRootOptions): DialogRootOptions {

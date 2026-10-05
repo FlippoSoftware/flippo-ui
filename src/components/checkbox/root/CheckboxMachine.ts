@@ -6,6 +6,7 @@ import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { fieldValidityMapping } from '~@components/field/utils/fieldValidity';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_OBJECT } from '~@lib/constants';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
@@ -95,7 +96,7 @@ type GroupProps = {
  * State machine of a checkbox: a `role="checkbox"` element with a hidden checkbox input,
  * optionally part of a checkbox group (with a parent checkbox).
  */
-export class CheckboxMachine {
+export class CheckboxMachine extends Connectable {
     readonly store: Store<{ checked: boolean }>;
 
     readonly button: ButtonMachine;
@@ -111,6 +112,7 @@ export class CheckboxMachine {
     private previousChecked: boolean;
 
     constructor(options: CheckboxOptions) {
+        super();
         this.options = options;
         const { group, value: valueProp, defaultChecked = false, parent = false } = options;
         const value = valueProp ?? this.name;

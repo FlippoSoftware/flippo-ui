@@ -1,4 +1,5 @@
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
+import { Connectable } from '~@lib/Connectable';
 import { getNativeEvent, stopEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -10,7 +11,7 @@ import type { ComboboxRootMachine } from '../root/ComboboxRootMachine';
  * State machine of `Combobox.List`: the listbox (or grid) holding the items.
  * `registry` is the item list for non-virtualized lists.
  */
-export class ComboboxListMachine {
+export class ComboboxListMachine extends Connectable {
     readonly registry: ListRegistry;
 
     private readonly root: ComboboxRootMachine;
@@ -18,6 +19,7 @@ export class ComboboxListMachine {
     private readonly hasPositioner: boolean;
 
     constructor(root: ComboboxRootMachine, hasPositioner: boolean) {
+        super();
         this.root = root;
         this.hasPositioner = hasPositioner;
         const { store } = root;
@@ -25,6 +27,10 @@ export class ComboboxListMachine {
             elementsRef: store.state.listRef,
             labelsRef: root.store.state.items ? undefined : store.state.labelsRef
         });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registry);
     }
 
     setElement = (element: HTMLElement | null) => {
@@ -75,7 +81,5 @@ export class ComboboxListMachine {
         );
     }
 
-    destroy() {
-        this.registry.destroy();
-    }
+    protected override onDisconnect() {}
 }

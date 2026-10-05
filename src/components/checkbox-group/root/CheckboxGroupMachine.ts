@@ -2,6 +2,7 @@ import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { fieldValidityMapping } from '~@components/field/utils/fieldValidity';
 import { areArraysEqual } from '~@lib/areArraysEqual';
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY } from '~@lib/constants';
 import { mergeProps } from '~@props/mergeProps';
 import { Store } from '~@store/Store';
@@ -49,7 +50,7 @@ export type CheckboxGroupOptions = {
 /**
  * State machine of a checkbox group: the array of checked values shared by its checkboxes.
  */
-export class CheckboxGroupMachine {
+export class CheckboxGroupMachine extends Connectable {
     readonly store: Store<{ value: string[] | undefined }>;
 
     readonly parent: CheckboxGroupParent;
@@ -66,6 +67,7 @@ export class CheckboxGroupMachine {
     private previousValue: readonly string[];
 
     constructor(options: CheckboxGroupOptions) {
+        super();
         this.options = options;
         this.store = new Store({ value: options.defaultValue });
         this.parent = new CheckboxGroupParent(this);

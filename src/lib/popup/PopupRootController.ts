@@ -1,3 +1,5 @@
+import { Connectable } from '~@lib/Connectable';
+
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
 import type { FloatingRootStore } from '~@packages/floating-ui/FloatingRootStore';
 
@@ -69,7 +71,7 @@ export type PopupRootControllerSetup<Reason extends string> = {
  *
  * Component root machines compose it and add their own interactions.
  */
-export class PopupRootController<State extends PopupStoreState<unknown>, Reason extends string = string> {
+export class PopupRootController<State extends PopupStoreState<unknown>, Reason extends string = string> extends Connectable {
     readonly floatingRoot: FloatingRootStore<Reason>;
 
     readonly transitions: PopupTransitions<State>;
@@ -78,16 +80,15 @@ export class PopupRootController<State extends PopupStoreState<unknown>, Reason 
 
     private readonly setup: PopupRootControllerSetup<Reason>;
 
-    private readonly destroyFloatingRoot: () => void;
-
-    private readonly unsubscribe: () => void;
+    private readonly connectFloatingRoot: () => () => void;
 
     constructor(store: AnyPopupStore<State>, setup: PopupRootControllerSetup<Reason>, options: PopupRootControllerOptions = {}) {
+        super();
         this.store = store;
         this.setup = setup;
         this.setOptions(options);
 
-        const { floatingRoot, destroy } = createPopupFloatingRoot<State, Reason>(store, {
+        const { floatingRoot, connect } = createPopupFloatingRoot<State, Reason>(store, {
             floatingId: setup.floatingId,
             nested: setup.nested ?? false,
             noEmit: setup.noEmit,
@@ -95,14 +96,18 @@ export class PopupRootController<State extends PopupStoreState<unknown>, Reason 
             onOpenChange: setup.setOpen
         });
         this.floatingRoot = floatingRoot;
-        this.destroyFloatingRoot = destroy;
-        store.set('floatingRootContext', floatingRoot as State['floatingRootContext']);
-
+        this.connectFloatingRoot = connect;
         this.transitions = new PopupTransitions(store, { onUnmount: setup.onUnmount, flush: setup.flush });
-        this.transitions.start(setup.getTransitionOpen);
+    }
 
-        this.unsubscribe = store.subscribe(() => this.sync());
-        // `onChange` is not called here: the owner isn't fully constructed yet.
+    protected override onConnect() {
+        const { store, setup } = this;
+        // Published on connect: the parts read the floating root from the (possibly shared) store.
+        store.set('floatingRootContext', this.floatingRoot as State['floatingRootContext']);
+        this.addCleanup(this.connectFloatingRoot());
+        this.addCleanup(this.transitions.start(setup.getTransitionOpen));
+        this.addCleanup(store.subscribe(() => this.sync()));
+        // `onChange` is not called here: the owner syncs itself after connecting its parts.
         ensureImplicitActiveTrigger(store, setup.getTriggerOpen?.());
     }
 
@@ -120,12 +125,6 @@ export class PopupRootController<State extends PopupStoreState<unknown>, Reason 
     unmount = () => {
         this.transitions.forceUnmount();
     };
-
-    destroy() {
-        this.unsubscribe();
-        this.transitions.destroy();
-        this.destroyFloatingRoot();
-    }
 
     private sync() {
         ensureImplicitActiveTrigger(this.store, this.setup.getTriggerOpen?.());

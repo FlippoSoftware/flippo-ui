@@ -2,6 +2,7 @@ import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountT
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { PopupAutoResize } from '~@dom/PopupAutoResize';
+import { Connectable } from '~@lib/Connectable';
 import { HoverFloatingInteraction } from '~@packages/floating-ui/interactions/hover/HoverFloatingInteraction';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { mergeProps } from '~@props/mergeProps';
@@ -37,7 +38,7 @@ export type TooltipPopupSetup = {
  * State machine of `Tooltip.Popup`: hover close, auto-resize between triggers and
  * `Tooltip.Multiple` popup registration.
  */
-export class TooltipPopupMachine<Payload = unknown> {
+export class TooltipPopupMachine<Payload = unknown> extends Connectable {
     private readonly root: TooltipRootMachine<Payload>;
 
     private readonly setup: TooltipPopupSetup;
@@ -52,9 +53,8 @@ export class TooltipPopupMachine<Payload = unknown> {
 
     private readonly multipleEffect = new Effect(() => this.registerInMultiple());
 
-    private readonly unsubscribe: () => void;
-
     constructor(root: TooltipRootMachine<Payload>, setup: TooltipPopupSetup) {
+        super();
         this.root = root;
         this.setup = setup;
         const { store } = root;
@@ -64,7 +64,11 @@ export class TooltipPopupMachine<Payload = unknown> {
             }
         });
         this.autoResize = new PopupAutoResize(this.getAutoResizeOptions());
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.autoResize);
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -104,12 +108,11 @@ export class TooltipPopupMachine<Payload = unknown> {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.hover?.destroy();
         this.hover = null;
+        this.floatingRoot = null;
         this.multipleEffect.destroy();
-        this.autoResize.destroy();
         this.openChangeComplete.destroy();
     }
 
@@ -154,11 +157,15 @@ export class TooltipPopupMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.store.select('floatingRootContext');
         if (floatingRoot !== this.floatingRoot) {
             this.hover?.destroy();
             this.floatingRoot = floatingRoot;
             this.hover = new HoverFloatingInteraction(floatingRoot, this.getHoverOptions());
+            this.hover.connect();
         } else {
             this.hover?.setOptions(this.getHoverOptions());
         }

@@ -1,6 +1,7 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { COMPOSITE_KEYS } from '~@components/composite/utils/compositeKeys';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
+import { Connectable } from '~@lib/Connectable';
 import { FocusManager } from '~@packages/floating-ui/FocusManager';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -39,7 +40,7 @@ export type DialogPopupSetup = {
 /**
  * State machine of `Dialog.Popup`: focus management (trap for modal dialogs) and the popup's props.
  */
-export class DialogPopupMachine<Payload = unknown> {
+export class DialogPopupMachine<Payload = unknown> extends Connectable {
     private options: DialogPopupOptions;
 
     private readonly store: DialogStore<Payload>;
@@ -52,9 +53,8 @@ export class DialogPopupMachine<Payload = unknown> {
 
     private readonly openChangeComplete: OpenChangeComplete;
 
-    private readonly unsubscribe: () => void;
-
     constructor(store: DialogStore<Payload>, options: DialogPopupOptions = {}, setup: DialogPopupSetup = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.setup = setup;
@@ -63,7 +63,10 @@ export class DialogPopupMachine<Payload = unknown> {
                 store.context.onOpenChangeComplete?.(true);
             }
         });
-        this.unsubscribe = store.subscribe(() => this.sync());
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -113,10 +116,10 @@ export class DialogPopupMachine<Payload = unknown> {
         );
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.focusManagerInstance?.destroy();
         this.focusManagerInstance = null;
+        this.floatingRoot = null;
         this.openChangeComplete.destroy();
     }
 
@@ -142,11 +145,15 @@ export class DialogPopupMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.store.select('floatingRootContext');
         if (floatingRoot !== this.floatingRoot) {
             this.focusManagerInstance?.destroy();
             this.floatingRoot = floatingRoot;
             this.focusManagerInstance = new FocusManager(floatingRoot, this.getFocusManagerOptions());
+            this.focusManagerInstance.connect();
         } else {
             this.focusManagerInstance?.setOptions(this.getFocusManagerOptions());
         }

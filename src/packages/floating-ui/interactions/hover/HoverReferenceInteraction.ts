@@ -2,6 +2,7 @@ import { isElement } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { ownerDocument } from '~@lib/owner';
 
 import type { FloatingOpenChangeDetails } from '~@events/changeEventDetails';
@@ -76,7 +77,7 @@ const runImmediately = (fn: () => void) => fn();
  * Hover interactions attached to a reference/trigger element.
  * Replacement for `useHoverReferenceInteraction`.
  */
-export class HoverReferenceInteraction {
+export class HoverReferenceInteraction extends Connectable {
     private options: HoverReferenceInteractionOptions;
 
     private readonly store: FloatingRootStore;
@@ -87,11 +88,10 @@ export class HoverReferenceInteraction {
 
     private readonly openChangeListener: Effect;
 
-    private readonly unsubscribe: () => void;
-
     private readonly props: InteractionElementProps;
 
     constructor(store: FloatingRootStore, options: HoverReferenceInteractionOptions = {}) {
+        super();
         this.store = store;
         this.options = options;
         this.instance = getHoverInteractionState(store);
@@ -102,8 +102,11 @@ export class HoverReferenceInteraction {
             onPointerEnter: this.setPointerType,
             onMouseMove: this.onMouseMove
         };
-        this.unsubscribe = store.subscribe(() => this.sync());
         this.applyHandleCloseOptions();
+    }
+
+    protected override onConnect() {
+        this.addCleanup(this.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -120,8 +123,7 @@ export class HoverReferenceInteraction {
         return this.settings.enabled ? this.props : undefined;
     }
 
-    destroy() {
-        this.unsubscribe();
+    protected override onDisconnect() {
         this.listeners.destroy();
         this.openChangeListener.destroy();
     }
@@ -158,6 +160,9 @@ export class HoverReferenceInteraction {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { enabled, mouseOnly, move, isActiveTrigger } = this.settings;
         this.openChangeListener.sync([enabled]);
         this.listeners.sync([enabled, this.getTrigger(), mouseOnly, move, isActiveTrigger]);

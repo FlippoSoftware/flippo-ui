@@ -1,6 +1,7 @@
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
+import { Connectable } from '~@lib/Connectable';
 import { mergeProps } from '~@props/mergeProps';
 
 import type { MutableRef, TransitionStatus } from '~@lib/types';
@@ -18,7 +19,7 @@ export type MenuItemIndicatorState = MenuCheckableItemState & {
  * `Menu.CheckboxItemIndicator` / `Menu.RadioItemIndicator`: transition status while checked.
  * The adapter renders it when `keepMounted || checked`.
  */
-export class MenuItemIndicatorMachine {
+export class MenuItemIndicatorMachine extends Connectable {
     readonly transitions: TransitionStatusController;
 
     readonly ref: MutableRef<HTMLElement | null> = { current: null };
@@ -28,6 +29,7 @@ export class MenuItemIndicatorMachine {
     private readonly openChangeComplete: OpenChangeComplete;
 
     constructor(checked: boolean) {
+        super();
         this.checked = checked;
         this.transitions = new TransitionStatusController(checked);
         this.openChangeComplete = new OpenChangeComplete(this.ref, () => {
@@ -36,6 +38,10 @@ export class MenuItemIndicatorMachine {
             }
         });
         this.openChangeComplete.sync(checked);
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.transitions);
     }
 
     setChecked(checked: boolean) {
@@ -64,8 +70,7 @@ export class MenuItemIndicatorMachine {
         return mergeProps({ 'aria-hidden': true }, elementProps);
     }
 
-    destroy() {
-        this.transitions.destroy();
+    protected override onDisconnect() {
         this.openChangeComplete.destroy();
     }
 }

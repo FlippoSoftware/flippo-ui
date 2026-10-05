@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { connected } from '~@test/utils/connected';
+
 import { PopoverBackdrop } from './backdrop/PopoverBackdrop';
 import { PopoverCloseMachine } from './close/PopoverCloseMachine';
 import { PopoverPopupMachine } from './popup/PopoverPopupMachine';
@@ -9,15 +11,15 @@ import { registerPopoverTitle } from './title/registerPopoverTitle';
 import { PopoverTriggerMachine } from './trigger/PopoverTriggerMachine';
 
 function setup(options: ConstructorParameters<typeof PopoverRootMachine>[0] = {}) {
-    const root = new PopoverRootMachine(options, { fallbackReferenceId: 'ref' });
-    const trigger = new PopoverTriggerMachine(root.store, { id: 'trigger' });
+    const root = connected(new PopoverRootMachine(options, { fallbackReferenceId: 'ref' }));
+    const trigger = connected(new PopoverTriggerMachine(root.store, { id: 'trigger' }));
     const triggerElement = document.createElement('button');
     triggerElement.id = 'trigger';
     document.body.append(triggerElement);
     trigger.setElement(triggerElement);
 
-    const positioner = new PopoverPositionerMachine(root.store, { nodeId: 'node', tree: root.tree });
-    const popup = new PopoverPopupMachine(root.store, { positioner });
+    const positioner = connected(new PopoverPositionerMachine(root.store, { nodeId: 'node', tree: root.tree }));
+    const popup = connected(new PopoverPopupMachine(root.store, { positioner }));
     const positionerElement = document.createElement('div');
     const popupElement = document.createElement('div');
     positionerElement.append(popupElement);

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
+import { connected } from '~@test/utils/connected';
 
 import { getToastCloseProps } from './close/getToastCloseProps';
 import { createToastManager } from './manager/ToastManager';
@@ -21,7 +22,7 @@ describe('Toast machines', () => {
     });
 
     it('adds toasts, enforces the limit and auto-dismisses them', () => {
-        const provider = new ToastProviderMachine({ timeout: 1000, limit: 2 });
+        const provider = connected(new ToastProviderMachine({ timeout: 1000, limit: 2 }));
         const onClose = vi.fn();
 
         provider.add({ title: 'first', onClose });
@@ -40,8 +41,8 @@ describe('Toast machines', () => {
     });
 
     it('pauses timers while hovered and resumes them on leave', () => {
-        const provider = new ToastProviderMachine({ timeout: 1000 });
-        const viewport = new ToastViewportMachine(provider);
+        const provider = connected(new ToastProviderMachine({ timeout: 1000 }));
+        const viewport = connected(new ToastViewportMachine(provider));
         const viewportElement = document.createElement('div');
         document.body.append(viewportElement);
         viewport.setElement(viewportElement);
@@ -64,7 +65,7 @@ describe('Toast machines', () => {
 
     it('connects a toast manager and handles promises', async () => {
         const manager = createToastManager();
-        const provider = new ToastProviderMachine({ toastManager: manager });
+        const provider = connected(new ToastProviderMachine({ toastManager: manager }));
 
         const result = manager.promise(Promise.resolve(42), { loading: 'Loading', success: (value) => `Done ${value}`, error: 'Failed' });
         expect(provider.store.state.toasts[0]).toMatchObject({ type: 'loading', description: 'Loading' });
@@ -79,7 +80,7 @@ describe('Toast machines', () => {
     });
 
     it('removes a toast after its exit and closes it from Toast.Close', () => {
-        const provider = new ToastProviderMachine();
+        const provider = connected(new ToastProviderMachine());
         const onRemove = vi.fn();
         provider.add({ title: 'hello', onRemove, priority: 'high' });
         const toast = provider.store.state.toasts[0];
@@ -87,7 +88,7 @@ describe('Toast machines', () => {
             throw new Error('missing toast');
         }
 
-        const root = new ToastRootMachine(provider, { toast });
+        const root = connected(new ToastRootMachine(provider, { toast }));
         const element = document.createElement('div');
         document.body.append(element);
         root.setElement(element);

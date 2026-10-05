@@ -16,6 +16,7 @@ const menubar = (disabled: boolean): MenuParent => ({
 describe('MenuStore', () => {
     it('derives disabled and modal from the parent', () => {
         const store = new MenuStore({ parent: menubar(true) });
+        store.connectParent();
         expect(store.select('disabled')).toBe(true);
         expect(store.select('modal')).toBe(false);
         expect(store.select('rootId')).toBe('menubar-root');
@@ -34,6 +35,7 @@ describe('MenuStore', () => {
         const relay = vi.fn();
         const parent = new MenuStore({ rootId: 'root', keyboardEventRelay: relay });
         const child = new MenuStore({ parent: { type: 'menu', store: parent } });
+        const disconnect = child.connectParent();
 
         expect(child.select('rootId')).toBe('root');
         expect(child.select('floatingTreeRoot')).toBe(parent.state.floatingTreeRoot);
@@ -45,7 +47,7 @@ describe('MenuStore', () => {
         parent.set('activeIndex', 2);
         expect(listener).toHaveBeenCalledTimes(1);
 
-        child.destroy();
+        disconnect();
         parent.set('activeIndex', 3);
         expect(listener).toHaveBeenCalledTimes(1);
     });
@@ -53,6 +55,7 @@ describe('MenuStore', () => {
     it('stops listening to the previous parent menu when the parent changes', () => {
         const parent = new MenuStore();
         const child = new MenuStore({ parent: { type: 'menu', store: parent } });
+        child.connectParent();
         child.set('parent', { type: undefined });
 
         const listener = vi.fn();

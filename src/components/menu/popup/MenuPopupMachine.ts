@@ -4,6 +4,7 @@ import { COMPOSITE_KEYS } from '~@components/composite/utils/compositeKeys';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { FocusManager } from '~@packages/floating-ui/FocusManager';
 import { HoverFloatingInteraction } from '~@packages/floating-ui/interactions/hover/HoverFloatingInteraction';
 import { mergeProps } from '~@props/mergeProps';
@@ -43,7 +44,7 @@ export type MenuPopupSetup = {
 /**
  * State machine of `Menu.Popup`: focus management, hover close and closing on item press.
  */
-export class MenuPopupMachine<Payload = unknown> {
+export class MenuPopupMachine<Payload = unknown> extends Connectable {
     private options: MenuPopupOptions;
 
     private readonly root: MenuRootMachine<Payload>;
@@ -58,9 +59,8 @@ export class MenuPopupMachine<Payload = unknown> {
 
     private readonly openChangeComplete: OpenChangeComplete;
 
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(root: MenuRootMachine<Payload>, setup: MenuPopupSetup, options: MenuPopupOptions = {}) {
+        super();
         this.root = root;
         this.setup = setup;
         this.options = options;
@@ -70,13 +70,13 @@ export class MenuPopupMachine<Payload = unknown> {
                 store.context.onOpenChangeComplete?.(true);
             }
         });
+    }
 
-        const events = root.tree.events;
+    protected override onConnect() {
+        const events = this.root.tree.events;
         events.on('close', this.handleTreeClose);
-        this.unsubscribers.push(
-            () => events.off('close', this.handleTreeClose),
-            store.subscribe(() => this.sync())
-        );
+        this.addCleanup(() => events.off('close', this.handleTreeClose));
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -131,14 +131,12 @@ export class MenuPopupMachine<Payload = unknown> {
         );
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
+    protected override onDisconnect() {
         this.focusManagerInstance?.destroy();
         this.hover?.destroy();
         this.focusManagerInstance = null;
         this.hover = null;
+        this.floatingRoot = null;
         this.openChangeComplete.destroy();
     }
 
@@ -182,6 +180,9 @@ export class MenuPopupMachine<Payload = unknown> {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const floatingRoot = this.store.select('floatingRootContext');
         if (floatingRoot !== this.floatingRoot) {
             this.focusManagerInstance?.destroy();
@@ -189,6 +190,8 @@ export class MenuPopupMachine<Payload = unknown> {
             this.floatingRoot = floatingRoot;
             this.focusManagerInstance = new FocusManager(floatingRoot, this.getFocusManagerOptions());
             this.hover = new HoverFloatingInteraction(floatingRoot, this.getHoverOptions());
+            this.focusManagerInstance.connect();
+            this.hover.connect();
         } else {
             this.focusManagerInstance?.setOptions(this.getFocusManagerOptions());
             this.hover?.setOptions(this.getHoverOptions());

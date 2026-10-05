@@ -1,4 +1,5 @@
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
+import { Connectable } from '~@lib/Connectable';
 import { Store } from '~@store/Store';
 
 import type { MutableRef } from '~@lib/types';
@@ -8,23 +9,28 @@ import type { ComboboxRootMachine } from '../root/ComboboxRootMachine';
 /**
  * State machine of `Combobox.Chips`: the container of the selected values' chips, with keyboard navigation.
  */
-export class ComboboxChipsMachine {
+export class ComboboxChipsMachine extends Connectable {
     readonly store = new Store<{ highlightedChipIndex: number | undefined }>({ highlightedChipIndex: undefined });
 
     readonly registry: ListRegistry;
 
     private readonly root: ComboboxRootMachine;
 
-    private readonly unsubscribe: () => void;
-
     constructor(root: ComboboxRootMachine) {
+        super();
         this.root = root;
         this.registry = new ListRegistry();
-        this.unsubscribe = root.store.subscribe(() => {
-            if (root.store.state.open && this.store.state.highlightedChipIndex !== undefined) {
-                this.store.set('highlightedChipIndex', undefined);
-            }
-        });
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.registry);
+        this.addCleanup(
+            this.root.store.subscribe(() => {
+                if (this.root.store.state.open && this.store.state.highlightedChipIndex !== undefined) {
+                    this.store.set('highlightedChipIndex', undefined);
+                }
+            })
+        );
     }
 
     get chipsRef(): MutableRef<(HTMLElement | null)[]> {
@@ -43,8 +49,5 @@ export class ComboboxChipsMachine {
         this.root.store.state.chipsContainerRef.current = element;
     };
 
-    destroy() {
-        this.unsubscribe();
-        this.registry.destroy();
-    }
+    protected override onDisconnect() {}
 }

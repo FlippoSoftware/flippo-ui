@@ -205,8 +205,6 @@ function createInitialState<Payload>(): MenuState<Payload> {
 export class MenuStore<Payload = unknown> extends ComponentStore<Readonly<MenuState<Payload>>, MenuContext, MenuSelectors> {
     private unsubscribeParentListener: (() => void) | null = null;
 
-    private readonly unobserveParent: () => void;
-
     constructor(initialState?: Partial<MenuState<Payload>>) {
         super(
             { ...createInitialState<Payload>(), ...initialState },
@@ -224,9 +222,13 @@ export class MenuStore<Payload = unknown> extends ComponentStore<Readonly<MenuSt
             },
             menuSelectors
         );
+    }
 
-        // Set up propagation of state from parent menu if applicable.
-        this.unobserveParent = this.observe('parent', (parent) => {
+    /**
+     * Propagates the parent menu's updates to this store until the returned function is called.
+     */
+    connectParent(): () => void {
+        const unobserveParent = this.observe('parent', (parent) => {
             this.unsubscribeParentListener?.();
 
             if (parent.type === 'menu') {
@@ -244,6 +246,11 @@ export class MenuStore<Payload = unknown> extends ComponentStore<Readonly<MenuSt
 
             this.unsubscribeParentListener = null;
         });
+        return () => {
+            unobserveParent();
+            this.unsubscribeParentListener?.();
+            this.unsubscribeParentListener = null;
+        };
     }
 
     /**
@@ -252,14 +259,5 @@ export class MenuStore<Payload = unknown> extends ComponentStore<Readonly<MenuSt
      */
     setOpen(open: boolean, eventDetails: Omit<MenuChangeEventDetails, 'preventUnmountOnClose'>) {
         this.state.floatingRootContext.context.events.emit('setOpen', { open, eventDetails });
-    }
-
-    /**
-     * Stops propagating the parent menu's updates.
-     */
-    destroy() {
-        this.unobserveParent();
-        this.unsubscribeParentListener?.();
-        this.unsubscribeParentListener = null;
     }
 }

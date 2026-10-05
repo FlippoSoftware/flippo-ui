@@ -1,4 +1,5 @@
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY } from '~@lib/constants';
 import { mergeProps } from '~@props/mergeProps';
 import { Store } from '~@store/Store';
@@ -29,7 +30,7 @@ export type TabsListOptions = {
 /**
  * The tab list: roving focus over the tabs and detection of the activation direction.
  */
-export class TabsListMachine {
+export class TabsListMachine extends Connectable {
     readonly composite: CompositeRootMachine;
 
     readonly store = new Store<{ highlightedTabIndex: number; listElement: HTMLElement | null }>({
@@ -44,11 +45,16 @@ export class TabsListMachine {
     private previousTabEdge: number | null = null;
 
     constructor(tabs: TabsMachine, options: TabsListOptions = {}) {
+        super();
         this.tabs = tabs;
         this.options = options;
         this.composite = new CompositeRootMachine(this.getCompositeOptions());
         this.composite.registry.setOptions({ onMapChange: (map) => this.tabs.setTabMap(map as ListRegistryMap<TabsTabMetadata>) });
         this.syncPreviousTabEdge();
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.composite);
     }
 
     setOptions(options: TabsListOptions) {
@@ -179,7 +185,5 @@ export class TabsListMachine {
         }
     };
 
-    destroy() {
-        this.composite.destroy();
-    }
+    protected override onDisconnect() {}
 }

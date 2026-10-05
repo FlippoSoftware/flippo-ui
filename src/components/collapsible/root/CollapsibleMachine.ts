@@ -3,6 +3,7 @@ import { runOnceAnimationsFinish } from '~@dom/animations';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { warn } from '~@lib/warn';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
@@ -14,6 +15,7 @@ import type { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
 import type { Style, TransitionStatus } from '~@lib/types';
 import type { Props } from '~@props/mergeProps';
+import type { AnimationFrameId } from '~@timers/AnimationFrame';
 
 import { CollapsiblePanelCssVars } from '../panel/CollapsiblePanelCssVars';
 import { CollapsiblePanelDataAttributes } from '../panel/CollapsiblePanelDataAttributes';
@@ -79,7 +81,7 @@ const ACCORDION_ORIENTATION_ATTRIBUTE = 'data-orientation';
  * and the panel's measured dimensions for height/width animations.
  * Replacement for `useCollapsibleRoot` + `useCollapsiblePanel`.
  */
-export class CollapsibleMachine {
+export class CollapsibleMachine extends Connectable {
     readonly store: Store<CollapsibleInternalState>;
 
     readonly transitions: TransitionStatusController;
@@ -118,11 +120,8 @@ export class CollapsibleMachine {
 
     private panelRefCleanup: (() => void) | null = null;
 
-    private readonly mountFrame: number;
-
-    private readonly unsubscribers: (() => void)[] = [];
-
     constructor(options: CollapsibleOptions) {
+        super();
         this.options = options;
         const open = options.open ?? Boolean(options.defaultOpen);
         this.store = new Store<CollapsibleInternalState>({
@@ -148,13 +147,17 @@ export class CollapsibleMachine {
                 this.transitions.setMounted(false);
             }
         });
+    }
 
-        this.mountFrame = AnimationFrame.request(() => {
+    protected override onConnect() {
+        // The initial open state is shown without animation; later changes animate.
+        const mountFrame = AnimationFrame.request(() => {
             this.shouldCancelInitialOpenAnimation = false;
         });
-
-        this.unsubscribers.push(this.store.subscribe(() => this.sync()));
-        this.unsubscribers.push(this.transitions.store.subscribe(() => this.sync()));
+        this.addCleanup(() => AnimationFrame.cancel(mountFrame));
+        this.connectChild(this.transitions);
+        this.addCleanup(this.store.subscribe(() => this.sync()));
+        this.addCleanup(this.transitions.store.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -164,12 +167,7 @@ export class CollapsibleMachine {
         this.sync();
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        AnimationFrame.cancel(this.mountFrame);
-        this.transitions.destroy();
+    protected override onDisconnect() {
         this.transitionEffect.destroy();
         this.animationEffect.destroy();
         this.hiddenUntilFoundEffect.destroy();
@@ -397,7 +395,7 @@ export class CollapsibleMachine {
             }
         }
 
-        let nextFrame = -1;
+        let nextFrame: AnimationFrameId | null = null;
         const frame = AnimationFrame.request(() => {
             this.shouldCancelInitialOpenTransition = false;
             nextFrame = AnimationFrame.request(() => {
@@ -414,6 +412,9 @@ export class CollapsibleMachine {
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const { keepMounted, hiddenUntilFound, visible } = this.store.state;
         const open = this.open;
         const mounted = this.mounted;
@@ -437,7 +438,7 @@ export class CollapsibleMachine {
             return;
         }
 
-        let resizeFrame = -1;
+        let resizeFrame: AnimationFrameId | null = null;
 
         if (this.abortController != null) {
             this.abortController.abort();
@@ -574,8 +575,8 @@ export class CollapsibleMachine {
             return;
         }
 
-        let frame = -1;
-        let nextFrame = -1;
+        let frame: AnimationFrameId | null = null;
+        let nextFrame: AnimationFrameId | null = null;
 
         if (this.open && this.isBeforeMatch) {
             panel.style.transitionDuration = '0s';

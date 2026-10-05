@@ -6,6 +6,7 @@ import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { Connectable } from '~@lib/Connectable';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -24,7 +25,7 @@ export type ComboboxClearState = {
 /**
  * State machine of `Combobox.Clear`: visible when there is something to clear.
  */
-export class ComboboxClearMachine {
+export class ComboboxClearMachine extends Connectable {
     readonly button: ButtonMachine;
 
     readonly transitions: TransitionStatusController;
@@ -35,9 +36,8 @@ export class ComboboxClearMachine {
 
     private readonly openChangeComplete: OpenChangeComplete;
 
-    private readonly unsubscribers: (() => void)[];
-
     constructor(root: ComboboxRootMachine, options: { disabled?: boolean | undefined; nativeButton?: boolean | undefined } = {}) {
+        super();
         this.root = root;
         this.options = options;
         this.button = new ButtonMachine({ disabled: this.disabled, native: options.nativeButton });
@@ -47,7 +47,12 @@ export class ComboboxClearMachine {
                 this.transitions.setMounted(false);
             }
         });
-        this.unsubscribers = [root.store.subscribe(() => this.sync()), root.inputValue.subscribe(() => this.sync())];
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.transitions);
+        this.addCleanup(this.root.store.subscribe(() => this.sync()));
+        this.addCleanup(this.root.inputValue.subscribe(() => this.sync()));
         this.sync();
     }
 
@@ -123,15 +128,14 @@ export class ComboboxClearMachine {
         );
     }
 
-    destroy() {
-        for (const unsubscribe of this.unsubscribers) {
-            unsubscribe();
-        }
-        this.transitions.destroy();
+    protected override onDisconnect() {
         this.openChangeComplete.destroy();
     }
 
     private sync() {
+        if (!this.connected) {
+            return;
+        }
         const visible = this.visible;
         this.button.setOptions({ disabled: this.disabled, native: this.options.nativeButton });
         this.transitions.setOpen(visible);
