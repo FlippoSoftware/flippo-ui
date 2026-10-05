@@ -72,7 +72,7 @@ import each other relatively.
 
 Machines follow one shape: `new XMachine(options, setup)`, `setOptions(options)` on every render, `getState()`, a static
 `attrs(state)` for data attributes, `getXProps(elementProps)` returning props to spread (compatible with `mergeProps`),
-element setters for ref callbacks and `destroy()`.
+element setters for ref callbacks and `connect()`/`disconnect()`.
 
 ## Usage without a framework
 
@@ -137,10 +137,17 @@ class ReactStore<State extends object, Context, Selectors> extends ComponentStor
 
 Rules for adapters:
 
-1. Stores keep only internal state. Controlled props are synchronized with `syncControlledValue`.
-2. Elements reach the core through setters/ref callbacks. Measuring, focusing and `autoUpdate` wait for `whenConnected(element)`.
-3. Listeners and timers created by the core are released with `destroy()`.
-4. Portals are rendered by the adapter.
+1. Machines are created once per component instance; constructors have no side effects (safe during server
+   rendering and discarded renders). `connect()` starts subscriptions, listeners and timers and returns
+   `disconnect()`; an instance can reconnect (React StrictMode mounts, unmounts and mounts again).
+2. `setOptions(options)` runs on every render, inside `deferNotifications()` from `@flippo-software/core-components/store`:
+   store changes apply immediately, listeners are notified by `flushNotifications()` after the commit (a layout
+   effect in React). On the server, call `setOptions` directly.
+3. Machines never call user callbacks from `setOptions`; they react to their own store changes from a listener, so
+   deferred notifications also defer the callbacks.
+4. Controlled props are synchronized with `syncControlledValue`.
+5. Elements reach the core through setters/ref callbacks. Measuring, focusing and `autoUpdate` wait for `whenConnected(element)`.
+6. Portals are rendered by the adapter.
 
 ## Scripts
 

@@ -1,5 +1,42 @@
 export type Listener<State> = (state: State) => void;
 
+let deferDepth = 0;
+
+const deferredStores = new Set<Store<unknown>>();
+
+/**
+ * Runs `fn` with listener notifications deferred: state changes apply immediately (`store.state` is
+ * up to date), but listeners are only called by {@link flushNotifications}.
+ *
+ * Framework adapters use it to push options into machines while rendering, when notifying other
+ * components is not allowed, and flush once the render is committed.
+ */
+export function deferNotifications<T>(fn: () => T): T {
+    deferDepth += 1;
+    try {
+        return fn();
+    } finally {
+        deferDepth -= 1;
+    }
+}
+
+/**
+ * Notifies the listeners of every store changed inside {@link deferNotifications}, once per store
+ * with its latest state. Does nothing while a deferral is still running.
+ */
+export function flushNotifications() {
+    if (deferDepth > 0) {
+        return;
+    }
+    while (deferredStores.size > 0) {
+        const stores = [...deferredStores];
+        deferredStores.clear();
+        for (const store of stores) {
+            store.notifyListeners();
+        }
+    }
+}
+
 /**
  * A data store implementation that allows subscribing to state changes and updating the state.
  * It uses an observer pattern to notify subscribers when the state changes.
@@ -58,6 +95,21 @@ export class Store<State> {
         this.state = newState;
         this.updateTick += 1;
 
+        if (deferDepth > 0) {
+            deferredStores.add(this as Store<unknown>);
+            return;
+        }
+
+        this.notifyListeners();
+    }
+
+    /**
+     * Calls the listeners with the current state.
+     *
+     * @internal Used by {@link flushNotifications}; use the state setters instead.
+     */
+    notifyListeners() {
+        const newState = this.state;
         const currentTick = this.updateTick;
         for (const listener of this.listeners) {
             if (currentTick !== this.updateTick) {

@@ -84,8 +84,10 @@ export class RadioMachine extends Connectable {
             : null;
     }
 
-    protected override onDisconnect() {
-        this.listItem?.destroy();
+    protected override onConnect() {
+        if (this.listItem) {
+            this.connectChild(this.listItem);
+        }
     }
 
     /**

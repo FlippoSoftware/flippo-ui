@@ -34,6 +34,9 @@ export class NavigationMenuListMachine extends Connectable {
     }
 
     protected override onConnect() {
+        if (this.composite) {
+            this.connectChild(this.composite);
+        }
         this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
@@ -73,7 +76,6 @@ export class NavigationMenuListMachine extends Connectable {
         this.dismiss?.destroy();
         this.dismiss = null;
         this.floatingRoot = undefined;
-        this.composite?.destroy();
     }
 
     private getDismissOptions() {

@@ -15,6 +15,7 @@ import { getSeparatorProps } from '~@components/separator/root/getSeparatorProps
 import { SwitchMachine } from '~@components/switch/root/SwitchMachine';
 import { ToggleMachine } from '~@components/toggle/root/ToggleMachine';
 import { ToggleGroupMachine } from '~@components/toggle-group/root/ToggleGroupMachine';
+import { deferNotifications, flushNotifications } from '~@store/Store';
 import { connected } from '~@test/utils/connected';
 
 function clickEvent(target: Element) {
@@ -169,6 +170,32 @@ describe('Avatar', () => {
 
         loader.destroy();
         fallback.destroy();
+        vi.useRealTimers();
+    });
+
+    it('reports status changes from setOptions after deferred notifications are flushed', () => {
+        const avatar = new AvatarMachine();
+        const onLoadingStatusChange = vi.fn();
+        const loader = connected(new AvatarImageLoader(avatar, { src: undefined, onLoadingStatusChange }));
+        expect(onLoadingStatusChange).toHaveBeenLastCalledWith('error');
+
+        deferNotifications(() => loader.setOptions({ src: '/a.png', onLoadingStatusChange }));
+        expect(loader.status).toBe('loading');
+        expect(onLoadingStatusChange).not.toHaveBeenCalledWith('loading');
+        expect(avatar.getState().imageLoadingStatus).toBe('error');
+
+        flushNotifications();
+        expect(onLoadingStatusChange).toHaveBeenLastCalledWith('loading');
+        expect(avatar.getState().imageLoadingStatus).toBe('loading');
+    });
+
+    it('restarts the fallback delay only when it changes', () => {
+        vi.useFakeTimers();
+        const fallback = connected(new AvatarFallbackDelay(100));
+        vi.advanceTimersByTime(60);
+        fallback.setOptions({ delay: 100 });
+        vi.advanceTimersByTime(40);
+        expect(fallback.isRendered('error')).toBe(true);
         vi.useRealTimers();
     });
 });

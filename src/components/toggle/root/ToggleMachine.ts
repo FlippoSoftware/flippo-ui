@@ -8,6 +8,7 @@ import { Store } from '~@store/Store';
 
 import type { ToggleGroupMachine } from '~@components/toggle-group/root/ToggleGroupMachine';
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
+import type { Props } from '~@props/mergeProps';
 
 export type ToggleChangeEventReason = typeof REASONS.none;
 
@@ -65,8 +66,10 @@ export class ToggleMachine extends Connectable {
         this.listItem?.setElement(element);
     };
 
-    protected override onDisconnect() {
-        this.listItem?.destroy();
+    protected override onConnect() {
+        if (this.listItem) {
+            this.connectChild(this.listItem);
+        }
     }
 
     setOptions(options: ToggleOptions) {
@@ -106,7 +109,7 @@ export class ToggleMachine extends Connectable {
         }
     };
 
-    getRootProps() {
+    getRootProps(): Props {
         const group = this.options.group;
         const compositeProps = group ? group.composite.getItemProps(this.store.state.index) : {};
         return { ...compositeProps, 'aria-pressed': this.getState().pressed, onClick: this.onClick };

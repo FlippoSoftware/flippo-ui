@@ -18,6 +18,8 @@ import { SelectPositionerMachine } from '~@components/select/positioner/SelectPo
 import { SelectRootMachine } from '~@components/select/root/SelectRootMachine';
 import { SelectTriggerMachine } from '~@components/select/trigger/SelectTriggerMachine';
 import { ToastProviderMachine } from '~@components/toast/provider/ToastProviderMachine';
+import { ToggleMachine } from '~@components/toggle/root/ToggleMachine';
+import { ToggleGroupMachine } from '~@components/toggle-group/root/ToggleGroupMachine';
 import { TooltipPopupMachine } from '~@components/tooltip/popup/TooltipPopupMachine';
 import { TooltipPositionerMachine } from '~@components/tooltip/positioner/TooltipPositionerMachine';
 import { TooltipProviderMachine } from '~@components/tooltip/provider/TooltipProviderMachine';
@@ -271,6 +273,24 @@ describe('reconnection (React StrictMode)', () => {
         expect(provider.store.state.toasts[0]?.transitionStatus).toBe('ending');
 
         provider.disconnect();
+    });
+
+    it('toggle group: items stay registered for roving focus', async () => {
+        const group = new ToggleGroupMachine({});
+        const bold = new ToggleMachine({ value: 'bold', group });
+        const italic = new ToggleMachine({ value: 'italic', group });
+        bold.setElement(element('button'));
+        italic.setElement(element('button'));
+
+        const unmount = strictMount(group, bold, italic);
+        await Promise.resolve();
+
+        expect([bold.store.state.index, italic.store.state.index]).toEqual([0, 1]);
+        expect(bold.getRootProps().tabIndex).toBe(0);
+        expect(italic.getRootProps().tabIndex).toBe(-1);
+
+        unmount();
+        expect(listeners.describe()).toEqual([]);
     });
 
     it('scroll area reattaches its DOM effects', () => {

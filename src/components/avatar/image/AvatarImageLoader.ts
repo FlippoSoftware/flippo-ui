@@ -32,6 +32,9 @@ export class AvatarImageLoader extends Connectable {
     }
 
     protected override onConnect() {
+        // Status changes are reported from a store listener rather than where they happen: `setOptions` may run
+        // during a framework render, where user callbacks must not be called (adapters defer store notifications).
+        this.addCleanup(this.store.subscribe(({ status }) => this.reportStatus(status)));
         this.load();
     }
 
@@ -51,6 +54,9 @@ export class AvatarImageLoader extends Connectable {
 
     private setStatus(status: ImageLoadingStatus) {
         this.store.set('status', status);
+    }
+
+    private reportStatus(status: ImageLoadingStatus) {
         if (status !== 'idle') {
             this.options.onLoadingStatusChange?.(status);
             this.avatar.setImageLoadingStatus(status);

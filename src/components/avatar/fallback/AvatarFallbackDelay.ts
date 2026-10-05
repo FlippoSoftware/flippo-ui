@@ -24,6 +24,15 @@ export class AvatarFallbackDelay extends Connectable {
         this.setDelay(this.delay);
     }
 
+    /**
+     * Restarts the delay only when it changed, so it can be called on every render.
+     */
+    setOptions(options: { delay?: number | undefined }) {
+        if (options.delay !== this.delay) {
+            this.setDelay(options.delay);
+        }
+    }
+
     setDelay(delay: number | undefined) {
         this.delay = delay;
         this.timeout.clear();

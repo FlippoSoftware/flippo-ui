@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { ComponentStore } from './ComponentStore';
 import { createSelector, createSelectorMemoized } from './createSelector';
-import { Store } from './Store';
+import { deferNotifications, flushNotifications, Store } from './Store';
 
 type State = { count: number; label: string; optional: string | undefined };
 
@@ -207,5 +207,63 @@ describe('createSelectorMemoized', () => {
                 (_s: State, _a: number, _b: number, _c: number, _d: number) => 0
             )
         ).toThrow('Unsupported number of arguments');
+    });
+});
+
+describe('deferred notifications', () => {
+    it('applies changes immediately and notifies once per store on flush', () => {
+        const a = new Store({ value: 0 });
+        const b = new Store({ value: 0 });
+        const listenerA = vi.fn();
+        const listenerB = vi.fn();
+        a.subscribe(listenerA);
+        b.subscribe(listenerB);
+
+        deferNotifications(() => {
+            a.set('value', 1);
+            a.set('value', 2);
+            b.set('value', 1);
+            expect(a.state.value).toBe(2);
+        });
+        expect(listenerA).not.toHaveBeenCalled();
+        expect(listenerB).not.toHaveBeenCalled();
+
+        flushNotifications();
+        expect(listenerA).toHaveBeenCalledTimes(1);
+        expect(listenerA).toHaveBeenCalledWith({ value: 2 });
+        expect(listenerB).toHaveBeenCalledTimes(1);
+
+        flushNotifications();
+        expect(listenerA).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not flush inside a deferral and notifies directly outside one', () => {
+        const store = new Store({ value: 0 });
+        const listener = vi.fn();
+        store.subscribe(listener);
+
+        deferNotifications(() => {
+            store.set('value', 1);
+            flushNotifications();
+            expect(listener).not.toHaveBeenCalled();
+        });
+        flushNotifications();
+        expect(listener).toHaveBeenCalledTimes(1);
+
+        store.set('value', 2);
+        expect(listener).toHaveBeenCalledTimes(2);
+    });
+
+    it('flushes changes made by listeners during a flush', () => {
+        const source = new Store({ value: 0 });
+        const derived = new Store({ value: 0 });
+        const derivedListener = vi.fn();
+        derived.subscribe(derivedListener);
+        source.subscribe((state) => deferNotifications(() => derived.set('value', state.value * 2)));
+
+        deferNotifications(() => source.set('value', 2));
+        flushNotifications();
+        expect(derived.state.value).toBe(4);
+        expect(derivedListener).toHaveBeenCalledTimes(1);
     });
 });

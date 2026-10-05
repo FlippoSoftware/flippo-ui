@@ -93,6 +93,9 @@ export class ComboboxItemMachine extends Connectable {
     }
 
     protected override onConnect() {
+        if (this.listItem) {
+            this.connectChild(this.listItem);
+        }
         this.addCleanup(this.root.store.subscribe(() => this.sync()));
         this.sync();
     }
@@ -209,8 +212,6 @@ export class ComboboxItemMachine extends Connectable {
         this.listRefEffect.destroy();
         this.valueEffect.destroy();
         this.selectedIndexEffect.destroy();
-        this.listItem?.setElement(null);
-        this.listItem?.destroy();
     }
 
     private sync() {
