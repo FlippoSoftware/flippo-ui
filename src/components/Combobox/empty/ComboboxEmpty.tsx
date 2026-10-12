@@ -2,10 +2,7 @@ import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import {
-    useComboboxDerivedItemsContext,
-    useComboboxRootContext
-} from '../root/ComboboxRootContext';
+import { useComboboxDerivedItemsContext, useComboboxRootContext } from '../root/ComboboxRootContext';
 
 /**
  * Renders its children only when the list is empty.
@@ -31,12 +28,15 @@ export function ComboboxEmpty(componentProps: ComboboxEmpty.Props) {
 
     return useRenderElement('div', componentProps, {
         ref: [ref, store.state.emptyRef],
-        props: [{
-            children,
-            'role': 'status',
-            'aria-live': 'polite',
-            'aria-atomic': true
-        }, elementProps]
+        props: [
+            {
+                children,
+                role: 'status',
+                'aria-live': 'polite',
+                'aria-atomic': true
+            },
+            elementProps
+        ]
     });
 }
 

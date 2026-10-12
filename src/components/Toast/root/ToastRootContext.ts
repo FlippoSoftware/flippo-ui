@@ -18,9 +18,7 @@ export function useToastRootContext(): ToastRootContextValue {
     const context = React.use(ToastRootContext);
 
     if (!context) {
-        throw new Error(
-            'Headless UI: ToastRootContext is missing. Toast parts must be used within <Toast.Root>.'
-        );
+        throw new Error('Headless UI: ToastRootContext is missing. Toast parts must be used within <Toast.Root>.');
     }
     return context as ToastRootContextValue;
 }

@@ -28,7 +28,7 @@ export function NoSsr(props: NoSsr.Props) {
         }
     }, [defer]);
 
-    return (mountedState ? children : fallback);
+    return mountedState ? children : fallback;
 }
 
 export namespace NoSsr {

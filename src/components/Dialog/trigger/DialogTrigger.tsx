@@ -1,18 +1,17 @@
 import * as React from 'react';
 
-import { CLICK_TRIGGER_IDENTIFIER } from '~@lib/constants';
+import { DialogTriggerMachine } from '@flippo-software/core-components/dialog';
+
+import type { DialogHandle } from '@flippo-software/core-components/dialog';
+
+import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
-import { useTriggerDataForwarding } from '~@lib/popups';
 import { triggerOpenStateMapping } from '~@lib/popupStateMapping';
-import { useClick, useInteractions } from '~@packages/floating-ui-react';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button/useButton';
 import { useDialogRootContext } from '../root/DialogRootContext';
-
-import type { DialogHandle } from '../store/DialogHandle';
 
 /**
  * A button that opens the dialog.
@@ -38,55 +37,24 @@ export function DialogTrigger(componentProps: DialogTriggerProps) {
     const dialogRootContext = useDialogRootContext(true);
     const store = handle?.store ?? dialogRootContext?.store;
     if (!store) {
-        throw new Error(
-            'Base UI: <Dialog.Trigger> must be used within <Dialog.Root> or provided with a handle.'
-        );
+        throw new Error('Base UI: <Dialog.Trigger> must be used within <Dialog.Root> or provided with a handle.');
     }
 
-    const thisTriggerId = useHeadlessUiId(idProp);
-    const floatingContext = store.useState('floatingRootContext');
-    const isOpenedByThisTrigger = store.useState('isOpenedByTrigger', thisTriggerId);
+    const thisTriggerId = useHeadlessUiId(idProp) as string;
 
-    const triggerElementRef = React.useRef<HTMLElement | null>(null);
-
-    const { registerTrigger, isMountedByThisTrigger } = useTriggerDataForwarding(
-        thisTriggerId,
-        triggerElementRef,
-        store,
-        {
-            payload
-        }
-    );
-
-    const { getButtonProps, buttonRef } = useButton({
+    const trigger = useMachine((options) => new DialogTriggerMachine(store, options), {
+        id: thisTriggerId,
         disabled,
-        native: nativeButton
+        nativeButton,
+        payload
     });
-
-    const click = useClick(floatingContext, { enabled: floatingContext != null });
-
-    const localInteractionProps = useInteractions([click]);
-
-    const state: DialogTrigger.State = React.useMemo(
-        () => ({
-            disabled,
-            open: isOpenedByThisTrigger
-        }),
-        [disabled, isOpenedByThisTrigger]
-    );
-
-    const rootTriggerProps = store.useState('triggerProps', isMountedByThisTrigger);
+    const track = useTracker();
+    const state: DialogTrigger.State = useMachineState(trigger);
 
     return useRenderElement('button', componentProps, {
         state,
-        ref: [buttonRef, ref, registerTrigger, triggerElementRef],
-        props: [
-            localInteractionProps.getReferenceProps(),
-            rootTriggerProps,
-            { [CLICK_TRIGGER_IDENTIFIER as string]: '', id: thisTriggerId },
-            elementProps,
-            getButtonProps
-        ],
+        ref: [ref, trigger.setElement],
+        props: [elementProps, (props) => track(() => toReactProps(trigger.getTriggerProps(props)))],
         customStyleHookMapping: triggerOpenStateMapping
     });
 }
@@ -106,7 +74,8 @@ export type DialogTriggerProps<Payload = unknown> = {
      * it is also used to specify the active trigger for the dialogs in controlled mode (with the DialogRoot `triggerId` prop).
      */
     id?: string;
-} & NativeButtonProps & HeadlessUIComponentProps<'button', DialogTrigger.State>;
+} & NativeButtonProps &
+    HeadlessUIComponentProps<'button', DialogTrigger.State>;
 
 export type DialogTriggerState = {
     /**

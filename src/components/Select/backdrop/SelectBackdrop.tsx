@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks';
+import { SelectBackdrop as SelectBackdropCore } from '@flippo-software/core-components/select';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
+import { toReactProps, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -11,8 +12,7 @@ import { transitionStatusMapping } from '~@lib/styleHookMapping';
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useSelectRootContext } from '../root/SelectRootContext';
-import { selectors } from '../store';
+import { useSelectRoot } from '../root/SelectRootContext';
 
 const customStyleHookMapping: StateAttributesMapping<SelectBackdrop.State> = {
     ...popupStateMapping,
@@ -35,32 +35,17 @@ export function SelectBackdrop(componentProps: SelectBackdrop.Props) {
         ...elementProps
     } = componentProps;
 
-    const { store } = useSelectRootContext();
+    const root = useSelectRoot();
+    const track = useTracker();
+    const { open, transitionStatus } = track(() => SelectBackdropCore.getState(root));
+    const state: SelectBackdrop.State = React.useMemo(() => ({ open, transitionStatus }), [open, transitionStatus]);
 
-    const open = useStore(store, selectors.open);
-    const mounted = useStore(store, selectors.mounted);
-    const transitionStatus = useStore(store, selectors.transitionStatus);
-
-    const state: SelectBackdrop.State = {
-        open,
-        transitionStatus
-    };
-
-    const element = useRenderElement('div', componentProps, {
-        state,
+    return useRenderElement('div', componentProps, {
         ref,
-        props: [{
-            role: 'presentation',
-            hidden: !mounted,
-            style: {
-                userSelect: 'none',
-                WebkitUserSelect: 'none'
-            }
-        }, elementProps],
-        customStyleHookMapping
+        state,
+        customStyleHookMapping,
+        props: [elementProps, (props) => track(() => toReactProps(SelectBackdropCore.getProps(root, props)))]
     });
-
-    return element;
 }
 
 export type SelectBackdropState = {

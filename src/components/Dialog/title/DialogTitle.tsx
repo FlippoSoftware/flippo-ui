@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { registerDialogTitle } from '@flippo-software/core-components/dialog';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+
 import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
@@ -27,7 +30,7 @@ export function DialogTitle(componentProps: DialogTitleProps) {
 
     const id = useHeadlessUiId(idProp);
 
-    store.useSyncedValueWithCleanup('titleElementId', id);
+    useIsoLayoutEffect(() => (id === undefined ? undefined : registerDialogTitle(store, id)), [store, id]);
 
     return useRenderElement('h2', componentProps, {
         ref,

@@ -1,11 +1,13 @@
+import React from 'react';
 
-import * as React from 'react';
+import { ButtonMachine } from '@flippo-software/core-components/button';
+import { getToastCloseProps } from '@flippo-software/core-components/toast';
 
+import { toReactProps, useMachine } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button/useButton';
 import { useToastContext } from '../provider/ToastProviderContext';
 import { useToastRootContext } from '../root/ToastRootContext';
 
@@ -27,30 +29,17 @@ export function ToastClose(componentProps: ToastClose.Props) {
         ...elementProps
     } = componentProps;
 
-    const { close, focused } = useToastContext();
+    const { provider } = useToastContext();
     const { toast } = useToastRootContext();
 
-    const { getButtonProps, buttonRef } = useButton({
-        disabled,
-        native: nativeButton
-    });
+    const button = useMachine((options) => new ButtonMachine(options), { disabled, native: nativeButton });
 
-    const state: ToastClose.State = React.useMemo(
-        () => ({
-            type: toast.type
-        }),
-        [toast.type]
-    );
+    const state: ToastClose.State = React.useMemo(() => ({ type: toast.type }), [toast.type]);
 
     const element = useRenderElement('button', componentProps, {
-        ref: [ref, buttonRef],
+        ref: [ref, button.setElement],
         state,
-        props: [{
-            'aria-hidden': !focused || undefined,
-            onClick() {
-                close(toast.id);
-            }
-        }, elementProps, getButtonProps]
+        props: [elementProps, (props) => toReactProps(getToastCloseProps(provider, toast as never, button, props))]
     });
 
     return element;

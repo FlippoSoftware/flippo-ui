@@ -1,16 +1,25 @@
 {
-  "extends": "@flippo/tsconfig",
-  "compilerOptions": {
-    "jsx": "react",
+    "extends": "@flippo-software/tsconfig",
+    "compilerOptions": {
+        "jsx": "react",
 
-    "lib": ["dom", "ES2024"],
+        "lib": ["dom", "ES2024"],
 
-    "paths": {
-      "~@lib/*": ["./src/lib/*"],
-      "~@packages/*": ["./src/packages/*"]
+        "paths": {
+            "~@lib/*": ["./src/lib/*"],
+            "~@packages/*": ["./src/packages/*"]
+        },
+        "types": ["react", "react-dom", "node"]
     },
-    "types": ["react", "react-dom", "node"]
-  },
-  "include": ["eslint.config.js", "src/**/*.tsx", "src/**/*.ts", "vite.config.ts", "scripts/**/*.mts", "src/components/Tabs/indicator/prehydrationScript.template.js", "scripts/inlineScripts.mts"],
-  "exclude": ["node_modules", "**/*.md", "**/README.md"]
+    "include": [
+        "eslint.config.js",
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "vite.config.ts",
+        "vitest.config.ts",
+        "scripts/**/*.mts",
+        "src/components/Tabs/indicator/prehydrationScript.template.js",
+        "scripts/inlineScripts.mts"
+    ],
+    "exclude": ["node_modules", "**/*.md", "**/README.md"]
 }

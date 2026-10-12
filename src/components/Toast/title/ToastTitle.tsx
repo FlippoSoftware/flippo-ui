@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 import { useId, useIsoLayoutEffect } from '@flippo-ui/hooks';
@@ -37,7 +36,7 @@ export function ToastTitle(componentProps: ToastTitle.Props) {
 
     useIsoLayoutEffect(() => {
         if (!shouldRender) {
-            return undefined;
+            return;
         }
 
         setTitleId(id);

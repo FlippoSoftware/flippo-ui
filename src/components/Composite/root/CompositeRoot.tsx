@@ -21,9 +21,7 @@ import type { CompositeRootContextValue } from './CompositeRootContext';
  */
 export type CreateCompositeRootParameters<BaseMetadata extends {}> = {
     CompositeRootContext: React.Context<CompositeRootContextValue | undefined>;
-    CompositeList: <T extends BaseMetadata>(
-        props: CompositeListProps<T>
-    ) => React.ReactElement | null;
+    CompositeList: <T extends BaseMetadata>(props: CompositeListProps<T>) => React.ReactElement | null;
 };
 
 export function createCompositeRoot<CreateMetadata extends {}>(params: CreateCompositeRootParameters<CreateMetadata>) {
@@ -65,8 +63,7 @@ export function createCompositeRoot<CreateMetadata extends {}>(params: CreateCom
             props: defaultProps,
             highlightedIndex,
             onHighlightedIndexChange,
-            elementsRef,
-            onMapChange: onMapChangeUnwrapped,
+            registry,
             relayKeyboardEvent
         } = useCompositeRoot({
             itemSizes,
@@ -81,7 +78,8 @@ export function createCompositeRoot<CreateMetadata extends {}>(params: CreateCom
             enableHomeAndEndKeys,
             direction,
             disabledIndices,
-            modifierKeys
+            modifierKeys,
+            highlightItemOnHover
         });
 
         const element = useRenderElement(tag, componentProps, {
@@ -104,11 +102,9 @@ export function createCompositeRoot<CreateMetadata extends {}>(params: CreateCom
         return (
             <CompositeRootContext.Provider value={contextValue}>
                 <CompositeList<Metadata>
-                    elementsRef={elementsRef}
-                    onMapChange={(newMap) => {
-                        onMapChangeProp?.(newMap);
-                        onMapChangeUnwrapped(newMap);
-                    }}
+                    registry={registry as never}
+                    elementsRef={registry.elementsRef as React.RefObject<Array<HTMLElement | null>>}
+                    onMapChange={onMapChangeProp}
                 >
                     {element}
                 </CompositeList>
@@ -146,8 +142,5 @@ export type CompositeRootProps<Metadata, State extends Record<string, any>> = {
 
 // eslint-disable-next-line ts/no-redeclare
 export namespace CompositeRoot {
-    export type Props<Metadata, State extends Record<string, any>> = CompositeRootProps<
-        Metadata,
-        State
-    >;
+    export type Props<Metadata, State extends Record<string, any>> = CompositeRootProps<Metadata, State>;
 }

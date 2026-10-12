@@ -1,5 +1,3 @@
-
-
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
@@ -29,19 +27,22 @@ export function MeterLabel(componentProps: MeterLabel.Props) {
 
     const id = useHeadlessUiId(idProp);
 
-    const { setLabelId } = useMeterRootContext();
+    const { meter } = useMeterRootContext();
 
     useIsoLayoutEffect(() => {
-        setLabelId(id);
+        meter.setLabelId(id);
 
-        return () => setLabelId(undefined);
-    }, [id, setLabelId]);
+        return () => meter.setLabelId(undefined);
+    }, [id, meter]);
 
     const element = useRenderElement('span', componentProps, {
         ref,
-        props: [{
-            id
-        }, elementProps]
+        props: [
+            {
+                id
+            },
+            elementProps
+        ]
     });
 
     return element;

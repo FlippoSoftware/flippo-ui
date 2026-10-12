@@ -1,7 +1,10 @@
 import React from 'react';
 
+import { NavigationMenuParts } from '@flippo-software/core-components/navigation-menu';
+
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
+import { toReactProps, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -9,7 +12,7 @@ import { transitionStatusMapping } from '~@lib/styleHookMapping';
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useNavigationMenuRootContext } from '../root/NavigationMenuRootContext';
+import { useNavigationMenuRoot } from '../root/NavigationMenuRootContext';
 
 const stateAttributesMapping: StateAttributesMapping<NavigationMenuBackdrop.State> = {
     ...baseMapping,
@@ -32,7 +35,9 @@ export function NavigationMenuBackdrop(componentProps: NavigationMenuBackdropPro
         ...elementProps
     } = componentProps;
 
-    const { open, mounted, transitionStatus } = useNavigationMenuRootContext();
+    const root = useNavigationMenuRoot();
+    const track = useTracker();
+    const { open, transitionStatus } = track(() => NavigationMenuParts.getBackdropState(root));
 
     const state: NavigationMenuBackdrop.State = React.useMemo(
         () => ({
@@ -42,21 +47,12 @@ export function NavigationMenuBackdrop(componentProps: NavigationMenuBackdropPro
         [open, transitionStatus]
     );
 
-    const element = useRenderElement('div', componentProps, {
+    return useRenderElement('div', componentProps, {
         state,
         ref,
-        props: [{
-            role: 'presentation',
-            hidden: !mounted,
-            style: {
-                userSelect: 'none',
-                WebkitUserSelect: 'none'
-            }
-        }, elementProps],
+        props: [elementProps, (props) => track(() => toReactProps(NavigationMenuParts.getBackdropProps(root, props)))],
         customStyleHookMapping: stateAttributesMapping
     });
-
-    return element;
 }
 
 export type NavigationMenuBackdropState = {

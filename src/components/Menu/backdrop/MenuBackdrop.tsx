@@ -1,16 +1,17 @@
 import React from 'react';
 
+import { MenuBackdrop as MenuBackdropCore } from '@flippo-software/core-components/menu';
+
 import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
 
+import { toReactProps, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
-import { REASONS } from '~@lib/reason';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useContextMenuRootContext } from '../../ContextMenu/root/ContextMenuRootContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
 
 const stateAttributesMapping: StateAttributesMapping<MenuBackdrop.State> = {
@@ -35,33 +36,17 @@ export function MenuBackdrop(componentProps: MenuBackdrop.Props) {
     } = componentProps;
 
     const { store } = useMenuRootContext();
-    const open = store.useState('open');
-    const mounted = store.useState('mounted');
-    const transitionStatus = store.useState('transitionStatus');
-    const lastOpenChangeReason = store.useState('lastOpenChangeReason');
+    const track = useTracker();
+    const { open, transitionStatus } = track(() => MenuBackdropCore.getState(store));
+    const state: MenuBackdrop.State = React.useMemo(() => ({ open, transitionStatus }), [open, transitionStatus]);
 
-    const contextMenuContext = useContextMenuRootContext();
-
-    const state: MenuBackdrop.State = {
-        open,
-        transitionStatus
-    };
+    const setElement = React.useCallback((element: HTMLDivElement | null) => MenuBackdropCore.setElement(store, element), [store]);
 
     return useRenderElement('div', componentProps, {
-        ref: contextMenuContext?.backdropRef
-            ? [ref, contextMenuContext.backdropRef]
-            : ref,
+        ref: [ref, setElement],
         state,
         customStyleHookMapping: stateAttributesMapping,
-        props: [{
-            role: 'presentation',
-            hidden: !mounted,
-            style: {
-                pointerEvents: lastOpenChangeReason === REASONS.triggerHover ? 'none' : undefined,
-                userSelect: 'none',
-                WebkitUserSelect: 'none'
-            }
-        }, elementProps]
+        props: [elementProps, (props) => track(() => toReactProps(MenuBackdropCore.getProps(store, props)))]
     });
 }
 

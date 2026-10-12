@@ -1,9 +1,9 @@
-export type * from './arrow/NavigationMenuArrow';
+export * as NavigationMenu from './index.parts';
 
+export type * from './arrow/NavigationMenuArrow';
 export type * from './backdrop/NavigationMenuBackdrop';
 export type * from './content/NavigationMenuContent';
 export type * from './icon/NavigationMenuIcon';
-export * as NavigationMenu from './index.parts';
 export type * from './item/NavigationMenuItem';
 export type * from './link/NavigationMenuLink';
 export type * from './list/NavigationMenuList';

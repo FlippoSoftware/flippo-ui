@@ -1,35 +1,30 @@
 import React from 'react';
 
-import { useControlledState } from '@flippo-ui/hooks/use-controlled-state';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
-import { useValueChanged } from '@flippo-ui/hooks/use-value-changed';
+import { CheckboxGroupMachine } from '@flippo-software/core-components/checkbox-group';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import { areArraysEqual } from '~@lib/areArraysEqual';
-import { EMPTY_ARRAY } from '~@lib/constants';
+import type { CheckboxGroupOptions } from '@flippo-software/core-components/checkbox-group';
+
+import { toReactProps, useMachine, useTracker } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { REASONS } from '~@lib/reason';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { PARENT_CHECKBOX } from '../Checkbox/root/CheckboxRoot';
 import { useFieldRootContext } from '../Field/root/FieldRootContext';
-import { useField } from '../Field/useField';
 import { fieldValidityMapping } from '../Field/utils/constants';
-import { useFormContext } from '../Form/FormContext';
-import { useLabelableContext } from '../LabelableProvider';
+import { useLabelableContext } from '../LabelableProvider/LabelableContext';
 
 import type { FieldRoot } from '../Field/root/FieldRoot';
 
 import { CheckboxGroupContext } from './CheckboxGroupContext';
-import { useCheckboxGroupParent } from './useCheckboxGroupParent';
 
 import type { CheckboxGroupContextValue } from './CheckboxGroupContext';
 
 /**
  * Provides a shared state to a series of checkboxes.
- *
- * Documentation: [Base UI Checkbox Group](https://base-ui.com/react/components/checkbox-group)
+ * Renders a `<div>` element.
  */
 export function CheckboxGroup(componentProps: CheckboxGroup.Props) {
     const {
@@ -39,139 +34,64 @@ export function CheckboxGroup(componentProps: CheckboxGroup.Props) {
         /* eslint-enable unused-imports/no-unused-vars */
         allValues,
         defaultValue,
-        disabled: disabledProp = false,
+        disabled = false,
         id: idProp,
         onValueChange,
-        value: externalValue,
+        value,
         ref,
         ...elementProps
     } = componentProps;
 
-    const {
-        disabled: fieldDisabled,
-        name: fieldName,
-        state: fieldState,
-        validation,
-        setFilled,
-        setDirty,
-        shouldValidateOnChange,
-        validityData
-    } = useFieldRootContext();
-    const { labelId, getDescriptionProps } = useLabelableContext();
-    const { clearErrors } = useFormContext();
+    const { field, state: fieldState, validation } = useFieldRootContext();
+    const { labelable } = useLabelableContext();
 
-    const disabled = fieldDisabled || disabledProp;
+    const id = useHeadlessUiId(idProp) as string;
+    const parentId = useHeadlessUiId() as string;
 
-    const [value, setValueUnwrapped] = useControlledState({
-        prop: externalValue,
-        defaultProp: defaultValue,
-        caller: 'CheckboxGroup'
-    });
-
-    const setValue = useStableCallback(
-        (v: string[], eventDetails: CheckboxGroup.ChangeEventDetails) => {
-            onValueChange?.(v, eventDetails);
-
-            if (eventDetails.isCanceled) {
-                return;
-            }
-
-            setValueUnwrapped(v);
-        }
-    );
-
-    const parent = useCheckboxGroupParent({
-        allValues,
-        value: externalValue,
-        onValueChange
-    });
-
-    const id = useHeadlessUiId(idProp);
-
-    const controlRef = React.useRef<HTMLButtonElement>(null);
-
-    const registerControlRef = React.useCallback((element: HTMLButtonElement | null) => {
-        if (controlRef.current == null && element != null && !element.hasAttribute(PARENT_CHECKBOX)) {
-            controlRef.current = element;
-        }
-    }, []);
-
-    useField({
-        enabled: !!fieldName,
-        id,
-        commit: validation.commit,
+    const group = useMachine((options) => new CheckboxGroupMachine(options), {
         value,
-        controlRef,
-        name: fieldName,
-        getValue: () => value
+        defaultValue,
+        onValueChange: onValueChange as CheckboxGroupOptions['onValueChange'],
+        allValues,
+        disabled,
+        field,
+        labelable,
+        id,
+        parentId
     });
+    const track = useTracker();
 
-    const resolvedValue = value ?? EMPTY_ARRAY;
+    // Registered again after each render: the registration holds the current value and validity.
+    useIsoLayoutEffect(() => group.registerField());
 
-    useValueChanged(resolvedValue, () => {
-        if (fieldName) {
-            clearErrors(fieldName);
-        }
+    const groupValue = track(() => group.value);
+    const groupDisabled = track(() => group.disabled);
 
-        const initialValue = Array.isArray(validityData.initialValue)
-            ? (validityData.initialValue as readonly string[])
-            : EMPTY_ARRAY;
-
-        setFilled(resolvedValue.length > 0);
-        setDirty(!areArraysEqual(resolvedValue, initialValue));
-
-        if (shouldValidateOnChange()) {
-            validation.commit(resolvedValue);
-        }
-        else {
-            validation.commit(resolvedValue, true);
-        }
-    });
-
-    const state: CheckboxGroup.State = React.useMemo(
-        () => ({
-            ...fieldState,
-            disabled
-        }),
-        [fieldState, disabled]
-    );
+    const state: CheckboxGroup.State = React.useMemo(() => ({ ...fieldState, disabled: groupDisabled }), [fieldState, groupDisabled]);
 
     const contextValue: CheckboxGroupContextValue = React.useMemo(
         () => ({
             allValues,
-            value,
+            value: groupValue,
             defaultValue,
-            setValue,
-            parent,
-            disabled,
+            setValue: group.setValue as CheckboxGroupContextValue['setValue'],
+            parent: group.parent,
+            disabled: groupDisabled,
             validation,
-            registerControlRef
+            registerControlRef: group.registerControlRef,
+            group
         }),
-        [
-            allValues,
-            value,
-            defaultValue,
-            setValue,
-            parent,
-            disabled,
-            validation,
-            registerControlRef
-        ]
+        [allValues, groupValue, defaultValue, group, groupDisabled, validation]
     );
 
     const element = useRenderElement('div', componentProps, {
         state,
         ref,
-        props: [{
-            'role': 'group',
-            'aria-labelledby': labelId
-        }, getDescriptionProps, elementProps],
+        props: [toReactProps(group.getRootProps()), elementProps],
         customStyleHookMapping: fieldValidityMapping
     });
 
-    return (
-        <CheckboxGroupContext.Provider value={contextValue}>{element}</CheckboxGroupContext.Provider>
-    );
+    return <CheckboxGroupContext.Provider value={contextValue}>{element}</CheckboxGroupContext.Provider>;
 }
 
 export type CheckboxGroupState = {
@@ -211,8 +131,7 @@ export type CheckboxGroupProps = {
 } & HeadlessUIComponentProps<'div', CheckboxGroup.State>;
 
 export type CheckboxGroupChangeEventReason = typeof REASONS.none;
-export type CheckboxGroupChangeEventDetails
-    = HeadlessUIChangeEventDetails<CheckboxGroup.ChangeEventReason>;
+export type CheckboxGroupChangeEventDetails = HeadlessUIChangeEventDetails<CheckboxGroup.ChangeEventReason>;
 
 export namespace CheckboxGroup {
     export type State = CheckboxGroupState;

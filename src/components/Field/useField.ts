@@ -1,96 +1,33 @@
-import ReactDOM from 'react-dom';
+import React from 'react';
 
+import { FieldRootMachine } from '@flippo-software/core-components/field';
 import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useFormContext } from '../Form/FormContext';
 
 import { useFieldRootContext } from './root/FieldRootContext';
-import { getCombinedFieldValidityData } from './utils/getCombinedFieldValidityData';
 
+/**
+ * Registers a control in the form through its field (core `FieldRootMachine.registerControl`):
+ * submitting validates it and reads its value. Controls outside of `Field.Root` still join an enclosing form.
+ */
 export function useField(params: useField.Parameters) {
-    const {
-        enabled = true,
-        value,
-        id,
-        name,
-        controlRef,
-        commit
-    } = params;
+    const { enabled = true, value, id, name, controlRef, commit } = params;
 
-    const { formRef } = useFormContext();
-    const {
-        invalid,
-        markedDirtyRef,
-        validityData,
-        setValidityData
-    } = useFieldRootContext();
+    const { field, validityData, invalid } = useFieldRootContext();
+    const { form } = useFormContext();
 
-    const getValue = useEventCallback(params.getValue);
+    // Outside of `Field.Root`, a field of its own registers the control in the form.
+    const [fallbackField] = React.useState(() => (field ? null : new FieldRootMachine({ form })));
+    const registeringField = field ?? (fallbackField as FieldRootMachine);
 
-    useIsoLayoutEffect(() => {
-        if (!enabled) {
-            return;
-        }
+    const getValue = useEventCallback(params.getValue ?? (() => undefined));
 
-        let initialValue = value;
-        if (initialValue === undefined) {
-            initialValue = getValue();
-        }
-
-        if (validityData.initialValue === null && initialValue !== null) {
-            setValidityData((prev) => ({ ...prev, initialValue }));
-        }
-    }, [
-        enabled,
-        setValidityData,
-        value,
-        validityData.initialValue,
-        getValue
-    ]);
-
-    useIsoLayoutEffect(() => {
-        if (!enabled || !id) {
-            return;
-        }
-
-        formRef.current.fields.set(id, {
-            getValue,
-            name,
-            controlRef,
-            validityData: getCombinedFieldValidityData(validityData, invalid),
-            validate() {
-                let nextValue = value;
-                if (nextValue === undefined) {
-                    nextValue = getValue();
-                }
-
-                markedDirtyRef.current = true;
-                // Synchronously update the validity state so the submit event can be prevented.
-                ReactDOM.flushSync(() => commit(nextValue));
-            }
-        });
-    }, [
-        commit,
-        controlRef,
-        enabled,
-        formRef,
-        getValue,
-        id,
-        invalid,
-        markedDirtyRef,
-        name,
-        validityData,
-        value
-    ]);
-
-    useIsoLayoutEffect(() => {
-        const fields = formRef.current.fields;
-        return () => {
-            if (id) {
-                fields.delete(id);
-            }
-        };
-    }, [formRef, id]);
+    useIsoLayoutEffect(
+        () => registeringField.registerControl({ id, name, value, getValue, controlRef, commit, enabled }),
+        // The registration stores the current validity: register again when it changes.
+        [registeringField, id, name, value, getValue, controlRef, commit, enabled, validityData, invalid]
+    );
 }
 
 export namespace useField {

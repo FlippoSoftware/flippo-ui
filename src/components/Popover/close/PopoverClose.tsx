@@ -1,12 +1,10 @@
-import type React from 'react';
+import { PopoverCloseMachine } from '@flippo-software/core-components/popover';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { toReactProps, useMachine } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
-import { REASONS } from '~@lib/reason';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button/useButton';
 import { usePopoverRootContext } from '../root/PopoverRootContext';
 
 /**
@@ -27,24 +25,13 @@ export function PopoverClose(componentProps: PopoverClose.Props) {
         ...elementProps
     } = componentProps;
 
-    const { buttonRef, getButtonProps } = useButton({
-        disabled,
-        focusableWhenDisabled: false,
-        native: nativeButton
-    });
-
     const { store } = usePopoverRootContext();
 
+    const close = useMachine((options) => new PopoverCloseMachine(store, options), { disabled, nativeButton });
+
     const element = useRenderElement('button', componentProps, {
-        ref: [ref, buttonRef],
-        props: [{
-            onClick(event) {
-                store.setOpen(
-                    false,
-                    createChangeEventDetails(REASONS.closePress, event.nativeEvent, event.currentTarget)
-                );
-            }
-        }, elementProps, getButtonProps]
+        ref: [ref, close.setElement],
+        props: [elementProps, (props) => toReactProps(close.getCloseProps(props))]
     });
 
     return element;

@@ -1,10 +1,11 @@
 import React from 'react';
 
+import { ButtonMachine } from '@flippo-software/core-components/button';
+
+import { useMachine } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
 import type { HeadlessUIComponentProps, NativeButtonProps, NonNativeButtonProps } from '~@lib/types';
-
-import { useButton } from '../use-button/useButton';
 
 /**
  * A button component that can be used to trigger actions.
@@ -27,7 +28,7 @@ export function Button(componentProps: Button.Props) {
 
     const disabled = Boolean(disabledProp);
 
-    const { getButtonProps, buttonRef } = useButton({
+    const button = useMachine((options) => new ButtonMachine(options), {
         disabled,
         focusableWhenDisabled,
         native: nativeButton
@@ -42,8 +43,8 @@ export function Button(componentProps: Button.Props) {
 
     return useRenderElement('button', componentProps, {
         state,
-        ref: [ref, buttonRef],
-        props: [elementProps, getButtonProps]
+        ref: [ref, button.setElement],
+        props: [elementProps, (props) => button.getButtonProps(props)]
     });
 }
 
@@ -67,24 +68,28 @@ export namespace Button {
         focusableWhenDisabled?: boolean;
     };
 
-    type NonNativeAttributeKeys
-        = | 'form'
-          | 'formAction'
-          | 'formEncType'
-          | 'formMethod'
-          | 'formNoValidate'
-          | 'formTarget'
-          | 'name'
-          | 'type'
-          | 'value';
+    type NonNativeAttributeKeys =
+        | 'form'
+        | 'formAction'
+        | 'formEncType'
+        | 'formMethod'
+        | 'formNoValidate'
+        | 'formTarget'
+        | 'name'
+        | 'type'
+        | 'value';
 
     type ButtonNativeProps = {
         nativeButton?: true;
-    } & NativeButtonProps & ButtonCommonProps & Omit<HeadlessUIComponentProps<'button', State>, 'disabled'>;
+    } & NativeButtonProps &
+        ButtonCommonProps &
+        Omit<HeadlessUIComponentProps<'button', State>, 'disabled'>;
 
     type ButtonNonNativeProps = {
         nativeButton: false;
-    } & NonNativeButtonProps & ButtonCommonProps & Omit<HeadlessUIComponentProps<'button', State>, NonNativeAttributeKeys | 'disabled'>;
+    } & NonNativeButtonProps &
+        ButtonCommonProps &
+        Omit<HeadlessUIComponentProps<'button', State>, NonNativeAttributeKeys | 'disabled'>;
 
     export type Props = ButtonNativeProps | ButtonNonNativeProps;
 }

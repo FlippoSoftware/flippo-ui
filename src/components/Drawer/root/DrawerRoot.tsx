@@ -1,40 +1,21 @@
 import React from 'react';
+import * as ReactDOM from 'react-dom';
 
-import {
-    useEventCallback,
-    useLazyRef
-} from '@flippo-ui/hooks';
+import { DrawerRootMachine } from '@flippo-software/core-components/drawer';
 
-import { mergeProps } from '~@lib/merge';
+import type { DrawerDirection, SnapPoint } from '@flippo-software/core-components/drawer';
 
-import { Dialog as DialogHeadless } from '../../Dialog';
-import { DrawerGestureDataAttributes } from '../drag/DrawerGestureDataAttributes';
-import { DrawerStore } from '../store';
+import { useMachine, useStoreSelector } from '~@lib/core';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 
-import type { DrawerDirection, SnapPoint } from '../store';
+import { DialogRootContext, useDialogRootContext } from '../../Dialog/root/DialogRootContext';
+
+import type { Dialog as DialogHeadless } from '../../Dialog';
+import type { DialogRootContextValue } from '../../Dialog/root/DialogRootContext';
 
 import { DrawerRootContext } from './DrawerRootContext';
 
 import type { DrawerRootContextValue } from './DrawerRootContext';
-
-const INITIAL_STATE = {
-    direction: 'down',
-    shouldDrag: true,
-    isDragging: false,
-    dragOffset: 0,
-    snapPoints: [] as SnapPoint[],
-    activeSnapPointIndex: 0,
-    shouldScaleBackground: false,
-    backgroundScale: 0.96,
-    popupStyle: {},
-    popupDataAttributes: {
-        [DrawerGestureDataAttributes.snapPoints]: null,
-        [DrawerGestureDataAttributes.swipeDirectionRight]: null,
-        [DrawerGestureDataAttributes.swipeDirectionLeft]: null,
-        [DrawerGestureDataAttributes.swipeDirectionUp]: null,
-        [DrawerGestureDataAttributes.swipeDirectionDown]: null
-    }
-} as const;
 
 /**
  * Groups all parts of the drawer.
@@ -44,6 +25,17 @@ const INITIAL_STATE = {
  */
 export function DrawerRoot(componentProps: DrawerRoot.Props) {
     const {
+        children,
+        open,
+        defaultOpen = false,
+        onOpenChange,
+        onOpenChangeComplete,
+        disablePointerDismissal = false,
+        modal = true,
+        actionsRef,
+        handle,
+        triggerId,
+        defaultTriggerId = null,
         direction = 'down',
         shouldDrag = true,
         snapPoints,
@@ -53,55 +45,57 @@ export function DrawerRoot(componentProps: DrawerRoot.Props) {
         backgroundScale = 0.96,
         onDrag,
         onDragEnd,
-        containerRef,
-        ...elementProps
+        containerRef
     } = componentProps;
 
-    const store = useLazyRef(DrawerStore.create, INITIAL_STATE).current;
+    const parentDialogRootContext = useDialogRootContext(true);
+    const fallbackReferenceId = useHeadlessUiId();
+    const floatingId = useHeadlessUiId();
 
-    // Initial popupDataAttributes based on direction to ensure CSS selectors work on first render
-    const initialPopupDataAttributes = React.useMemo(() => ({
-        [DrawerGestureDataAttributes.snapPoints]: snapPoints && snapPoints.length > 0 ? '' : null,
-        [DrawerGestureDataAttributes.swipeDirectionRight]: direction === 'right' ? '' : null,
-        [DrawerGestureDataAttributes.swipeDirectionLeft]: direction === 'left' ? '' : null,
-        [DrawerGestureDataAttributes.swipeDirectionUp]: direction === 'up' ? '' : null,
-        [DrawerGestureDataAttributes.swipeDirectionDown]: direction === 'down' ? '' : null
-    }), [direction, snapPoints]);
-
-    store.useControlledProp('activeSnapPointIndex', activeSnapPoint);
-    store.useSyncedValues({
-        direction,
-        shouldDrag,
-        snapPoints,
-        shouldScaleBackground,
-        backgroundScale,
-        containerRef,
-        popupDataAttributes: initialPopupDataAttributes
-    });
-    store.useContextCallback('dragMove', onDrag);
-    store.useContextCallback('snapPointChange', onSnapPointChange);
-
-    // Handle drag end with callback
-    React.useEffect(() => {
-        store.context.dragEnd = (open: boolean) => {
-            onDragEnd?.({ open });
-        };
-    }, [store, onDragEnd]);
-
-    const contextValue = React.useMemo<DrawerRootContextValue>(() => ({ store }), [store]);
-
-    const onOpenChange = useEventCallback((open: boolean) => {
-        if (!open) {
-            store.setActiveSnapPoint(0);
+    const root = useMachine(
+        (options) =>
+            new DrawerRootMachine(options, {
+                store: handle?.store,
+                parentStore: parentDialogRootContext?.store,
+                fallbackReferenceId: fallbackReferenceId as string,
+                floatingId,
+                flushSync: ReactDOM.flushSync
+            }),
+        {
+            open,
+            defaultOpen,
+            modal,
+            onOpenChange: onOpenChange as never,
+            onOpenChangeComplete,
+            disablePointerDismissal,
+            triggerId,
+            defaultTriggerId,
+            direction,
+            shouldDrag,
+            snapPoints,
+            activeSnapPoint,
+            onSnapPointChange,
+            shouldScaleBackground,
+            backgroundScale,
+            onDrag,
+            onDragEnd,
+            containerRef
         }
-    });
+    );
 
-    const mergedProps = mergeProps<typeof DialogHeadless.Root>(elementProps, { onOpenChange });
+    React.useImperativeHandle(actionsRef, () => root.dialog.actions, [root]);
+
+    const payload = useStoreSelector(root.store, 'payload');
+
+    const dialogContextValue: DialogRootContextValue = React.useMemo(() => ({ store: root.store }), [root]);
+    const drawerContextValue: DrawerRootContextValue = React.useMemo(() => ({ store: root.drawerStore }), [root]);
 
     return (
-        <DrawerRootContext value={contextValue}>
-            <DialogHeadless.Root {...mergedProps} />
-        </DrawerRootContext>
+        <DialogRootContext value={dialogContextValue}>
+            <DrawerRootContext value={drawerContextValue}>
+                {typeof children === 'function' ? children({ payload }) : children}
+            </DrawerRootContext>
+        </DialogRootContext>
     );
 }
 

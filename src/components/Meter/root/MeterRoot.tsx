@@ -1,34 +1,16 @@
 import React from 'react';
 
-import { useLatestRef } from '@flippo-ui/hooks';
+import { MeterMachine } from '@flippo-software/core-components/meter';
 
-import { formatNumber } from '~@lib/formatNumber';
+import { toReactProps, useMachine, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { MeterRootContext } from './MeterRootContext';
 
 import type { MeterRootContextValue } from './MeterRootContext';
 
-function formatValue(
-    value: number,
-    locale?: Intl.LocalesArgument,
-    format?: Intl.NumberFormatOptions
-): string {
-    if (!format) {
-        return formatNumber(value / 100, locale, { style: 'percent' });
-    }
-
-    return formatNumber(value, locale, format);
-}
-
-/**
- * Groups all parts of the meter and provides the value for screen readers.
- * Renders a `<div>` element.
- *
- * Documentation: [Base UI Meter](https://base-ui.com/react/components/meter)
- */
 export function MeterRoot(componentProps: MeterRoot.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
@@ -45,48 +27,27 @@ export function MeterRoot(componentProps: MeterRoot.Props) {
         ...elementProps
     } = componentProps;
 
-    const formatOptionsRef = useLatestRef(format);
+    const meter = useMachine((options) => new MeterMachine(options), {
+        format,
+        getAriaValueText,
+        locale,
+        max,
+        min,
+        value: valueProp
+    });
+    const track = useTracker();
 
-    const [labelId, setLabelId] = React.useState<string | undefined>();
-    const formattedValue = formatValue(valueProp, locale, formatOptionsRef.current);
+    const formattedValue = meter.formattedValue;
 
-    let ariaValuetext = `${valueProp}%`;
-    if (getAriaValueText) {
-        ariaValuetext = getAriaValueText(formattedValue, valueProp);
-    }
-    else if (format) {
-        ariaValuetext = formattedValue;
-    }
-
-    const defaultProps: HTMLProps = {
-        'aria-labelledby': labelId,
-        'aria-valuemax': max,
-        'aria-valuemin': min,
-        'aria-valuenow': valueProp,
-        'aria-valuetext': ariaValuetext,
-        'role': 'meter'
-    };
-
+    // A new value whenever what the parts render changes, so they update even when memoized.
     const contextValue: MeterRootContextValue = React.useMemo(
-        () => ({
-            formattedValue,
-            max,
-            min,
-            setLabelId,
-            value: valueProp
-        }),
-        [
-            formattedValue,
-            max,
-            min,
-            setLabelId,
-            valueProp
-        ]
+        () => ({ meter, formattedValue, max, min, value: valueProp }),
+        [meter, formattedValue, max, min, valueProp]
     );
 
     const element = useRenderElement('div', componentProps, {
         ref,
-        props: [defaultProps, elementProps]
+        props: [track(() => toReactProps(meter.getRootProps())), elementProps]
     });
 
     return <MeterRootContext value={contextValue}>{element}</MeterRootContext>;
@@ -103,7 +64,7 @@ export namespace MeterRoot {
         /**
          * Options to format the value.
          */
-        'format'?: Intl.NumberFormatOptions;
+        format?: Intl.NumberFormatOptions;
         /**
          * A function that returns a string value that provides a human-readable text alternative for `aria-valuenow`,
          * the current value of the meter.
@@ -111,25 +72,25 @@ export namespace MeterRoot {
          * @param {number} value The raw value
          * @returns {string}
          */
-        'getAriaValueText'?: (formattedValue: string, value: number) => string;
+        getAriaValueText?: (formattedValue: string, value: number) => string;
         /**
          * The locale used by `Intl.NumberFormat` when formatting the value.
          * Defaults to the user's runtime locale.
          */
-        'locale'?: Intl.LocalesArgument;
+        locale?: Intl.LocalesArgument;
         /**
          * The maximum value
          * @default 100
          */
-        'max'?: number;
+        max?: number;
         /**
          * The minimum value
          * @default 0
          */
-        'min'?: number;
+        min?: number;
         /**
          * The current value.
          */
-        'value': number;
+        value: number;
     } & HeadlessUIComponentProps<'div', State>;
 }

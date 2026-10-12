@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { comboboxSelectors as selectors } from '@flippo-software/core-components/combobox';
 
 import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
 
+import { useSelector as useStore } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -12,7 +13,6 @@ import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useComboboxRootContext } from '../root/ComboboxRootContext';
-import { selectors } from '../store';
 
 const stateAttributesMapping: StateAttributesMapping<ComboboxBackdrop.State> = {
     ...popupStateMapping,
@@ -51,14 +51,17 @@ export function ComboboxBackdrop(componentProps: ComboboxBackdrop.Props) {
         state,
         ref,
         customStyleHookMapping: stateAttributesMapping,
-        props: [{
-            role: 'presentation',
-            hidden: !mounted,
-            style: {
-                userSelect: 'none',
-                WebkitUserSelect: 'none'
-            }
-        }, elementProps]
+        props: [
+            {
+                role: 'presentation',
+                hidden: !mounted,
+                style: {
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none'
+                }
+            },
+            elementProps
+        ]
     });
 }
 

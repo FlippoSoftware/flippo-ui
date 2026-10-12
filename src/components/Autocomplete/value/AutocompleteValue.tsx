@@ -16,11 +16,9 @@ export function AutocompleteValue(props: AutocompleteValue.Props): React.ReactEl
     let returnValue = null;
     if (typeof children === 'function') {
         returnValue = children(String(inputValue));
-    }
-    else if (children != null) {
+    } else if (children != null) {
         returnValue = children;
-    }
-    else {
+    } else {
         returnValue = inputValue;
     }
 

@@ -1,10 +1,8 @@
 import React from 'react';
 
-import type { MenuStore } from '../store/MenuStore';
+import type { MenuStore } from '@flippo-software/core-components/menu';
 
-export const MenuSubmenuRootContext = React.createContext<MenuSubmenuRootContextValue | undefined>(
-    undefined
-);
+export const MenuSubmenuRootContext = React.createContext<MenuSubmenuRootContextValue | undefined>(undefined);
 
 export type MenuSubmenuRootContextValue = {
     parentMenu: MenuStore<unknown>;

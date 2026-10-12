@@ -1,14 +1,11 @@
 import React from 'react';
 
-export type TooltipProviderContextValue = {
-    delay: number | undefined;
-    closeDelay: number | undefined;
-};
+import type { TooltipProviderMachine } from '@flippo-software/core-components/tooltip';
+
+export type TooltipProviderContextValue = TooltipProviderMachine;
 
 export const TooltipProviderContext = React.createContext<TooltipProviderContextValue | undefined>(undefined);
 
 export function useTooltipProviderContext(): TooltipProviderContextValue | undefined {
-    const context = React.use(TooltipProviderContext);
-
-    return context;
+    return React.use(TooltipProviderContext);
 }

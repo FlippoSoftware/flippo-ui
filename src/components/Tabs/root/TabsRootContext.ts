@@ -1,5 +1,7 @@
 import React from 'react';
 
+import type { TabsMachine } from '@flippo-software/core-components/tabs';
+
 import type { TabsTab } from '../tab/TabsTab';
 
 import type { TabsRoot } from './TabsRoot';
@@ -26,10 +28,7 @@ export type TabsRootContextValue = {
      * @param (any | undefined) panelValue Value to find the Tab for.
      * @param (number) index The index of the TabPanel to look for.
      */
-    getTabIdByPanelValueOrIndex: (
-        panelValue: TabsTab.Value | undefined,
-        index: number,
-    ) => string | undefined;
+    getTabIdByPanelValueOrIndex: (panelValue: TabsTab.Value | undefined, index: number) => string | undefined;
     /**
      * Gets the `id` attribute of the TabPanel that corresponds to the given Tab value or index.
      * @param (any | undefined) tabValue Value to find the Tab for.
@@ -41,6 +40,10 @@ export type TabsRootContextValue = {
      * The position of the active tab relative to the previously active tab.
      */
     tabActivationDirection: TabsTab.ActivationDirection;
+    /**
+     * The core machine of the tabs.
+     */
+    tabs: TabsMachine;
 };
 
 export const TabsRootContext = React.createContext<TabsRootContextValue | undefined>(undefined);
@@ -48,9 +51,7 @@ export const TabsRootContext = React.createContext<TabsRootContextValue | undefi
 export function useTabsRootContext() {
     const context = React.use(TabsRootContext);
     if (context === undefined) {
-        throw new Error(
-            'Headless UI: TabsRootContext is missing. Tabs parts must be placed within <Tabs.Root>.'
-        );
+        throw new Error('Headless UI: TabsRootContext is missing. Tabs parts must be placed within <Tabs.Root>.');
     }
 
     return context;

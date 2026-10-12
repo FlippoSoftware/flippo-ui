@@ -1,11 +1,6 @@
 import React from 'react';
 
-import {
-    useControlledState,
-    useEventCallback,
-    useIsoLayoutEffect,
-    useMergedRef
-} from '@flippo-ui/hooks';
+import { useControlledState, useEventCallback, useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
 
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { mergeProps } from '~@lib/merge';
@@ -69,16 +64,7 @@ export function FieldControl(componentProps: FieldControl.Props) {
         [fieldState, disabled]
     );
 
-    const {
-        setTouched,
-        setDirty,
-        validityData,
-        setFocused,
-        setFilled,
-        validationMode,
-        validation
-    }
-        = useFieldRootContext();
+    const { setTouched, setDirty, validityData, setFocused, setFilled, validationMode, validation } = useFieldRootContext();
     const { labelId } = useLabelableContext();
 
     const id = useLabelableId({ id: idProp });
@@ -87,8 +73,7 @@ export function FieldControl(componentProps: FieldControl.Props) {
         const hasExternalValue = valueProp != null;
         if (validation.inputRef.current?.value || (hasExternalValue && valueProp !== '')) {
             setFilled(true);
-        }
-        else if (hasExternalValue && valueProp === '') {
+        } else if (hasExternalValue && valueProp === '') {
             setFilled(false);
         }
     }, [validation.inputRef, setFilled, valueProp]);
@@ -101,17 +86,15 @@ export function FieldControl(componentProps: FieldControl.Props) {
 
     const isControlled = valueProp !== undefined;
 
-    const setValue = useEventCallback(
-        (nextValue: string, eventDetails: FieldControl.ChangeEventDetails) => {
-            onValueChange?.(nextValue, eventDetails);
+    const setValue = useEventCallback((nextValue: string, eventDetails: FieldControl.ChangeEventDetails) => {
+        onValueChange?.(nextValue, eventDetails);
 
-            if (eventDetails.isCanceled) {
-                return;
-            }
-
-            setValueUnwrapped(nextValue);
+        if (eventDetails.isCanceled) {
+            return;
         }
-    );
+
+        setValueUnwrapped(nextValue);
+    });
 
     useField({
         id,
@@ -129,7 +112,7 @@ export function FieldControl(componentProps: FieldControl.Props) {
             id,
             disabled,
             name,
-            'ref': mergedRef,
+            ref: mergedRef,
             'aria-labelledby': labelId,
             ...(isControlled ? { value } : { defaultValue }),
             onChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -157,11 +140,7 @@ export function FieldControl(componentProps: FieldControl.Props) {
             }
         };
 
-        return mergeProps(
-            baseProps,
-            elementProps,
-            validation.getInputValidationProps()
-        );
+        return mergeProps(baseProps, elementProps, validation.getInputValidationProps());
     }, [
         id,
         disabled,
@@ -182,27 +161,19 @@ export function FieldControl(componentProps: FieldControl.Props) {
         validationMode
     ]);
 
-    const context: FieldControlContextValue = React.useMemo(() => ({
-        state,
-        controlRef: mergedRef,
-        setValue,
-        control: control ?? 'input',
-        value,
-        controlProps
-    }), [
-        control,
-        controlProps,
-        mergedRef,
-        setValue,
-        state,
-        value
-    ]);
-
-    return (
-        <FieldControlContext value={context}>
-            {children}
-        </FieldControlContext>
+    const context: FieldControlContextValue = React.useMemo(
+        () => ({
+            state,
+            controlRef: mergedRef,
+            setValue,
+            control: control ?? 'input',
+            value,
+            controlProps
+        }),
+        [control, controlProps, mergedRef, setValue, state, value]
     );
+
+    return <FieldControlContext value={context}>{children}</FieldControlContext>;
 }
 
 FieldControl.Slot = FieldControlSlot;
@@ -220,9 +191,13 @@ export namespace FieldControl {
         onValueChange?: (value: string, eventDetails: ChangeEventDetails) => void;
         defaultValue?: React.ComponentProps<'input'>['defaultValue'];
     };
-    export type TextAreaProps = HeadlessUIComponentProps<'textarea', State> & { control: 'textarea'; onValueChange?: (value: string, eventDetails: ChangeEventDetails) => void; defaultValue?: React.ComponentProps<'textarea'>['defaultValue'] };
+    export type TextAreaProps = HeadlessUIComponentProps<'textarea', State> & {
+        control: 'textarea';
+        onValueChange?: (value: string, eventDetails: ChangeEventDetails) => void;
+        defaultValue?: React.ComponentProps<'textarea'>['defaultValue'];
+    };
 
-    export type Props = (InputProps | TextAreaProps);
+    export type Props = InputProps | TextAreaProps;
 
     export type ChangeEventReason = 'none';
     export type ChangeEventDetails = HeadlessUIChangeEventDetails<ChangeEventReason>;

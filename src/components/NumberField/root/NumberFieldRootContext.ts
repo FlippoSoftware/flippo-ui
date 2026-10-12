@@ -1,64 +1,23 @@
 import React from 'react';
 
-import type { Timeout } from '@flippo-ui/hooks';
-
-import type { EventWithOptionalKeyState, IncrementValueParameters } from '../utils/types';
+import type { NumberFieldMachine } from '@flippo-software/core-components/number-field';
 
 import type { NumberFieldRoot } from './NumberFieldRoot';
 
-export type InputMode = 'numeric' | 'decimal' | 'text';
-
 export type NumberFieldRootContextValue = {
-    inputValue: string;
-    value: number | null;
-    startAutoChange: (isIncrement: boolean, event?: React.MouseEvent | Event) => void;
-    stopAutoChange: () => void;
-    minWithDefault: number;
-    maxWithDefault: number;
-    disabled: boolean;
-    readOnly: boolean;
-    id: string | undefined;
-    setValue: (value: number | null, details: NumberFieldRoot.ChangeEventDetails) => void;
-    getStepAmount: (event?: EventWithOptionalKeyState) => number | undefined;
-    incrementValue: (amount: number, params: IncrementValueParameters) => void;
-    inputRef: React.RefObject<HTMLInputElement | null>;
-    allowInputSyncRef: React.RefObject<boolean | null>;
-    formatOptionsRef: React.RefObject<Intl.NumberFormatOptions | undefined>;
-    valueRef: React.RefObject<number | null>;
-    lastChangedValueRef: React.RefObject<number | null>;
-    hasPendingCommitRef: React.RefObject<boolean>;
-    isPressedRef: React.RefObject<boolean | null>;
-    intentionalTouchCheckTimeout: Timeout;
-    movesAfterTouchRef: React.RefObject<number | null>;
-    name: string | undefined;
-    required: boolean;
-    invalid: boolean | undefined;
-    inputMode: InputMode;
-    getAllowedNonNumericKeys: () => Set<string | undefined>;
-    min: number | undefined;
-    max: number | undefined;
-    setInputValue: React.Dispatch<React.SetStateAction<string>>;
-    locale: Intl.LocalesArgument;
-    isScrubbing: boolean;
-    setIsScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
+    /**
+     * The core machine: value, input text, stepping, auto-change and field integration.
+     */
+    numberField: NumberFieldMachine;
     state: NumberFieldRoot.State;
-    onValueCommitted: (
-        value: number | null,
-        eventDetails: NumberFieldRoot.CommitEventDetails,
-    ) => void;
 };
 
-export const NumberFieldRootContext = React.createContext<NumberFieldRootContextValue | undefined>(
-    undefined
-);
+export const NumberFieldRootContext = React.createContext<NumberFieldRootContextValue | undefined>(undefined);
 
 export function useNumberFieldRootContext() {
     const context = React.use(NumberFieldRootContext);
     if (context === undefined) {
-        throw new Error(
-            'Headless UI: NumberFieldRootContext is missing. NumberField parts must be placed within <NumberField.Root>.'
-        );
+        throw new Error('Headless UI: NumberFieldRootContext is missing. NumberField parts must be placed within <NumberField.Root>.');
     }
-
     return context;
 }

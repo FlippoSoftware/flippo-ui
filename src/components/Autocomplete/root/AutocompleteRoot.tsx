@@ -1,12 +1,19 @@
 import React from 'react';
+import * as ReactDOM from 'react-dom';
 
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { AutocompleteRootMachine } from '@flippo-software/core-components/autocomplete';
 
-import { REASONS } from '~@lib/reason';
-import { stringifyAsLabel } from '~@lib/resolveValueLabel';
+import type { AutocompleteRootOptions } from '@flippo-software/core-components/autocomplete';
 
-import { AriaCombobox } from '../../Combobox/root/AriaCombobox';
-import { useCoreFilter } from '../../Combobox/root/utils/useFilter';
+import { useMachine } from '~@lib/core';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
+
+import { getComboboxRootOptions } from '../../Combobox/root/AriaCombobox';
+import { ComboboxRootProvider } from '../../Combobox/root/ComboboxRootProvider';
+import { useFieldRootContext } from '../../Field/root/FieldRootContext';
+import { useLabelableContext } from '../../LabelableProvider';
+
+import type { AriaCombobox } from '../../Combobox/root/AriaCombobox';
 
 /**
  * Groups all parts of the autocomplete.
@@ -16,25 +23,23 @@ import { useCoreFilter } from '../../Combobox/root/utils/useFilter';
  */
 export function AutocompleteRoot<Items extends readonly { items: readonly any[] }[]>(
     props: Omit<AutocompleteRoot.Props<Items[number]['items'][number]>, 'items'> & {
-    /**
-     * The items to be displayed in the list.
-     * Can be either a flat array of items or an array of groups with items.
-     */
+        /**
+         * The items to be displayed in the list.
+         * Can be either a flat array of items or an array of groups with items.
+         */
         items: Items;
-    },
+    }
 ): React.JSX.Element;
 export function AutocompleteRoot<ItemValue>(
     props: Omit<AutocompleteRoot.Props<ItemValue>, 'items'> & {
-    /**
-     * The items to be displayed in the list.
-     * Can be either a flat array of items or an array of groups with items.
-     */
+        /**
+         * The items to be displayed in the list.
+         * Can be either a flat array of items or an array of groups with items.
+         */
         items?: readonly ItemValue[];
-    },
+    }
 ): React.JSX.Element;
-export function AutocompleteRoot<ItemValue>(
-    props: AutocompleteRoot.Props<ItemValue>
-): React.JSX.Element {
+export function AutocompleteRoot<ItemValue>(props: AutocompleteRoot.Props<ItemValue>): React.JSX.Element {
     const {
         openOnInputClick = false,
         value,
@@ -42,111 +47,34 @@ export function AutocompleteRoot<ItemValue>(
         onValueChange,
         mode = 'list',
         itemToStringValue,
+        actionsRef,
+        inputRef,
+        children,
         ...other
     } = props;
 
-    const enableInline = mode === 'inline' || mode === 'both';
-    const staticItems = mode === 'inline' || mode === 'none';
+    const { field } = useFieldRootContext();
+    const { labelable } = useLabelableContext();
+    const defaultId = useHeadlessUiId() as string;
 
-    // Mirror the typed value for uncontrolled usage so we can compose the temporary
-    // inline input value.
-    const isControlled = value !== undefined;
-    const [internalValue, setInternalValue] = React.useState(defaultValue ?? '');
-    const [inlineInputValue, setInlineInputValue] = React.useState('');
-
-    React.useEffect(() => {
-        if (isControlled) {
-            setInlineInputValue('');
-        }
-    }, [value, isControlled]);
-
-    // Compose the input value shown to the user: inline value takes precedence when present.
-    let resolvedInputValue: typeof value;
-    if (enableInline && inlineInputValue !== '') {
-        resolvedInputValue = inlineInputValue;
-    }
-    else if (isControlled) {
-        resolvedInputValue = value ?? '';
-    }
-    else {
-        resolvedInputValue = internalValue;
-    }
-
-    const handleValueChange = useStableCallback(
-        (nextValue: string, eventDetails: AutocompleteRoot.ChangeEventDetails) => {
-            setInlineInputValue('');
-            if (!isControlled) {
-                setInternalValue(nextValue);
-            }
-            onValueChange?.(nextValue, eventDetails);
-        }
-    );
-
-    const collator = useCoreFilter();
-
-    const baseFilter: typeof other.filter = React.useMemo(() => {
-        if (other.filter) {
-            return other.filter;
-        }
-        return (item, query, toString) => {
-            return collator.contains(stringifyAsLabel(item, toString), query);
-        };
-    }, [other, collator]);
-
-    const resolvedQuery = String(isControlled ? value : internalValue).trim();
-
-    // In "both", wrap filtering to use only the typed value, ignoring the inline value.
-    const resolvedFilter: typeof other.filter = React.useMemo(() => {
-        if (mode !== 'both') {
-            return staticItems ? null : other.filter;
-        }
-        return (item, _query, toString) => {
-            return baseFilter(item, resolvedQuery, toString);
-        };
-    }, [
-        baseFilter,
-        mode,
-        other.filter,
-        resolvedQuery,
-        staticItems
-    ]);
-
-    const handleItemHighlighted = useStableCallback(
-        (highlightedValue: any, eventDetails: AriaCombobox.HighlightEventDetails) => {
-            props.onItemHighlighted?.(highlightedValue, eventDetails);
-
-            if (eventDetails.reason === REASONS.pointer) {
-                return;
-            }
-
-            if (enableInline) {
-                if (highlightedValue == null) {
-                    setInlineInputValue('');
-                }
-                else {
-                    setInlineInputValue(stringifyAsLabel(highlightedValue, itemToStringValue));
-                }
-            }
-            else {
-                setInlineInputValue('');
-            }
-        }
+    const autocomplete = useMachine(
+        (options) => new AutocompleteRootMachine(options, { defaultId, field, labelable, flushSync: ReactDOM.flushSync }),
+        {
+            ...getComboboxRootOptions(other as AriaCombobox.Props<ItemValue, 'none'>),
+            openOnInputClick,
+            itemToStringLabel: itemToStringValue as never,
+            mode,
+            value,
+            defaultValue,
+            onValueChange: onValueChange as never,
+            hasActionsRef: actionsRef != null
+        } as AutocompleteRootOptions
     );
 
     return (
-        <AriaCombobox
-          {...other}
-          itemToStringLabel={itemToStringValue}
-          openOnInputClick={openOnInputClick}
-          selectionMode={'none'}
-          fillInputOnItemPress
-          filter={resolvedFilter}
-          autoComplete={mode}
-          inputValue={resolvedInputValue}
-          defaultInputValue={defaultValue}
-          onInputValueChange={handleValueChange}
-          onItemHighlighted={handleItemHighlighted}
-        />
+        <ComboboxRootProvider root={autocomplete.combobox} actionsRef={actionsRef} inputRef={inputRef}>
+            {children}
+        </ComboboxRootProvider>
     );
 }
 
@@ -197,10 +125,7 @@ export type AutocompleteRootProps<ItemValue> = {
      *
      * To render a controlled autocomplete, use the `value` prop instead.
      */
-    defaultValue?: AriaCombobox.Props<
-        React.ComponentProps<'input'>['defaultValue'],
-        'none'
-    >['defaultInputValue'];
+    defaultValue?: AriaCombobox.Props<React.ComponentProps<'input'>['defaultValue'], 'none'>['defaultInputValue'];
     /**
      * The input value of the autocomplete. Use when controlled.
      */
@@ -242,10 +167,7 @@ export type AutocompleteRootProps<ItemValue> = {
      * - `'pointer'`: the highlight changed due to pointer hovering.
      * - `'none'`: the highlight changed programmatically.
      */
-    onItemHighlighted?: (
-        highlightedValue: ItemValue | undefined,
-        eventDetails: AutocompleteRootHighlightEventDetails,
-    ) => void;
+    onItemHighlighted?: (highlightedValue: ItemValue | undefined, eventDetails: AutocompleteRootHighlightEventDetails) => void;
 } & Omit<
     AriaCombobox.Props<ItemValue, 'none'>,
     | 'selectionMode'

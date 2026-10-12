@@ -1,14 +1,13 @@
 import React from 'react';
 
-import { useEventCallback } from '@flippo-ui/hooks';
-import { useValueChanged } from '@flippo-ui/hooks/use-value-changed';
+import { FormController } from '@flippo-software/core-components/form';
 
 import { EMPTY_OBJECT } from '~@lib/constants';
-import { createGenericEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { toReactProps, useMachine, useStoreState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
-import { REASONS } from '~@lib/reason';
 
 import type { HeadlessUIGenericEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { REASONS } from '~@lib/reason';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { FormContext } from './FormContext';
@@ -21,9 +20,7 @@ import type { FormContextValue } from './FormContext';
  *
  * Documentation: [Base UI Form](https://base-ui.com/react/components/form)
  */
-export function Form<
-    FormValues extends Record<string, any> = Record<string, any>,
->(componentProps: Form.Props<FormValues>) {
+export function Form<FormValues extends Record<string, any> = Record<string, any>>(componentProps: Form.Props<FormValues>) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
@@ -37,104 +34,29 @@ export function Form<
         ...elementProps
     } = componentProps;
 
-    const formRef = React.useRef<FormContextValue['formRef']['current']>({
-        fields: new Map()
+    const form = useMachine((options) => new FormController<FormValues>(options), {
+        validationMode,
+        errors: externalErrors,
+        onSubmit: onSubmit as never,
+        onFormSubmit: onFormSubmit as never
     });
-    const submittedRef = React.useRef(false);
-    const submitAttemptedRef = React.useRef(false);
-
-    const focusControl = useEventCallback((control: HTMLElement | null) => {
-        if (!control) {
-            return;
-        }
-        control.focus();
-        if (control.tagName === 'INPUT') {
-            (control as HTMLInputElement).select();
-        }
-    });
-
-    const [errors, setErrors] = React.useState(externalErrors);
-
-    useValueChanged(externalErrors, () => {
-        setErrors(externalErrors);
-    });
-
-    React.useEffect(() => {
-        if (!submittedRef.current) {
-            return;
-        }
-
-        submittedRef.current = false;
-
-        const invalidFields = Array.from(formRef.current.fields.values()).filter(
-            (field) => field.validityData.state.valid === false
-        );
-
-        if (invalidFields.length) {
-            focusControl(invalidFields[0]?.controlRef.current ?? null);
-        }
-    }, [errors, focusControl]);
+    const { errors } = useStoreState(form.store);
 
     const element = useRenderElement('form', componentProps, {
         ref,
-        props: [{
-            noValidate: true,
-            onSubmit(event) {
-                submitAttemptedRef.current = true;
-
-                let values = Array.from(formRef.current.fields.values());
-
-                // Async validation isn't supported to stop the submit event.
-                values.forEach((field) => {
-                    field.validate();
-                });
-
-                values = Array.from(formRef.current.fields.values());
-
-                const invalidFields = values.filter((field) => !field.validityData.state.valid);
-
-                if (invalidFields.length) {
-                    event.preventDefault();
-                    focusControl(invalidFields[0]?.controlRef.current ?? null);
-                }
-                else {
-                    submittedRef.current = true;
-                    onSubmit?.(event as any);
-
-                    if (onFormSubmit) {
-                        event.preventDefault();
-
-                        const formValues = values.reduce((acc, field) => {
-                            if (field.name) {
-                                (acc as Record<string, any>)[field.name] = field.getValue();
-                            }
-                            return acc;
-                        }, {} as FormValues);
-
-                        onFormSubmit(formValues, createGenericEventDetails(REASONS.none, event.nativeEvent));
-                    }
-                }
-            }
-        }, elementProps]
-    });
-
-    const clearErrors = useEventCallback((name: string | undefined) => {
-        if (name && errors && EMPTY_OBJECT.hasOwnProperty.call(errors, name)) {
-            const nextErrors = { ...errors };
-            delete nextErrors[name];
-            setErrors(nextErrors);
-        }
+        props: [toReactProps(form.getFormProps()), elementProps]
     });
 
     const contextValue: FormContextValue = React.useMemo(
         () => ({
-            formRef,
+            formRef: { current: { fields: form.fields as FormContextValue['formRef']['current']['fields'] } },
             validationMode,
             errors: errors ?? EMPTY_OBJECT,
-            clearErrors,
-            submitAttemptedRef
+            clearErrors: form.clearErrors,
+            submitAttemptedRef: form.submitAttemptedRef,
+            form: form as unknown as FormController
         }),
-        [formRef, validationMode, errors, clearErrors]
+        [form, validationMode, errors]
     );
 
     return <FormContext.Provider value={contextValue}>{element}</FormContext.Provider>;
@@ -173,8 +95,7 @@ export type FormProps<FormValues extends Record<string, any> = Record<string, an
 export type FormValidationMode = 'onSubmit' | 'onBlur' | 'onChange';
 
 export namespace Form {
-    export type Props<FormValues extends Record<string, any> = Record<string, any>>
-        = FormProps<FormValues>;
+    export type Props<FormValues extends Record<string, any> = Record<string, any>> = FormProps<FormValues>;
     export type State = FormState;
     export type ValidationMode = FormValidationMode;
     export type SubmitEventReason = FormSubmitEventReason;

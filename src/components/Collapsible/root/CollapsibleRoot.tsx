@@ -1,24 +1,23 @@
 import React from 'react';
 
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { CollapsibleMachine } from '@flippo-software/core-components/collapsible';
 
-import { useRenderElement } from '~@lib/hooks';
+import type { CollapsibleOptions } from '@flippo-software/core-components/collapsible';
+import type { TransitionStatus } from '@flippo-ui/hooks';
+
+import { useMachine } from '~@lib/core';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { REASONS } from '~@lib/reason';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { CollapsibleRootContext } from './CollapsibleRootContext';
+import { CollapsibleRootContext, useCollapsibleContextValue } from './CollapsibleRootContext';
 import { collapsibleStyleHookMapping } from './styleHooks';
-import { useCollapsibleRoot } from './useCollapsibleRoot';
-
-import type { CollapsibleRootContextValue } from './CollapsibleRootContext';
 
 /**
  * Groups all parts of the collapsible.
  * Renders a `<div>` element.
- *
- * Documentation: [Base UI Collapsible](https://base-ui.com/react/components/collapsible)
  */
 export function CollapsibleRoot(componentProps: CollapsibleRootProps) {
     const {
@@ -28,63 +27,53 @@ export function CollapsibleRoot(componentProps: CollapsibleRootProps) {
         /* eslint-enable unused-imports/no-unused-vars */
         defaultOpen = false,
         disabled = false,
-        onOpenChange: onOpenChangeProp,
+        onOpenChange,
         open,
         ref,
         ...elementProps
     } = componentProps;
 
-    const onOpenChange = useStableCallback(onOpenChangeProp);
+    const defaultPanelId = useHeadlessUiId() as string;
 
-    const collapsible = useCollapsibleRoot({
+    const collapsible = useMachine((options) => new CollapsibleMachine(options), {
         open,
         defaultOpen,
-        onOpenChange,
-        disabled
+        onOpenChange: onOpenChange as CollapsibleOptions['onOpenChange'],
+        disabled,
+        defaultPanelId
     });
 
-    const state: CollapsibleRoot.State = React.useMemo(
-        () => ({
-            open: collapsible.open,
-            disabled: collapsible.disabled,
-            transitionStatus: collapsible.transitionStatus
-        }),
-        [collapsible.open, collapsible.disabled, collapsible.transitionStatus]
-    );
-
-    const contextValue: CollapsibleRootContextValue = React.useMemo(
-        () => ({
-            ...collapsible,
-            onOpenChange,
-            state
-        }),
-        [collapsible, onOpenChange, state]
-    );
+    const contextValue = useCollapsibleContextValue(collapsible);
 
     // @ts-expect-error Collapsible accepts `render={null}`
     const element = useRenderElement('div', componentProps, {
-        state,
+        state: contextValue.state,
         ref,
         props: elementProps,
         customStyleHookMapping: collapsibleStyleHookMapping
     });
 
-    if (componentProps.render !== null) {
-        return (
-            <CollapsibleRootContext.Provider value={contextValue}>
-                {element}
-            </CollapsibleRootContext.Provider>
-        );
-    }
-
     return (
         <CollapsibleRootContext.Provider value={contextValue}>
-            {elementProps.children}
+            {componentProps.render === null ? elementProps.children : element}
         </CollapsibleRootContext.Provider>
     );
 }
 
-export type CollapsibleRootState = {} & Pick<useCollapsibleRoot.ReturnValue, 'open' | 'disabled'>;
+export type CollapsibleRootState = {
+    /**
+     * Whether the collapsible panel is currently open.
+     */
+    open: boolean;
+    /**
+     * Whether the component should ignore user interaction.
+     */
+    disabled: boolean;
+    /**
+     * The transition status of the panel.
+     */
+    transitionStatus: TransitionStatus;
+};
 
 export type CollapsibleRootProps = {
     /**
@@ -113,8 +102,7 @@ export type CollapsibleRootProps = {
 } & Omit<HeadlessUIComponentProps<'div', CollapsibleRoot.State>, 'render'>;
 
 export type CollapsibleRootChangeEventReason = typeof REASONS.triggerPress | typeof REASONS.none;
-export type CollapsibleRootChangeEventDetails
-    = HeadlessUIChangeEventDetails<CollapsibleRootChangeEventReason>;
+export type CollapsibleRootChangeEventDetails = HeadlessUIChangeEventDetails<CollapsibleRootChangeEventReason>;
 
 export namespace CollapsibleRoot {
     export type State = CollapsibleRootState;

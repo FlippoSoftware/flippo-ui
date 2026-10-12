@@ -3,23 +3,24 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { glob } from 'glob';
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
 
 import type { UserConfig } from 'vite';
-import type { InlineConfig } from 'vitest';
 
 // Create entry points only for component indexes (matching package.json exports)
-const componentEntries = glob.sync('src/components/*/index.ts').reduce((acc, file) => {
-    const normalized = file.split('\\').join('/');
-    const match = normalized.match(/src\/components\/(.+)\/index\.ts/);
-    if (match) {
-        acc[`components/${match[1]}/index`] = path.resolve(file);
-    }
-    return acc;
-}, {} as Record<string, string>);
+const componentEntries = glob.sync('src/components/*/index.ts').reduce(
+    (acc, file) => {
+        const normalized = file.split('\\').join('/');
+        const match = normalized.match(/src\/components\/(.+)\/index\.ts/);
+        if (match) {
+            acc[`components/${match[1]}/index`] = path.resolve(file);
+        }
+        return acc;
+    },
+    {} as Record<string, string>
+);
 
 const entryPoints: Record<string, string> = {
-    'index': path.resolve('src/index.ts'),
+    index: path.resolve('src/index.ts'),
     ...componentEntries,
     // Additional exports
     'lib/merge': path.resolve('src/lib/merge.ts'),
@@ -27,25 +28,9 @@ const entryPoints: Record<string, string> = {
     'lib/createHeadlessUIEventDetails': path.resolve('src/lib/createHeadlessUIEventDetails.ts')
 };
 
-type VitestConfigExport = {
-    test: InlineConfig;
-} & UserConfig;
-
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [react(), dts({
-        insertTypesEntry: true,
-        beforeWriteFile: (filePath, content) => {
-            return { filePath: filePath.replace('/src', ''), content };
-        }
-    })],
-    test: {
-        globals: true,
-        environment: 'jsdom',
-        setupFiles: './src/test/setup.ts',
-        css: true,
-        include: ['src/components/Tooltip/**/*.test.tsx']
-    },
+    plugins: [react()],
     build: {
         outDir: 'dist',
         lib: {
@@ -54,7 +39,15 @@ export default defineConfig({
             formats: ['es', 'cjs']
         },
         rollupOptions: {
-            external: ['react', 'react-dom', '@flippo-ui/hooks'],
+            // Dependencies stay imports: one copy of the core is shared with the app (its stores keep module-level state).
+            external: [
+                'react',
+                'react-dom',
+                'react/jsx-runtime',
+                '@flippo-ui/hooks',
+                /^@flippo-ui\/hooks\//,
+                /^@flippo-software\/core-components(\/|$)/
+            ],
             output: {
                 entryFileNames: '[name].[format].js',
                 chunkFileNames: 'shared/[name]-[hash].[format].js',
@@ -77,8 +70,8 @@ export default defineConfig({
     envPrefix: 'HEADLESS_',
     resolve: {
         alias: {
-            '~@lib': path.resolve(__dirname, './src/lib'),
-            '~@packages': path.resolve(__dirname, './src/packages')
+            '~@lib': path.resolve(import.meta.dirname, './src/lib'),
+            '~@packages': path.resolve(import.meta.dirname, './src/packages')
         }
     },
     server: {
@@ -88,4 +81,4 @@ export default defineConfig({
             usePolling: true
         }
     }
-} as VitestConfigExport);
+} as UserConfig);

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { getSeparatorProps } from '@flippo-software/core-components/separator';
+
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
@@ -20,7 +22,7 @@ export function Separator(componentProps: SeparatorProps) {
     const element = useRenderElement('div', componentProps, {
         state,
         ref,
-        props: [{ 'role': 'separator', 'aria-orientation': orientation }, elementProps]
+        props: [getSeparatorProps(state), elementProps]
     });
 
     return element;

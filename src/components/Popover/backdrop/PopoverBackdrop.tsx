@@ -1,10 +1,12 @@
 import React from 'react';
 
+import { PopoverBackdrop as PopoverBackdropCore } from '@flippo-software/core-components/popover';
+
 import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
 
+import { toReactProps, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
-import { REASONS } from '~@lib/reason';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
@@ -35,10 +37,8 @@ export function PopoverBackdrop(componentProps: PopoverBackdrop.Props) {
 
     const { store } = usePopoverRootContext();
 
-    const open = store.useState('open');
-    const mounted = store.useState('mounted');
-    const transitionStatus = store.useState('transitionStatus');
-    const openReason = store.useState('openChangeReason');
+    const track = useTracker();
+    const { open, transitionStatus } = track(() => PopoverBackdropCore.getState(store));
 
     const state: PopoverBackdrop.State = React.useMemo(
         () => ({
@@ -50,16 +50,8 @@ export function PopoverBackdrop(componentProps: PopoverBackdrop.Props) {
 
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: [store.context.backdropRef, ref],
-        props: [{
-            role: 'presentation',
-            hidden: !mounted,
-            style: {
-                pointerEvents: openReason === REASONS.triggerHover ? 'none' : undefined,
-                userSelect: 'none',
-                WebkitUserSelect: 'none'
-            }
-        }, elementProps],
+        ref: [store.context.backdropRef as React.RefObject<HTMLDivElement | null>, ref],
+        props: [elementProps, (props) => track(() => toReactProps(PopoverBackdropCore.getProps(store, props)))],
         customStyleHookMapping: stateAttributesMapping
     });
 

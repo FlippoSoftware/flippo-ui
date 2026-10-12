@@ -1,11 +1,10 @@
 export { ComboboxArrow as Arrow } from '../Combobox/arrow/ComboboxArrow';
 export { ComboboxBackdrop as Backdrop } from '../Combobox/backdrop/ComboboxBackdrop';
-
 export { ComboboxClear as Clear } from '../Combobox/clear/ComboboxClear';
 export { ComboboxCollection as Collection } from '../Combobox/collection/ComboboxCollection';
 export { ComboboxEmpty as Empty } from '../Combobox/empty/ComboboxEmpty';
-export { ComboboxGroupLabel as GroupLabel } from '../Combobox/group-label/ComboboxGroupLabel';
 export { ComboboxGroup as Group } from '../Combobox/group/ComboboxGroup';
+export { ComboboxGroupLabel as GroupLabel } from '../Combobox/group-label/ComboboxGroupLabel';
 export { ComboboxIcon as Icon } from '../Combobox/icon/ComboboxIcon';
 export { ComboboxInput as Input } from '../Combobox/input/ComboboxInput';
 export { ComboboxItem as Item } from '../Combobox/item/ComboboxItem';
@@ -20,5 +19,4 @@ export { ComboboxTrigger as Trigger } from '../Combobox/trigger/ComboboxTrigger'
 export { Separator } from '../Separator/Separator';
 
 export { AutocompleteRoot as Root } from './root/AutocompleteRoot';
-
 export { AutocompleteValue as Value } from './value/AutocompleteValue';

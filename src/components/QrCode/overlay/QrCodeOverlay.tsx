@@ -31,12 +31,7 @@ export function QrCodeOverlay(componentProps: QrCodeOverlay.Props) {
 
     const overlayRef = React.useRef<HTMLDivElement>(null);
 
-    const {
-        status,
-        value,
-        size,
-        error
-    } = useQrCodeRootContext();
+    const { status, value, size, error } = useQrCodeRootContext();
 
     const { transitionStatus, mounted, setMounted } = useStatusTransition({
         status,
@@ -49,19 +44,19 @@ export function QrCodeOverlay(componentProps: QrCodeOverlay.Props) {
         open: rendered,
         ref: overlayRef,
         onComplete: () => {
-            if (!rendered)
-                setMounted(false);
+            if (!rendered) setMounted(false);
         }
     });
 
-    const children = typeof childrenProp === 'function'
-        ? childrenProp({
-            size,
-            status,
-            error,
-            value
-        })
-        : childrenProp;
+    const children =
+        typeof childrenProp === 'function'
+            ? childrenProp({
+                  size,
+                  status,
+                  error,
+                  value
+              })
+            : childrenProp;
 
     const state: QrCodeOverlay.State = React.useMemo(
         () => ({

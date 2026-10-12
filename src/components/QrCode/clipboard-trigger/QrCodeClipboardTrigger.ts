@@ -1,15 +1,12 @@
-import React from 'react';
-
-import { useEventCallback } from '@flippo-ui/hooks';
+import { QrCodeClipboardTriggerMachine } from '@flippo-software/core-components/qr-code';
 
 import type { FileExtension } from 'qr-code-styling';
 
+import { toReactProps, useMachine, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
-import { mergeProps } from '~@lib/merge';
 
-import type { HeadlessUIComponentProps, HTMLProps, NativeButtonProps } from '~@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button';
 import { useQrCodeRootContext } from '../root/QrCodeRootContext';
 import { qrCodeStyleHookMapping } from '../utils/styleHooks';
 
@@ -23,113 +20,30 @@ export function QrCodeClipboardTrigger(componentProps: QrCodeClipboardTrigger.Pr
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
         nativeButton,
-        disabled: disabledProp,
+        disabled,
         extension = 'svg',
         copyAs = 'blob',
-        onCopy: onCopyProp,
-        onCopyError: onCopyErrorProp,
+        onCopy,
+        onCopyError,
         ...elementProps
     } = componentProps;
 
-    const onCopy = useEventCallback(onCopyProp);
-    const onCopyError = useEventCallback(onCopyErrorProp);
+    const { qrCode } = useQrCodeRootContext();
 
-    const { status, value, qrCodeStyling } = useQrCodeRootContext();
-
-    const [isCopying, setIsCopying] = React.useState(false);
-
-    const disabled = Boolean(!qrCodeStyling || disabledProp || isCopying);
-
-    const { getButtonProps, buttonRef } = useButton({
+    const trigger = useMachine((options) => new QrCodeClipboardTriggerMachine(qrCode, options), {
         disabled,
-        native: nativeButton
+        nativeButton,
+        extension,
+        copyAs,
+        onCopy,
+        onCopyError
     });
-
-    const getTriggerProps = React.useCallback(
-        (externalProps?: HTMLProps): HTMLProps => {
-            return mergeProps(
-                {
-                    onClick: async () => {
-                        if (!qrCodeStyling || isCopying) {
-                            return;
-                        }
-
-                        setIsCopying(true);
-
-                        try {
-                            const data = await qrCodeStyling.getRawData(extension);
-
-                            if (!data) {
-                                throw new Error('Failed to get QR code data');
-                            }
-
-                            let blob: Blob;
-
-                            if (data instanceof Blob) {
-                                blob = data;
-                            }
-                            else {
-                                blob = new Blob([new Uint8Array(data)], {
-                                    type: extension === 'svg'
-                                        ? 'image/svg+xml'
-                                        : `image/${extension}`
-                                });
-                            }
-
-                            if (copyAs === 'dataUrl') {
-                                const reader = new FileReader();
-                                reader.readAsDataURL(blob);
-                                const dataUrl = await new Promise<string>((resolve, reject) => {
-                                    reader.onloadend = () => resolve(reader.result as string);
-                                    reader.onerror = reject;
-                                });
-                                await navigator.clipboard.writeText(dataUrl);
-                            }
-                            else {
-                                if (extension === 'svg') {
-                                    const text = await blob.text();
-                                    await navigator.clipboard.writeText(text);
-                                }
-                                else {
-                                    await navigator.clipboard.write([
-                                        new ClipboardItem({
-                                            [blob.type]: blob
-                                        })
-                                    ]);
-                                }
-                            }
-
-                            onCopy?.();
-                        }
-                        catch (error) {
-                            onCopyError?.(error);
-                        }
-                        finally {
-                            setIsCopying(false);
-                        }
-                    }
-                },
-                externalProps,
-                getButtonProps
-            );
-        },
-        [getButtonProps, qrCodeStyling, isCopying, extension, copyAs, onCopy, onCopyError]
-    );
-
-    const state: QrCodeClipboardTrigger.State = React.useMemo(
-        () => ({
-            value,
-            status,
-            disabled,
-            copying: isCopying
-        }),
-        [value, status, disabled, isCopying]
-    );
+    const state: QrCodeClipboardTrigger.State = useMachineState(trigger);
 
     const element = useRenderElement('button', componentProps, {
         state,
-        ref: [ref, buttonRef],
-        props: [elementProps, getTriggerProps],
+        ref: [ref, trigger.button.setElement],
+        props: [elementProps, (props) => toReactProps(trigger.getProps(props))],
         customStyleHookMapping: qrCodeStyleHookMapping
     });
 
@@ -182,5 +96,6 @@ export namespace QrCodeClipboardTrigger {
          * @default undefined
          */
         onCopyError?: (error: unknown) => void;
-    } & NativeButtonProps & HeadlessUIComponentProps<'button', State>;
+    } & NativeButtonProps &
+        HeadlessUIComponentProps<'button', State>;
 }

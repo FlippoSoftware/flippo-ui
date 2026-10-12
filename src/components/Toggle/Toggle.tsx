@@ -1,19 +1,25 @@
 import React from 'react';
 
-import { useControlledState, useEventCallback } from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { ButtonMachine } from '@flippo-software/core-components/button';
+import { ToggleMachine } from '@flippo-software/core-components/toggle';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { ToggleOptions as ToggleMachineOptions } from '@flippo-software/core-components/toggle';
+
+import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
-import { REASONS } from '~@lib/reason';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { REASONS } from '~@lib/reason';
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { CompositeItem } from '../Composite/item/CompositeItem';
+import { useCompositeRootContext } from '../Composite/root/CompositeRootContext';
 import { useToggleGroupContext } from '../ToggleGroup/ToggleGroupContext';
-import { useButton } from '../use-button/useButton';
 
+/**
+ * A two-state button that can be on or off.
+ * Renders a `<button>` element.
+ */
 export function Toggle(componentProps: Toggle.Props) {
     const {
         className,
@@ -33,57 +39,35 @@ export function Toggle(componentProps: Toggle.Props) {
     } = componentProps;
 
     const value = valueProp ?? '';
-
     const groupContext = useToggleGroupContext();
+    const isCompositeItem = useCompositeRootContext(true) !== undefined;
 
-    const groupValue = groupContext?.value ?? [];
-
-    const defaultPressed = groupContext ? undefined : defaultPressedProp;
-
-    const disabled = (disabledProp || groupContext?.disabled) ?? false;
-
-    const [pressed, setPressedState] = useControlledState({
-        prop: groupContext && value ? groupValue?.indexOf(value) > -1 : pressedProp,
-        defaultProp: defaultPressed,
-        caller: 'Toggle'
-    });
-
-    const onPressedChange = useStableCallback(
-        (nextPressed: boolean, eventDetails: Toggle.ChangeEventDetails) => {
+    // Inside a group, the group's value is the controlled pressed state.
+    const toggle = useMachine((options) => new ToggleMachine(options), {
+        pressed: groupContext && value ? groupContext.value.includes(value) : pressedProp,
+        defaultPressed: groupContext ? undefined : defaultPressedProp,
+        disabled: (disabledProp || groupContext?.disabled) ?? false,
+        value,
+        onPressedChange: ((nextPressed: boolean, eventDetails: Toggle.ChangeEventDetails) => {
             groupContext?.setGroupValue?.(value, nextPressed, eventDetails);
             onPressedChangeProp?.(nextPressed, eventDetails);
-        }
-    );
+        }) as ToggleMachineOptions['onPressedChange']
+    });
+    const state: Toggle.State = useMachineState(toggle);
+    const track = useTracker();
 
-    const { getButtonProps, buttonRef } = useButton({
-        disabled,
-        native: nativeButton
+    const button = useMachine((options) => new ButtonMachine(options), {
+        disabled: state.disabled,
+        native: nativeButton,
+        composite: isCompositeItem
     });
 
-    const state: Toggle.State = React.useMemo(
-        () => ({
-            disabled,
-            pressed: Boolean(pressed)
-        }),
-        [disabled, pressed]
-    );
-
-    const refs = [buttonRef, ref];
-    const props = [{
-        'aria-pressed': pressed,
-        onClick(event: React.MouseEvent) {
-            const nextPressed = !pressed;
-            const details = createChangeEventDetails(REASONS.none, event.nativeEvent);
-
-            onPressedChange(nextPressed, details);
-
-            if (details.isCanceled) {
-                return;
-            }
-
-            setPressedState(nextPressed);
-        }
-    }, elementProps, getButtonProps];
+    const refs = [button.setElement, ref];
+    const props = [
+        track(() => toReactProps(toggle.getRootProps())),
+        elementProps,
+        (mergedProps: Record<string, any>) => track(() => button.getButtonProps(mergedProps))
+    ];
 
     const element = useRenderElement('button', componentProps, {
         enabled: !groupContext,
@@ -93,16 +77,7 @@ export function Toggle(componentProps: Toggle.Props) {
     });
 
     if (groupContext) {
-        return (
-            <CompositeItem
-              tag={'button'}
-              render={render}
-              className={className}
-              state={state}
-              refs={refs}
-              props={props}
-            />
-        );
+        return <CompositeItem tag='button' render={render} className={className} state={state} refs={refs} props={props} />;
     }
 
     return element;
@@ -145,7 +120,8 @@ export type ToggleProps = {
      * inside a toggle group.
      */
     value?: string;
-} & NativeButtonProps & HeadlessUIComponentProps<'button', Toggle.State>;
+} & NativeButtonProps &
+    HeadlessUIComponentProps<'button', Toggle.State>;
 
 export type ToggleChangeEventReason = typeof REASONS.none;
 

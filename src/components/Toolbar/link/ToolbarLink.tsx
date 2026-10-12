@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 
 import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
@@ -19,12 +17,7 @@ const TOOLBAR_LINK_METADATA = {
  * Documentation: [Base UI Toolbar](https://base-ui.com/react/components/toolbar)
  */
 export function ToolbarLink(componentProps: ToolbarLink.Props) {
-    const {
-        className,
-        render,
-        ref,
-        ...elementProps
-    } = componentProps;
+    const { className, render, ref, ...elementProps } = componentProps;
 
     const { orientation } = useToolbarRootContext();
 
@@ -37,13 +30,13 @@ export function ToolbarLink(componentProps: ToolbarLink.Props) {
 
     return (
         <CompositeItem
-          tag={'a'}
-          render={render}
-          className={className}
-          metadata={TOOLBAR_LINK_METADATA}
-          state={state}
-          refs={[ref]}
-          props={[elementProps]}
+            tag={'a'}
+            render={render}
+            className={className}
+            metadata={TOOLBAR_LINK_METADATA}
+            state={state}
+            refs={[ref]}
+            props={[elementProps]}
         />
     );
 }

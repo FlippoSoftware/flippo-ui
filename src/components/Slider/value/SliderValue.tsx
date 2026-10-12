@@ -1,6 +1,5 @@
-import React from 'react';
+import type React from 'react';
 
-import { formatNumber } from '~@lib/formatNumber';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -13,8 +12,6 @@ import type { SliderRoot } from '../root/SliderRoot';
 /**
  * Displays the current value of the slider as text.
  * Renders an `<output>` element.
- *
- * Documentation: [Base UI Slider](https://base-ui.com/react/components/slider)
  */
 export function SliderValue(componentProps: SliderValue.Props) {
     const {
@@ -28,61 +25,30 @@ export function SliderValue(componentProps: SliderValue.Props) {
         ...elementProps
     } = componentProps;
 
-    const {
-        thumbMap,
-        state,
-        values,
-        formatOptionsRef,
-        locale
-    } = useSliderRootContext();
+    const { slider, state } = useSliderRootContext();
 
-    const outputFor = React.useMemo(() => {
-        let htmlFor = '';
-        for (const thumbMetadata of thumbMap.values()) {
-            if (thumbMetadata?.inputId) {
-                htmlFor += `${thumbMetadata.inputId} `;
-            }
-        }
-        return htmlFor.trim() === '' ? undefined : htmlFor.trim();
-    }, [thumbMap]);
-
-    const formattedValues = React.useMemo(() => {
-        const arr = [];
-        for (let i = 0; i < values.length; i += 1) {
-            arr.push(formatNumber(values[i], locale, formatOptionsRef.current ?? undefined));
-        }
-        return arr;
-    }, [formatOptionsRef, locale, values]);
-
-    const defaultDisplayValue = React.useMemo(() => {
-        const arr = [];
-        for (let i = 0; i < values.length; i += 1) {
-            arr.push(formattedValues[i] || values[i]);
-        }
-        return arr.join(' – ');
-    }, [values, formattedValues]);
-
-    const element = useRenderElement('output', componentProps, {
+    return useRenderElement('output', componentProps, {
         state,
         ref,
-        props: [{
-            // off by default because it will keep announcing when the slider is being dragged
-            // and also when the value is changing (but not yet committed)
-            'aria-live': ariaLive,
-            'children':
-                    typeof children === 'function' ? children(formattedValues, values) : defaultDisplayValue,
-            'htmlFor': outputFor
-        }, elementProps],
+        props: [
+            {
+                // off by default because it will keep announcing when the slider is being dragged
+                // and also when the value is changing (but not yet committed)
+                'aria-live': ariaLive,
+                children:
+                    typeof children === 'function'
+                        ? children(slider.getFormattedValues(), slider.values as number[])
+                        : slider.getDefaultDisplayValue(),
+                htmlFor: slider.getValueOutputFor()
+            },
+            elementProps
+        ],
         customStyleHookMapping: sliderStyleHookMapping
     });
-
-    return element;
 }
 
 export type SliderValueProps = {
-    children?:
-      | null
-      | ((formattedValues: readonly string[], values: readonly number[]) => React.ReactNode);
+    children?: null | ((formattedValues: readonly string[], values: readonly number[]) => React.ReactNode);
 } & Omit<HeadlessUIComponentProps<'output', SliderRoot.State>, 'children'>;
 
 export namespace SliderValue {

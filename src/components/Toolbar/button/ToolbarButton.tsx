@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
@@ -53,17 +51,20 @@ export function ToolbarButton(componentProps: ToolbarButton.Props) {
 
     return (
         <CompositeItem
-          tag={'button'}
-          render={render}
-          className={className}
-          metadata={itemMetadata}
-          state={state}
-          refs={[ref, buttonRef]}
-          props={[elementProps,
+            tag={'button'}
+            render={render}
+            className={className}
+            metadata={itemMetadata}
+            state={state}
+            refs={[ref, buttonRef]}
+            props={[
+                elementProps,
                 // for integrating with Menu and Select disabled states, `disabled` is
                 // intentionally duplicated even though getButtonProps includes it already
                 // TODO: follow up after https://github.com/mui/base-ui/issues/1976#issuecomment-2916905663
-                { disabled }, getButtonProps]}
+                { disabled },
+                getButtonProps
+            ]}
         />
     );
 }
@@ -85,5 +86,6 @@ export namespace ToolbarButton {
          * @default true
          */
         focusableWhenDisabled?: boolean;
-    } & NativeButtonProps & HeadlessUIComponentProps<'button', ToolbarRoot.State>;
+    } & NativeButtonProps &
+        HeadlessUIComponentProps<'button', ToolbarRoot.State>;
 }

@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
+import { useStoreSelector } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
@@ -27,9 +28,9 @@ export function ListSubheader<Tag extends ListSubheader.ElementType>(componentPr
     const { index, setSubheaderId } = useListItemContext();
 
     const id = useHeadlessUiId(idProp);
-    const orientation = store.useState('orientation');
-    const nestedListNumber = store.useState('nestedListNumber');
-    const type = store.useState('type');
+    const orientation = useStoreSelector(store, 'orientation');
+    const nestedListNumber = useStoreSelector(store, 'nestedListNumber');
+    const type = useStoreSelector(store, 'type');
 
     useIsoLayoutEffect(() => {
         setSubheaderId(id);
@@ -39,24 +40,22 @@ export function ListSubheader<Tag extends ListSubheader.ElementType>(componentPr
         };
     }, [id]);
 
-    const state: ListSubheader.State = React.useMemo(() => ({
-        index,
-        orientation,
-        nestedListNumber,
-        nestedListItemNumber,
-        type
-    }), [
-        index,
-        nestedListItemNumber,
-        nestedListNumber,
-        orientation,
-        type
-    ]);
+    const state: ListSubheader.State = React.useMemo(
+        () => ({
+            index,
+            orientation,
+            nestedListNumber,
+            nestedListItemNumber,
+            type
+        }),
+        [index, nestedListItemNumber, nestedListNumber, orientation, type]
+    );
 
     const element = useRenderElement(tag, componentProps, {
         ref,
         state,
-        props: [elementProps]
+        // The nested list is labelled by this id.
+        props: [{ id }, elementProps]
     });
 
     return element;

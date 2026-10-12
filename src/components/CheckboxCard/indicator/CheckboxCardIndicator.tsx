@@ -63,10 +63,7 @@ export function CheckboxCardIndicator(componentProps: CheckboxCardIndicator.Prop
 
     const indicatorRef = React.useRef<HTMLSpanElement | null>(null);
 
-    const state: CheckboxCardIndicator.State = React.useMemo(
-        () => ({ ...rootState, transitionStatus }),
-        [rootState, transitionStatus]
-    );
+    const state: CheckboxCardIndicator.State = React.useMemo(() => ({ ...rootState, transitionStatus }), [rootState, transitionStatus]);
 
     const shouldRender = keepMounted || rendered;
 
@@ -88,8 +85,7 @@ export function CheckboxCardIndicator(componentProps: CheckboxCardIndicator.Prop
         customStyleHookMapping: stateAttributesMapping
     });
 
-    if (!shouldRender)
-        return null;
+    if (!shouldRender) return null;
 
     return element;
 }

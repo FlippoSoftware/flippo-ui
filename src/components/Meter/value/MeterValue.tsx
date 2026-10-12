@@ -1,5 +1,3 @@
-
-
 import type React from 'react';
 
 import { useRenderElement } from '~@lib/hooks';
@@ -26,17 +24,17 @@ export function MeterValue(componentProps: MeterValue.Props) {
         ...elementProps
     } = componentProps;
 
-    const { value, formattedValue } = useMeterRootContext();
+    const { meter, value, formattedValue } = useMeterRootContext();
 
     return useRenderElement('span', componentProps, {
         ref,
-        props: [{
-            'aria-hidden': true,
-            'children':
-                    typeof children === 'function'
-                        ? children(formattedValue, value)
-                        : ((formattedValue || value) ?? '')
-        }, elementProps]
+        props: [
+            {
+                'aria-hidden': true,
+                children: typeof children === 'function' ? children(formattedValue, value) : meter.getValueText()
+            },
+            elementProps
+        ]
     });
 }
 

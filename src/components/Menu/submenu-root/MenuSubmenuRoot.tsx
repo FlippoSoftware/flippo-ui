@@ -29,19 +29,14 @@ export type MenuSubmenuRootProps = {
     /**
      * Event handler called when the menu is opened or closed.
      */
-    onOpenChange?:
-    | ((open: boolean, eventDetails: MenuSubmenuRoot.ChangeEventDetails) => void)
-    | undefined;
+    onOpenChange?: ((open: boolean, eventDetails: MenuSubmenuRoot.ChangeEventDetails) => void) | undefined;
     /**
      * When in a submenu, determines whether pressing the Escape key
      * closes the entire menu, or only the current child menu.
      * @default false
      */
     closeParentOnEsc?: boolean | undefined;
-} & Omit<
-    MenuRoot.Props,
-    'modal' | 'openOnHover' | 'onOpenChange'
->;
+} & Omit<MenuRoot.Props, 'modal' | 'openOnHover' | 'onOpenChange'>;
 
 export type MenuSubmenuRootState = {};
 

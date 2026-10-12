@@ -16,56 +16,55 @@ import { useComboboxItemContext } from '../item/ComboboxItemContext';
  * The core implementation of the indicator is split here to avoid paying the hooks
  * costs unless the element needs to be mounted.
  */
-const Inner = React.memo(
-    (
-        componentProps: ComboboxItemIndicator.Props
-    ) => {
-        const {
-            /* eslint-disable unused-imports/no-unused-vars */
-            render,
-            className,
-            /* eslint-enable unused-imports/no-unused-vars */
-            ref,
-            ...elementProps
-        } = componentProps;
+const Inner = React.memo((componentProps: ComboboxItemIndicator.Props) => {
+    const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        render,
+        className,
+        /* eslint-enable unused-imports/no-unused-vars */
+        ref,
+        ...elementProps
+    } = componentProps;
 
-        const { selected } = useComboboxItemContext();
+    const { selected } = useComboboxItemContext();
 
-        const indicatorRef = React.useRef<HTMLSpanElement | null>(null);
+    const indicatorRef = React.useRef<HTMLSpanElement | null>(null);
 
-        const { transitionStatus, setMounted } = useTransitionStatus(selected);
+    const { transitionStatus, setMounted } = useTransitionStatus(selected);
 
-        const state: ComboboxItemIndicator.State = React.useMemo(
-            () => ({
-                selected,
-                transitionStatus
-            }),
-            [selected, transitionStatus]
-        );
+    const state: ComboboxItemIndicator.State = React.useMemo(
+        () => ({
+            selected,
+            transitionStatus
+        }),
+        [selected, transitionStatus]
+    );
 
-        const element = useRenderElement('span', componentProps, {
-            ref: [ref, indicatorRef],
-            state,
-            props: [{
+    const element = useRenderElement('span', componentProps, {
+        ref: [ref, indicatorRef],
+        state,
+        props: [
+            {
                 'aria-hidden': true,
-                'children': '✔️'
-            }, elementProps],
-            customStyleHookMapping: transitionStatusMapping
-        });
+                children: '✔️'
+            },
+            elementProps
+        ],
+        customStyleHookMapping: transitionStatusMapping
+    });
 
-        useOpenChangeComplete({
-            open: selected,
-            ref: indicatorRef,
-            onComplete() {
-                if (!selected) {
-                    setMounted(false);
-                }
+    useOpenChangeComplete({
+        open: selected,
+        ref: indicatorRef,
+        onComplete() {
+            if (!selected) {
+                setMounted(false);
             }
-        });
+        }
+    });
 
-        return element;
-    }
-);
+    return element;
+});
 
 /**
  * Indicates whether the item is selected.

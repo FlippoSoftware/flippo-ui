@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { comboboxSelectors as selectors } from '@flippo-software/core-components/combobox';
 
+import { useSelector as useStore } from '~@lib/core';
 import { resolveSelectedLabel } from '~@lib/resolveValueLabel';
 
 import { useComboboxRootContext } from '../root/ComboboxRootContext';
-import { selectors } from '../store';
 
 /**
  * The current value of the combobox.
@@ -25,12 +25,10 @@ export function ComboboxValue(props: ComboboxValue.Props): React.ReactElement {
     let returnValue = null;
     if (typeof childrenProp === 'function') {
         returnValue = childrenProp(selectedValue);
-    }
-    else if (childrenProp != null) {
+    } else if (childrenProp != null) {
         returnValue = childrenProp;
-    }
-    else {
-        returnValue = resolveSelectedLabel(selectedValue, items, itemToStringLabel);
+    } else {
+        returnValue = resolveSelectedLabel(selectedValue, items as Parameters<typeof resolveSelectedLabel>[1], itemToStringLabel);
     }
 
     return <React.Fragment>{returnValue}</React.Fragment>;

@@ -1,7 +1,8 @@
-
-
 import React from 'react';
 
+import { AvatarMachine } from '@flippo-software/core-components/avatar';
+
+import { useStoreState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -25,7 +26,9 @@ export function AvatarRoot(componentProps: AvatarRoot.Props) {
         ...elementProps
     } = componentProps;
 
-    const [imageLoadingStatus, setImageLoadingStatus] = React.useState<ImageLoadingStatus>('idle');
+    // `useState` keeps one machine per instance; it has no options to sync.
+    const [avatar] = React.useState(() => new AvatarMachine());
+    const { imageLoadingStatus } = useStoreState(avatar.store);
 
     const state: AvatarRoot.State = React.useMemo(
         () => ({
@@ -34,13 +37,7 @@ export function AvatarRoot(componentProps: AvatarRoot.Props) {
         [imageLoadingStatus]
     );
 
-    const contextValue = React.useMemo(
-        () => ({
-            imageLoadingStatus,
-            setImageLoadingStatus
-        }),
-        [imageLoadingStatus, setImageLoadingStatus]
-    );
+    const contextValue = React.useMemo(() => ({ avatar, imageLoadingStatus }), [avatar, imageLoadingStatus]);
 
     const element = useRenderElement('span', componentProps, {
         state,
@@ -49,11 +46,7 @@ export function AvatarRoot(componentProps: AvatarRoot.Props) {
         customStyleHookMapping: avatarStyleHookMapping
     });
 
-    return (
-        <AvatarRootContext value={contextValue}>
-            { element }
-        </AvatarRootContext>
-    );
+    return <AvatarRootContext value={contextValue}>{element}</AvatarRootContext>;
 }
 
 export type ImageLoadingStatus = 'idle' | 'loading' | 'loaded' | 'error';

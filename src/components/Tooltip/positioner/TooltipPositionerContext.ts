@@ -1,19 +1,12 @@
 import React from 'react';
 
-import type { Align, Side } from '~@lib/hooks';
+import type { TooltipPositionerMachine } from '@flippo-software/core-components/tooltip';
 
 export type TooltipPositionerContextValue = {
-    open: boolean;
-    side: Side;
-    align: Align;
-    arrowRef: React.RefObject<Element | null>;
-    arrowUncentered: boolean;
-    arrowStyles: React.CSSProperties;
+    positioner: TooltipPositionerMachine<unknown>;
 };
 
-export const TooltipPositionerContext = React.createContext<TooltipPositionerContextValue | undefined>(
-    undefined
-);
+export const TooltipPositionerContext = React.createContext<TooltipPositionerContextValue | undefined>(undefined);
 
 export function useTooltipPositionerContext() {
     const context = React.use(TooltipPositionerContext);

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import type { RadioGroupMachine } from '@flippo-software/core-components/radio-group';
+
 import { NOOP } from '~@lib/noop';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
@@ -13,18 +15,16 @@ export type RadioGroupContextValue = {
     required: boolean | undefined;
     name: string | undefined;
     checkedValue: unknown;
-    setCheckedValue: (
-        value: unknown,
-        eventDetails: HeadlessUIChangeEventDetails<HeadlessUIEventReasons['none']>,
-    ) => void;
-    onValueChange: (
-        value: unknown,
-        eventDetails: HeadlessUIChangeEventDetails<HeadlessUIEventReasons['none']>,
-    ) => void;
+    setCheckedValue: (value: unknown, eventDetails: HeadlessUIChangeEventDetails<HeadlessUIEventReasons['none']>) => void;
+    onValueChange: (value: unknown, eventDetails: HeadlessUIChangeEventDetails<HeadlessUIEventReasons['none']>) => void;
     touched: boolean;
     setTouched: React.Dispatch<React.SetStateAction<boolean>>;
     validation?: UseFieldValidationReturnValue;
     registerControlRef: (element: HTMLElement | null) => void;
+    /**
+     * The core machine of the group (absent outside of a group).
+     */
+    group?: RadioGroupMachine;
 };
 
 export const RadioGroupContext = React.createContext<RadioGroupContextValue>({

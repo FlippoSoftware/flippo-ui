@@ -21,7 +21,7 @@ import type { CheckboxRoot } from '../root/CheckboxRoot';
  * Renders a `<span>` element.
  *
  * Documentation: [Base UI Checkbox](https://base-ui.com/react/components/checkbox)
- */export function CheckboxIndicator(componentProps: CheckboxIndicator.Props) {
+ */ export function CheckboxIndicator(componentProps: CheckboxIndicator.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,

@@ -63,8 +63,5 @@ export type CompositeItemProps<Metadata, State extends Record<string, any>> = {
 
 // eslint-disable-next-line ts/no-redeclare
 export namespace CompositeItem {
-    export type Props<Metadata, State extends Record<string, any>> = CompositeItemProps<
-        Metadata,
-        State
-    >;
+    export type Props<Metadata, State extends Record<string, any>> = CompositeItemProps<Metadata, State>;
 }

@@ -1,18 +1,28 @@
 import React from 'react';
 
-import { useLazyRef } from '@flippo-ui/hooks';
+import { ListStore } from '@flippo-software/core-components/list';
 
+import { useStoreSelector, useSyncDuringRender } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '~@lib/types';
 
 import { CompositeList } from '../../Composite';
-import { ListStore } from '../store';
 
 import { ListRootContext, useListRootContext } from './ListRootContext';
 import { useNestedListContext } from './NestedListContext';
 
 import type { ListRootContextValue } from './ListRootContext';
+
+// Selected from when the list is not nested (hooks can't be called conditionally).
+const NO_PARENT_STORE = ListStore.create({
+    nested: false,
+    nestedListNumber: 0,
+    orientation: 'vertical',
+    type: 'ordered',
+    virtualized: false,
+    elementsRef: { current: [] }
+});
 
 /**
  * Root container for the List component with full state management.
@@ -34,50 +44,56 @@ export function ListRoot(componentProps: ListRoot.Props) {
     const elementsRef = React.useRef<(HTMLElement | null)[]>([]);
 
     const parentListRootContext = useListRootContext(true);
-    const nesting = useNestedListContext();
+    const nesting = useNestedListContext(true);
 
     const nested = Boolean(parentListRootContext);
-    const nestedListNumber = (parentListRootContext?.store.useState('nestedListNumber') ?? 0) + 1;
+    const parentNestedListNumber = useStoreSelector(parentListRootContext?.store ?? NO_PARENT_STORE, 'nestedListNumber');
+    const nestedListNumber = (parentListRootContext ? parentNestedListNumber : 0) + 1;
     const nestedListItemNumber = nesting?.nestedListItemNumber ?? undefined;
 
-    const initialState = React.useMemo(() => ({
-        nested: false,
-        nestedListNumber: 1,
-        orientation: 'vertical' as const,
-        type: 'ordered' as const,
-        virtualized: false,
-        elementsRef
-    }), []);
+    const initialState = React.useMemo(
+        () => ({
+            nested: false,
+            nestedListNumber: 1,
+            orientation: 'vertical' as const,
+            type: 'ordered' as const,
+            virtualized: false,
+            elementsRef
+        }),
+        []
+    );
 
-    const store = useLazyRef(ListStore.create, initialState).current;
+    const [store] = React.useState(() => ListStore.create(initialState));
 
-    store.useSyncedValues({
-        nested,
-        nestedListNumber,
-        orientation,
-        type,
-        virtualized,
-        elementsRef
-    });
+    useSyncDuringRender(() =>
+        store.update({
+            nested,
+            nestedListNumber,
+            orientation,
+            type,
+            virtualized,
+            elementsRef
+        })
+    );
 
-    const state: ListRoot.State = React.useMemo(() => ({
-        orientation,
-        nestedListNumber,
-        nestedListItemNumber,
-        nested,
-        type
-    }), [
-        orientation,
-        nestedListNumber,
-        nestedListItemNumber,
-        nested,
-        type
-    ]);
+    const state: ListRoot.State = React.useMemo(
+        () => ({
+            orientation,
+            nestedListNumber,
+            nestedListItemNumber,
+            nested,
+            type
+        }),
+        [orientation, nestedListNumber, nestedListItemNumber, nested, type]
+    );
 
-    const listProps = React.useMemo<HTMLProps>(() => ({
-        'role': 'list',
-        'aria-labelledby': nesting?.subheaderId ? nesting.subheaderId : undefined
-    }), [nesting]);
+    const listProps = React.useMemo<HTMLProps>(
+        () => ({
+            role: 'list',
+            'aria-labelledby': nesting?.subheaderId ? nesting.subheaderId : undefined
+        }),
+        [nesting]
+    );
 
     const element = useRenderElement('div', componentProps, {
         ref,
@@ -88,18 +104,12 @@ export function ListRoot(componentProps: ListRoot.Props) {
     const contextValue: ListRootContextValue = React.useMemo(() => ({ store }), [store]);
 
     if (virtualized) {
-        return (
-            <ListRootContext value={contextValue}>
-                {element}
-            </ListRootContext>
-        );
+        return <ListRootContext value={contextValue}>{element}</ListRootContext>;
     }
 
     return (
         <ListRootContext value={contextValue}>
-            <CompositeList elementsRef={elementsRef}>
-                {element}
-            </CompositeList>
+            <CompositeList elementsRef={elementsRef}>{element}</CompositeList>
         </ListRootContext>
     );
 }
@@ -131,8 +141,10 @@ export namespace ListRoot {
     export type Props = HeadlessUIComponentProps<'div', State> & {
         /**
          * Layout orientation.
+         *
+         * @default 'vertical'
          */
-        orientation: Orientation;
+        orientation?: Orientation;
         /**
          * The type of the list.
          *

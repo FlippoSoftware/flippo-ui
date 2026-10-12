@@ -1,13 +1,10 @@
-import React from 'react';
+import { SegmentedControlItemMachine } from '@flippo-software/core-components/segmented-control';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import { REASONS } from '~@lib/reason';
+import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
+import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { ACTIVE_COMPOSITE_ITEM } from '../../Composite/constants';
-import { CompositeItem } from '../../Composite/item/CompositeItem';
-import { useButton } from '../../use-button/useButton';
 import { useSegmentedControlContext } from '../root/SegmentedControlRootContext';
 
 import { SegmentedControlItemDataAttributes } from './SegmentedControlItemDataAttributes';
@@ -28,62 +25,38 @@ const stateAttributesMapping = {
 };
 
 /**
- * Represents a single option inside a SegmentedControl.Root.
- * Renders a `<button>` element with role="radio".
- *
- * @example
- * <SegmentedControl.Item value="grid">Grid</SegmentedControl.Item>
+ * An option of a segmented control.
+ * Renders a `<button>` element.
  */
 export function SegmentedControlItem(componentProps: SegmentedControlItem.Props) {
     const {
-        value,
-        disabled: disabledProp = false,
+        /* eslint-disable unused-imports/no-unused-vars */
         render,
         className,
+        /* eslint-enable unused-imports/no-unused-vars */
+        value,
+        disabled,
         nativeButton = true,
         ref,
         ...elementProps
     } = componentProps;
 
-    const context = useSegmentedControlContext(false);
+    const { control } = useSegmentedControlContext(false);
 
-    const selected = context.value === value;
-    const disabled = disabledProp || context.disabled;
-    const readOnly = context.readOnly;
+    const item = useMachine((options) => new SegmentedControlItemMachine(control, options), {
+        value,
+        disabled,
+        nativeButton
+    });
+    const state: SegmentedControlItem.State = useMachineState(item);
+    const track = useTracker();
 
-    const { getButtonProps, buttonRef } = useButton({ disabled, native: nativeButton });
-
-    const state: SegmentedControlItem.State = React.useMemo(
-        () => ({ selected, disabled }),
-        [selected, disabled]
-    );
-
-    const itemProps = {
-        'role': 'radio',
-        'aria-checked': selected,
-        'aria-disabled': disabled || undefined,
-        [ACTIVE_COMPOSITE_ITEM as string]: selected ? '' : undefined,
-        onClick(event: React.MouseEvent) {
-            if (readOnly || disabled || selected) return;
-            const details = createChangeEventDetails(REASONS.none, event.nativeEvent);
-            context.setValue(value, details);
-        }
-    };
-
-    const refs = [ref, buttonRef];
-    const props = [itemProps, elementProps, getButtonProps];
-
-    return (
-        <CompositeItem
-            tag={'button'}
-            render={render}
-            className={className}
-            state={state}
-            refs={refs}
-            props={props}
-            stateAttributesMapping={stateAttributesMapping}
-        />
-    );
+    return useRenderElement('button', componentProps, {
+        state,
+        ref: [ref, item.setElement],
+        props: [elementProps, (props) => track(() => toReactProps(item.getProps(props)))],
+        customStyleHookMapping: stateAttributesMapping
+    });
 }
 
 export type SegmentedControlItemState = {
@@ -103,8 +76,8 @@ export type SegmentedControlItemProps = {
      * @default false
      */
     disabled?: boolean;
-} & NativeButtonProps
-  & HeadlessUIComponentProps<'button', SegmentedControlItem.State>;
+} & NativeButtonProps &
+    HeadlessUIComponentProps<'button', SegmentedControlItem.State>;
 
 export namespace SegmentedControlItem {
     export type State = SegmentedControlItemState;

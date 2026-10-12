@@ -1,11 +1,13 @@
+import React from 'react';
 
-import * as React from 'react';
+import { ButtonMachine } from '@flippo-software/core-components/button';
+import { getToastActionProps } from '@flippo-software/core-components/toast';
 
+import { toReactProps, useMachine } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button/useButton';
 import { useToastRootContext } from '../root/ToastRootContext';
 
 /**
@@ -28,35 +30,18 @@ export function ToastAction(componentProps: ToastAction.Props) {
 
     const { toast } = useToastRootContext();
 
-    const computedChildren = toast.actionProps?.children ?? elementProps.children;
-    const shouldRender = Boolean(computedChildren);
+    const button = useMachine((options) => new ButtonMachine(options), { disabled, native: nativeButton });
 
-    const { getButtonProps, buttonRef } = useButton({
-        disabled,
-        native: nativeButton
-    });
-
-    const state: ToastAction.State = React.useMemo(
-        () => ({
-            type: toast.type
-        }),
-        [toast.type]
-    );
+    const state: ToastAction.State = React.useMemo(() => ({ type: toast.type }), [toast.type]);
 
     const element = useRenderElement('button', componentProps, {
-        ref: [ref, buttonRef],
+        ref: [ref, button.setElement],
         state,
-        props: [
-            elementProps,
-            toast.actionProps,
-            getButtonProps,
-            {
-                children: computedChildren
-            }
-        ]
+        props: [elementProps, (props) => toReactProps(getToastActionProps(toast as never, button, props))]
     });
 
-    if (!shouldRender) {
+    const computedChildren = toast.actionProps?.children ?? elementProps.children;
+    if (!computedChildren) {
         return null;
     }
 

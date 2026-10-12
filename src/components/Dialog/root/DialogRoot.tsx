@@ -1,17 +1,18 @@
 import React from 'react';
+import * as ReactDOM from 'react-dom';
 
-import { useLazyRef } from '@flippo-ui/hooks/use-lazy-ref';
+import { DialogRootMachine } from '@flippo-software/core-components/dialog';
+
+import type { DialogHandle } from '@flippo-software/core-components/dialog';
+
+import { useMachine, useStoreSelector } from '~@lib/core';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import type { PayloadChildRenderFunction } from '~@lib/popups';
+import type { PayloadChildRenderFunction } from '~@lib/popupTypes';
 import type { REASONS } from '~@lib/reason';
 
-import { DialogStore } from '../store/DialogStore';
-
-import type { DialogHandle } from '../store/DialogHandle';
-
 import { DialogRootContext, useDialogRootContext } from './DialogRootContext';
-import { useDialogRoot } from './useDialogRoot';
 
 import type { DialogRootContextValue } from './DialogRootContext';
 
@@ -37,38 +38,35 @@ export function DialogRoot<Payload>(props: DialogRoot.Props<Payload>) {
     } = props;
 
     const parentDialogRootContext = useDialogRootContext(true);
-    const nested = Boolean(parentDialogRootContext);
+    const fallbackReferenceId = useHeadlessUiId();
+    const floatingId = useHeadlessUiId();
 
-    const store = useLazyRef(() => {
-        return (
-            handle?.store
-            ?? new DialogStore<Payload>({
-                open: openProp ?? defaultOpen,
-                activeTriggerId: triggerIdProp !== undefined ? triggerIdProp : defaultTriggerIdProp,
-                modal,
-                disablePointerDismissal,
-                nested
-            })
-        );
-    }).current;
+    const root = useMachine(
+        (options) =>
+            new DialogRootMachine<Payload>(options, {
+                store: handle?.store,
+                parentStore: parentDialogRootContext?.store,
+                fallbackReferenceId: fallbackReferenceId as string,
+                floatingId,
+                flushSync: ReactDOM.flushSync
+            }),
+        {
+            open: openProp,
+            defaultOpen,
+            modal,
+            onOpenChange: onOpenChange as never,
+            onOpenChangeComplete,
+            disablePointerDismissal,
+            triggerId: triggerIdProp,
+            defaultTriggerId: defaultTriggerIdProp
+        }
+    );
 
-    store.useControlledProp('open', openProp);
-    store.useControlledProp('activeTriggerId', triggerIdProp);
-    store.useSyncedValues({ disablePointerDismissal, nested, modal });
-    store.useContextCallback('onOpenChange', onOpenChange);
-    store.useContextCallback('onOpenChangeComplete', onOpenChangeComplete);
+    React.useImperativeHandle(actionsRef, () => root.actions, [root]);
 
-    const payload = store.useState('payload') as Payload | undefined;
+    const payload = useStoreSelector(root.store, 'payload') as Payload | undefined;
 
-    useDialogRoot({
-        store,
-        actionsRef,
-        parentContext: parentDialogRootContext?.store.context,
-        onOpenChange,
-        triggerIdProp
-    });
-
-    const contextValue: DialogRootContextValue<Payload> = React.useMemo(() => ({ store }), [store]);
+    const contextValue: DialogRootContextValue<Payload> = React.useMemo(() => ({ store: root.store }), [root]);
 
     return (
         <DialogRootContext.Provider value={contextValue as DialogRootContextValue}>
@@ -148,8 +146,8 @@ export type DialogRootActions = {
     close: () => void;
 };
 
-export type DialogRootChangeEventReason
-  = | typeof REASONS.triggerPress
+export type DialogRootChangeEventReason =
+    | typeof REASONS.triggerPress
     | typeof REASONS.outsidePress
     | typeof REASONS.escapeKey
     | typeof REASONS.closePress
@@ -157,10 +155,9 @@ export type DialogRootChangeEventReason
     | typeof REASONS.imperativeAction
     | typeof REASONS.none;
 
-export type DialogRootChangeEventDetails
-  = HeadlessUIChangeEventDetails<DialogRoot.ChangeEventReason> & {
-      preventUnmountOnClose: () => void;
-  };
+export type DialogRootChangeEventDetails = HeadlessUIChangeEventDetails<DialogRoot.ChangeEventReason> & {
+    preventUnmountOnClose: () => void;
+};
 
 export namespace DialogRoot {
     export type Props<Payload = unknown> = DialogRootProps<Payload>;

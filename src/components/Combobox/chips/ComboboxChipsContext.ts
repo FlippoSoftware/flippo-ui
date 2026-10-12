@@ -1,14 +1,10 @@
 import React from 'react';
 
-export type ComboboxChipsContextValue = {
-    highlightedChipIndex: number | undefined;
-    setHighlightedChipIndex: React.Dispatch<React.SetStateAction<number | undefined>>;
-    chipsRef: React.RefObject<Array<HTMLButtonElement | null>>;
-};
+import type { ComboboxChipsMachine } from '@flippo-software/core-components/combobox';
 
-export const ComboboxChipsContext = React.createContext<ComboboxChipsContextValue | undefined>(
-    undefined
-);
+export type ComboboxChipsContextValue = ComboboxChipsMachine;
+
+export const ComboboxChipsContext = React.createContext<ComboboxChipsContextValue | undefined>(undefined);
 
 export function useComboboxChipsContext() {
     return React.use(ComboboxChipsContext);

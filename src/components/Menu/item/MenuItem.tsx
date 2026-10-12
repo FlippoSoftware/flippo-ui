@@ -1,15 +1,15 @@
 import type React from 'react';
 
+import { MenuRegularItemMachine } from '@flippo-software/core-components/menu';
+
+import { toReactProps, useMachine, useMachineState } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, NonNativeButtonProps } from '~@lib/types';
 
-import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
-import { useMenuPositionerContext } from '../positioner/MenuPositionerContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
 
-import { REGULAR_ITEM, useMenuItem } from './useMenuItem';
-
+import { useMenuItemSetup } from './useMenuItem';
 /**
  * An individual interactive item in the menu.
  * Renders a `<div>` element.
@@ -31,34 +31,23 @@ export function MenuItem(componentProps: MenuItem.Props) {
         ...elementProps
     } = componentProps;
 
-    const listItem = useCompositeListItem({ label });
-    const menuPositionerContext = useMenuPositionerContext(true);
-    const id = useHeadlessUiId(idProp);
-
+    const id = useHeadlessUiId(idProp) as string;
     const { store } = useMenuRootContext();
-    const highlighted = store.useState('isActive', listItem.index);
-    const itemProps = store.useState('itemProps');
+    const setup = useMenuItemSetup();
 
-    const { getItemProps, itemRef } = useMenuItem({
-        closeOnClick,
-        disabled,
-        highlighted,
+    const item = useMachine((options) => new MenuRegularItemMachine(store, options, setup), {
         id,
-        store,
+        label,
         nativeButton,
-        nodeId: menuPositionerContext?.nodeId,
-        itemMetadata: REGULAR_ITEM
-    });
-
-    const state: MenuItem.State = {
         disabled,
-        highlighted
-    };
+        closeOnClick
+    });
+    const state: MenuItem.State = useMachineState(item);
 
     return useRenderElement('div', componentProps, {
         state,
-        props: [itemProps, elementProps, getItemProps],
-        ref: [itemRef, ref, listItem.ref]
+        props: [elementProps, (props) => toReactProps(item.getItemProps(props))],
+        ref: [ref, item.setElement]
     });
 }
 
@@ -97,7 +86,8 @@ export type MenuItemProps = {
      * @default true
      */
     closeOnClick?: boolean;
-} & NonNativeButtonProps & HeadlessUIComponentProps<'div', MenuItem.State>;
+} & NonNativeButtonProps &
+    HeadlessUIComponentProps<'div', MenuItem.State>;
 
 export namespace MenuItem {
     export type State = MenuItemState;

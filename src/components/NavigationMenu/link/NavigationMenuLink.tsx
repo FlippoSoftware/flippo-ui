@@ -1,17 +1,13 @@
 import React from 'react';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import { REASONS } from '~@lib/reason';
-import { useFloatingTree } from '~@packages/floating-ui-react';
+import { getNavigationMenuLinkProps } from '@flippo-software/core-components/navigation-menu';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
+import { toReactProps } from '~@lib/core';
+
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CompositeItem } from '../../Composite/item/CompositeItem';
-import {
-    useNavigationMenuRootContext,
-    useNavigationMenuTreeContext
-} from '../root/NavigationMenuRootContext';
-import { isOutsideMenuEvent } from '../utils/isOutsideMenuEvent';
+import { useNavigationMenuRootContext } from '../root/NavigationMenuRootContext';
 
 /**
  * A link in the navigation menu that can be used to navigate to a different page or section.
@@ -20,69 +16,20 @@ import { isOutsideMenuEvent } from '../utils/isOutsideMenuEvent';
  * Documentation: [Base UI Navigation Menu](https://base-ui.com/react/components/navigation-menu)
  */
 export function NavigationMenuLink(componentProps: NavigationMenuLinkProps) {
-    const {
-        className,
-        render,
-        active = false,
-        closeOnClick = false,
-        ref,
-        ...elementProps
-    } = componentProps;
+    const { className, render, active = false, closeOnClick = false, ref, ...elementProps } = componentProps;
 
-    const {
-        setValue,
-        popupElement,
-        positionerElement,
-        rootRef
-    } = useNavigationMenuRootContext();
-    const nodeId = useNavigationMenuTreeContext();
-    const tree = useFloatingTree();
+    const root = useNavigationMenuRootContext();
 
-    const state: NavigationMenuLink.State = React.useMemo(
-        () => ({
-            active
-        }),
-        [active]
-    );
-
-    const defaultProps: HTMLProps = {
-        'aria-current': active ? 'page' : undefined,
-        'tabIndex': undefined,
-        onClick(event) {
-            if (closeOnClick) {
-                setValue(null, createChangeEventDetails(REASONS.linkPress, event.nativeEvent));
-            }
-        },
-        onBlur(event) {
-            if (
-                positionerElement
-                && popupElement
-                && isOutsideMenuEvent(
-                    {
-                        currentTarget: event.currentTarget,
-                        relatedTarget: event.relatedTarget as HTMLElement | null
-                    },
-                    {
-                        popupElement,
-                        rootRef,
-                        tree,
-                        nodeId
-                    }
-                )
-            ) {
-                setValue(null, createChangeEventDetails(REASONS.focusOut, event.nativeEvent));
-            }
-        }
-    };
+    const state: NavigationMenuLink.State = React.useMemo(() => ({ active }), [active]);
 
     return (
         <CompositeItem
-            tag={'a'}
+            tag='a'
             render={render}
             className={className}
             state={state}
             refs={[ref]}
-            props={[defaultProps, elementProps]}
+            props={[elementProps, (props: object) => toReactProps(getNavigationMenuLinkProps(root, { active, closeOnClick }, props))]}
         />
     );
 }

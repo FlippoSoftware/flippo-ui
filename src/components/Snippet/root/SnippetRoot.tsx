@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { SnippetMachine, snippetRootStateAttributesMapping } from '@flippo-software/core-components/snippet';
+
+import { useMachine, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
@@ -7,21 +10,9 @@ import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { CompositeList } from '../../Composite';
 
-import type { CompositeMetadata } from '../../Composite';
-import type { SnippetLine } from '../line/SnippetLine';
-
 import { SnippetRootContext } from './SnippetRootContext';
-import { SnippetRootDataAttributes } from './SnippetRootDataAttributes';
 
-const snippetRootStyleHook: StateAttributesMapping<SnippetRoot.State> = {
-    disableCopy(value): Record<string, string> | null {
-        if (value) {
-            return { [SnippetRootDataAttributes.disableCopy]: '' };
-        }
-
-        return null;
-    }
-};
+import type { SnippetRootContextValue } from './SnippetRootContext';
 
 /**
  * Root container for the Snippet component.
@@ -40,40 +31,21 @@ export function SnippetRoot(componentProps: SnippetRoot.Props) {
         ...elementProps
     } = componentProps;
 
-    const elementsRef = React.useRef<HTMLElement[]>([]);
-    const metadataMapRef = React.useRef<Map<Element, CompositeMetadata<SnippetLine.Metadata> | null>>(new Map());
+    const snippet = useMachine((options) => new SnippetMachine(options), { disableCopy, symbol });
+    const state: SnippetRoot.State = useMachineState(snippet);
 
-    const handleMapChange = React.useCallback((newMap: Map<Element, CompositeMetadata<SnippetLine.Metadata> | null>) => {
-        metadataMapRef.current = newMap;
-    }, []);
-
-    const state: SnippetRoot.State = React.useMemo(
-        () => ({
-            disableCopy,
-            symbol: typeof symbol === 'string' ? symbol : undefined
-        }),
-        [disableCopy, symbol]
-    );
-
-    const contextValue = React.useMemo(
-        () => ({
-            symbol,
-            disableCopy,
-            metadataMapRef
-        }),
-        [disableCopy, symbol]
-    );
+    const contextValue: SnippetRootContextValue = React.useMemo(() => ({ snippet, symbol, disableCopy }), [snippet, symbol, disableCopy]);
 
     const element = useRenderElement('div', componentProps, {
         state,
         ref,
         props: elementProps,
-        customStyleHookMapping: snippetRootStyleHook
+        customStyleHookMapping: snippetRootStateAttributesMapping as StateAttributesMapping<SnippetRoot.State>
     });
 
     return (
         <SnippetRootContext value={contextValue}>
-            <CompositeList elementsRef={elementsRef} onMapChange={handleMapChange}>
+            <CompositeList registry={snippet.registry} elementsRef={snippet.registry.elementsRef}>
                 {element}
             </CompositeList>
         </SnippetRootContext>

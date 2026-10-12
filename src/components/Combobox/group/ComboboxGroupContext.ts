@@ -10,16 +10,12 @@ export type ComboboxGroupContextValue = {
     items?: readonly any[];
 };
 
-export const ComboboxGroupContext = React.createContext<ComboboxGroupContextValue | undefined>(
-    undefined
-);
+export const ComboboxGroupContext = React.createContext<ComboboxGroupContextValue | undefined>(undefined);
 
 export function useComboboxGroupContext() {
     const context = React.use(ComboboxGroupContext);
     if (context === undefined) {
-        throw new Error(
-            'Headless UI: ComboboxGroupContext is missing. ComboboxGroup parts must be placed within <Combobox.Group>.'
-        );
+        throw new Error('Headless UI: ComboboxGroupContext is missing. ComboboxGroup parts must be placed within <Combobox.Group>.');
     }
     return context;
 }

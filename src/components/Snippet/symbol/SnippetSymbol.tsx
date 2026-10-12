@@ -34,9 +34,12 @@ export function SnippetSymbol(componentProps: SnippetSymbol.Props) {
 
     const content = children ?? symbol;
 
-    const state: SnippetSymbol.State = React.useMemo(() => ({
-        snippetSymbol: true
-    }), []);
+    const state: SnippetSymbol.State = React.useMemo(
+        () => ({
+            snippetSymbol: true
+        }),
+        []
+    );
 
     const element = useRenderElement('span', componentProps, {
         ref,

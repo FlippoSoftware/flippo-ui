@@ -57,10 +57,7 @@ export function RadioCardIndicator(componentProps: RadioCardIndicator.Props) {
 
     const indicatorRef = React.useRef<HTMLSpanElement | null>(null);
 
-    const state: RadioCardIndicator.State = React.useMemo(
-        () => ({ ...rootState, transitionStatus }),
-        [rootState, transitionStatus]
-    );
+    const state: RadioCardIndicator.State = React.useMemo(() => ({ ...rootState, transitionStatus }), [rootState, transitionStatus]);
 
     const shouldRender = keepMounted || rendered;
 
@@ -82,8 +79,7 @@ export function RadioCardIndicator(componentProps: RadioCardIndicator.Props) {
         customStyleHookMapping: stateAttributesMapping
     });
 
-    if (!shouldRender)
-        return null;
+    if (!shouldRender) return null;
 
     return element;
 }

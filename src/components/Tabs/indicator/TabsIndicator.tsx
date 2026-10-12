@@ -1,8 +1,9 @@
 import React from 'react';
 
+import { getTabsIndicatorGeometry } from '@flippo-software/core-components/tabs';
 import { useForcedRerendering, useOnMount } from '@flippo-ui/hooks';
 
-import { useDirection, useRenderElement } from '~@lib/hooks';
+import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
@@ -14,7 +15,6 @@ import type { TabsRoot } from '../root/TabsRoot';
 import type { TabsTab } from '../tab/TabsTab';
 
 import { script as prehydrationScript } from './prehydrationScript.min';
-import { TabsIndicatorCssVars } from './TabsIndicatorCssVars';
 
 const customStyleHookMapping = {
     ...tabsStyleHookMapping,
@@ -39,25 +39,17 @@ export function TabsIndicator(componentProps: TabsIndicator.Props) {
         ...elementProps
     } = componentProps;
 
-    const {
-        getTabElementBySelectedValue,
-        orientation,
-        tabActivationDirection,
-        value
-    }
-        = useTabsRootContext();
+    const { tabs, orientation, tabActivationDirection, value } = useTabsRootContext();
 
     const { tabsListElement } = useTabsListContext();
 
     const [isMounted, setIsMounted] = React.useState(false);
-    const { value: activeTabValue } = useTabsRootContext();
-
-    const direction = useDirection();
 
     useOnMount(() => setIsMounted(true));
 
     const rerender = useForcedRerendering();
 
+    // The indicator follows the active tab when the list resizes.
     React.useEffect(() => {
         if (value != null && tabsListElement != null && typeof ResizeObserver !== 'undefined') {
             const resizeObserver = new ResizeObserver(rerender);
@@ -69,98 +61,15 @@ export function TabsIndicator(componentProps: TabsIndicator.Props) {
             };
         }
 
-        return undefined;
+        return;
     }, [value, tabsListElement, rerender]);
 
-    let left = 0;
-    let right = 0;
-    let top = 0;
-    let bottom = 0;
-    let width = 0;
-    let height = 0;
-
-    let isTabSelected = false;
-
-    if (value != null && tabsListElement != null) {
-        const activeTab = getTabElementBySelectedValue(value);
-        isTabSelected = true;
-
-        if (activeTab != null) {
-            const tabsListRect = tabsListElement.getBoundingClientRect();
-            const {
-                left: tabLeft,
-                top: tabTop,
-                width: computedWidth,
-                height: computedHeight
-            } = activeTab.getBoundingClientRect();
-
-            left = tabLeft - tabsListRect.left + tabsListElement.scrollLeft - tabsListElement.clientLeft;
-            top = tabTop - tabsListRect.top + tabsListElement.scrollTop - tabsListElement.clientTop;
-            width = computedWidth;
-            height = computedHeight;
-
-            right
-                = direction === 'ltr'
-                    ? tabsListElement.scrollWidth - left - width - tabsListElement.clientLeft
-                    : left - tabsListElement.clientLeft;
-            bottom = tabsListElement.scrollHeight - top - height - tabsListElement.clientTop;
-        }
-    }
-
-    const activeTabPosition = React.useMemo(
-        () =>
-            isTabSelected
-                ? {
-                    left,
-                    right,
-                    top,
-                    bottom
-                }
-                : null,
-        [
-            left,
-            right,
-            top,
-            bottom,
-            isTabSelected
-        ]
-    );
-
-    const activeTabSize = React.useMemo(
-        () =>
-            isTabSelected
-                ? {
-                    width,
-                    height
-                }
-                : null,
-        [width, height, isTabSelected]
-    );
-
-    const style = React.useMemo(() => {
-        if (!isTabSelected) {
-            return undefined;
-        }
-
-        return {
-            [TabsIndicatorCssVars.activeTabLeft]: `${left}px`,
-            [TabsIndicatorCssVars.activeTabRight]: `${right}px`,
-            [TabsIndicatorCssVars.activeTabTop]: `${top}px`,
-            [TabsIndicatorCssVars.activeTabBottom]: `${bottom}px`,
-            [TabsIndicatorCssVars.activeTabWidth]: `${width}px`,
-            [TabsIndicatorCssVars.activeTabHeight]: `${height}px`
-        } as React.CSSProperties;
-    }, [
-        left,
-        right,
-        top,
-        bottom,
-        width,
-        height,
-        isTabSelected
-    ]);
-
-    const displayIndicator = isTabSelected && width > 0 && height > 0;
+    const {
+        position: activeTabPosition,
+        size: activeTabSize,
+        style,
+        displayed: displayIndicator
+    } = getTabsIndicatorGeometry(tabs, tabsListElement);
 
     const state: TabsIndicator.State = React.useMemo(
         () => ({
@@ -175,17 +84,21 @@ export function TabsIndicator(componentProps: TabsIndicator.Props) {
     const element = useRenderElement('span', componentProps, {
         state,
         ref,
-        props: [{
-            role: 'presentation',
-            style,
-            hidden: !displayIndicator // do not display the indicator before the layout is settled
-        }, elementProps, {
-            suppressHydrationWarning: true
-        }],
+        props: [
+            {
+                role: 'presentation',
+                style,
+                hidden: !displayIndicator // do not display the indicator before the layout is settled
+            },
+            elementProps,
+            {
+                suppressHydrationWarning: true
+            }
+        ],
         customStyleHookMapping
     });
 
-    if (activeTabValue == null) {
+    if (value == null) {
         return null;
     }
 
@@ -193,10 +106,7 @@ export function TabsIndicator(componentProps: TabsIndicator.Props) {
         <React.Fragment>
             {element}
             {!isMounted && renderBeforeHydration && (
-                <script
-                    dangerouslySetInnerHTML={{ __html: prehydrationScript }}
-                    suppressHydrationWarning
-                />
+                <script dangerouslySetInnerHTML={{ __html: prehydrationScript }} suppressHydrationWarning={true} />
             )}
         </React.Fragment>
     );

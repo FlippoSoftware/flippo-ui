@@ -1,11 +1,9 @@
 import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks';
+import { useTracker } from '~@lib/core';
+import { FloatingPortal } from '~@lib/floating';
 
-import { FloatingPortal } from '~@packages/floating-ui-react';
-
-import { useSelectRootContext } from '../root/SelectRootContext';
-import { selectors } from '../store';
+import { useSelectRoot } from '../root/SelectRootContext';
 
 import { SelectPortalContext } from './SelectPortalContext';
 
@@ -16,20 +14,9 @@ import { SelectPortalContext } from './SelectPortalContext';
  * Documentation: [Base UI Select](https://base-ui.com/react/components/select)
  */
 export function SelectPortal(componentProps: SelectPortal.Props) {
-    const { store } = useSelectRootContext();
-    const mounted = useStore(store, selectors.mounted);
-    const forceMount = useStore(store, selectors.forceMount);
-
-    // Reset forceMount after items have had a chance to register their values/labels.
-    // forceMount is set to true when the value changes programmatically, on trigger focus,
-    // or on autofill — but is never reset, causing the portal to render permanently.
-    // This effect runs after layout effects (where items register), so their data is captured
-    // before the portal unmounts.
-    // React.useEffect(() => {
-    //     if (forceMount && !mounted) {
-    //         store.set('forceMount', false);
-    //     }
-    // }, [forceMount, mounted, store]);
+    const root = useSelectRoot();
+    const track = useTracker();
+    const { mounted, forceMount } = track(() => root.store.state);
 
     const shouldRender = mounted || forceMount;
     if (!shouldRender) {
@@ -37,7 +24,7 @@ export function SelectPortal(componentProps: SelectPortal.Props) {
     }
 
     return (
-        <SelectPortalContext.Provider value>
+        <SelectPortalContext.Provider value={true}>
             <FloatingPortal {...componentProps} />
         </SelectPortalContext.Provider>
     );

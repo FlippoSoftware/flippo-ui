@@ -1,15 +1,14 @@
-import type React from 'react';
+import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks';
+import { SelectValue as SelectValueCore } from '@flippo-software/core-components/select';
 
+import { useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
-import { resolveMultipleLabels, resolveSelectedLabel } from '~@lib/resolveValueLabel';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useSelectRootContext } from '../root/SelectRootContext';
-import { selectors } from '../store';
+import { useSelectRoot } from '../root/SelectRootContext';
 
 const customStyleHookMapping: StateAttributesMapping<SelectValue.State> = {
     value: () => null
@@ -33,46 +32,37 @@ export function SelectValue(componentProps: SelectValue.Props) {
         ...elementProps
     } = componentProps;
 
-    const { store, valueRef } = useSelectRootContext();
+    const root = useSelectRoot();
+    const track = useTracker();
+    const { value, placeholder: isPlaceholder } = track(() => SelectValueCore.getState(root));
+    const state: SelectValue.State = React.useMemo(() => ({ value, placeholder: isPlaceholder }), [value, isPlaceholder]);
 
-    const value = useStore(store, selectors.value);
-    const items = useStore(store, selectors.items);
-    const itemToStringLabel = useStore(store, selectors.itemToStringLabel);
-    const hasSelectedValue = useStore(store, selectors.hasSelectedValue);
-
-    const shouldCheckNullItemLabel = !hasSelectedValue && placeholder != null && childrenProp == null;
-    const hasNullLabel = useStore(store, selectors.hasNullItemLabel, shouldCheckNullItemLabel);
-
-    const state: SelectValue.State = {
-        value,
-        placeholder: !hasSelectedValue
-    };
-
-    let children = null;
+    let children: React.ReactNode;
     if (typeof childrenProp === 'function') {
         children = childrenProp(value);
-    }
-    else if (childrenProp != null) {
-        children = childrenProp;
-    }
-    else if (!hasSelectedValue && placeholder != null && !hasNullLabel) {
-        children = placeholder;
-    }
-    else if (Array.isArray(value)) {
-        children = resolveMultipleLabels(value, items, itemToStringLabel);
-    }
-    else {
-        children = resolveSelectedLabel(value, items, itemToStringLabel);
+    } else {
+        const resolved = track(() =>
+            SelectValueCore.resolve(root, { hasChildren: childrenProp != null, hasPlaceholder: placeholder != null })
+        );
+        if (resolved.kind === 'children') {
+            children = childrenProp;
+        } else if (resolved.kind === 'placeholder') {
+            children = placeholder;
+        } else if (resolved.kind === 'labels') {
+            children = resolved.labels as React.ReactNode;
+        } else {
+            children = resolved.label as React.ReactNode;
+        }
     }
 
-    const element = useRenderElement('span', componentProps, {
+    const setElement = React.useCallback((element: HTMLElement | null) => SelectValueCore.setElement(root, element), [root]);
+
+    return useRenderElement('span', componentProps, {
         state,
-        ref: [ref, valueRef],
+        ref: [ref, setElement],
         props: [{ children }, elementProps],
         customStyleHookMapping
     });
-
-    return element;
 }
 
 export type SelectValueState = {

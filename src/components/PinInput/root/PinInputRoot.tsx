@@ -1,23 +1,17 @@
 import React from 'react';
 
-import {
-    useControlledState,
-    useEventCallback,
-    useIsoLayoutEffect,
-    useMergedRef
-} from '@flippo-ui/hooks';
+import { PinInputMachine } from '@flippo-software/core-components/pin-input';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
-import { mergeProps } from '~@lib/merge';
-import { visuallyHidden } from '~@lib/visuallyHidden';
-import { contains } from '~@packages/floating-ui-react/utils';
+import type { PinInputOptions } from '@flippo-software/core-components/pin-input';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
+import { toReactProps, useMachine, useStoreState } from '~@lib/core';
+import { useDirection, useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
-import { CompositeList } from '../../Composite';
+import type { HeadlessUIComponentProps } from '~@lib/types';
+
+import { CompositeList } from '../../Composite/list/CompositeList';
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
-import { useField } from '../../Field/useField';
-import { useFormContext } from '../../Form/FormContext';
 import { useLabelableContext } from '../../LabelableProvider';
 import { pinInputStyleHookMapping } from '../utils/styleHooks';
 
@@ -28,20 +22,24 @@ import { PinInputRootContext } from './PinInputRootContext';
 
 import type { PinInputRootContextValue } from './PinInputRootContext';
 
+/**
+ * Groups all parts of the PIN input and manages its value.
+ * Renders a `<div>` element and a hidden `<input>` beside.
+ */
 export function PinInputRoot(componentProps: PinInputRoot.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         className,
         render,
         /* eslint-enable unused-imports/no-unused-vars */
-        disabled: disabledProp,
+        disabled,
         readOnly = false,
         required,
-        onValueChange: onValueChangeProp,
+        onValueChange,
         onValueComplete,
-        value: externalValue,
+        value,
         defaultValue,
-        name: nameProp,
+        name,
         placeholder = '○',
         inputRef: inputRefProp,
         id: idProp,
@@ -55,252 +53,72 @@ export function PinInputRoot(componentProps: PinInputRoot.Props) {
         ...elementProps
     } = componentProps;
 
-    const [focusedInputIndex, setFocusedInputIndex] = React.useState<number | null>(null);
-    const [lastFocusedInputIndex, setLastFocusedInputIndex] = React.useState<number | null>(null);
+    const { field, state: fieldState } = useFieldRootContext();
+    const { labelable } = useLabelableContext();
+    const direction = useDirection();
 
-    const {
-        setTouched: setFieldTouched,
-        validationMode,
-        name: fieldName,
-        disabled: fieldDisabled,
-        state: fieldState,
-        validation,
-        setDirty,
-        setFilled,
-        setFocused
-    } = useFieldRootContext();
-    const { labelId, getDescriptionProps } = useLabelableContext();
+    const id = useHeadlessUiId(idProp) as string;
 
-    const { clearErrors } = useFormContext();
-
-    const disabled = fieldDisabled || disabledProp;
-    const name = fieldName ?? nameProp;
-    const id = useHeadlessUiId(idProp);
-
-    const [checkedValue, setCheckedValue] = useControlledState({
-        prop: externalValue ?? '',
-        defaultProp: defaultValue ?? '',
-        caller: 'PinInput'
-    });
-
-    const [values, setValues] = React.useState(() => String(checkedValue).split(''));
-    const [touched, setTouched] = React.useState(false);
-    const pinElementsRefs = React.useRef<(HTMLElement | null)[]>([]);
-    const prevValueRef = React.useRef(checkedValue);
-
-    const controlRef = React.useRef<HTMLElement>(null);
-    const registerControlRef = useEventCallback((element: HTMLElement | null) => {
-        if (controlRef.current == null && element != null) {
-            controlRef.current = element;
-        }
-    });
-
-    useField({
-        id,
-        commit: validation.commit,
-        value: checkedValue,
-        controlRef,
+    const pinInput = useMachine((options) => new PinInputMachine(options), {
+        disabled,
+        readOnly,
+        required,
+        value,
+        defaultValue,
         name,
-        getValue: () => checkedValue ?? null
-    });
-
-    useIsoLayoutEffect(() => {
-        if (prevValueRef.current === checkedValue) {
-            return;
-        }
-
-        clearErrors(name);
-
-        if (validationMode === 'onChange') {
-            validation.commit(checkedValue);
-        }
-        else {
-            validation.commit(checkedValue, true);
-        }
-    }, [
-        name,
-        clearErrors,
-        validationMode,
-        checkedValue,
-        validation
-    ]);
-
-    useIsoLayoutEffect(() => {
-        prevValueRef.current = checkedValue;
-    }, [checkedValue]);
-
-    const onBlur = useEventCallback((event) => {
-        if (!contains(event.currentTarget, event.relatedTarget)) {
-            setFieldTouched(true);
-            setFocused(false);
-
-            if (validationMode === 'onBlur') {
-                validation.commit(checkedValue);
-            }
-        }
-    });
-
-    const onKeyDownCapture = useEventCallback((event) => {
-        if (event.key.startsWith('Arrow')) {
-            setFieldTouched(true);
-            setTouched(true);
-            setFocused(true);
-        }
-    });
-
-    const onValueChange = React.useCallback((pinValue: string, index: number, event: Event) => {
-        setValues((prevValues) => {
-            const newValues = [...prevValues];
-            newValues[index] = pinValue;
-
-            const value = newValues.join('');
-            setCheckedValue(value);
-            onValueChangeProp?.(value, newValues, event);
-
-            // Check if PIN input is completed and handle completion logic
-            const isComplete = pinElementsRefs.current.length === newValues.length && newValues.every((val) => val !== '');
-            if (isComplete && focusedInputIndex === pinElementsRefs.current.length - 1) {
-                // Trigger onValueComplete callback
-                onValueComplete?.(value, newValues, event);
-
-                if (blurOnComplete) {
-                    // Blur the currently focused input
-                    setTimeout(() => {
-                        pinElementsRefs.current[focusedInputIndex ?? 0]?.blur();
-                    }, 0);
-                }
-            }
-
-            return newValues;
-        });
-    }, [
-        setCheckedValue,
-        onValueChangeProp,
-        onValueComplete,
+        placeholder,
+        otp,
+        mask,
         blurOnComplete,
-        focusedInputIndex
-    ]);
+        selectOnFocus,
+        pattern,
+        type,
+        onValueChange: onValueChange as PinInputOptions['onValueChange'],
+        onValueComplete: onValueComplete as PinInputOptions['onValueComplete'],
+        field,
+        labelable,
+        id,
+        direction
+    });
+    const internalState = useStoreState(pinInput.store);
 
-    const serializedCheckedValue = React.useMemo(() => {
-        if (checkedValue == null) {
-            return ''; // avoid uncontrolled -> controlled error
-        }
-        if (typeof checkedValue === 'string') {
-            return checkedValue;
-        }
-        return JSON.stringify(checkedValue);
-    }, [checkedValue]);
+    // Registered again after each render: the registration holds the current value and validity.
+    useIsoLayoutEffect(() => pinInput.registerField());
 
-    const mergedInputRef = useMergedRef(validation.inputRef, controlRef, inputRefProp);
+    const { readOnly: machineReadOnly } = pinInput.getState();
+    const state: PinInputRoot.State = React.useMemo(() => ({ ...fieldState, readOnly: machineReadOnly }), [fieldState, machineReadOnly]);
 
-    const inputProps = mergeProps<'input'>(
-        {
-            'value': serializedCheckedValue,
-            'ref': mergedInputRef,
-            id,
-            'name': serializedCheckedValue ? name : undefined,
-            disabled,
-            readOnly,
-            required,
-            'aria-hidden': true,
-            'tabIndex': -1,
-            'style': visuallyHidden,
-            onFocus() {
-                controlRef.current?.focus();
-            }
-        },
-        validation.getInputValidationProps
-    );
-
-    const state: PinInputRoot.State = React.useMemo(
-        () => ({
-            ...fieldState,
-            disabled: disabled ?? false,
-            required: required ?? false,
-            readOnly: readOnly ?? false
-        }),
-        [fieldState, disabled, required, readOnly]
-    );
-
-    const contextValue: PinInputRootContextValue = React.useMemo(
-        () => ({
-            state,
-            mask,
-            otp,
-            checkedValue,
-            readOnly,
-            name,
-            touched,
-            values,
-            placeholder,
-            controlRef,
-            blurOnComplete,
-            selectOnFocus,
-            pattern,
-            type,
-            validation,
-            focusedInputIndex,
-            lastFocusedInputIndex,
-            setLastFocusedInputIndex,
-            setFocusedInputIndex,
-            setFocused,
-            setDirty,
-            setFilled,
-            setValues,
-            setTouched,
-            setCheckedValue,
-            registerControlRef,
-            onValueChange
-        }),
-        [
-            blurOnComplete,
-            checkedValue,
-            focusedInputIndex,
-            lastFocusedInputIndex,
-            mask,
-            name,
-            onValueChange,
-            otp,
-            pattern,
-            placeholder,
-            readOnly,
-            registerControlRef,
-            selectOnFocus,
-            setCheckedValue,
-            setDirty,
-            setFilled,
-            setFocused,
-            state,
-            touched,
-            type,
-            validation,
-            values
-        ]
-    );
-
-    const defaultProps: HTMLProps = {
-        'aria-required': required,
-        'aria-disabled': disabled,
-        'aria-readonly': readOnly,
-        'aria-labelledby': labelId,
-        onFocus() {
-            setFocused(true);
-        },
-        onBlur,
-        onKeyDownCapture
-    };
+    // biome-ignore lint/correctness/useExhaustiveDependencies: a new value when the machine's state changes.
+    const contextValue: PinInputRootContextValue = React.useMemo(() => ({ pinInput, state }), [pinInput, state, internalState]);
 
     const element = useRenderElement('div', componentProps, {
         ref,
         state,
-        props: [defaultProps, elementProps, getDescriptionProps],
+        props: [elementProps, (props) => toReactProps(pinInput.getRootProps(props))],
         customStyleHookMapping: pinInputStyleHookMapping
     });
 
+    const inputRef = React.useCallback(
+        (inputElement: HTMLInputElement | null) => {
+            pinInput.setInputElement(inputElement);
+            if (typeof inputRefProp === 'function') {
+                inputRefProp(inputElement);
+            } else if (inputRefProp) {
+                (inputRefProp as React.RefObject<HTMLInputElement | null>).current = inputElement;
+            }
+        },
+        [pinInput, inputRefProp]
+    );
+
     return (
         <PinInputRootContext value={contextValue}>
-            <CompositeList elementsRef={pinElementsRefs}>{element}</CompositeList>
-            <input {...inputProps} />
+            <CompositeList
+                registry={pinInput.registry as never}
+                elementsRef={pinInput.elementsRef as React.RefObject<Array<HTMLElement | null>>}
+            >
+                {element}
+            </CompositeList>
+            <input {...toReactProps(pinInput.getInputProps())} ref={inputRef} />
         </PinInputRootContext>
     );
 }

@@ -14,9 +14,7 @@ export type CompositeRootContextValue = {
 };
 
 export function createCompositeRootContext() {
-    const CompositeRootContext = React.createContext<CompositeRootContextValue | undefined>(
-        undefined
-    );
+    const CompositeRootContext = React.createContext<CompositeRootContextValue | undefined>(undefined);
 
     function useCompositeRootContext(optional: true): CompositeRootContextValue | undefined;
     function useCompositeRootContext(optional?: false): CompositeRootContextValue;
@@ -24,9 +22,7 @@ export function createCompositeRootContext() {
         const context = React.use(CompositeRootContext);
 
         if (context === undefined && !optional) {
-            throw new Error(
-                'Headless UI: CompositeRootContext is missing. Composite parts must be placed within <Composite.Root>.'
-            );
+            throw new Error('Headless UI: CompositeRootContext is missing. Composite parts must be placed within <Composite.Root>.');
         }
 
         return context;

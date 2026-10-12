@@ -14,13 +14,7 @@ export function useToastManager(): useToastManager.ReturnValue {
         throw new Error('Headless UI: useToast must be used within <Toast.Provider>.');
     }
 
-    const {
-        toasts,
-        add,
-        close,
-        update,
-        promise
-    } = context;
+    const { toasts, add, close, update, promise } = context;
 
     return React.useMemo(
         () => ({
@@ -30,13 +24,7 @@ export function useToastManager(): useToastManager.ReturnValue {
             update,
             promise
         }),
-        [
-            toasts,
-            add,
-            close,
-            update,
-            promise
-        ]
+        [toasts, add, close, update, promise]
     );
 }
 
@@ -46,10 +34,7 @@ export namespace useToastManager {
         add: <Data extends object>(options: AddOptions<Data>) => string;
         close: (toastId: string) => void;
         update: <Data extends object>(toastId: string, options: UpdateOptions<Data>) => void;
-        promise: <Value, Data extends object>(
-            promise: Promise<Value>,
-            options: PromiseOptions<Value, Data>,
-        ) => Promise<Value>;
+        promise: <Value, Data extends object>(promise: Promise<Value>, options: PromiseOptions<Value, Data>) => Promise<Value>;
     };
 
     export type AddOptions<Data extends object> = {

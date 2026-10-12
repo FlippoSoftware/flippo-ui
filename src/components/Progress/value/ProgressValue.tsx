@@ -1,5 +1,3 @@
-
-
 import type React from 'react';
 
 import { useRenderElement } from '~@lib/hooks';
@@ -27,21 +25,20 @@ export function ProgressValue(componentProps: ProgressValue.Props) {
         ...elementProps
     } = componentProps;
 
-    const { value, formattedValue, state } = useProgressRootContext();
+    const { progress, value, state } = useProgressRootContext();
 
-    const formattedValueArg = value == null ? 'indeterminate' : formattedValue;
-    const formattedValueDisplay = value == null ? null : formattedValue;
+    const { formattedValue: formattedValueArg, display: formattedValueDisplay } = progress.getValueText();
 
     const element = useRenderElement('span', componentProps, {
         state,
         ref,
-        props: [{
-            'aria-hidden': true,
-            'children':
-                    typeof children === 'function'
-                        ? children(formattedValueArg, value)
-                        : formattedValueDisplay
-        }, elementProps],
+        props: [
+            {
+                'aria-hidden': true,
+                children: typeof children === 'function' ? children(formattedValueArg, value) : formattedValueDisplay
+            },
+            elementProps
+        ],
         customStyleHookMapping: progressStyleHookMapping
     });
 

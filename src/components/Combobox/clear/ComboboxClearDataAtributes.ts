@@ -1,7 +1,4 @@
-import {
-    CommonPopupDataAttributes,
-    CommonTriggerDataAttributes
-} from '~@lib/popupStateMapping';
+import { CommonPopupDataAttributes, CommonTriggerDataAttributes } from '~@lib/popupStateMapping';
 
 export enum ComboboxClearDataAttributes {
     /**

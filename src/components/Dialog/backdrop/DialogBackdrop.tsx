@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
 
+import { useStoreSelector } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -34,10 +35,10 @@ export function DialogBackdrop(componentProps: DialogBackdropProps) {
     } = componentProps;
     const { store } = useDialogRootContext();
 
-    const open = store.useState('open');
-    const nested = store.useState('nested');
-    const mounted = store.useState('mounted');
-    const transitionStatus = store.useState('transitionStatus');
+    const open = useStoreSelector(store, 'open');
+    const nested = useStoreSelector(store, 'nested');
+    const mounted = useStoreSelector(store, 'mounted');
+    const transitionStatus = useStoreSelector(store, 'transitionStatus');
 
     const state: DialogBackdrop.State = React.useMemo(
         () => ({
@@ -49,16 +50,19 @@ export function DialogBackdrop(componentProps: DialogBackdropProps) {
 
     return useRenderElement('div', componentProps, {
         state,
-        ref: [store.context.backdropRef, ref],
+        ref: [store.context.backdropRef as React.RefObject<HTMLDivElement | null>, ref],
         customStyleHookMapping: stateAttributesMapping,
-        props: [{
-            role: 'presentation',
-            hidden: !mounted,
-            style: {
-                userSelect: 'none',
-                WebkitUserSelect: 'none'
-            }
-        }, elementProps],
+        props: [
+            {
+                role: 'presentation',
+                hidden: !mounted,
+                style: {
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none'
+                }
+            },
+            elementProps
+        ],
         enabled: forceRender || !nested
     });
 }

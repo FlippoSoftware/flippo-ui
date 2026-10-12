@@ -1,5 +1,3 @@
-
-
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';

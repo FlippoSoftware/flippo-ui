@@ -1,3 +1,6 @@
+import { registerDialogDescription } from '@flippo-software/core-components/dialog';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+
 import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
@@ -25,7 +28,7 @@ export function DialogDescription(componentProps: DialogDescriptionProps) {
 
     const id = useHeadlessUiId(idProp);
 
-    store.useSyncedValueWithCleanup('descriptionElementId', id);
+    useIsoLayoutEffect(() => (id === undefined ? undefined : registerDialogDescription(store, id)), [store, id]);
 
     return useRenderElement('p', componentProps, {
         ref,

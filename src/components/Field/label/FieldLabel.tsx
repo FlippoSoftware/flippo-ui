@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { getTarget } from '@flippo-software/core-components/floating';
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
-import { getTarget } from '~@packages/floating-ui-react/utils';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
@@ -51,21 +51,24 @@ export function FieldLabel(componentProps: FieldLabel.Props) {
     const element = useRenderElement('label', componentProps, {
         ref: [ref, labelRef],
         state: fieldRootContext.state,
-        props: [{
-            id: labelId,
-            htmlFor: controlId ?? undefined,
-            onMouseDown(event) {
-                const target = getTarget(event.nativeEvent) as HTMLElement | null;
-                if (target?.closest('button,input,select,textarea')) {
-                    return;
-                }
+        props: [
+            {
+                id: labelId,
+                htmlFor: controlId ?? undefined,
+                onMouseDown(event) {
+                    const target = getTarget(event.nativeEvent) as HTMLElement | null;
+                    if (target?.closest('button,input,select,textarea')) {
+                        return;
+                    }
 
-                // Prevent text selection when double clicking label.
-                if (!event.defaultPrevented && event.detail > 1) {
-                    event.preventDefault();
+                    // Prevent text selection when double clicking label.
+                    if (!event.defaultPrevented && event.detail > 1) {
+                        event.preventDefault();
+                    }
                 }
-            }
-        }, elementProps],
+            },
+            elementProps
+        ],
         customStyleHookMapping: fieldValidityMapping
     });
 

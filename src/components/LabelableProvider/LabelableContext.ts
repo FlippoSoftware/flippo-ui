@@ -1,5 +1,7 @@
 import React from 'react';
 
+import type { LabelableController } from '@flippo-software/core-components/labelable';
+
 import { NOOP } from '~@lib/noop';
 
 import type { HTMLProps } from '~@lib/types';
@@ -22,6 +24,10 @@ export type LabelableContextValue = {
     messageIds: string[];
     setMessageIds: React.Dispatch<React.SetStateAction<string[]>>;
     getDescriptionProps: (externalProps: HTMLProps) => HTMLProps;
+    /**
+     * The core controller (absent outside of a provider).
+     */
+    labelable?: LabelableController;
 };
 
 /**

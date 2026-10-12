@@ -28,11 +28,14 @@ export function SliderTrack(componentProps: SliderTrack.Props) {
     const element = useRenderElement('div', componentProps, {
         state,
         ref,
-        props: [{
-            style: {
-                position: 'relative'
-            }
-        }, elementProps],
+        props: [
+            {
+                style: {
+                    position: 'relative'
+                }
+            },
+            elementProps
+        ],
         customStyleHookMapping: sliderStyleHookMapping
     });
 

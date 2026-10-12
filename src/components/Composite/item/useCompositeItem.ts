@@ -20,8 +20,7 @@ export function createUseCompositeItem<CreateMetadata>(params: CreateUseComposit
     const { useCompositeRootContext, useCompositeListItem } = params;
 
     return function useCompositeItem<Metadata extends CreateMetadata>(params: UseCompositeItemParameters<Metadata> = {}) {
-        const { highlightItemOnHover, highlightedIndex, onHighlightedIndexChange }
-            = useCompositeRootContext();
+        const { highlightItemOnHover, highlightedIndex, onHighlightedIndexChange } = useCompositeRootContext();
         const { ref, index } = useCompositeListItem<Metadata>(params);
 
         const isHighlighted = highlightedIndex === index;

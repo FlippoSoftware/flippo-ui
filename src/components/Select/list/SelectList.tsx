@@ -1,15 +1,14 @@
-import { useStore } from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import React from 'react';
 
-import { useRenderElement } from '~@lib/hooks/';
-import { styleDisableScrollbar } from '~@lib/styles';
+import { SelectList as SelectListCore } from '@flippo-software/core-components/select';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
+import { toReactProps, useTracker } from '~@lib/core';
+import { useRenderElement } from '~@lib/hooks';
+
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectPositionerContext } from '../positioner/SelectPositionerContext';
-import { useSelectRootContext } from '../root/SelectRootContext';
-import { selectors } from '../store';
-import { LIST_FUNCTIONAL_STYLES } from '../utils/clearStyles';
+import { useSelectRoot } from '../root/SelectRootContext';
 
 /**
  * A container for the select items.
@@ -27,35 +26,13 @@ export function SelectList(componentProps: SelectList.Props) {
         ...elementProps
     } = componentProps;
 
-    const { store, scrollHandlerRef } = useSelectRootContext();
-    const { alignItemWithTriggerActive } = useSelectPositionerContext();
-
-    const hasScrollArrows = useStore(store, selectors.hasScrollArrows);
-    const openMethod = useStore(store, selectors.openMethod);
-    const multiple = useStore(store, selectors.multiple);
-    const id = useStore(store, selectors.id);
-
-    const defaultProps: HTMLProps = {
-        'id': `${id}-list`,
-        'role': 'listbox',
-        'aria-multiselectable': multiple || undefined,
-        onScroll(event) {
-            scrollHandlerRef.current?.(event.currentTarget);
-        },
-        ...(alignItemWithTriggerActive && {
-            style: LIST_FUNCTIONAL_STYLES
-        }),
-        'className':
-            hasScrollArrows && openMethod !== 'touch' ? styleDisableScrollbar.className : undefined
-    };
-
-    const setListElement = useStableCallback((element: HTMLElement | null) => {
-        store.set('listElement', element);
-    });
+    const root = useSelectRoot();
+    const track = useTracker();
+    const { positioner } = useSelectPositionerContext();
 
     return useRenderElement('div', componentProps, {
-        ref: [ref, setListElement],
-        props: [defaultProps, elementProps]
+        ref: [ref, root.setListElement],
+        props: [elementProps, (props) => track(() => toReactProps(SelectListCore.getProps(root, positioner, props)))]
     });
 }
 

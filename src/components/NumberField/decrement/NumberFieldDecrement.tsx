@@ -1,21 +1,18 @@
-import React from 'react';
+import { NumberFieldButtonMachine } from '@flippo-software/core-components/number-field';
 
+import { toReactProps, useMachine, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button';
 import { useNumberFieldRootContext } from '../root/NumberFieldRootContext';
-import { useNumberFieldButton } from '../root/useNumberFieldButton';
 import { styleHookMapping } from '../utils/styleHooks';
 
 import type { NumberFieldRoot } from '../root/NumberFieldRoot';
 
 /**
- * A stepper button that decreases the field value when clicked.
- * Renders an `<button>` element.
- *
- * Documentation: [Base UI Number Field](https://base-ui.com/react/components/number-field)
+ * A stepper button that decrements the field value when clicked (and keeps doing so while pressed).
+ * Renders a `<button>` element.
  */
 export function NumberFieldDecrement(componentProps: NumberFieldDecrement.Props) {
     const {
@@ -24,86 +21,25 @@ export function NumberFieldDecrement(componentProps: NumberFieldDecrement.Props)
         className,
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
-        disabled: disabledProp = false,
+        disabled,
         nativeButton = true,
         ...elementProps
     } = componentProps;
 
-    const {
-        allowInputSyncRef,
-        disabled: contextDisabled,
-        formatOptionsRef,
-        getStepAmount,
-        id,
-        incrementValue,
-        inputRef,
-        inputValue,
-        intentionalTouchCheckTimeout,
-        isPressedRef,
-        maxWithDefault,
-        minWithDefault,
-        movesAfterTouchRef,
-        readOnly,
-        setValue,
-        startAutoChange,
+    const { numberField } = useNumberFieldRootContext();
+
+    const button = useMachine((options) => new NumberFieldButtonMachine(numberField, false, options), {
+        disabled,
+        nativeButton
+    });
+    const state: NumberFieldDecrement.State = useMachineState(button);
+
+    return useRenderElement('button', componentProps, {
+        ref: [ref, button.button.setElement],
         state,
-        stopAutoChange,
-        value,
-        valueRef,
-        locale,
-        lastChangedValueRef,
-        onValueCommitted
-    } = useNumberFieldRootContext();
-
-    const disabled = disabledProp || contextDisabled;
-
-    const props = useNumberFieldButton({
-        isIncrement: false,
-        inputRef,
-        startAutoChange,
-        stopAutoChange,
-        minWithDefault,
-        maxWithDefault,
-        value,
-        inputValue,
-        disabled,
-        readOnly,
-        id,
-        setValue,
-        getStepAmount,
-        incrementValue,
-        allowInputSyncRef,
-        formatOptionsRef,
-        valueRef,
-        isPressedRef,
-        intentionalTouchCheckTimeout,
-        movesAfterTouchRef,
-        locale,
-        lastChangedValueRef,
-        onValueCommitted
-    });
-
-    const { getButtonProps, buttonRef } = useButton({
-        disabled,
-        native: nativeButton
-    });
-
-    const buttonState = React.useMemo(
-        () => ({
-            ...state,
-            disabled
-        }),
-        [state, disabled]
-    );
-
-    const element = useRenderElement('button', componentProps, {
-        ref: [ref, buttonRef],
-        state: buttonState,
-        props: [props, elementProps, getButtonProps],
+        props: [elementProps, (props) => toReactProps(button.getProps(props))],
         customStyleHookMapping: styleHookMapping
     });
-
-    return element;
 }
 
 export type NumberFieldDecrementState = {} & NumberFieldRoot.State;

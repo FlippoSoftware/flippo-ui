@@ -36,10 +36,13 @@ export function SelectGroup(componentProps: SelectGroup.Props) {
 
     const element = useRenderElement('div', componentProps, {
         ref,
-        props: [{
-            'role': 'group',
-            'aria-labelledby': labelId
-        }, elementProps]
+        props: [
+            {
+                role: 'group',
+                'aria-labelledby': labelId
+            },
+            elementProps
+        ]
     });
 
     return <SelectGroupContext.Provider value={contextValue}>{element}</SelectGroupContext.Provider>;

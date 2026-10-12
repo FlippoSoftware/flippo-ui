@@ -19,11 +19,14 @@ export function ComboboxStatus(componentProps: ComboboxStatus.Props) {
 
     return useRenderElement('div', componentProps, {
         ref,
-        props: [{
-            'role': 'status',
-            'aria-live': 'polite',
-            'aria-atomic': true
-        }, elementProps]
+        props: [
+            {
+                role: 'status',
+                'aria-live': 'polite',
+                'aria-atomic': true
+            },
+            elementProps
+        ]
     });
 }
 

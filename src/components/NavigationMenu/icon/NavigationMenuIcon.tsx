@@ -1,12 +1,13 @@
 import React from 'react';
 
+import { useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { triggerOpenStateMapping } from '~@lib/popupStateMapping';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useNavigationMenuItemContext } from '../item/NavigationMenuItemContext';
-import { useNavigationMenuRootContext } from '../root/NavigationMenuRootContext';
+import { useNavigationMenuRoot } from '../root/NavigationMenuRootContext';
 
 /**
  * An icon that indicates that the trigger button opens a menu.
@@ -24,9 +25,10 @@ export function NavigationMenuIcon(componentProps: NavigationMenuIconProps) {
     } = componentProps;
 
     const { value: itemValue } = useNavigationMenuItemContext();
-    const { open, value } = useNavigationMenuRootContext();
+    const root = useNavigationMenuRoot();
+    const track = useTracker();
 
-    const isActiveItem = open && value === itemValue;
+    const isActiveItem = track(() => root.open && root.store.state.value === itemValue);
 
     const state: NavigationMenuIcon.State = React.useMemo(
         () => ({
@@ -38,7 +40,7 @@ export function NavigationMenuIcon(componentProps: NavigationMenuIconProps) {
     const element = useRenderElement('span', componentProps, {
         state,
         ref,
-        props: [{ 'aria-hidden': true, 'children': '▼' }, elementProps],
+        props: [{ 'aria-hidden': true, children: '▼' }, elementProps],
         customStyleHookMapping: triggerOpenStateMapping
     });
 

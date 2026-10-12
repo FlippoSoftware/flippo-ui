@@ -1,13 +1,16 @@
 import React from 'react';
 
+import { AnchorPositioner } from '@flippo-software/core-components/positioning';
+
+import { toReactProps, useMachineState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 
-import type { Align, Side } from '~@lib/hooks/useAnchorPositioning';
+import type { Align, Side } from '~@lib/hooks';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useNavigationMenuPositionerContext } from '../positioner/NavigationMenuPositionerContext';
-import { useNavigationMenuRootContext } from '../root/NavigationMenuRootContext';
+import { useNavigationMenuRoot } from '../root/NavigationMenuRootContext';
 
 /**
  * Displays an element pointing toward the navigation menu's current anchor.
@@ -25,34 +28,38 @@ export function NavigationMenuArrow(componentProps: NavigationMenuArrowProps) {
         ...elementProps
     } = componentProps;
 
-    const { open } = useNavigationMenuRootContext();
-    const {
-        arrowRef,
-        side,
-        align,
-        arrowUncentered,
-        arrowStyles
-    }
-    = useNavigationMenuPositionerContext();
+    const root = useNavigationMenuRoot();
+    const { positioner } = useNavigationMenuPositionerContext();
 
-    const state: NavigationMenuArrow.State = React.useMemo(
+    const arrow = React.useMemo(
         () => ({
-            open,
-            side,
-            align,
-            uncentered: arrowUncentered
+            getState: (): NavigationMenuArrow.State => {
+                const { side, align, open } = positioner.getState();
+                return { open, side, align, uncentered: AnchorPositioner.arrowUncentered(positioner.anchorPositioner.store.state) };
+            },
+            setElement: (element: Element | null) => positioner.anchorPositioner.setArrow(element)
         }),
-        [open, side, align, arrowUncentered]
+        [positioner]
     );
+    const state = useMachineState(arrow, [positioner]);
+    const track = useTracker();
 
-    const element = useRenderElement('div', componentProps, {
+    return useRenderElement('div', componentProps, {
         state,
-        ref: [ref, arrowRef],
-        props: [{ 'style': arrowStyles, 'aria-hidden': true }, elementProps],
+        ref: [ref, arrow.setElement],
+        props: [
+            elementProps,
+            (props) =>
+                track(() =>
+                    toReactProps({
+                        style: AnchorPositioner.arrowStyles(positioner.anchorPositioner.store.state),
+                        'aria-hidden': true,
+                        ...props
+                    })
+                )
+        ],
         customStyleHookMapping: popupStateMapping
     });
-
-    return element;
 }
 
 export type NavigationMenuArrowState = {

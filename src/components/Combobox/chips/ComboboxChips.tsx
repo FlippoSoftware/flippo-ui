@@ -1,18 +1,15 @@
 import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { ComboboxChipsMachine } from '@flippo-software/core-components/combobox';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { CompositeList } from '../../Composite/list/CompositeList';
-import { useComboboxRootContext } from '../root/ComboboxRootContext';
-import { selectors } from '../store';
+import { useComboboxRootMachine } from '../root/ComboboxRootContext';
 
 import { ComboboxChipsContext } from './ComboboxChipsContext';
-
-import type { ComboboxChipsContextValue } from './ComboboxChipsContext';
 
 /**
  * A container for the chips in a multiselectable input.
@@ -28,39 +25,17 @@ export function ComboboxChips(componentProps: ComboboxChips.Props) {
         ...elementProps
     } = componentProps;
 
-    const store = useComboboxRootContext();
+    const root = useComboboxRootMachine();
 
-    const open = useStore(store, selectors.open);
-
-    const [highlightedChipIndex, setHighlightedChipIndex] = React.useState<number | undefined>(
-        undefined
-    );
-
-    if (open && highlightedChipIndex !== undefined) {
-        setHighlightedChipIndex(undefined);
-    }
-
-    const chipsRef = React.useRef<Array<HTMLButtonElement | null>>([]);
+    const [chips] = React.useState(() => new ComboboxChipsMachine(root));
+    useIsoLayoutEffect(() => chips.connect(), [chips]);
 
     const element = useRenderElement('div', componentProps, {
-        ref: [ref, store.state.chipsContainerRef],
+        ref: [ref, chips.setElement],
         props: elementProps
     });
 
-    const contextValue: ComboboxChipsContextValue = React.useMemo(
-        () => ({
-            highlightedChipIndex,
-            setHighlightedChipIndex,
-            chipsRef
-        }),
-        [highlightedChipIndex, setHighlightedChipIndex, chipsRef]
-    );
-
-    return (
-        <ComboboxChipsContext.Provider value={contextValue}>
-            <CompositeList elementsRef={chipsRef}>{element}</CompositeList>
-        </ComboboxChipsContext.Provider>
-    );
+    return <ComboboxChipsContext value={chips}>{element}</ComboboxChipsContext>;
 }
 
 export type ComboboxChipsState = {};

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import type { FieldRootMachine } from '@flippo-software/core-components/field';
+
 import { EMPTY_OBJECT } from '~@lib/constants';
 import { NOOP } from '~@lib/noop';
 
@@ -26,16 +28,17 @@ export type FieldRootContextValue = {
     setFilled: React.Dispatch<React.SetStateAction<boolean>>;
     focused: boolean;
     setFocused: React.Dispatch<React.SetStateAction<boolean>>;
-    validate: (
-        value: unknown,
-        formValues: Record<string, unknown>,
-    ) => string | string[] | null | Promise<string | string[] | null>;
+    validate: (value: unknown, formValues: Record<string, unknown>) => string | string[] | null | Promise<string | string[] | null>;
     validationMode: Form.ValidationMode;
     validationDebounceTime: number;
     shouldValidateOnChange: () => boolean;
     state: FieldRoot.State;
     markedDirtyRef: React.RefObject<boolean>;
     validation: UseFieldValidationReturnValue;
+    /**
+     * The core machine (absent outside of `Field.Root`).
+     */
+    field?: FieldRootMachine;
 };
 
 export const FieldRootContext = React.createContext<FieldRootContextValue>({
@@ -83,9 +86,7 @@ export function useFieldRootContext(optional = true) {
     const context = React.use(FieldRootContext);
 
     if (context.setValidityData === NOOP && !optional) {
-        throw new Error(
-            'Headless UI: FieldRootContext is missing. Field parts must be placed within <Field.Root>.'
-        );
+        throw new Error('Headless UI: FieldRootContext is missing. Field parts must be placed within <Field.Root>.');
     }
 
     return context;

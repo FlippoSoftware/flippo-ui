@@ -1,34 +1,16 @@
 import React from 'react';
 
-import { useControlledState, useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
-import { isHTMLElement } from '@floating-ui/utils/dom';
+import { NavigationMenuRootMachine } from '@flippo-software/core-components/navigation-menu';
 
-import { useRenderElement } from '~@lib/hooks';
-import { ownerDocument } from '~@lib/owner';
-import { REASONS } from '~@lib/reason';
-import {
-    FloatingTree,
-    useFloatingNodeId,
-    useFloatingParentNodeId
-} from '~@packages/floating-ui-react';
-import { activeElement, contains } from '~@packages/floating-ui-react/utils';
+import { toReactProps, useMachine, useTracker } from '~@lib/core';
+import { FloatingTree, useFloatingParentNodeId, useFloatingTree } from '~@lib/floating';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { REASONS } from '~@lib/reason';
 import type { HeadlessUIComponentProps } from '~@lib/types';
-import type { FloatingRootContext } from '~@packages/floating-ui-react';
 
-import { setFixedSize } from '../utils/setFixedSize';
-
-import {
-    NavigationMenuRootContext,
-    NavigationMenuTreeContext,
-    useNavigationMenuRootContext
-} from './NavigationMenuRootContext';
-
-import type { NavigationMenuRootContextValue } from './NavigationMenuRootContext';
-
-const blockedReturnFocusReasons = new Set<string>([REASONS.triggerHover, REASONS.outsidePress, REASONS.focusOut]);
+import { NavigationMenuRootContext, NavigationMenuTreeContext } from './NavigationMenuRootContext';
 
 /**
  * Groups all parts of the navigation menu.
@@ -38,242 +20,67 @@ const blockedReturnFocusReasons = new Set<string>([REASONS.triggerHover, REASONS
  */
 export function NavigationMenuRoot(componentProps: NavigationMenuRootProps) {
     const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        className,
+        render,
+        /* eslint-enable unused-imports/no-unused-vars */
         defaultValue = null,
-        value: valueParam,
+        value,
         onValueChange,
         actionsRef,
         delay = 50,
         closeDelay = 50,
         orientation = 'horizontal',
-        onOpenChangeComplete
-    } = componentProps;
-
-    const nested = useFloatingParentNodeId() != null;
-
-    const [value, setValueUnwrapped] = useControlledState({
-        prop: valueParam,
-        defaultProp: defaultValue,
-        caller: 'NavigationMenuRoot'
-    });
-
-    // Derive open state from value being non-nullish
-    const open = value != null;
-
-    const closeReasonRef = React.useRef<NavigationMenuRoot.ChangeEventReason | undefined>(undefined);
-    const rootRef = React.useRef<HTMLDivElement | null>(null);
-
-    const [positionerElement, setPositionerElement] = React.useState<HTMLElement | null>(null);
-    const [popupElement, setPopupElement] = React.useState<HTMLElement | null>(null);
-    const [viewportElement, setViewportElement] = React.useState<HTMLElement | null>(null);
-    const [viewportTargetElement, setViewportTargetElement] = React.useState<HTMLElement | null>(
-        null
-    );
-    const [activationDirection, setActivationDirection]
-    = React.useState<NavigationMenuRootContextValue['activationDirection']>(null);
-    const [floatingRootContext, setFloatingRootContext] = React.useState<
-    FloatingRootContext | undefined
-    >(undefined);
-    const [viewportInert, setViewportInert] = React.useState(false);
-
-    const prevTriggerElementRef = React.useRef<Element | null | undefined>(null);
-    const currentContentRef = React.useRef<HTMLDivElement | null>(null);
-    const beforeInsideRef = React.useRef<HTMLSpanElement | null>(null);
-    const afterInsideRef = React.useRef<HTMLSpanElement | null>(null);
-    const beforeOutsideRef = React.useRef<HTMLSpanElement | null>(null);
-    const afterOutsideRef = React.useRef<HTMLSpanElement | null>(null);
-
-    const { mounted, setMounted, transitionStatus } = useTransitionStatus(open);
-
-    React.useEffect(() => {
-        setViewportInert(false);
-    }, [value]);
-
-    const setValue = useStableCallback(
-        (nextValue: any, eventDetails: NavigationMenuRoot.ChangeEventDetails) => {
-            if (!nextValue) {
-                closeReasonRef.current = eventDetails.reason;
-                setActivationDirection(null);
-                setFloatingRootContext(undefined);
-
-                if (positionerElement && popupElement) {
-                    setFixedSize(popupElement, 'popup');
-                    setFixedSize(positionerElement, 'positioner');
-                }
-            }
-
-            if (nextValue !== value) {
-                onValueChange?.(nextValue, eventDetails);
-            }
-
-            if (eventDetails.isCanceled) {
-                return;
-            }
-
-            setValueUnwrapped(nextValue);
-        }
-    );
-
-    const handleUnmount = useStableCallback(() => {
-        const doc = ownerDocument(rootRef.current);
-        const activeEl = activeElement(doc);
-
-        const isReturnFocusBlocked = closeReasonRef.current
-            ? blockedReturnFocusReasons.has(closeReasonRef.current)
-            : false;
-
-        if (
-            !isReturnFocusBlocked
-            && isHTMLElement(prevTriggerElementRef.current)
-            && (activeEl === ownerDocument(popupElement).body || contains(popupElement, activeEl))
-            && popupElement
-        ) {
-            prevTriggerElementRef.current.focus({ preventScroll: true });
-            prevTriggerElementRef.current = undefined;
-        }
-
-        setMounted(false);
-        onOpenChangeComplete?.(false);
-        setActivationDirection(null);
-        setFloatingRootContext(undefined);
-
-        currentContentRef.current = null;
-        closeReasonRef.current = undefined;
-    });
-
-    useOpenChangeComplete({
-        enabled: !actionsRef,
-        open,
-        ref: { current: popupElement },
-        onComplete() {
-            if (!open) {
-                handleUnmount();
-            }
-        }
-    });
-
-    useOpenChangeComplete({
-        enabled: !actionsRef,
-        open,
-        ref: { current: viewportTargetElement },
-        onComplete() {
-            if (!open) {
-                handleUnmount();
-            }
-        }
-    });
-
-    const contextValue: NavigationMenuRootContextValue = React.useMemo(
-        () => ({
-            open,
-            value,
-            setValue,
-            mounted,
-            transitionStatus,
-            positionerElement,
-            setPositionerElement,
-            popupElement,
-            setPopupElement,
-            viewportElement,
-            setViewportElement,
-            viewportTargetElement,
-            setViewportTargetElement,
-            activationDirection,
-            setActivationDirection,
-            floatingRootContext,
-            setFloatingRootContext,
-            currentContentRef,
-            nested,
-            rootRef,
-            beforeInsideRef,
-            afterInsideRef,
-            beforeOutsideRef,
-            afterOutsideRef,
-            prevTriggerElementRef,
-            delay,
-            closeDelay,
-            orientation,
-            viewportInert,
-            setViewportInert
-        }),
-        [
-            open,
-            value,
-            setValue,
-            mounted,
-            transitionStatus,
-            positionerElement,
-            popupElement,
-            viewportElement,
-            viewportTargetElement,
-            activationDirection,
-            floatingRootContext,
-            nested,
-            delay,
-            closeDelay,
-            orientation,
-            viewportInert
-        ]
-    );
-
-    const jsx = (
-        <NavigationMenuRootContext.Provider value={contextValue}>
-            <TreeContext componentProps={componentProps}>
-                {componentProps.children}
-            </TreeContext>
-        </NavigationMenuRootContext.Provider>
-    );
-
-    if (!nested) {
-    // FloatingTree provides context to nested menus
-        return <FloatingTree>{jsx}</FloatingTree>;
-    }
-
-    return jsx;
-}
-
-function TreeContext(props: {
-    componentProps: NavigationMenuRoot.Props;
-    children: React.ReactNode;
-}) {
-    const {
-        className,
-        render,
-        defaultValue,
-        value: valueParam,
-        onValueChange,
-        actionsRef,
-        delay,
-        closeDelay,
-        orientation,
         onOpenChangeComplete,
         ref,
         ...elementProps
-    } = props.componentProps;
+    } = componentProps;
 
-    const nodeId = useFloatingNodeId();
-    const { rootRef, nested } = useNavigationMenuRootContext();
+    // Nested navigation menus join the floating tree of the parent content.
+    const parentTree = useFloatingTree();
+    const parentNodeId = useFloatingParentNodeId();
+    const nodeId = useHeadlessUiId() as string;
 
-    const { open } = useNavigationMenuRootContext();
-
-    const state: NavigationMenuRoot.State = React.useMemo(
-        () => ({
-            open,
-            nested
-        }),
-        [open, nested]
+    const root = useMachine(
+        (options) =>
+            new NavigationMenuRootMachine(options, {
+                nodeId,
+                parent: parentTree && parentNodeId != null ? { tree: parentTree, nodeId: parentNodeId } : null
+            }),
+        {
+            value,
+            defaultValue,
+            onValueChange: onValueChange as never,
+            onOpenChangeComplete,
+            delay,
+            closeDelay,
+            orientation,
+            hasActionsRef: actionsRef != null
+        }
     );
 
-    const element = useRenderElement(nested ? 'div' : 'nav', props.componentProps, {
+    React.useImperativeHandle(actionsRef, () => root.actions, [root]);
+    const track = useTracker();
+
+    const nested = track(() => root.nested);
+    const state: NavigationMenuRoot.State = React.useMemo(
+        () => ({ open: track(() => root.open), nested }),
+        [track(() => root.open), nested]
+    );
+
+    const element = useRenderElement(nested ? 'div' : 'nav', componentProps, {
         state,
-        ref: [ref, rootRef],
-        props: [{ 'aria-orientation': orientation }, elementProps]
+        ref: [ref, root.setRootElement],
+        props: [elementProps, (props) => track(() => toReactProps(root.getRootProps(props)))]
     });
 
-    return (
-        <NavigationMenuTreeContext.Provider value={nodeId}>
-            {element}
-        </NavigationMenuTreeContext.Provider>
+    const content = (
+        <NavigationMenuRootContext value={root}>
+            <NavigationMenuTreeContext value={nodeId}>{element}</NavigationMenuTreeContext>
+        </NavigationMenuRootContext>
     );
+
+    return nested ? content : <FloatingTree tree={root.tree}>{content}</FloatingTree>;
 }
 
 export type NavigationMenuRootState = {
@@ -336,8 +143,8 @@ export type NavigationMenuRootActions = {
     unmount: () => void;
 };
 
-export type NavigationMenuRootChangeEventReason
-  = | typeof REASONS.triggerPress
+export type NavigationMenuRootChangeEventReason =
+    | typeof REASONS.triggerPress
     | typeof REASONS.triggerHover
     | typeof REASONS.outsidePress
     | typeof REASONS.listNavigation
@@ -347,8 +154,7 @@ export type NavigationMenuRootChangeEventReason
     | typeof REASONS.none
     | (string & {});
 
-export type NavigationMenuRootChangeEventDetails
-  = HeadlessUIChangeEventDetails<NavigationMenuRoot.ChangeEventReason>;
+export type NavigationMenuRootChangeEventDetails = HeadlessUIChangeEventDetails<NavigationMenuRoot.ChangeEventReason>;
 
 export namespace NavigationMenuRoot {
     export type State = NavigationMenuRootState;

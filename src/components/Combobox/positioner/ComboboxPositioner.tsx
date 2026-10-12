@@ -1,26 +1,19 @@
 import React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
-import { useScrollLock } from '@flippo-ui/hooks/use-scroll-lock';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { ComboboxPositionerMachine } from '@flippo-software/core-components/combobox';
 
-import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
-import { useAnchorPositioning } from '~@lib/hooks/useAnchorPositioning';
+import type { AnchorPositioningSharedOptions } from '@flippo-software/core-components/positioning';
+
+import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
+import { useDirection } from '~@lib/hooks/useDirection';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
-import { InternalBackdrop } from '~@lib/InternalBackdrop';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 
-import type { Align, Side } from '~@lib/hooks/useAnchorPositioning';
-import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
+import type { Align, Side, useAnchorPositioning } from '~@lib/hooks/useAnchorPositioning';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useComboboxPortalContext } from '../portal/ComboboxPortalContext';
-import {
-    useComboboxDerivedItemsContext,
-    useComboboxFloatingContext,
-    useComboboxRootContext
-} from '../root/ComboboxRootContext';
-import { selectors } from '../store';
+import { useComboboxRootMachine } from '../root/ComboboxRootContext';
 
 import { ComboboxPositionerContext } from './ComboboxPositionerContext';
 
@@ -48,123 +41,49 @@ export function ComboboxPositioner(componentProps: ComboboxPositioner.Props) {
         arrowPadding = 5,
         sticky = false,
         disableAnchorTracking = false,
-        collisionAvoidance = DROPDOWN_COLLISION_AVOIDANCE,
+        collisionAvoidance,
         ...elementProps
     } = componentProps;
 
-    const store = useComboboxRootContext();
-    const { filteredItems } = useComboboxDerivedItemsContext();
-    const floatingRootContext = useComboboxFloatingContext();
+    const root = useComboboxRootMachine();
     const keepMounted = useComboboxPortalContext();
+    const direction = useDirection();
 
-    const modal = useStore(store, selectors.modal);
-    const open = useStore(store, selectors.open);
-    const mounted = useStore(store, selectors.mounted);
-    const openMethod = useStore(store, selectors.openMethod);
-    const triggerElement = useStore(store, selectors.triggerElement);
-    const inputElement = useStore(store, selectors.inputElement);
-    const inputInsidePopup = useStore(store, selectors.inputInsidePopup);
-
-    const empty = filteredItems.length === 0;
-    const resolvedAnchor = anchor ?? (inputInsidePopup ? triggerElement : inputElement);
-
-    const positioning = useAnchorPositioning({
-        anchor: resolvedAnchor,
-        floatingRootContext,
+    const positioner = useMachine((options) => new ComboboxPositionerMachine(root, options), {
+        anchor,
         positionMethod,
-        mounted,
         side,
-        sideOffset,
         align,
+        sideOffset,
         alignOffset,
-        arrowPadding,
         collisionBoundary,
         collisionPadding,
+        arrowPadding,
         sticky,
         disableAnchorTracking,
-        keepMounted,
         collisionAvoidance,
-        lazyFlip: true
-    });
+        keepMounted,
+        direction
+    } as AnchorPositioningSharedOptions & { keepMounted?: boolean });
+    const state: ComboboxPositioner.State = useMachineState(positioner);
+    const track = useTracker();
 
-    useScrollLock(open && modal && openMethod !== 'touch', triggerElement);
-
-    const defaultProps: HTMLProps = React.useMemo(() => {
-        const style: React.CSSProperties = {
-            ...positioning.positionerStyles
-        };
-
-        if (!open) {
-            style.pointerEvents = 'none';
-        }
-
-        return {
-            role: 'presentation',
-            hidden: !mounted,
-            style
-        };
-    }, [open, mounted, positioning.positionerStyles]);
-
-    const state: ComboboxPositioner.State = React.useMemo(
-        () => ({
-            open,
-            side: positioning.side,
-            align: positioning.align,
-            anchorHidden: positioning.anchorHidden,
-            empty
-        }),
-        [
-            open,
-            positioning.side,
-            positioning.align,
-            positioning.anchorHidden,
-            empty
-        ]
-    );
-
-    useIsoLayoutEffect(() => {
-        store.set('popupSide', positioning.side);
-    }, [store, positioning.side]);
-
-    const contextValue: ComboboxPositionerContextValue = React.useMemo(
-        () => ({
-            side: positioning.side,
-            align: positioning.align,
-            arrowRef: positioning.arrowRef,
-            arrowUncentered: positioning.arrowUncentered,
-            arrowStyles: positioning.arrowStyles,
-            anchorHidden: positioning.anchorHidden,
-            isPositioned: positioning.isPositioned
-        }),
-        [
-            positioning.side,
-            positioning.align,
-            positioning.arrowRef,
-            positioning.arrowUncentered,
-            positioning.arrowStyles,
-            positioning.anchorHidden,
-            positioning.isPositioned
-        ]
-    );
-
-    const setPositionerElement = useStableCallback((element) => {
-        store.set('positionerElement', element);
-    });
+    const contextValue: ComboboxPositionerContextValue = React.useMemo(() => ({ positioner }), [positioner]);
 
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: [ref, setPositionerElement],
-        props: [defaultProps, elementProps],
+        ref: [ref, positioner.setElement],
+        props: [elementProps, (props) => track(() => toReactProps(positioner.getPositionerProps(props)))],
         customStyleHookMapping: popupStateMapping
     });
 
     return (
-        <ComboboxPositionerContext.Provider value={contextValue}>
-            {mounted && modal && (
-                <InternalBackdrop inert={!open} cutout={inputElement ?? triggerElement} />
+        <ComboboxPositionerContext value={contextValue}>
+            {track(() => positioner.shouldRenderInternalBackdrop()) && (
+                <div {...track(() => toReactProps(positioner.getInternalBackdropProps()))} />
             )}
             {element}
-        </ComboboxPositionerContext.Provider>
+        </ComboboxPositionerContext>
     );
 }
 
@@ -179,7 +98,8 @@ export type ComboboxPositionerState = {
     empty: boolean;
 };
 
-export type ComboboxPositionerProps = {} & useAnchorPositioning.SharedParameters & HeadlessUIComponentProps<'div', ComboboxPositioner.State>;
+export type ComboboxPositionerProps = {} & useAnchorPositioning.SharedParameters &
+    HeadlessUIComponentProps<'div', ComboboxPositioner.State>;
 
 export namespace ComboboxPositioner {
     export type State = ComboboxPositionerState;

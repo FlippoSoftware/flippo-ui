@@ -1,11 +1,12 @@
-
 import * as React from 'react';
+
+import { stopEvent } from '@flippo-software/core-components/floating';
 
 import { useFocusableWhenDisabled } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
 
-import { ARROW_LEFT, ARROW_RIGHT, stopEvent } from '../../Composite/composite';
+import { ARROW_LEFT, ARROW_RIGHT } from '../../Composite/composite';
 import { CompositeItem } from '../../Composite/item/CompositeItem';
 import { useToolbarGroupContext } from '../group/ToolbarGroupContext';
 import { useToolbarRootContext } from '../root/ToolbarRootContext';
@@ -19,14 +20,7 @@ import type { ToolbarRoot } from '../root/ToolbarRoot';
  * Documentation: [Base UI Toolbar](https://base-ui.com/react/components/toolbar)
  */
 export function ToolbarInput(componentProps: ToolbarInput.Props) {
-    const {
-        className,
-        focusableWhenDisabled = true,
-        render,
-        disabled: disabledProp = false,
-        ref,
-        ...elementProps
-    } = componentProps;
+    const { className, focusableWhenDisabled = true, render, disabled: disabledProp = false, ref, ...elementProps } = componentProps;
 
     const itemMetadata = React.useMemo(() => ({ focusableWhenDisabled }), [focusableWhenDisabled]);
 

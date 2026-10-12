@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { comboboxSelectors as selectors } from '@flippo-software/core-components/combobox';
 
-import { FloatingPortal } from '~@packages/floating-ui-react';
+import { useSelector as useStore } from '~@lib/core';
+import { FloatingPortal } from '~@lib/floating';
 
 import { useComboboxRootContext } from '../root/ComboboxRootContext';
-import { selectors } from '../store';
 
 import { ComboboxPortalContext } from './ComboboxPortalContext';
 

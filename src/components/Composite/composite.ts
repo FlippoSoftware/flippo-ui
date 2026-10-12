@@ -11,7 +11,7 @@ export {
     isIndexOutOfListBounds,
     isListIndexDisabled,
     stopEvent
-} from '~@packages/floating-ui-react/utils';
+} from '@flippo-software/core-components/floating';
 
 export type Dimensions = {
     width: number;
@@ -26,45 +26,21 @@ export const HOME = 'Home';
 export const END = 'End';
 
 export const HORIZONTAL_KEYS = new Set([ARROW_LEFT, ARROW_RIGHT]);
-export const HORIZONTAL_KEYS_WITH_EXTRA_KEYS = new Set([
-    ARROW_LEFT,
-    ARROW_RIGHT,
-    HOME,
-    END
-]);
+export const HORIZONTAL_KEYS_WITH_EXTRA_KEYS = new Set([ARROW_LEFT, ARROW_RIGHT, HOME, END]);
 export const VERTICAL_KEYS = new Set([ARROW_UP, ARROW_DOWN]);
-export const VERTICAL_KEYS_WITH_EXTRA_KEYS = new Set([
-    ARROW_UP,
-    ARROW_DOWN,
-    HOME,
-    END
-]);
+export const VERTICAL_KEYS_WITH_EXTRA_KEYS = new Set([ARROW_UP, ARROW_DOWN, HOME, END]);
 export const ARROW_KEYS = new Set([...HORIZONTAL_KEYS, ...VERTICAL_KEYS]);
 export const ALL_KEYS = new Set([...ARROW_KEYS, HOME, END]);
-export const COMPOSITE_KEYS = new Set([
-    ARROW_UP,
-    ARROW_DOWN,
-    ARROW_LEFT,
-    ARROW_RIGHT,
-    HOME,
-    END
-]);
+export const COMPOSITE_KEYS = new Set([ARROW_UP, ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, HOME, END]);
 
 export const SHIFT = 'Shift' as const;
 export const CONTROL = 'Control' as const;
 export const ALT = 'Alt' as const;
 export const META = 'Meta' as const;
-export const MODIFIER_KEYS = new Set([
-    SHIFT,
-    CONTROL,
-    ALT,
-    META
-] as const);
+export const MODIFIER_KEYS = new Set([SHIFT, CONTROL, ALT, META] as const);
 export type ModifierKey = typeof MODIFIER_KEYS extends Set<infer Keys> ? Keys : never;
 
-export function isNativeInput(
-    element: EventTarget
-): element is HTMLElement & (HTMLInputElement | HTMLTextAreaElement) {
+export function isNativeInput(element: EventTarget): element is HTMLElement & (HTMLInputElement | HTMLTextAreaElement) {
     if (element instanceof HTMLInputElement && element.selectionStart != null) {
         return true;
     }
@@ -97,51 +73,40 @@ export function scrollIntoViewIfNeeded(
 
         if (direction === 'ltr') {
             if (
-                elementOffsetLeft + element.offsetWidth + elementStyles.scrollMarginRight
-                > scrollContainer.scrollLeft
-                + scrollContainer.clientWidth
-                - containerStyles.scrollPaddingRight
+                elementOffsetLeft + element.offsetWidth + elementStyles.scrollMarginRight >
+                scrollContainer.scrollLeft + scrollContainer.clientWidth - containerStyles.scrollPaddingRight
             ) {
                 // overflow to the right, scroll to align right edges
-                targetX
-                    = elementOffsetLeft
-                      + element.offsetWidth
-                      + elementStyles.scrollMarginRight
-                      - scrollContainer.clientWidth
-                      + containerStyles.scrollPaddingRight;
-            }
-            else if (
-                elementOffsetLeft - elementStyles.scrollMarginLeft
-                < scrollContainer.scrollLeft + containerStyles.scrollPaddingLeft
+                targetX =
+                    elementOffsetLeft +
+                    element.offsetWidth +
+                    elementStyles.scrollMarginRight -
+                    scrollContainer.clientWidth +
+                    containerStyles.scrollPaddingRight;
+            } else if (
+                elementOffsetLeft - elementStyles.scrollMarginLeft <
+                scrollContainer.scrollLeft + containerStyles.scrollPaddingLeft
             ) {
                 // overflow to the left, scroll to align left edges
-                targetX
-                    = elementOffsetLeft - elementStyles.scrollMarginLeft - containerStyles.scrollPaddingLeft;
+                targetX = elementOffsetLeft - elementStyles.scrollMarginLeft - containerStyles.scrollPaddingLeft;
             }
         }
 
         if (direction === 'rtl') {
-            if (
-                elementOffsetLeft - elementStyles.scrollMarginRight
-                < scrollContainer.scrollLeft + containerStyles.scrollPaddingLeft
-            ) {
+            if (elementOffsetLeft - elementStyles.scrollMarginRight < scrollContainer.scrollLeft + containerStyles.scrollPaddingLeft) {
                 // overflow to the left, scroll to align left edges
-                targetX
-                    = elementOffsetLeft - elementStyles.scrollMarginLeft - containerStyles.scrollPaddingLeft;
-            }
-            else if (
-                elementOffsetLeft + element.offsetWidth + elementStyles.scrollMarginRight
-                > scrollContainer.scrollLeft
-                + scrollContainer.clientWidth
-                - containerStyles.scrollPaddingRight
+                targetX = elementOffsetLeft - elementStyles.scrollMarginLeft - containerStyles.scrollPaddingLeft;
+            } else if (
+                elementOffsetLeft + element.offsetWidth + elementStyles.scrollMarginRight >
+                scrollContainer.scrollLeft + scrollContainer.clientWidth - containerStyles.scrollPaddingRight
             ) {
                 // overflow to the right, scroll to align right edges
-                targetX
-                    = elementOffsetLeft
-                      + element.offsetWidth
-                      + elementStyles.scrollMarginRight
-                      - scrollContainer.clientWidth
-                      + containerStyles.scrollPaddingRight;
+                targetX =
+                    elementOffsetLeft +
+                    element.offsetWidth +
+                    elementStyles.scrollMarginRight -
+                    scrollContainer.clientWidth +
+                    containerStyles.scrollPaddingRight;
             }
         }
     }
@@ -151,24 +116,20 @@ export function scrollIntoViewIfNeeded(
         const containerStyles = getStyles(scrollContainer);
         const elementStyles = getStyles(element);
 
-        if (
-            elementOffsetTop - elementStyles.scrollMarginTop
-            < scrollContainer.scrollTop + containerStyles.scrollPaddingTop
-        ) {
+        if (elementOffsetTop - elementStyles.scrollMarginTop < scrollContainer.scrollTop + containerStyles.scrollPaddingTop) {
             // overflow upwards, align top edges
             targetY = elementOffsetTop - elementStyles.scrollMarginTop - containerStyles.scrollPaddingTop;
-        }
-        else if (
-            elementOffsetTop + element.offsetHeight + elementStyles.scrollMarginBottom
-            > scrollContainer.scrollTop + scrollContainer.clientHeight - containerStyles.scrollPaddingBottom
+        } else if (
+            elementOffsetTop + element.offsetHeight + elementStyles.scrollMarginBottom >
+            scrollContainer.scrollTop + scrollContainer.clientHeight - containerStyles.scrollPaddingBottom
         ) {
             // overflow downwards, align bottom edges
-            targetY
-                = elementOffsetTop
-                  + element.offsetHeight
-                  + elementStyles.scrollMarginBottom
-                  - scrollContainer.clientHeight
-                  + containerStyles.scrollPaddingBottom;
+            targetY =
+                elementOffsetTop +
+                element.offsetHeight +
+                elementStyles.scrollMarginBottom -
+                scrollContainer.clientHeight +
+                containerStyles.scrollPaddingBottom;
         }
     }
 

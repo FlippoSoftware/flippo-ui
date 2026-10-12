@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { toReactProps, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 
@@ -7,6 +8,7 @@ import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { Align, Side } from '~@lib/hooks';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
+import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
 import { useTooltipPositionerContext } from '../positioner/TooltipPositionerContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 import { multipleActive } from '../utils/stateAttributes';
@@ -31,40 +33,26 @@ export function TooltipArrow({ ref: forwardedRef, ...componentProps }: TooltipAr
         ...elementProps
     } = componentProps;
 
-    const {
-        open,
-        arrowRef,
-        side,
-        align,
-        arrowUncentered,
-        arrowStyles
-    }
-    = useTooltipPositionerContext();
-    const store = useTooltipRootContext();
+    const root = useTooltipRootContext();
+    const multiple = useTooltipMultipleContext();
+    const { positioner } = useTooltipPositionerContext();
 
-    const multipleActive = store.useMultipleActive();
-
-    const state: TooltipArrow.State = React.useMemo(
+    const arrow = React.useMemo(
         () => ({
-            open,
-            side,
-            align,
-            uncentered: arrowUncentered,
-            multipleActive
+            getState: () => ({ ...positioner.getArrowState(), multipleActive: root.isMultipleActive() }),
+            setElement: (element: Element | null) => positioner.controller.setArrow(element)
         }),
-        [
-            open,
-            side,
-            align,
-            arrowUncentered,
-            multipleActive
-        ]
+        [root, positioner]
+    );
+    const state: TooltipArrow.State = useMachineState(
+        arrow,
+        multiple ? [root.store, positioner.controller, multiple.store] : [root.store, positioner.controller]
     );
 
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: [forwardedRef, arrowRef],
-        props: [{ 'style': arrowStyles, 'aria-hidden': true }, elementProps],
+        ref: [forwardedRef, arrow.setElement],
+        props: [elementProps, (props) => toReactProps(positioner.getArrowProps(props))],
         customStyleHookMapping: stateAttributesMapping
     });
 

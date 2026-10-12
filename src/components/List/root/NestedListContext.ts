@@ -13,9 +13,7 @@ export function useNestedListContext(optional?: boolean) {
     const context = React.use(NestedListContext);
 
     if (!optional && context === undefined) {
-        throw new Error(
-            'Headless UI: NestedListContext is missing. NestedList parts must be placed within <List.Item>.'
-        );
+        throw new Error('Headless UI: NestedListContext is missing. NestedList parts must be placed within <List.Item>.');
     }
 
     return context;

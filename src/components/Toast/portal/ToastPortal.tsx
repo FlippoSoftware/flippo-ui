@@ -1,8 +1,16 @@
-import { FloatingPortalLite } from '~@lib/FloatingPortalLite';
+import React from 'react';
 
-export const ToastPortal = FloatingPortalLite;
+import { FloatingPortal } from '~@lib/floating';
 
-export type ToastPortalProps = {} & FloatingPortalLite.Props<ToastPortal.State>;
+/**
+ * A portal element that moves the viewport to a different part of the DOM.
+ * By default, the portal element is appended to `<body>`.
+ */
+export function ToastPortal(props: ToastPortal.Props) {
+    return <FloatingPortal {...props} renderGuards={false} />;
+}
+
+export type ToastPortalProps = {} & Omit<FloatingPortal.Props<ToastPortal.State>, 'renderGuards'>;
 
 // eslint-disable-next-line ts/no-redeclare
 export namespace ToastPortal {

@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { useFieldRootContext } from '../root/FieldRootContext';
-import { getCombinedFieldValidityData } from '../utils/getCombinedFieldValidityData';
 
 import type { FieldValidityData } from '../root/FieldRoot';
 
@@ -13,15 +12,13 @@ import type { FieldValidityData } from '../root/FieldRoot';
  */
 export function FieldValidity(props: FieldValidity.Props) {
     const { children } = props;
-    const { validityData, invalid } = useFieldRootContext(false);
+    const { validityData, invalid, field } = useFieldRootContext(false);
 
-    const fieldValidityState: FieldValidityState = React.useMemo(() => {
-        const combinedFieldValidityData = getCombinedFieldValidityData(validityData, invalid);
-        return {
-            ...combinedFieldValidityData,
-            validity: combinedFieldValidityData.state
-        };
-    }, [validityData, invalid]);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: `validityData` and `invalid` are what the state derives from.
+    const fieldValidityState: FieldValidityState = React.useMemo(
+        () => field?.getValidityState() as FieldValidityState,
+        [field, validityData, invalid]
+    );
 
     return <React.Fragment>{children(fieldValidityState)}</React.Fragment>;
 }

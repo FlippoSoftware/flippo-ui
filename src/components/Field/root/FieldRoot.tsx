@@ -1,20 +1,22 @@
 import React from 'react';
+import * as ReactDOM from 'react-dom';
 
-import { useEventCallback } from '@flippo-ui/hooks';
+import { FieldRootMachine } from '@flippo-software/core-components/field';
+import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
 
+import { useMachine, useStoreState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useFieldsetRootContext } from '../../Fieldset/root/FieldsetRootContext';
 import { useFormContext } from '../../Form/FormContext';
-import { LabelableProvider } from '../../LabelableProvider';
-import { DEFAULT_VALIDITY_STATE, fieldValidityMapping } from '../utils/constants';
+import { LabelableProvider, useLabelableContext } from '../../LabelableProvider';
+import { fieldValidityMapping } from '../utils/constants';
 
 import type { Form } from '../../Form';
 
 import { FieldRootContext } from './FieldRootContext';
-import { useFieldValidation } from './useFieldValidation';
 
 import type { FieldRootContextValue } from './FieldRootContext';
 
@@ -25,8 +27,6 @@ import type { FieldRootContextValue } from './FieldRootContext';
  * Documentation: [Base UI Field](https://base-ui.com/react/components/field)
  */
 function FieldRootInner(componentProps: FieldRoot.Props) {
-    const { errors, validationMode: formValidationMode, submitAttemptedRef } = useFormContext();
-
     const {
         /* eslint-disable unused-imports/no-unused-vars */
         render,
@@ -34,144 +34,98 @@ function FieldRootInner(componentProps: FieldRoot.Props) {
         /* eslint-enable unused-imports/no-unused-vars */
         validate: validateProp,
         validationDebounceTime = 0,
-        validationMode = formValidationMode,
+        validationMode,
         name,
-        disabled: disabledProp = false,
-        invalid: invalidProp,
-        dirty: dirtyProp,
-        touched: touchedProp,
+        disabled = false,
+        invalid,
+        dirty,
+        touched,
         ref,
         ...elementProps
     } = componentProps;
 
-    const { disabled: disabledFieldset } = useFieldsetRootContext();
+    const { form } = useFormContext();
+    const { fieldset } = useFieldsetRootContext();
+    const { labelable } = useLabelableContext();
 
-    const validate = useEventCallback(validateProp || (() => null));
+    const validate = useStableCallback((value: unknown, formValues: Form.Values) => validateProp?.(value, formValues) ?? null);
 
-    const disabled = disabledFieldset || disabledProp;
-
-    const [touchedState, setTouchedUnwrapped] = React.useState(false);
-    const [dirtyState, setDirtyUnwrapped] = React.useState(false);
-    const [filled, setFilled] = React.useState(false);
-    const [focused, setFocused] = React.useState(false);
-
-    const dirty = dirtyProp ?? dirtyState;
-    const touched = touchedProp ?? touchedState;
-
-    const markedDirtyRef = React.useRef(false);
-
-    const setDirty: typeof setDirtyUnwrapped = useEventCallback((value) => {
-        if (dirtyProp !== undefined) {
-            return;
-        }
-
-        if (value) {
-            markedDirtyRef.current = true;
-        }
-        setDirtyUnwrapped(value);
-    });
-
-    const setTouched: typeof setTouchedUnwrapped = useEventCallback((value) => {
-        if (touchedProp !== undefined) {
-            return;
-        }
-        setTouchedUnwrapped(value);
-    });
-
-    const shouldValidateOnChange = useEventCallback(
-        () =>
-            validationMode === 'onChange'
-            || (validationMode === 'onSubmit' && submitAttemptedRef.current)
-    );
-
-    const invalid = Boolean(
-        invalidProp || (name && {}.hasOwnProperty.call(errors, name) && errors[name] !== undefined)
-    );
-
-    const [validityData, setValidityData] = React.useState<FieldValidityData>({
-        state: DEFAULT_VALIDITY_STATE,
-        error: '',
-        errors: [],
-        value: null,
-        initialValue: null
-    });
-
-    const valid = !invalid && validityData.state.valid;
-
-    const state: FieldRoot.State = React.useMemo(
-        () => ({
-            disabled,
-            touched,
-            dirty,
-            valid,
-            filled,
-            focused
-        }),
-        [
-            disabled,
-            touched,
-            dirty,
-            valid,
-            filled,
-            focused
-        ]
-    );
-
-    const validation = useFieldValidation({
-        setValidityData,
+    const field = useMachine((options) => new FieldRootMachine(options), {
         validate,
-        validityData,
         validationDebounceTime,
-        invalid,
-        markedDirtyRef,
-        state,
+        validationMode,
         name,
-        shouldValidateOnChange
+        disabled,
+        invalid,
+        dirty,
+        touched,
+        form,
+        fieldset,
+        labelable,
+        flushSync: ReactDOM.flushSync
+    });
+    const internalState = useStoreState(field.store);
+    const track = useTracker();
+
+    const fieldState = track(() => field.getState());
+    // biome-ignore lint/correctness/useExhaustiveDependencies: the state's fields are the dependencies.
+    const state: FieldRoot.State = React.useMemo(
+        () => fieldState,
+        [fieldState.disabled, fieldState.touched, fieldState.dirty, fieldState.valid, fieldState.filled, fieldState.focused]
+    );
+
+    // Stable setters (effects of the parts depend on them); they accept updater functions like `setState`.
+    const [setters] = React.useState(() => {
+        const resolve = <T,>(update: React.SetStateAction<T>, current: T) =>
+            typeof update === 'function' ? (update as (previous: T) => T)(current) : update;
+        return {
+            setTouched: ((update) => field.setTouched(resolve(update, field.getState().touched))) as React.Dispatch<
+                React.SetStateAction<boolean>
+            >,
+            setDirty: ((update) => field.setDirty(resolve(update, field.getState().dirty))) as React.Dispatch<
+                React.SetStateAction<boolean>
+            >,
+            setFilled: ((update) => field.setFilled(resolve(update, field.store.state.filled))) as React.Dispatch<
+                React.SetStateAction<boolean>
+            >,
+            setFocused: ((update) => field.setFocused(resolve(update, field.store.state.focused))) as React.Dispatch<
+                React.SetStateAction<boolean>
+            >,
+            validation: {
+                getValidationProps: field.getValidationProps,
+                getInputValidationProps: field.getInputValidationProps,
+                inputRef: field.inputRef,
+                commit: field.commit
+            } as FieldRootContextValue['validation']
+        };
     });
 
+    const fieldInvalid = field.invalid;
     const contextValue: FieldRootContextValue = React.useMemo(
         () => ({
-            invalid,
+            invalid: fieldInvalid,
             name,
-            validityData,
-            setValidityData,
-            disabled,
-            touched,
-            setTouched,
-            dirty,
-            setDirty,
-            filled,
-            setFilled,
-            focused,
-            setFocused,
+            validityData: internalState.validityData,
+            setValidityData: field.setValidityData as FieldRootContextValue['setValidityData'],
+            disabled: state.disabled,
+            touched: state.touched,
+            setTouched: setters.setTouched,
+            dirty: state.dirty,
+            setDirty: setters.setDirty,
+            filled: state.filled,
+            setFilled: setters.setFilled,
+            focused: state.focused,
+            setFocused: setters.setFocused,
             validate,
-            validationMode,
+            validationMode: field.validationMode,
             validationDebounceTime,
-            shouldValidateOnChange,
+            shouldValidateOnChange: field.shouldValidateOnChange,
             state,
-            markedDirtyRef,
-            validation
+            markedDirtyRef: field.markedDirtyRef as React.RefObject<boolean>,
+            validation: setters.validation,
+            field
         }),
-        [
-            invalid,
-            name,
-            validityData,
-            disabled,
-            touched,
-            setTouched,
-            dirty,
-            setDirty,
-            filled,
-            setFilled,
-            focused,
-            setFocused,
-            validate,
-            validationMode,
-            validationDebounceTime,
-            shouldValidateOnChange,
-            state,
-            validation
-        ]
+        [fieldInvalid, name, internalState.validityData, field, state, setters, validate, validationDebounceTime]
     );
 
     const element = useRenderElement('div', componentProps, {
@@ -187,8 +141,6 @@ function FieldRootInner(componentProps: FieldRoot.Props) {
 /**
  * Groups all parts of the field.
  * Renders a `<div>` element.
- *
- * Documentation: [Base UI Field](https://base-ui.com/react/components/field)
  */
 export function FieldRoot(componentProps: FieldRoot.Props) {
     return (
@@ -246,10 +198,7 @@ export type FieldRootProps = {
      * Asynchronous functions are supported, but they do not prevent form submission
      * when using `validationMode="onSubmit"`.
      */
-    validate?: (
-        value: unknown,
-        formValues: Form.Values,
-    ) => string | string[] | null | Promise<string | string[] | null>;
+    validate?: (value: unknown, formValues: Form.Values) => string | string[] | null | Promise<string | string[] | null>;
     /**
      * Determines when the field should be validated.
      * This takes precedence over the `validationMode` prop on `<Form>`.

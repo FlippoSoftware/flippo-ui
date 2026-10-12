@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks';
+import { AnchorPositioner } from '@flippo-software/core-components/positioning';
 
+import { toReactProps, useMachineState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -11,8 +12,7 @@ import type { Align, Side } from '~@lib/hooks';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSelectPositionerContext } from '../positioner/SelectPositionerContext';
-import { useSelectRootContext } from '../root/SelectRootContext';
-import { selectors } from '../store';
+import { useSelectRoot } from '../root/SelectRootContext';
 
 const customStyleHookMapping: StateAttributesMapping<SelectArrow.State> = {
     ...baseMapping,
@@ -35,38 +35,46 @@ export function SelectArrow(componentProps: SelectArrow.Props) {
         ...elementProps
     } = componentProps;
 
-    const { store } = useSelectRootContext();
-    const {
-        side,
-        align,
-        arrowRef,
-        arrowStyles,
-        arrowUncentered,
-        alignItemWithTriggerActive
-    }
-        = useSelectPositionerContext();
+    const root = useSelectRoot();
+    const { positioner } = useSelectPositionerContext();
+    const anchor = positioner.positioner;
 
-    const open = useStore(store, selectors.open, true);
+    const arrow = React.useMemo(
+        () => ({
+            getState: (): SelectArrow.State => {
+                const { side, align } = positioner.getState();
+                return {
+                    open: root.store.state.open,
+                    side,
+                    align,
+                    uncentered: AnchorPositioner.arrowUncentered(anchor.store.state)
+                };
+            },
+            setElement: (element: Element | null) => anchor.setArrow(element)
+        }),
+        [root, positioner, anchor]
+    );
+    const state = useMachineState(arrow);
+    const track = useTracker();
 
-    const state: SelectArrow.State = {
-        open,
-        side,
-        align,
-        uncentered: arrowUncentered
-    };
+    // The arrow is hidden while the popup is aligned with the trigger.
+    const alignItemWithTriggerActive = track(() => positioner.alignItemWithTriggerActive);
 
-    const element = useRenderElement('div', componentProps, {
+    return useRenderElement('div', componentProps, {
         state,
-        ref: [arrowRef, ref],
-        props: [{ 'style': arrowStyles, 'aria-hidden': true }, elementProps],
-        customStyleHookMapping
+        ref: [ref, arrow.setElement],
+        props: [
+            elementProps,
+            (props) =>
+                toReactProps({
+                    style: track(() => AnchorPositioner.arrowStyles(anchor.store.state)),
+                    'aria-hidden': true,
+                    ...props
+                })
+        ],
+        customStyleHookMapping,
+        enabled: !alignItemWithTriggerActive
     });
-
-    if (alignItemWithTriggerActive) {
-        return null;
-    }
-
-    return element;
 }
 
 export type SelectArrowState = {

@@ -1,8 +1,14 @@
 import React from 'react';
 
+import type { ProgressMachine } from '@flippo-software/core-components/progress';
+
 import type { ProgressRoot } from './ProgressRoot';
 
 export type ProgressRootContextValue = {
+    /**
+     * The core machine of the progress bar (ARIA, formatting, status, indicator style).
+     */
+    progress: ProgressMachine;
     /**
      * Formatted value of the component.
      */
@@ -19,7 +25,6 @@ export type ProgressRootContextValue = {
      * Value of the component.
      */
     value: number | null;
-    setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
     state: ProgressRoot.State;
     status: ProgressRoot.Status;
 };

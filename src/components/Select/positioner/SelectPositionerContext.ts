@@ -1,18 +1,12 @@
 import React from 'react';
 
-import type { Side, useAnchorPositioning } from '~@lib/hooks';
+import type { SelectPositionerMachine } from '@flippo-software/core-components/select';
 
 export type SelectPositionerContextValue = {
-    side: 'none' | Side;
-    alignItemWithTriggerActive: boolean;
-    setControlledAlignItemWithTrigger: React.Dispatch<React.SetStateAction<boolean>>;
-    scrollUpArrowRef: React.RefObject<HTMLDivElement | null>;
-    scrollDownArrowRef: React.RefObject<HTMLDivElement | null>;
-} & Omit<useAnchorPositioning.ReturnValue, 'side'>;
+    positioner: SelectPositionerMachine;
+};
 
-export const SelectPositionerContext = React.createContext<SelectPositionerContextValue | undefined>(
-    undefined
-);
+export const SelectPositionerContext = React.createContext<SelectPositionerContextValue | undefined>(undefined);
 
 export function useSelectPositionerContext() {
     const context = React.use(SelectPositionerContext);

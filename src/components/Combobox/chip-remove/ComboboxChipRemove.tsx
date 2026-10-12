@@ -1,19 +1,15 @@
 import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { ButtonMachine } from '@flippo-software/core-components/button';
+import { getComboboxChipRemoveProps, comboboxSelectors as selectors } from '@flippo-software/core-components/combobox';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { toReactProps, useMachine, useSelector } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
-import { findItemIndex } from '~@lib/itemEquality';
-import { REASONS } from '~@lib/reason';
-import { stopEvent } from '~@packages/floating-ui-react/utils';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button';
 import { useComboboxChipContext } from '../chip/ComboboxChipContext';
-import { useComboboxRootContext } from '../root/ComboboxRootContext';
-import { selectors } from '../store';
+import { useComboboxRootMachine } from '../root/ComboboxRootContext';
 
 /**
  * A button to remove a chip.
@@ -30,110 +26,19 @@ export function ComboboxChipRemove(componentProps: ComboboxChipRemove.Props) {
         ...elementProps
     } = componentProps;
 
-    const store = useComboboxRootContext();
+    const root = useComboboxRootMachine();
     const { index } = useComboboxChipContext();
+    const disabled = useSelector(root.store, selectors.disabled);
 
-    const disabled = useStore(store, selectors.disabled);
-    const readOnly = useStore(store, selectors.readOnly);
-    const selectedValue = useStore(store, selectors.selectedValue);
-    const isItemEqualToValue = useStore(store, selectors.isItemEqualToValue);
+    const button = useMachine((options) => new ButtonMachine(options), { disabled, native: nativeButton });
 
-    const { buttonRef, getButtonProps } = useButton({
-        native: nativeButton,
-        disabled: disabled || readOnly,
-        focusableWhenDisabled: true
-    });
+    const state: ComboboxChipRemove.State = React.useMemo(() => ({ disabled }), [disabled]);
 
-    const state: ComboboxChipRemove.State = React.useMemo(
-        () => ({
-            disabled
-        }),
-        [disabled]
-    );
-
-    const element = useRenderElement('button', componentProps, {
-        ref: [ref, buttonRef],
+    return useRenderElement('button', componentProps, {
+        ref: [ref, button.setElement],
         state,
-        props: [{
-            'tabIndex': -1,
-            disabled,
-            'aria-readonly': readOnly || undefined,
-            onClick(event) {
-                if (disabled || readOnly) {
-                    return;
-                }
-
-                const eventDetails = createChangeEventDetails(REASONS.chipRemovePress, event.nativeEvent);
-
-                // If the removed chip was the active item, clear highlight
-                const activeIndex = store.state.activeIndex;
-                const removedItem = selectedValue[index];
-
-                // Try current visible list first; if not found, it's filtered out. No need
-                // to clear highlight in that case since it can't equal activeIndex.
-                const removedIndex = findItemIndex(
-                    store.state.valuesRef.current,
-                    removedItem,
-                    isItemEqualToValue
-                );
-                if (removedIndex !== -1 && activeIndex === removedIndex) {
-                    store.state.setIndices({
-                        activeIndex: null,
-                        type: store.state.keyboardActiveRef.current ? 'pointer' : 'keyboard'
-                    });
-                }
-
-                store.state.setSelectedValue(
-                    selectedValue.filter((_: any, i: number) => i !== index),
-                    eventDetails
-                );
-
-                if (!eventDetails.isPropagationAllowed) {
-                    event.stopPropagation();
-                }
-
-                store.state.inputRef.current?.focus();
-            },
-            onKeyDown(event) {
-                if (disabled || readOnly) {
-                    return;
-                }
-
-                const eventDetails = createChangeEventDetails(REASONS.chipRemovePress, event.nativeEvent);
-
-                if (event.key === 'Enter' || event.key === ' ') {
-                    // If the removed chip was the active item, clear highlight
-                    const activeIndex = store.state.activeIndex;
-                    const removedItem = selectedValue[index];
-                    const removedIndex = findItemIndex(
-                        store.state.valuesRef.current,
-                        removedItem,
-                        isItemEqualToValue
-                    );
-
-                    if (removedIndex !== -1 && activeIndex === removedIndex) {
-                        store.state.setIndices({
-                            activeIndex: null,
-                            type: store.state.keyboardActiveRef.current ? 'pointer' : 'keyboard'
-                        });
-                    }
-
-                    store.state.setSelectedValue(
-                        selectedValue.filter((_: any, i: number) => i !== index),
-                        eventDetails
-                    );
-
-                    if (!eventDetails.isPropagationAllowed) {
-                        stopEvent(event);
-                    }
-
-                    store.state.inputRef.current?.focus();
-                }
-            }
-        }, elementProps, getButtonProps]
+        props: [elementProps, (props) => toReactProps(getComboboxChipRemoveProps(root, index, button, props))]
     });
-
-    return element;
 }
 
 export type ComboboxChipRemoveState = {

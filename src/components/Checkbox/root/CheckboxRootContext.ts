@@ -10,9 +10,7 @@ export function useCheckboxRootContext() {
     const context = React.use(CheckboxRootContext);
 
     if (context === undefined) {
-        throw new Error(
-            'Headless UI: CheckboxRootContext is missing. Checkbox parts must be placed within <Checkbox.Root>.'
-        );
+        throw new Error('Headless UI: CheckboxRootContext is missing. Checkbox parts must be placed within <Checkbox.Root>.');
     }
 
     return context;

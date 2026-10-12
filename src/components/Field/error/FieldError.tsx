@@ -6,7 +6,6 @@ import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useFormContext } from '../../Form/FormContext';
 import { useLabelableContext } from '../../LabelableProvider';
 import { useFieldRootContext } from '../root/FieldRootContext';
 import { fieldValidityMapping } from '../utils/constants';
@@ -33,27 +32,15 @@ export function FieldError(componentProps: FieldError.Props) {
 
     const id = useHeadlessUiId(idProp);
 
-    const { validityData, state, name } = useFieldRootContext(false);
+    const { state, field } = useFieldRootContext(false);
     const { setMessageIds } = useLabelableContext();
 
-    const { errors } = useFormContext();
-
-    const formError = name ? errors[name] : null;
-
-    let rendered = false;
-    if (formError || match === true) {
-        rendered = true;
-    }
-    else if (match) {
-        rendered = Boolean(validityData.state[match]);
-    }
-    else {
-        rendered = validityData.state.valid === false;
-    }
+    const rendered = field?.isErrorRendered(match) ?? false;
+    const messages = field?.getErrorMessages() ?? '';
 
     useIsoLayoutEffect(() => {
         if (!rendered || !id) {
-            return undefined;
+            return;
         }
 
         setMessageIds((v) => v.concat(id));
@@ -66,20 +53,19 @@ export function FieldError(componentProps: FieldError.Props) {
     const element = useRenderElement('div', componentProps, {
         ref,
         state,
-        props: [{
-            id,
-            children:
-                    formError
-                    || (validityData.errors.length > 1
-                        ? React.createElement(
-                            'ul',
-                            {},
-                            validityData.errors.map((message) =>
-                                React.createElement('li', { key: message }, message)
-                            )
-                        )
-                        : validityData.error)
-        }, elementProps],
+        props: [
+            {
+                id,
+                children: Array.isArray(messages)
+                    ? React.createElement(
+                          'ul',
+                          {},
+                          messages.map((message) => React.createElement('li', { key: message }, message))
+                      )
+                    : messages
+            },
+            elementProps
+        ],
         customStyleHookMapping: fieldValidityMapping
     });
 

@@ -1,12 +1,14 @@
 import React from 'react';
 
+import type { MarqueeMachine } from '@flippo-software/core-components/marquee';
+
 import type { Orientation } from '~@lib/types';
 
 export type MarqueeRootContextValue = {
     /**
-     * Ref to measure the initial content size.
+     * The core machine: measures the content and provides the functional styles.
      */
-    contentRef: React.RefObject<HTMLDivElement | null>;
+    marquee: MarqueeMachine;
     /**
      * Number of times to multiply the content.
      */
@@ -30,9 +32,7 @@ export const MarqueeRootContext = React.createContext<MarqueeRootContextValue | 
 export function useMarqueeRootContext(): MarqueeRootContextValue {
     const context = React.use(MarqueeRootContext);
     if (context === undefined) {
-        throw new Error(
-            'Headless UI: MarqueeRootContext is missing. Marquee parts must be placed within <Marquee.Root>.'
-        );
+        throw new Error('Headless UI: MarqueeRootContext is missing. Marquee parts must be placed within <Marquee.Root>.');
     }
 
     return context;

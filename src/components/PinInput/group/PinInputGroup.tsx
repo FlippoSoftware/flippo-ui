@@ -1,3 +1,4 @@
+import { toReactProps } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -17,25 +18,14 @@ export function PinInputGroup(componentProps: PinInputGroup.Props) {
         ...elementProps
     } = componentProps;
 
-    const { state } = usePinInputRootContext();
+    const { pinInput, state } = usePinInputRootContext();
 
-    const element = useRenderElement(
-        'div',
-        componentProps,
-        {
-            ref,
-            state,
-            props: [{
-                'role': 'group',
-                'aria-label': 'PIN code input',
-                'aria-describedby': state.valid === false ? 'pin-input-error' : undefined,
-                'aria-invalid': state.valid === false
-            }, elementProps],
-            customStyleHookMapping: pinInputStyleHookMapping
-        }
-    );
-
-    return element;
+    return useRenderElement('div', componentProps, {
+        ref,
+        state,
+        props: [toReactProps(pinInput.getGroupProps()), elementProps],
+        customStyleHookMapping: pinInputStyleHookMapping
+    });
 }
 
 export namespace PinInputGroup {

@@ -1,25 +1,15 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { ComboboxItemMachine } from '@flippo-software/core-components/combobox';
 
+import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
-import { compareItemEquality, findItemIndex } from '~@lib/itemEquality';
 
-import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps } from '~@lib/types';
+import type { HeadlessUIComponentProps, NonNativeButtonProps } from '~@lib/types';
 
-import {
-    IndexGuessBehavior,
-    useCompositeListItem
-} from '../../Composite/list/useCompositeListItem';
-import { useButton } from '../../use-button';
-import {
-    useComboboxDerivedItemsContext,
-    useComboboxRootContext
-} from '../root/ComboboxRootContext';
+import { useComboboxListContext } from '../list/ComboboxListContext';
+import { useComboboxRootMachine } from '../root/ComboboxRootContext';
 import { useComboboxRowContext } from '../row/ComboboxRowContext';
-import { selectors } from '../store';
 
 import { ComboboxItemContext } from './ComboboxItemContext';
 
@@ -29,217 +19,44 @@ import type { ComboboxItemContextValue } from './ComboboxItemContext';
  * An individual item in the list.
  * Renders a `<div>` element.
  */
-export const ComboboxItem = React.memo(
-    (
-        componentProps: ComboboxItem.Props
-    ) => {
-        const {
-            /* eslint-disable unused-imports/no-unused-vars */
-            render,
-            className,
-            /* eslint-enable unused-imports/no-unused-vars */
-            value = null,
-            index: indexProp,
-            disabled = false,
-            nativeButton = false,
-            ref,
-            ...elementProps
-        } = componentProps;
+export const ComboboxItem = React.memo((componentProps: ComboboxItem.Props) => {
+    const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        render,
+        className,
+        /* eslint-enable unused-imports/no-unused-vars */
+        value = null,
+        index,
+        disabled = false,
+        nativeButton = false,
+        ref,
+        ...elementProps
+    } = componentProps;
 
-        const didPointerDownRef = React.useRef(false);
-        const textRef = React.useRef<HTMLElement | null>(null);
-        const listItem = useCompositeListItem({
-            index: indexProp,
-            textRef,
-            indexGuessBehavior: IndexGuessBehavior.GuessFromOrder
-        });
+    const root = useComboboxRootMachine();
+    const list = useComboboxListContext();
+    const inRow = useComboboxRowContext();
 
-        const store = useComboboxRootContext();
-        const isRow = useComboboxRowContext();
-        const { flatFilteredItems } = useComboboxDerivedItemsContext();
+    const item = useMachine((options) => new ComboboxItemMachine(root, options, { registry: list?.registry ?? null, inRow }), {
+        value,
+        index,
+        disabled,
+        nativeButton
+    });
+    const state: ComboboxItem.State = useMachineState(item);
+    const track = useTracker();
+    const { selected } = state;
 
-        const open = useStore(store, selectors.open);
-        const selectionMode = useStore(store, selectors.selectionMode);
-        const readOnly = useStore(store, selectors.readOnly);
-        const virtualized = useStore(store, selectors.virtualized);
-        const isItemEqualToValue = useStore(store, selectors.isItemEqualToValue);
+    const contextValue: ComboboxItemContextValue = React.useMemo(() => ({ item, selected }), [item, selected]);
 
-        const selectable = selectionMode !== 'none';
-        const index
-      = indexProp
-        ?? (virtualized ? findItemIndex(flatFilteredItems, value, isItemEqualToValue) : listItem.index);
-        const hasRegistered = listItem.index !== -1;
+    const element = useRenderElement('div', componentProps, {
+        ref: [ref, item.setElement],
+        state,
+        props: [elementProps, (props) => track(() => toReactProps(item.getItemProps(props)))]
+    });
 
-        const rootId = useStore(store, selectors.id);
-        const highlighted = useStore(store, selectors.isActive, index);
-        const matchesSelectedValue = useStore(store, selectors.isSelected, value);
-        const items = useStore(store, selectors.items);
-        const getItemProps = useStore(store, selectors.getItemProps);
-
-        const itemRef = React.useRef<HTMLDivElement | null>(null);
-
-        const id = rootId != null && hasRegistered ? `${rootId}-${index}` : undefined;
-        const selected = matchesSelectedValue && selectable;
-
-        useIsoLayoutEffect(() => {
-            const shouldRun = hasRegistered && (virtualized || indexProp != null);
-            if (!shouldRun) {
-                return undefined;
-            }
-
-            const list = store.state.listRef.current;
-            list[index] = itemRef.current;
-
-            return () => {
-                delete list[index];
-            };
-        }, [
-            hasRegistered,
-            virtualized,
-            index,
-            indexProp,
-            store
-        ]);
-
-        useIsoLayoutEffect(() => {
-            if (!hasRegistered || items) {
-                return undefined;
-            }
-
-            const visibleMap = store.state.valuesRef.current;
-            visibleMap[index] = value;
-
-            // Stable registry that doesn't depend on filtering. Assume that no
-            // filtering had occurred at this point; otherwise, an `items` prop is
-            // required.
-            if (selectionMode !== 'none') {
-                store.state.allValuesRef.current.push(value);
-            }
-
-            return () => {
-                delete visibleMap[index];
-            };
-        }, [
-            hasRegistered,
-            items,
-            index,
-            value,
-            store,
-            selectionMode
-        ]);
-
-        useIsoLayoutEffect(() => {
-            if (!open) {
-                didPointerDownRef.current = false;
-                return;
-            }
-
-            if (!hasRegistered || items) {
-                return;
-            }
-
-            const selectedValue = store.state.selectedValue;
-            const lastSelectedValue = Array.isArray(selectedValue)
-                ? selectedValue[selectedValue.length - 1]
-                : selectedValue;
-
-            if (compareItemEquality(lastSelectedValue, value, isItemEqualToValue)) {
-                store.set('selectedIndex', index);
-            }
-        }, [
-            hasRegistered,
-            items,
-            open,
-            store,
-            index,
-            value,
-            isItemEqualToValue
-        ]);
-
-        const state: ComboboxItem.State = React.useMemo(
-            () => ({
-                disabled,
-                selected,
-                highlighted
-            }),
-            [disabled, selected, highlighted]
-        );
-
-        const rootProps = getItemProps({ active: highlighted, selected });
-        rootProps.id = undefined;
-        rootProps.onFocus = undefined;
-
-        const { getButtonProps, buttonRef } = useButton({
-            disabled,
-            focusableWhenDisabled: true,
-            native: nativeButton
-        });
-
-        function commitSelection(nativeEvent: MouseEvent) {
-            function selectItem() {
-                store.state.handleSelection(nativeEvent, value);
-            }
-
-            if (store.state.submitOnItemClick) {
-                ReactDOM.flushSync(selectItem);
-                store.state.requestSubmit();
-            }
-            else {
-                selectItem();
-            }
-        }
-
-        const defaultProps: HTMLProps = {
-            id,
-            'role': isRow ? 'gridcell' : 'option',
-            'aria-disabled': disabled || undefined,
-            'aria-selected': selectable ? selected : undefined,
-            // Focusable items steal focus from the input upon mouseup.
-            // Warn if the user renders a natively focusable element like `<button>`,
-            // as it should be a `<div>` instead.
-            'tabIndex': undefined,
-            onPointerDownCapture(event) {
-                didPointerDownRef.current = true;
-                event.preventDefault();
-            },
-            onClick(event) {
-                if (disabled || readOnly) {
-                    return;
-                }
-
-                commitSelection(event.nativeEvent);
-            },
-            onMouseUp(event) {
-                const pointerStartedOnItem = didPointerDownRef.current;
-                didPointerDownRef.current = false;
-
-                if (disabled || readOnly || event.button !== 0 || pointerStartedOnItem || !highlighted) {
-                    return;
-                }
-
-                commitSelection(event.nativeEvent);
-            }
-        };
-
-        const element = useRenderElement('div', componentProps, {
-            ref: [buttonRef, ref, listItem.ref, itemRef],
-            state,
-            props: [rootProps, defaultProps, elementProps, getButtonProps]
-        });
-
-        const contextValue: ComboboxItemContextValue = React.useMemo(
-            () => ({
-                selected,
-                textRef
-            }),
-            [selected, textRef]
-        );
-
-        return (
-            <ComboboxItemContext.Provider value={contextValue}>{element}</ComboboxItemContext.Provider>
-        );
-    }
-);
+    return <ComboboxItemContext value={contextValue}>{element}</ComboboxItemContext>;
+});
 
 export type ComboboxItemState = {
     /**
@@ -279,7 +96,8 @@ export type ComboboxItemProps = {
      * @default false
      */
     disabled?: boolean;
-} & NonNativeButtonProps & Omit<HeadlessUIComponentProps<'div', ComboboxItem.State>, 'id'>;
+} & NonNativeButtonProps &
+    Omit<HeadlessUIComponentProps<'div', ComboboxItem.State>, 'id'>;
 
 // eslint-disable-next-line ts/no-redeclare
 export namespace ComboboxItem {

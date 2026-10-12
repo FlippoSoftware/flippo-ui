@@ -9,9 +9,7 @@ export const RadioCardRootContext = React.createContext<RadioCardRootContextValu
 export function useRadioCardRootContext() {
     const value = React.use(RadioCardRootContext);
     if (value === undefined) {
-        throw new Error(
-            'Headless UI: RadioCardRootContext is missing. RadioCard.Indicator must be placed within <RadioCard.Root>.'
-        );
+        throw new Error('Headless UI: RadioCardRootContext is missing. RadioCard.Indicator must be placed within <RadioCard.Root>.');
     }
     return value;
 }

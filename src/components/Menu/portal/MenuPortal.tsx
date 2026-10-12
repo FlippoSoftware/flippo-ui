@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { FloatingPortal } from '~@packages/floating-ui-react';
+import { useStoreSelector } from '~@lib/core';
+import { FloatingPortal } from '~@lib/floating';
 
 import { useMenuRootContext } from '../root/MenuRootContext';
 
@@ -17,7 +18,7 @@ export function MenuPortal(componentProps: MenuPortal.Props) {
     const { keepMounted = false, ...portalProps } = componentProps;
 
     const { store } = useMenuRootContext();
-    const mounted = store.useState('mounted');
+    const mounted = useStoreSelector(store, 'mounted');
 
     const shouldRender = mounted || keepMounted;
     if (!shouldRender) {

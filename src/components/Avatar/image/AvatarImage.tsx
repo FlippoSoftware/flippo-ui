@@ -1,9 +1,8 @@
-
-
 import React from 'react';
 
-import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { AvatarImageLoader } from '@flippo-software/core-components/avatar';
 
+import { useMachine, useStoreState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -11,11 +10,7 @@ import type { HeadlessUIComponentProps } from '~@lib/types';
 import { useAvatarRootContext } from '../root/AvatarRootContext';
 import { avatarStyleHookMapping } from '../root/styleHooks';
 
-import type { AvatarRoot } from '../root/AvatarRoot';
-
-import { useImageLoadingStatus } from './useImageLoadingStatus';
-
-import type { ImageLoadingStatus } from './useImageLoadingStatus';
+import type { AvatarRoot, ImageLoadingStatus } from '../root/AvatarRoot';
 
 /**
  * The image to be displayed in the avatar.
@@ -36,22 +31,14 @@ export function AvatarImage(componentProps: AvatarImage.Props) {
         ...elementProps
     } = componentProps;
 
-    const context = useAvatarRootContext();
-    const imageLoadingStatus = useImageLoadingStatus(componentProps.src, {
+    const { avatar } = useAvatarRootContext();
+    const loader = useMachine((options) => new AvatarImageLoader(avatar, options), {
+        src: componentProps.src,
         referrerPolicy,
-        crossOrigin
+        crossOrigin,
+        onLoadingStatusChange: onLoadingStatusChangeProp
     });
-
-    const handleLoadingStatusChange = useEventCallback((status: ImageLoadingStatus) => {
-        onLoadingStatusChangeProp?.(status);
-        context.setImageLoadingStatus(status);
-    });
-
-    useIsoLayoutEffect(() => {
-        if (imageLoadingStatus !== 'idle') {
-            handleLoadingStatusChange(imageLoadingStatus);
-        }
-    }, [imageLoadingStatus, handleLoadingStatusChange]);
+    const imageLoadingStatus = useStoreState(loader.store).status;
 
     const state: AvatarRoot.State = React.useMemo(
         () => ({

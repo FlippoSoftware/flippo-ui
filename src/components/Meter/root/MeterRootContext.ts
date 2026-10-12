@@ -1,6 +1,12 @@
 import React from 'react';
 
+import type { MeterMachine } from '@flippo-software/core-components/meter';
+
 export type MeterRootContextValue = {
+    /**
+     * The core machine of the meter (ARIA, formatting, indicator style).
+     */
+    meter: MeterMachine;
     /**
      * Formatted value of the component.
      */
@@ -17,7 +23,6 @@ export type MeterRootContextValue = {
      * Value of the component.
      */
     value: number | null;
-    setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
 export const MeterRootContext = React.createContext<MeterRootContextValue | undefined>(undefined);

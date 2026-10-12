@@ -1,15 +1,12 @@
-import React from 'react';
-
-import { useEventCallback } from '@flippo-ui/hooks';
+import { QrCodeDownloadTriggerMachine } from '@flippo-software/core-components/qr-code';
 
 import type { FileExtension } from 'qr-code-styling';
 
+import { toReactProps, useMachine, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
-import { mergeProps } from '~@lib/merge';
 
-import type { HeadlessUIComponentProps, HTMLProps, NativeButtonProps } from '~@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button';
 import { useQrCodeRootContext } from '../root/QrCodeRootContext';
 import { qrCodeStyleHookMapping } from '../utils/styleHooks';
 
@@ -25,73 +22,28 @@ export function QrCodeDownloadTrigger(componentProps: QrCodeDownloadTrigger.Prop
         extension = 'svg',
         ref,
         nativeButton,
-        disabled: disabledProp,
-        onDownload: onDownloadProp,
-        onDownloadError: onDownloadErrorProp,
+        disabled,
+        onDownload,
+        onDownloadError,
         ...elementProps
     } = componentProps;
 
-    const onDownload = useEventCallback(onDownloadProp);
-    const onDownloadError = useEventCallback(onDownloadErrorProp);
+    const { qrCode } = useQrCodeRootContext();
 
-    const { status, value, qrCodeStyling } = useQrCodeRootContext();
-
-    const [isDownloading, setIsDownloading] = React.useState(false);
-
-    const disabled = Boolean(!qrCodeStyling || disabledProp || isDownloading);
-
-    const { getButtonProps, buttonRef } = useButton({
+    const trigger = useMachine((options) => new QrCodeDownloadTriggerMachine(qrCode, options), {
         disabled,
-        native: nativeButton
+        nativeButton,
+        name,
+        extension,
+        onDownload,
+        onDownloadError
     });
-
-    const getTriggerProps = React.useCallback(
-        (externalProps?: HTMLProps): HTMLProps => {
-            return mergeProps(
-                {
-                    onClick: async () => {
-                        if (!qrCodeStyling || isDownloading) {
-                            return;
-                        }
-
-                        setIsDownloading(true);
-
-                        try {
-                            await qrCodeStyling.download({
-                                name,
-                                extension
-                            });
-
-                            onDownload?.();
-                        }
-                        catch (error) {
-                            onDownloadError?.(error);
-                        }
-                        finally {
-                            setIsDownloading(false);
-                        }
-                    }
-                },
-                externalProps,
-                getButtonProps
-            );
-        },
-        [getButtonProps, qrCodeStyling, isDownloading, name, extension, onDownload, onDownloadError]
-    );
-    const state: QrCodeDownloadTrigger.State = React.useMemo(
-        () => ({
-            value,
-            status,
-            disabled,
-            downloading: isDownloading
-        }),
-        [value, status, disabled, isDownloading]
-    );
+    const state: QrCodeDownloadTrigger.State = useMachineState(trigger);
 
     const element = useRenderElement('button', componentProps, {
         state,
-        ref: [ref, buttonRef],
-        props: [elementProps, getTriggerProps],
+        ref: [ref, trigger.button.setElement],
+        props: [elementProps, (props) => toReactProps(trigger.getProps(props))],
         customStyleHookMapping: qrCodeStyleHookMapping
     });
 
@@ -138,5 +90,6 @@ export namespace QrCodeDownloadTrigger {
          * @default undefined
          */
         onDownloadError?: (error: unknown) => void;
-    } & NativeButtonProps & HeadlessUIComponentProps<'button', State>;
+    } & NativeButtonProps &
+        HeadlessUIComponentProps<'button', State>;
 }

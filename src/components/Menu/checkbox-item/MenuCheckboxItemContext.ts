@@ -6,9 +6,7 @@ export type MenuCheckboxItemContextValue = {
     disabled: boolean;
 };
 
-export const MenuCheckboxItemContext = React.createContext<MenuCheckboxItemContextValue | undefined>(
-    undefined
-);
+export const MenuCheckboxItemContext = React.createContext<MenuCheckboxItemContextValue | undefined>(undefined);
 
 export function useMenuCheckboxItemContext() {
     const context = React.use(MenuCheckboxItemContext);

@@ -1,12 +1,12 @@
 import React from 'react';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { DialogCloseMachine } from '@flippo-software/core-components/dialog';
+
+import { toReactProps, useMachine } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
-import { REASONS } from '~@lib/reason';
 
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button';
 import { useDialogRootContext } from '../root/DialogRootContext';
 
 /**
@@ -28,25 +28,15 @@ export function DialogClose(componentProps: DialogCloseProps) {
     } = componentProps;
 
     const { store } = useDialogRootContext();
-    const open = store.useState('open');
 
-    function handleClick(event: React.MouseEvent) {
-        if (open) {
-            store.setOpen(false, createChangeEventDetails(REASONS.closePress, event.nativeEvent));
-        }
-    }
-
-    const { getButtonProps, buttonRef } = useButton({
-        disabled,
-        native: nativeButton
-    });
+    const close = useMachine((options) => new DialogCloseMachine(store, options), { disabled, nativeButton });
 
     const state: DialogClose.State = React.useMemo(() => ({ disabled }), [disabled]);
 
     return useRenderElement('button', componentProps, {
         state,
-        ref: [ref, buttonRef],
-        props: [{ onClick: handleClick }, elementProps, getButtonProps]
+        ref: [ref, close.setElement],
+        props: [elementProps, (props) => toReactProps(close.getCloseProps(props))]
     });
 }
 

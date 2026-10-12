@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { ListStore } from '../store';
+import type { ListStore } from '@flippo-software/core-components/list';
 
 export type ListRootContextValue = {
     store: ListStore;
@@ -14,9 +14,7 @@ export function useListRootContext(optional?: boolean) {
     const listRootContext = React.use(ListRootContext);
 
     if (optional === false && listRootContext === undefined) {
-        throw new Error(
-            'Headless UI: ListRootContext is missing. List parts must be placed within <List.Root>.'
-        );
+        throw new Error('Headless UI: ListRootContext is missing. List parts must be placed within <List.Root>.');
     }
 
     return listRootContext;

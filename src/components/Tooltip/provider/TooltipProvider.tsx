@@ -1,35 +1,21 @@
 import React from 'react';
 
-import { FloatingDelayGroup } from '~@packages/floating-ui-react';
+import { TooltipProviderMachine } from '@flippo-software/core-components/tooltip';
+
+import { useMachine } from '~@lib/core';
 
 import { TooltipProviderContext } from './TooltipProviderContext';
 
-import type { TooltipProviderContextValue } from './TooltipProviderContext';
-
+/**
+ * Provides a shared delay for multiple tooltips. The grouping logic ensures that
+ * once a tooltip becomes visible, the adjacent tooltips will be shown instantly.
+ */
 export function TooltipProvider(props: TooltipProviderProps) {
-    const {
-        delay,
-        closeDelay,
-        timeout = 400
-    } = props;
+    const { delay, closeDelay, timeout = 400, children } = props;
 
-    const contextValue: TooltipProviderContextValue = React.useMemo(
-        () => ({
-            delay,
-            closeDelay
-        }),
-        [delay, closeDelay]
-    );
+    const provider = useMachine((options) => new TooltipProviderMachine(options), { delay, closeDelay, timeout });
 
-    const delayValue = React.useMemo(() => ({ open: delay, close: closeDelay }), [delay, closeDelay]);
-
-    return (
-        <TooltipProviderContext.Provider value={contextValue}>
-            <FloatingDelayGroup delay={delayValue} timeoutMs={timeout}>
-                {props.children}
-            </FloatingDelayGroup>
-        </TooltipProviderContext.Provider>
-    );
+    return <TooltipProviderContext value={provider}>{children}</TooltipProviderContext>;
 }
 
 export type TooltipProviderProps = {

@@ -11,32 +11,22 @@ import { AriaCombobox } from './AriaCombobox';
 export function ComboboxRoot<Value, Multiple extends boolean | undefined = false>(
     props: ComboboxRoot.Props<Value, Multiple>
 ): React.JSX.Element {
-    const {
-        multiple = false as Multiple,
-        defaultValue,
-        value,
-        onValueChange,
-        ...other
-    } = props;
+    const { multiple = false as Multiple, defaultValue, value, onValueChange, ...other } = props;
 
     return (
         <AriaCombobox
-          {...(other as any)}
-          selectionMode={multiple ? 'multiple' : 'single'}
-          selectedValue={value}
-          defaultSelectedValue={defaultValue}
-          onSelectedValueChange={onValueChange}
+            {...(other as any)}
+            selectionMode={multiple ? 'multiple' : 'single'}
+            selectedValue={value}
+            defaultSelectedValue={defaultValue}
+            onSelectedValueChange={onValueChange}
         />
     );
 }
 
-type ModeFromMultiple<Multiple extends boolean | undefined> = Multiple extends true
-    ? 'multiple'
-    : 'single';
+type ModeFromMultiple<Multiple extends boolean | undefined> = Multiple extends true ? 'multiple' : 'single';
 
-type ComboboxValueType<Value, Multiple extends boolean | undefined> = Multiple extends true
-    ? Value[]
-    : Value;
+type ComboboxValueType<Value, Multiple extends boolean | undefined> = Multiple extends true ? Value[] : Value;
 
 export type ComboboxRootProps<Value, Multiple extends boolean | undefined = false> = Omit<
     AriaCombobox.Props<Value, ModeFromMultiple<Multiple>>,
@@ -49,12 +39,12 @@ export type ComboboxRootProps<Value, Multiple extends boolean | undefined = fals
     | 'itemToStringLabel'
     | 'itemToStringValue'
     | 'isItemEqualToValue'
-  // Different names
+    // Different names
     | 'selectionMode'
     | 'defaultSelectedValue'
     | 'selectedValue'
     | 'onSelectedValueChange'
-  // Custom JSDoc
+    // Custom JSDoc
     | 'actionsRef'
     | 'onOpenChange'
     | 'onInputValueChange'
@@ -130,10 +120,7 @@ export type ComboboxRootProps<Value, Multiple extends boolean | undefined = fals
      * - `'pointer'`: the highlight changed due to pointer hovering.
      * - `'none'`: the highlight changed programmatically.
      */
-    onItemHighlighted?: (
-        highlightedValue: Value | undefined,
-        eventDetails: ComboboxRoot.HighlightEventDetails,
-    ) => void;
+    onItemHighlighted?: (highlightedValue: Value | undefined, eventDetails: ComboboxRoot.HighlightEventDetails) => void;
     /**
      * The selected value of the combobox. Use when controlled.
      */
@@ -143,7 +130,7 @@ export type ComboboxRootProps<Value, Multiple extends boolean | undefined = fals
      */
     onValueChange?: (
         value: ComboboxValueType<Value, Multiple> | (Multiple extends true ? never : null),
-        eventDetails: ComboboxRoot.ChangeEventDetails,
+        eventDetails: ComboboxRoot.ChangeEventDetails
     ) => void;
 };
 
@@ -158,10 +145,7 @@ export type ComboboxRootHighlightEventReason = AriaCombobox.HighlightEventReason
 export type ComboboxRootHighlightEventDetails = AriaCombobox.HighlightEventDetails;
 
 export namespace ComboboxRoot {
-    export type Props<Value, Multiple extends boolean | undefined = false> = ComboboxRootProps<
-        Value,
-        Multiple
-    >;
+    export type Props<Value, Multiple extends boolean | undefined = false> = ComboboxRootProps<Value, Multiple>;
     export type State = ComboboxRootState;
     export type Actions = ComboboxRootActions;
     export type ChangeEventReason = ComboboxRootChangeEventReason;

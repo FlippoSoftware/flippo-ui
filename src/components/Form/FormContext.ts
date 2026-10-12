@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import type { FormController } from '@flippo-software/core-components/form';
+
 import { NOOP } from '~@lib/noop';
 
 import type { FieldValidityData } from '../Field/root/FieldRoot';
@@ -25,6 +27,10 @@ export type FormContextValue = {
     }>;
     validationMode: Form.ValidationMode;
     submitAttemptedRef: React.RefObject<boolean>;
+    /**
+     * The core controller (absent outside of a form).
+     */
+    form?: FormController;
 };
 
 export const FormContext = React.createContext<FormContextValue>({

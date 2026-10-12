@@ -1,14 +1,15 @@
 import React from 'react';
 
-import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo-ui/hooks';
+import { TooltipPopupMachine } from '@flippo-software/core-components/tooltip';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
-import { getDisabledMountTransitionStyles } from '~@lib/getDisabledMountTransitionStyles';
-import { usePopupAutoResize, useRenderElement } from '~@lib/hooks';
+import { toReactProps, useMachineState, useTracker } from '~@lib/core';
+import { useFloatingTree } from '~@lib/floating';
+import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
-import { useHoverFloatingInteraction } from '~@packages/floating-ui-react';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { Align, Side } from '~@lib/hooks';
@@ -35,112 +36,25 @@ export function TooltipPopup(componentProps: TooltipPopupProps) {
         ...elementProps
     } = componentProps;
 
-    const store = useTooltipRootContext();
-    const multipleContext = useTooltipMultipleContext();
-    const { side, align } = useTooltipPositionerContext();
+    const root = useTooltipRootContext();
+    const multiple = useTooltipMultipleContext();
+    const { positioner } = useTooltipPositionerContext();
+    const tree = useFloatingTree();
 
-    const open = store.useOpen();
-    const mounted = store.useState('mounted');
-    const instantType = store.useState('instantType');
-    const transitionStatus = store.useState('transitionStatus');
-    const popupProps = store.useState('popupProps');
-    const payload = store.useState('payload');
-    const popupElement = store.useState('popupElement');
-    const positionerElement = store.useState('positionerElement');
-    const floatingContext = store.useState('floatingRootContext');
-
-    useOpenChangeComplete({
-        open,
-        ref: store.context.popupRef,
-        onComplete() {
-            if (open) {
-                store.context.onOpenChangeComplete?.(true);
-            }
-        }
-    });
-
-    function handleMeasureLayout() {
-        floatingContext.context.events.emit('measure-layout');
-    }
-
-    function handleMeasureLayoutComplete(
-        previousDimensions: { width: number; height: number } | null,
-        nextDimensions: { width: number; height: number }
-    ) {
-        floatingContext.context.events.emit('measure-layout-complete', {
-            previousDimensions,
-            nextDimensions
-        });
-    }
-
-    // If there's just one trigger, we can skip the auto-resize logic as
-    // the popover will always be anchored to the same position.
-    const autoresizeEnabled = () => store.context.triggerElements.size > 1;
-
-    usePopupAutoResize({
-        popupElement,
-        positionerElement,
-        mounted,
-        content: payload,
-        enabled: autoresizeEnabled,
-        onMeasureLayout: handleMeasureLayout,
-        onMeasureLayoutComplete: handleMeasureLayoutComplete
-    });
-
-    const disabled = store.useState('disabled');
-    const closeDelay = store.useState('closeDelay');
-
-    // Register popup element with Multiple store for safePolygon tracking
-    useIsoLayoutEffect(() => {
-        if (!multipleContext || !popupElement) {
-            return;
-        }
-        multipleContext.store.registerPopup(popupElement);
-        return () => {
-            multipleContext.store.unregisterPopup(popupElement);
-        };
-    }, [multipleContext, popupElement]);
-
-    // For Multiple: use larger closeDelay to allow mouse movement between elements
-    const effectiveCloseDelay = multipleContext ? Math.max(closeDelay, 150) : closeDelay;
-
-    useHoverFloatingInteraction(floatingContext, {
-        enabled: !disabled,
-        closeDelay: effectiveCloseDelay
-    });
-
-    const multipleActive = store.useMultipleActive();
-
-    // Hide from screen readers when not active in multiple mode
-    const isHiddenFromScreenReader = multipleContext !== null && !multipleActive;
-
-    const state: TooltipPopup.State = React.useMemo(
-        () => ({
-            open,
-            side,
-            align,
-            instant: instantType,
-            transitionStatus,
-            multipleActive
-        }),
-        [
-            open,
-            side,
-            align,
-            instantType,
-            transitionStatus,
-            multipleActive
-        ]
+    const [popup] = React.useState(() => new TooltipPopupMachine(root, { positioner, multiple, tree }));
+    useIsoLayoutEffect(() => popup.connect(), [popup]);
+    const track = useTracker();
+    const state: TooltipPopup.State = useMachineState(
+        popup,
+        multiple ? [root.store, positioner.controller, multiple.store] : [root.store, positioner.controller]
     );
 
-    const element = useRenderElement('div', componentProps, {
+    return useRenderElement('div', componentProps, {
         state,
-        ref: [ref, store.context.popupRef, store.useStateSetter('popupElement')],
-        props: [popupProps, getDisabledMountTransitionStyles(transitionStatus), isHiddenFromScreenReader ? { 'aria-hidden': true } : undefined, elementProps],
+        ref: [ref, popup.setElement],
+        props: [elementProps, (props) => track(() => toReactProps(popup.getPopupProps(props)))],
         customStyleHookMapping: stateAttributesMapping
     });
-
-    return element;
 }
 
 export type TooltipPopupState = {

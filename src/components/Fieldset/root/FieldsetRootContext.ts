@@ -1,9 +1,15 @@
 import React from 'react';
 
+import type { FieldsetMachine } from '@flippo-software/core-components/fieldset';
+
 export type FieldsetRootContextValue = {
     legendId: string | undefined;
     setLegendId: React.Dispatch<React.SetStateAction<string | undefined>>;
     disabled: boolean | undefined;
+    /**
+     * The core machine (absent outside of a fieldset).
+     */
+    fieldset?: FieldsetMachine;
 };
 
 export const FieldsetRootContext = React.createContext<FieldsetRootContextValue>({
@@ -17,9 +23,7 @@ export function useFieldsetRootContext(optional?: false): FieldsetRootContextVal
 export function useFieldsetRootContext(optional = false) {
     const context = React.use(FieldsetRootContext);
     if (!context && !optional) {
-        throw new Error(
-            'Headless UI: FieldsetRootContext is missing. Fieldset parts must be placed within <Fieldset.Root>.'
-        );
+        throw new Error('Headless UI: FieldsetRootContext is missing. Fieldset parts must be placed within <Fieldset.Root>.');
     }
     return context;
 }

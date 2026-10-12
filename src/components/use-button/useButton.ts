@@ -1,195 +1,48 @@
 import React from 'react';
 
-import { useEventCallback, useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { ButtonMachine } from '@flippo-software/core-components/button';
 
-import { error } from '~@lib/error';
-import { useFocusableWhenDisabled } from '~@lib/hooks';
-import { makeEventPreventable, mergeProps } from '~@lib/merge';
-
-import type { HeadlessUIEvent, HTMLProps } from '~@lib/types';
+import { toReactProps, useMachine } from '~@lib/core';
 
 import { useCompositeRootContext } from '../Composite/root/CompositeRootContext';
 
+/**
+ * Props and a ref that make an element behave as a button (core `ButtonMachine`).
+ */
 export function useButton(parameters: useButton.Parameters = {}): useButton.ReturnValue {
-    const {
-        disabled = false,
-        focusableWhenDisabled,
-        tabIndex = 0,
-        native: isNativeButton = true
-    } = parameters;
+    const { disabled = false, focusableWhenDisabled, tabIndex = 0, native = true } = parameters;
 
-    const buttonRef = React.useRef<HTMLButtonElement | HTMLAnchorElement | HTMLElement | null>(null);
+    const composite = useCompositeRootContext(true) !== undefined;
 
-    const isCompositeItem = useCompositeRootContext(true) !== undefined;
-
-    const isValidLink = useEventCallback(() => {
-        const element = buttonRef.current;
-        return Boolean(element?.tagName === 'A' && (element as HTMLAnchorElement)?.href);
-    });
-
-    const { props: focusableWhenDisabledProps } = useFocusableWhenDisabled({
-        focusableWhenDisabled,
+    const button = useMachine((options) => new ButtonMachine(options), {
         disabled,
-        composite: isCompositeItem,
+        focusableWhenDisabled,
         tabIndex,
-        isNativeButton
+        native,
+        composite
     });
 
-    if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        React.useEffect(() => {
-            if (!buttonRef.current) {
-                return;
+    // An object ref (the public API) that passes the element to the machine.
+    const buttonRef = React.useMemo(() => {
+        let element: HTMLElement | null = null;
+        return {
+            get current() {
+                return element;
+            },
+            set current(next: HTMLElement | null) {
+                element = next;
+                button.setElement(next);
             }
-
-            const isButtonTag = buttonRef.current.tagName === 'BUTTON';
-
-            if (isNativeButton) {
-                if (!isButtonTag) {
-                    error(
-                        'A component that acts as a button was not rendered as a native <button>, which does not match the default. Ensure that the element passed to the `render` prop of the component is a real <button>, or set the `nativeButton` prop on the component to `false`.'
-                    );
-                }
-            }
-            else if (isButtonTag) {
-                error(
-                    'A component that acts as a button was rendered as a native <button>, which does not match the default. Ensure that the element passed to the `render` prop of the component is not a real <button>, or set the `nativeButton` prop on the component to `true`.'
-                );
-            }
-        }, [isNativeButton]);
-    }
-
-    // handles a disabled composite button rendering another button, e.g.
-    // <Toolbar.Button disabled render={<Menu.Trigger />} />
-    // the `disabled` prop needs to pass through 2 `useButton`s then finally
-    // delete the `disabled` attribute from DOM
-    useIsoLayoutEffect(() => {
-        const element = buttonRef.current;
-        if (!(element instanceof HTMLButtonElement)) {
-            return;
-        }
-
-        if (
-            isCompositeItem
-            && disabled
-            && focusableWhenDisabledProps.disabled === undefined
-            && element.disabled
-        ) {
-            element.disabled = false;
-        }
-    }, [disabled, focusableWhenDisabledProps.disabled, isCompositeItem]);
+        };
+    }, [button]);
 
     const getButtonProps = React.useCallback(
-        (externalProps: GenericButtonProps = {}) => {
-            const {
-                onClick: externalOnClick,
-                onMouseDown: externalOnMouseDown,
-                onKeyUp: externalOnKeyUp,
-                onKeyDown: externalOnKeyDown,
-                onPointerDown: externalOnPointerDown,
-                ...otherExternalProps
-            } = externalProps;
-
-            const type = isNativeButton ? 'button' : undefined;
-
-            return mergeProps<'button'>(
-                {
-                    type,
-                    onClick(event: React.MouseEvent) {
-                        if (disabled) {
-                            event.preventDefault();
-                            return;
-                        }
-                        externalOnClick?.(event);
-                    },
-                    onMouseDown(event: React.MouseEvent) {
-                        if (!disabled) {
-                            externalOnMouseDown?.(event);
-                        }
-                    },
-                    onKeyDown(event: HeadlessUIEvent<React.KeyboardEvent>) {
-                        if (!disabled) {
-                            makeEventPreventable(event);
-                            externalOnKeyDown?.(event);
-                        }
-
-                        if (event.headlessUIHandlerPrevented) {
-                            return;
-                        }
-
-                        const shouldClick
-                            = event.target === event.currentTarget
-                              && !isNativeButton
-                              && !isValidLink()
-                              && !disabled;
-                        const isEnterKey = event.key === 'Enter';
-                        const isSpaceKey = event.key === ' ';
-
-                        // Keyboard accessibility for non interactive elements
-                        if (shouldClick) {
-                            if (isSpaceKey || isEnterKey) {
-                                event.preventDefault();
-                            }
-
-                            if (isEnterKey) {
-                                externalOnClick?.(event);
-                            }
-                        }
-                    },
-                    onKeyUp(event: HeadlessUIEvent<React.KeyboardEvent>) {
-                        // calling preventDefault in keyUp on a <button> will not dispatch a click event if Space is pressed
-                        // https://codesandbox.io/p/sandbox/button-keyup-preventdefault-dn7f0
-                        // Keyboard accessibility for non interactive elements
-                        if (!disabled) {
-                            makeEventPreventable(event);
-                            externalOnKeyUp?.(event);
-                        }
-
-                        if (event.headlessUIHandlerPrevented) {
-                            return;
-                        }
-
-                        if (
-                            event.target === event.currentTarget
-                            && !isNativeButton
-                            && !disabled
-                            && event.key === ' '
-                        ) {
-                            externalOnClick?.(event);
-                        }
-                    },
-                    onPointerDown(event: React.PointerEvent) {
-                        if (disabled) {
-                            event.preventDefault();
-                            return;
-                        }
-                        externalOnPointerDown?.(event);
-                    }
-                },
-                !isNativeButton ? { role: 'button' } : undefined,
-                focusableWhenDisabledProps,
-                otherExternalProps
-            );
-        },
-        [disabled, focusableWhenDisabledProps, isNativeButton, isValidLink]
+        (externalProps: React.ComponentPropsWithRef<any> = {}) => toReactProps(button.getButtonProps(externalProps)),
+        [button]
     );
 
-    return {
-        getButtonProps,
-        buttonRef
-    };
+    return { getButtonProps, buttonRef };
 }
-
-type GenericButtonProps = {
-    onClick?: (event: React.SyntheticEvent) => void;
-} & Omit<HTMLProps, 'onClick'> & AdditionalButtonProps;
-
-type AdditionalButtonProps = {} & Partial<{
-    'aria-disabled': React.AriaAttributes['aria-disabled'];
-    'disabled': boolean;
-    'role': React.AriaRole;
-    'tabIndex'?: number;
-}>;
 
 export namespace useButton {
     export type Parameters = {
@@ -217,9 +70,7 @@ export namespace useButton {
          * @param externalProps additional props for the button
          * @returns props that should be spread on the button
          */
-        getButtonProps: (
-            externalProps?: React.ComponentPropsWithRef<any>,
-        ) => React.ComponentPropsWithRef<any>;
+        getButtonProps: (externalProps?: React.ComponentPropsWithRef<any>) => React.ComponentPropsWithRef<any>;
         /**
          * A ref to the button DOM element. This ref should be passed to the rendered element.
          * It is not a part of the props returned by `getButtonProps`.

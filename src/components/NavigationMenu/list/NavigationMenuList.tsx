@@ -1,16 +1,15 @@
 import React from 'react';
 
-import { EMPTY_OBJECT } from '~@lib/constants';
-import { useRenderElement } from '~@lib/hooks';
-import { useDismiss } from '~@packages/floating-ui-react';
-import { getTarget } from '~@packages/floating-ui-react/utils';
-import { getEmptyRootContext } from '~@packages/floating-ui-react/utils/getEmptyRootContext';
+import { NavigationMenuListMachine } from '@flippo-software/core-components/navigation-menu';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
+import { toReactProps, useTracker } from '~@lib/core';
+import { useDirection, useRenderElement } from '~@lib/hooks';
 
-import { CompositeRoot } from '../../Composite/root/CompositeRoot';
-import { useNavigationMenuRootContext } from '../root/NavigationMenuRootContext';
-import { NAVIGATION_MENU_TRIGGER_IDENTIFIER } from '../utils/constants';
+import type { HeadlessUIComponentProps } from '~@lib/types';
+
+import { CompositeMachineProvider } from '../../Composite/root/CompositeMachineProvider';
+import { useNavigationMenuRoot } from '../root/NavigationMenuRootContext';
 
 import { NavigationMenuDismissContext } from './NavigationMenuDismissContext';
 
@@ -20,100 +19,37 @@ import { NavigationMenuDismissContext } from './NavigationMenuDismissContext';
  *
  * Documentation: [Base UI Navigation Menu](https://base-ui.com/react/components/navigation-menu)
  */
-export function NavigationMenuList(componentProps: NavigationMenuListProps) {
+export function NavigationMenuList(componentProps: NavigationMenuList.Props) {
     const {
+        /* eslint-disable unused-imports/no-unused-vars */
         className,
         render,
+        /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
     } = componentProps;
 
-    const {
-        orientation,
-        open,
-        floatingRootContext,
-        positionerElement,
-        value,
-        nested
-    }
-    = useNavigationMenuRootContext();
+    const root = useNavigationMenuRoot();
+    const direction = useDirection();
 
-    const fallbackContext = React.useMemo(() => getEmptyRootContext(), []);
-    const context = floatingRootContext || fallbackContext;
-    const interactionsEnabled = positionerElement ? true : !value;
+    const [list] = React.useState(() => new NavigationMenuListMachine(root, direction));
+    const track = useTracker();
+    useIsoLayoutEffect(() => list.connect(), [list]);
 
-    const dismiss = useDismiss(context, {
-        enabled: interactionsEnabled,
-        outsidePressEvent: 'intentional',
-        outsidePress(event) {
-            const target = getTarget(event) as HTMLElement | null;
-            const closestNavigationMenuTrigger = target?.closest(
-                `[${NAVIGATION_MENU_TRIGGER_IDENTIFIER}]`
-            );
-            return closestNavigationMenuTrigger === null;
-        }
-    });
+    const open = track(() => root.open);
+    const state: NavigationMenuList.State = React.useMemo(() => ({ open }), [open]);
 
-    const dismissProps = floatingRootContext ? dismiss : undefined;
-
-    const state: NavigationMenuList.State = React.useMemo(
-        () => ({
-            open
-        }),
-        [open]
-    );
-
-    // `stopEventPropagation` won't stop the propagation if the end of the list is reached,
-    // but we want to block it in this case.
-    // When nested, skip this handler so arrow keys can reach the parent CompositeRoot.
-    const defaultProps: HTMLProps = nested
-        ? {}
-        : {
-            onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-                const shouldStop
-            = (orientation === 'horizontal'
-              && (event.key === 'ArrowLeft' || event.key === 'ArrowRight'))
-            || (orientation === 'vertical' && (event.key === 'ArrowUp' || event.key === 'ArrowDown'));
-
-                if (shouldStop) {
-                    event.stopPropagation();
-                }
-            }
-        };
-
-    const props = [dismissProps?.floating || EMPTY_OBJECT, defaultProps, elementProps];
-
-    // When nested, skip the CompositeRoot wrapper so that triggers can participate
-    // in the parent Content's composite navigation context. Also skip the onKeyDown
-    // handler that blocks propagation so arrow keys can reach the parent CompositeRoot.
     const element = useRenderElement('ul', componentProps, {
         state,
-        ref,
-        props,
-        enabled: nested
+        ref: list.composite ? [ref, list.composite.setRoot] : ref,
+        props: [elementProps, (props) => track(() => toReactProps(list.getListProps(props)))]
     });
 
-    if (nested) {
-        return (
-            <NavigationMenuDismissContext.Provider value={dismissProps}>
-                {element}
-            </NavigationMenuDismissContext.Provider>
-        );
-    }
-
     return (
-        <NavigationMenuDismissContext.Provider value={dismissProps}>
-            <CompositeRoot
-                render={render}
-                className={className}
-                state={state}
-                refs={[ref]}
-                props={props}
-                loopFocus={false}
-                orientation={orientation}
-                tag={'ul'}
-            />
-        </NavigationMenuDismissContext.Provider>
+        <NavigationMenuDismissContext value={list}>
+            {/* Nested lists take part in the composite navigation of the parent content. */}
+            {list.composite ? <CompositeMachineProvider composite={list.composite}>{element}</CompositeMachineProvider> : element}
+        </NavigationMenuDismissContext>
     );
 }
 

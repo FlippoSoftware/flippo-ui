@@ -4,9 +4,7 @@ import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import {
-    NavigationMenuItemContext
-} from './NavigationMenuItemContext';
+import { NavigationMenuItemContext } from './NavigationMenuItemContext';
 
 import type { NavigationMenuItemContextValue } from './NavigationMenuItemContext';
 
@@ -37,11 +35,7 @@ export function NavigationMenuItem(componentProps: NavigationMenuItemProps) {
 
     const contextValue: NavigationMenuItemContextValue = React.useMemo(() => ({ value }), [value]);
 
-    return (
-        <NavigationMenuItemContext.Provider value={contextValue}>
-            {element}
-        </NavigationMenuItemContext.Provider>
-    );
+    return <NavigationMenuItemContext.Provider value={contextValue}>{element}</NavigationMenuItemContext.Provider>;
 }
 
 export type NavigationMenuItemState = {};

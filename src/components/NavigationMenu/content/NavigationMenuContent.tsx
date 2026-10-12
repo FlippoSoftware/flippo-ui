@@ -1,37 +1,26 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom';
 
-import { useOpenChangeComplete, useTransitionStatus } from '@flippo-ui/hooks';
+import {
+    NavigationMenuContentMachine,
+    navigationMenuContentStateAttributesMapping
+} from '@flippo-software/core-components/navigation-menu';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
-import { popupStateMapping } from '~@lib/popupStateMapping';
-import { transitionStatusMapping } from '~@lib/styleHookMapping';
-import { FloatingNode } from '~@packages/floating-ui-react';
-import { contains, getTarget } from '~@packages/floating-ui-react/utils';
+import { toReactProps, useMachineState, useTracker } from '~@lib/core';
+import { FloatingNode } from '~@lib/floating';
+import { useDirection, useRenderElement } from '~@lib/hooks';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
-import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { CompositeRoot } from '../../Composite/root/CompositeRoot';
+import { CompositeMachineProvider } from '../../Composite/root/CompositeMachineProvider';
 import { useNavigationMenuItemContext } from '../item/NavigationMenuItemContext';
-import {
-    useNavigationMenuRootContext,
-    useNavigationMenuTreeContext
-} from '../root/NavigationMenuRootContext';
+import { useNavigationMenuRoot } from '../root/NavigationMenuRootContext';
 
-const stateAttributesMapping: StateAttributesMapping<NavigationMenuContent.State> = {
-    ...popupStateMapping,
-    ...transitionStatusMapping,
-    activationDirection(value) {
-        if (!value) {
-            return null;
-        }
-        return {
-            'data-activation-direction': value
-        };
-    }
-};
+const stateAttributesMapping = navigationMenuContentStateAttributesMapping as StateAttributesMapping<NavigationMenuContent.State>;
 
 /**
  * A container for the content of the navigation menu item that is moved into the popup
@@ -42,100 +31,40 @@ const stateAttributesMapping: StateAttributesMapping<NavigationMenuContent.State
  */
 export function NavigationMenuContent(componentProps: NavigationMenuContentProps) {
     const {
+        /* eslint-disable unused-imports/no-unused-vars */
         className,
         render,
-        ref: refProp,
+        /* eslint-enable unused-imports/no-unused-vars */
+        ref,
         ...elementProps
     } = componentProps;
 
-    const {
-        mounted: popupMounted,
-        viewportElement,
-        value,
-        activationDirection,
-        currentContentRef,
-        viewportTargetElement
-    } = useNavigationMenuRootContext();
+    const root = useNavigationMenuRoot();
     const { value: itemValue } = useNavigationMenuItemContext();
-    const nodeId = useNavigationMenuTreeContext();
+    const direction = useDirection();
 
-    const open = popupMounted && value === itemValue;
+    const [content] = React.useState(() => new NavigationMenuContentMachine(root, itemValue, direction));
+    useIsoLayoutEffect(() => content.connect(), [content]);
 
-    const ref = React.useRef<HTMLDivElement | null>(null);
+    const state: NavigationMenuContent.State = useMachineState(content);
+    const track = useTracker();
+    const portalContainer = track(() => content.getPortalContainer());
 
-    const [focusInside, setFocusInside] = React.useState(false);
-
-    const { mounted, setMounted, transitionStatus } = useTransitionStatus(open);
-
-    useOpenChangeComplete({
-        ref,
-        open,
-        onComplete() {
-            if (!open) {
-                setMounted(false);
-            }
-        }
+    const element = useRenderElement('div', componentProps, {
+        enabled: portalContainer != null,
+        state,
+        ref: [ref, content.setElement],
+        props: [elementProps, (props) => track(() => toReactProps(content.getContentProps(props)))],
+        customStyleHookMapping: stateAttributesMapping
     });
 
-    const state: NavigationMenuContent.State = React.useMemo(
-        () => ({
-            open,
-            transitionStatus,
-            activationDirection
-        }),
-        [open, transitionStatus, activationDirection]
-    );
-
-    const handleCurrentContentRef = React.useCallback(
-        (node: HTMLDivElement | null) => {
-            if (node) {
-                currentContentRef.current = node;
-            }
-        },
-        [currentContentRef]
-    );
-
-    const commonProps: HTMLProps<HTMLDivElement> = {
-        onFocus(event) {
-            const target = getTarget(event.nativeEvent) as Element | null;
-            if (target?.hasAttribute('data-base-ui-focus-guard')) {
-                return;
-            }
-            setFocusInside(true);
-        },
-        onBlur(event) {
-            if (!contains(event.currentTarget, event.relatedTarget)) {
-                setFocusInside(false);
-            }
-        }
-    };
-
-    const defaultProps: HTMLProps
-    = !open && mounted
-        ? {
-            style: { position: 'absolute', top: 0, left: 0 },
-            inert: !focusInside,
-            ...commonProps
-        }
-        : commonProps;
-
-    const portalContainer = viewportTargetElement || viewportElement;
-    const shouldRender = portalContainer !== null && mounted;
-
-    if (!portalContainer || !shouldRender) {
+    if (!portalContainer) {
         return null;
     }
 
     return ReactDOM.createPortal(
-        <FloatingNode id={nodeId}>
-            <CompositeRoot
-              render={render}
-              className={className}
-              state={state}
-              refs={[ref, refProp, handleCurrentContentRef]}
-              props={[defaultProps, elementProps]}
-              stateAttributesMapping={stateAttributesMapping}
-            />
+        <FloatingNode id={`${root.nodeId}-content`}>
+            <CompositeMachineProvider composite={content.composite}>{element}</CompositeMachineProvider>
         </FloatingNode>,
         portalContainer
     );

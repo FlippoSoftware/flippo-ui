@@ -28,22 +28,14 @@
 
     if (activeTab != null && tabsList != null) {
         const tabsListRect = tabsList.getBoundingClientRect();
-        const {
-            left: tabLeft,
-            top: tabTop,
-            width: computedWidth,
-            height: computedHeight
-        } = activeTab.getBoundingClientRect();
+        const { left: tabLeft, top: tabTop, width: computedWidth, height: computedHeight } = activeTab.getBoundingClientRect();
 
         left = tabLeft - tabsListRect.left + tabsList.scrollLeft - tabsList.clientLeft;
         top = tabTop - tabsListRect.top + tabsList.scrollTop - tabsList.clientTop;
         width = computedWidth;
         height = computedHeight;
 
-        right
-      = direction === 'ltr'
-                ? tabsList.scrollWidth - left - width - tabsList.clientLeft
-                : left - tabsList.clientLeft;
+        right = direction === 'ltr' ? tabsList.scrollWidth - left - width - tabsList.clientLeft : left - tabsList.clientLeft;
         bottom = tabsList.scrollHeight - top - height - tabsList.clientTop;
     }
 

@@ -1,21 +1,19 @@
 import React from 'react';
 
-import { useMergedRef } from '@flippo-ui/hooks/use-merged-ref';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { AccordionItemMachine } from '@flippo-software/core-components/accordion';
 
+import type { AccordionItemOptions } from '@flippo-software/core-components/accordion';
+
+import { useMachine, useStoreState } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { REASONS } from '~@lib/reason';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { CollapsibleRootContext } from '../../Collapsible/root/CollapsibleRootContext';
-import { useCollapsibleRoot } from '../../Collapsible/root/useCollapsibleRoot';
-import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
+import { CollapsibleRootContext, useCollapsibleContextValue } from '../../Collapsible/root/CollapsibleRootContext';
 import { useAccordionRootContext } from '../root/AccordionRootContext';
 
-import type { CollapsibleRoot } from '../../Collapsible/root/CollapsibleRoot';
-import type { CollapsibleRootContextValue } from '../../Collapsible/root/CollapsibleRootContext';
 import type { AccordionRoot } from '../root/AccordionRoot';
 
 import { AccordionItemContext } from './AccordionItemContext';
@@ -26,8 +24,6 @@ import type { AccordionItemContextValue } from './AccordionItemContext';
 /**
  * Groups an accordion header with the corresponding panel.
  * Renders a `<div>` element.
- *
- * Documentation: [Base UI Accordion](https://base-ui.com/react/components/accordion)
  */
 export function AccordionItem(componentProps: AccordionItemProps) {
     const {
@@ -35,114 +31,53 @@ export function AccordionItem(componentProps: AccordionItemProps) {
         className,
         render,
         /* eslint-enable unused-imports/no-unused-vars */
-        disabled: disabledProp = false,
-        onOpenChange: onOpenChangeProp,
-        value: valueProp,
+        disabled,
+        onOpenChange,
+        value,
         ref,
         ...elementProps
     } = componentProps;
 
-    const { ref: listItemRef, index } = useCompositeListItem();
-    const mergedRef = useMergedRef(ref, listItemRef);
+    const { accordion, state: rootState } = useAccordionRootContext();
 
-    const {
-        disabled: contextDisabled,
-        handleValueChange,
-        state: rootState,
-        value: openValues
-    } = useAccordionRootContext();
+    const fallbackValue = useHeadlessUiId() as string;
+    const defaultTriggerId = useHeadlessUiId() as string;
+    const defaultPanelId = useHeadlessUiId() as string;
 
-    const fallbackValue = useHeadlessUiId();
-
-    const value = valueProp ?? fallbackValue;
-
-    const disabled = disabledProp || contextDisabled;
-
-    const isOpen = React.useMemo(() => {
-        if (!openValues) {
-            return false;
-        }
-
-        for (let i = 0; i < openValues.length; i += 1) {
-            if (openValues[i] === value) {
-                return true;
-            }
-        }
-
-        return false;
-    }, [openValues, value]);
-
-    const onOpenChange = useStableCallback(
-        (nextOpen: boolean, eventDetails: CollapsibleRoot.ChangeEventDetails) => {
-            onOpenChangeProp?.(nextOpen, eventDetails);
-
-            if (eventDetails.isCanceled) {
-                return;
-            }
-
-            handleValueChange(value, nextOpen);
-        }
-    );
-
-    const collapsible = useCollapsibleRoot({
-        open: isOpen,
-        onOpenChange,
-        disabled
+    const item = useMachine((options) => new AccordionItemMachine(accordion, options), {
+        value,
+        disabled,
+        onOpenChange: onOpenChange as AccordionItemOptions['onOpenChange'],
+        fallbackValue,
+        defaultTriggerId,
+        defaultPanelId
     });
+    const { index } = useStoreState(item.store);
 
-    const collapsibleState: CollapsibleRoot.State = React.useMemo(
-        () => ({
-            open: collapsible.open,
-            disabled: collapsible.disabled,
-            hidden: !collapsible.mounted,
-            transitionStatus: collapsible.transitionStatus
-        }),
-        [collapsible.open, collapsible.disabled, collapsible.mounted, collapsible.transitionStatus]
-    );
+    const collapsibleContext = useCollapsibleContextValue(item.collapsible);
 
-    const collapsibleContext: CollapsibleRootContextValue = React.useMemo(
-        () => ({
-            ...collapsible,
-            onOpenChange,
-            state: collapsibleState
-        }),
-        [collapsible, collapsibleState, onOpenChange]
-    );
-
+    const itemDisabled = item.disabled;
+    const open = item.isOpen;
     const state: AccordionItem.State = React.useMemo(
-        () => ({
-            ...rootState,
-            index,
-            disabled,
-            open: isOpen
-        }),
-        [disabled, index, isOpen, rootState]
+        () => ({ ...rootState, index, disabled: itemDisabled, open }),
+        [rootState, index, itemDisabled, open]
     );
 
-    const [triggerId, setTriggerId] = React.useState<string | undefined>(useHeadlessUiId());
-
-    const accordionItemContext: AccordionItemContextValue = React.useMemo(
-        () => ({
-            open: isOpen,
-            state,
-            setTriggerId,
-            triggerId
-        }),
-        [isOpen, state, setTriggerId, triggerId]
+    const itemContext: AccordionItemContextValue = React.useMemo(
+        () => ({ item, state, defaultTriggerId }),
+        [item, state, defaultTriggerId]
     );
 
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: mergedRef,
+        ref: [ref, item.listItem.setElement],
         props: elementProps,
         customStyleHookMapping: accordionStyleHookMapping
     });
 
     return (
         <CollapsibleRootContext.Provider value={collapsibleContext}>
-            <AccordionItemContext.Provider value={accordionItemContext}>
-                {element}
-            </AccordionItemContext.Provider>
+            <AccordionItemContext.Provider value={itemContext}>{element}</AccordionItemContext.Provider>
         </CollapsibleRootContext.Provider>
     );
 }
@@ -171,12 +106,11 @@ export type AccordionItemProps = {
      * Event handler called when the panel is opened or closed.
      */
     onOpenChange?: (open: boolean, eventDetails: AccordionItem.ChangeEventDetails) => void;
-} & HeadlessUIComponentProps<'div', AccordionItem.State> & Partial<Pick<useCollapsibleRoot.Parameters, 'disabled'>>;
+} & HeadlessUIComponentProps<'div', AccordionItem.State> & { disabled?: boolean };
 
 export type AccordionItemChangeEventReason = typeof REASONS.triggerPress | typeof REASONS.none;
 
-export type AccordionItemChangeEventDetails
-    = HeadlessUIChangeEventDetails<AccordionItem.ChangeEventReason>;
+export type AccordionItemChangeEventDetails = HeadlessUIChangeEventDetails<AccordionItem.ChangeEventReason>;
 
 export namespace AccordionItem {
     export type State = AccordionItemState;

@@ -1,61 +1,31 @@
 import React from 'react';
 
-import type {
-    Coords,
-    HiddenState,
-    OverflowEdges,
-    ScrollAreaRoot,
-    Size
-} from './ScrollAreaRoot';
+import type { ScrollAreaMachine } from '@flippo-software/core-components/scroll-area';
+
+import type { HiddenState, OverflowEdges, ScrollAreaRoot, Size } from './ScrollAreaRoot';
 
 export type ScrollAreaRootContextValue = {
-    cornerSize: Size;
-    setCornerSize: React.Dispatch<React.SetStateAction<Size>>;
-    thumbSize: Size;
-    setThumbSize: React.Dispatch<React.SetStateAction<Size>>;
-    touchModality: boolean;
+    /**
+     * The core machine: measures the viewport, positions the thumbs and handles dragging and hover.
+     */
+    scrollArea: ScrollAreaMachine;
     hovering: boolean;
-    setHovering: React.Dispatch<React.SetStateAction<boolean>>;
     scrollingX: boolean;
-    setScrollingX: React.Dispatch<React.SetStateAction<boolean>>;
     scrollingY: boolean;
-    setScrollingY: React.Dispatch<React.SetStateAction<boolean>>;
-    viewportRef: React.RefObject<HTMLDivElement | null>;
-    rootRef: React.RefObject<HTMLDivElement | null>;
-    scrollbarYRef: React.RefObject<HTMLDivElement | null>;
-    thumbYRef: React.RefObject<HTMLDivElement | null>;
-    scrollbarXRef: React.RefObject<HTMLDivElement | null>;
-    thumbXRef: React.RefObject<HTMLDivElement | null>;
-    cornerRef: React.RefObject<HTMLDivElement | null>;
-    handlePointerDown: (event: React.PointerEvent) => void;
-    handlePointerMove: (event: React.PointerEvent) => void;
-    handlePointerUp: (event: React.PointerEvent) => void;
-    handleScroll: (scrollPosition: Coords) => void;
-    rootId: string | undefined;
+    touchModality: boolean;
+    cornerSize: Size;
+    thumbSize: Size;
     hiddenState: HiddenState;
-    setHiddenState: React.Dispatch<React.SetStateAction<HiddenState>>;
     overflowEdges: OverflowEdges;
-    setOverflowEdges: React.Dispatch<React.SetStateAction<OverflowEdges>>;
     viewportState: ScrollAreaRoot.State;
-    overflowEdgeThreshold: {
-        xStart: number;
-        xEnd: number;
-        yStart: number;
-        yEnd: number;
-    };
 };
 
-export const ScrollAreaRootContext = React.createContext<ScrollAreaRootContextValue | undefined>(
-    undefined
-);
+export const ScrollAreaRootContext = React.createContext<ScrollAreaRootContextValue | undefined>(undefined);
 
 export function useScrollAreaRootContext() {
     const context = React.use(ScrollAreaRootContext);
     if (context === undefined) {
-        throw new Error(
-            'Headless UI: ScrollAreaRootContext is missing. ScrollArea parts must be placed within <ScrollArea.Root>.'
-        );
+        throw new Error('Headless UI: ScrollAreaRootContext is missing. ScrollArea parts must be placed within <ScrollArea.Root>.');
     }
-
     return context;
 }

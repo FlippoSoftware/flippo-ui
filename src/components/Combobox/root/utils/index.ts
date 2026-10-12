@@ -8,10 +8,7 @@ import type { Filter } from './useFilter';
  * • When `item` is an object with a `value` property, that property is used.
  * • When `item` is a primitive (e.g. `string`), it is used directly.
  */
-export function createCollatorItemFilter(
-    collatorFilter: Filter,
-    itemToStringLabel?: (item: any) => string
-) {
+export function createCollatorItemFilter(collatorFilter: Filter, itemToStringLabel?: (item: any) => string) {
     return (item: any, query: string) => {
         if (item == null) {
             return false;
@@ -39,15 +36,10 @@ export function createSingleSelectionCollatorFilter(
         }
 
         const itemString = stringifyAsLabel(item, itemToStringLabel);
-        const selectedString
-      = selectedValue != null ? stringifyAsLabel(selectedValue, itemToStringLabel) : '';
+        const selectedString = selectedValue != null ? stringifyAsLabel(selectedValue, itemToStringLabel) : '';
 
         // Handle case-insensitive matching consistently
-        if (
-            selectedString
-            && collatorFilter.contains(selectedString, query)
-            && selectedString.length === query.length
-        ) {
+        if (selectedString && collatorFilter.contains(selectedString, query) && selectedString.length === query.length) {
             return true;
         }
 

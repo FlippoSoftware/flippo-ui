@@ -55,7 +55,10 @@ export const QrCodePresets = {
             gradient: {
                 type: 'linear',
                 rotation: 45,
-                colorStops: [{ offset: 0, color: '#667eea' }, { offset: 1, color: '#764ba2' }]
+                colorStops: [
+                    { offset: 0, color: '#667eea' },
+                    { offset: 1, color: '#764ba2' }
+                ]
             },
             type: 'rounded'
         },
@@ -65,7 +68,10 @@ export const QrCodePresets = {
         cornersSquareOptions: {
             gradient: {
                 type: 'radial',
-                colorStops: [{ offset: 0, color: '#f093fb' }, { offset: 1, color: '#f5576c' }]
+                colorStops: [
+                    { offset: 0, color: '#f093fb' },
+                    { offset: 1, color: '#f5576c' }
+                ]
             },
             type: 'extra-rounded'
         },
@@ -135,7 +141,10 @@ export const QrCodePresets = {
             gradient: {
                 type: 'linear',
                 rotation: 135,
-                colorStops: [{ offset: 0, color: '#ffffff' }, { offset: 1, color: '#f8fafc' }]
+                colorStops: [
+                    { offset: 0, color: '#ffffff' },
+                    { offset: 1, color: '#f8fafc' }
+                ]
             }
         },
         cornersSquareOptions: {
@@ -195,9 +204,7 @@ export function createQrCodeWithLogo(
 /**
  * Utility to merge multiple QR code option objects
  */
-export function mergeQrCodeOptions(
-    ...options: Array<Partial<QrCodeRoot.QrCodeGenerationOptions>>
-): QrCodeRoot.QrCodeGenerationOptions {
+export function mergeQrCodeOptions(...options: Array<Partial<QrCodeRoot.QrCodeGenerationOptions>>): QrCodeRoot.QrCodeGenerationOptions {
     return options.reduce((merged, current) => {
         return {
             ...merged,

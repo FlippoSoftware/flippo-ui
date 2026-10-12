@@ -1,7 +1,8 @@
 import React from 'react';
 
+import { useStoreSelector } from '~@lib/core';
+import { FloatingPortal } from '~@lib/floating';
 import { InternalBackdrop } from '~@lib/InternalBackdrop';
-import { FloatingPortal } from '~@packages/floating-ui-react';
 
 import { useDialogRootContext } from '../root/DialogRootContext';
 
@@ -18,8 +19,9 @@ export function DialogPortal(props: DialogPortalProps) {
     const { keepMounted = false, ...portalProps } = props;
 
     const { store } = useDialogRootContext();
-    const mounted = store.useState('mounted');
-    const modal = store.useState('modal');
+    const mounted = useStoreSelector(store, 'mounted');
+    const modal = useStoreSelector(store, 'modal');
+    const open = useStoreSelector(store, 'open');
 
     const shouldRender = mounted || keepMounted;
     if (!shouldRender) {
@@ -30,7 +32,7 @@ export function DialogPortal(props: DialogPortalProps) {
         <DialogPortalContext.Provider value={keepMounted}>
             <FloatingPortal {...portalProps}>
                 {mounted && modal === true && (
-                    <InternalBackdrop ref={store.context.internalBackdropRef} inert={!open} />
+                    <InternalBackdrop ref={store.context.internalBackdropRef as React.RefObject<HTMLDivElement | null>} inert={!open} />
                 )}
                 {props.children}
             </FloatingPortal>

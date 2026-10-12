@@ -1,0 +1,85 @@
+name: Set up headless-components
+description: >
+    Prepare the workspace layout the `link:` dependencies need: `headless-components/` next to built
+    `store/`, `core/`, `hooks/` and `internal-test-utils/`. Check headless-components out into `headless-components/`
+    before this action. Remove a sibling's steps once headless uses its published version.
+
+inputs:
+    registry-url:
+        description: npm registry to configure (needed only for publishing)
+        required: false
+        default: ''
+    token:
+        description: Token able to read the FlippoSoftware/store, core-components, hooks and internal-test-utils repositories
+        required: false
+        default: ${{ github.token }}
+
+runs:
+    using: composite
+    steps:
+        - name: Check out store
+          uses: actions/checkout@v4
+          with:
+              repository: FlippoSoftware/store
+              path: store
+              token: ${{ inputs.token }}
+
+        - name: Check out core-components
+          uses: actions/checkout@v4
+          with:
+              repository: FlippoSoftware/core-components
+              path: core
+              token: ${{ inputs.token }}
+
+        - name: Check out hooks
+          uses: actions/checkout@v4
+          with:
+              repository: FlippoSoftware/hooks
+              path: hooks
+              token: ${{ inputs.token }}
+
+        - name: Check out internal-test-utils
+          uses: actions/checkout@v4
+          with:
+              repository: FlippoSoftware/internal-test-utils
+              path: internal-test-utils
+              token: ${{ inputs.token }}
+
+        - name: Install pnpm
+          uses: pnpm/action-setup@v4
+          with:
+              package_json_file: headless-components/package.json
+
+        - name: Install Node.js
+          uses: actions/setup-node@v4
+          with:
+              node-version-file: headless-components/.nvmrc
+              registry-url: ${{ inputs.registry-url }}
+              cache: pnpm
+              cache-dependency-path: headless-components/pnpm-lock.yaml
+
+        # The linked packages resolve from their `dist/`, so they are built first (store before its dependents).
+        - name: Build store
+          shell: bash
+          working-directory: store
+          run: pnpm install --frozen-lockfile && pnpm build
+
+        - name: Build core-components
+          shell: bash
+          working-directory: core
+          run: pnpm install --frozen-lockfile && pnpm build
+
+        - name: Build hooks
+          shell: bash
+          working-directory: hooks
+          run: pnpm install --no-frozen-lockfile && pnpm build
+
+        - name: Build internal-test-utils
+          shell: bash
+          working-directory: internal-test-utils
+          run: pnpm install --no-frozen-lockfile && pnpm build
+
+        - name: Install dependencies
+          shell: bash
+          working-directory: headless-components
+          run: pnpm install --frozen-lockfile

@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useStoreSelector } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
@@ -25,35 +26,33 @@ export function ListItemMarker(componentProps: ListItemMarker.Props) {
     const { nestedListItemNumber } = useNestedListContext();
     const { index } = useListItemContext();
 
-    const nestedListNumber = store.useState('nestedListNumber');
-    const orientation = store.useState('orientation');
-    const type = store.useState('type');
+    const nestedListNumber = useStoreSelector(store, 'nestedListNumber');
+    const orientation = useStoreSelector(store, 'orientation');
+    const type = useStoreSelector(store, 'type');
 
     const marker = type === 'ordered' ? `${index + 1}.` : '•';
 
-    const children = typeof childrenProp === 'function'
-        ? childrenProp({
+    const children =
+        typeof childrenProp === 'function'
+            ? childrenProp({
+                  index,
+                  nestedListNumber,
+                  nestedListItemNumber,
+                  orientation,
+                  type
+              })
+            : (childrenProp ?? marker);
+
+    const state: ListItemMarker.State = React.useMemo(
+        () => ({
             index,
             nestedListNumber,
             nestedListItemNumber,
             orientation,
             type
-        })
-        : childrenProp ?? marker;
-
-    const state: ListItemMarker.State = React.useMemo(() => ({
-        index,
-        nestedListNumber,
-        nestedListItemNumber,
-        orientation,
-        type
-    }), [
-        index,
-        nestedListNumber,
-        nestedListItemNumber,
-        orientation,
-        type
-    ]);
+        }),
+        [index, nestedListNumber, nestedListItemNumber, orientation, type]
+    );
 
     const element = useRenderElement('div', componentProps, {
         ref,
@@ -76,6 +75,10 @@ export namespace ListItemMarker {
     export type State = ChildrenProps;
 
     export type Props = {
-        children: React.ReactNode | ((props: ChildrenProps) => React.ReactNode);
-    } & HeadlessUIComponentProps<'div', State>;
+        /**
+         * The marker content, or a function of the item's position. Defaults to the number (ordered lists)
+         * or a bullet.
+         */
+        children?: React.ReactNode | ((props: ChildrenProps) => React.ReactNode);
+    } & Omit<HeadlessUIComponentProps<'div', State>, 'children'>;
 }

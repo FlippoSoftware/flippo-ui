@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { useIsFirstRender } from '@flippo-ui/hooks';
-
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -25,17 +23,11 @@ export function QrCodeFrame(componentProps: QrCodeFrame.Props) {
         ...elementProps
     } = componentProps;
 
-    const {
-        qrCodeStyling,
-        status,
-        value
-    } = useQrCodeRootContext();
+    const { qrCode, qrCodeStyling, status, value } = useQrCodeRootContext();
 
-    const qrCodeContainerRef = React.useCallback<React.RefCallback<HTMLElement>>((node) => {
-        if (node && qrCodeStyling) {
-            qrCodeStyling.append(node);
-        }
-    }, [qrCodeStyling]);
+    // A new ref callback for each generated code appends it to the frame.
+    // biome-ignore lint/correctness/useExhaustiveDependencies: `qrCodeStyling` is the code appended.
+    const qrCodeContainerRef = React.useCallback((node: HTMLElement | null) => qrCode.setFrameElement(node), [qrCode, qrCodeStyling]);
 
     const state: QrCodeFrame.State = React.useMemo(
         () => ({

@@ -4,9 +4,7 @@ export type ScrollAreaScrollbarContextValue = {
     orientation: 'horizontal' | 'vertical';
 };
 
-export const ScrollAreaScrollbarContext = React.createContext<
-  ScrollAreaScrollbarContextValue | undefined
->(undefined);
+export const ScrollAreaScrollbarContext = React.createContext<ScrollAreaScrollbarContextValue | undefined>(undefined);
 
 export function useScrollAreaScrollbarContext() {
     const context = React.use(ScrollAreaScrollbarContext);

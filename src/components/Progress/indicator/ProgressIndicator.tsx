@@ -1,9 +1,3 @@
-
-
-import React from 'react';
-
-import { valueToPercent } from '~@lib/valueToPercent';
-
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -29,34 +23,12 @@ export function ProgressIndicator(componentProps: ProgressIndicator.Props) {
         ...elementProps
     } = componentProps;
 
-    const {
-        max,
-        min,
-        value,
-        state
-    } = useProgressRootContext();
-
-    const percentageValue
-        = Number.isFinite(value) && value !== null ? valueToPercent(value, min, max) : null;
-
-    const getStyles = React.useCallback(() => {
-        if (percentageValue == null) {
-            return {};
-        }
-
-        return {
-            insetInlineStart: 0,
-            height: 'inherit',
-            width: `${percentageValue}%`
-        };
-    }, [percentageValue]);
+    const { progress, state } = useProgressRootContext();
 
     const element = useRenderElement('div', componentProps, {
         state,
         ref,
-        props: [{
-            style: getStyles()
-        }, elementProps],
+        props: [{ style: progress.getIndicatorStyle() }, elementProps],
         customStyleHookMapping: progressStyleHookMapping
     });
 

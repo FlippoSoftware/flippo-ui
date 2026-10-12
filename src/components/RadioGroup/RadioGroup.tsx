@@ -1,29 +1,21 @@
 import React from 'react';
 
-import {
-    useControlledState,
-    useMergedRef
-} from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
-import { useValueChanged } from '@flippo-ui/hooks/use-value-changed';
+import { RadioGroupMachine } from '@flippo-software/core-components/radio-group';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId } from '~@lib/hooks';
-import { mergeProps } from '~@lib/merge';
-import { NOOP } from '~@lib/noop';
-import { visuallyHidden } from '~@lib/visuallyHidden';
-import { contains } from '~@packages/floating-ui-react/utils';
+import type { RadioGroupOptions } from '@flippo-software/core-components/radio-group';
+
+import { toReactProps, useMachine, useStoreState } from '~@lib/core';
+import { useDirection, useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { REASONS } from '~@lib/reason';
-import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { SHIFT } from '../Composite/composite';
-import { CompositeRoot } from '../Composite/root/CompositeRoot';
+import { CompositeMachineProvider } from '../Composite/root/CompositeMachineProvider';
 import { useFieldRootContext } from '../Field/root/FieldRootContext';
-import { useField } from '../Field/useField';
 import { fieldValidityMapping } from '../Field/utils/constants';
 import { useFieldsetRootContext } from '../Fieldset/root/FieldsetRootContext';
-import { useFormContext } from '../Form/FormContext';
 import { useLabelableContext } from '../LabelableProvider';
 
 import type { FieldRoot } from '../Field/root/FieldRoot';
@@ -35,226 +27,111 @@ import type { RadioGroupContextValue } from './RadioGroupContext';
 /**
  * Provides a shared state to a series of radio buttons.
  * Renders a `<div>` element.
- *
- * Documentation: [Base UI Radio Group](https://base-ui.com/react/components/radio)
- */
-const MODIFIER_KEYS = [SHIFT];
-
-/**
- * Provides a shared state to a series of radio buttons.
- * Renders a `<div>` element.
- *
- * Documentation: [Base UI Radio Group](https://base-ui.com/react/components/radio)
  */
 export function RadioGroup(componentProps: RadioGroupProps) {
     const {
+        /* eslint-disable unused-imports/no-unused-vars */
         render,
         className,
-        disabled: disabledProp,
+        /* eslint-enable unused-imports/no-unused-vars */
+        disabled,
         readOnly,
         required,
-        onValueChange: onValueChangeProp,
-        value: externalValue,
+        onValueChange,
+        value,
         defaultValue,
-        name: nameProp,
+        name,
         inputRef: inputRefProp,
         id: idProp,
         ref,
         ...elementProps
     } = componentProps;
 
-    const {
-        setTouched: setFieldTouched,
-        setFocused,
-        shouldValidateOnChange,
-        validationMode,
-        name: fieldName,
-        disabled: fieldDisabled,
-        state: fieldState,
-        validation,
-        setDirty,
-        setFilled,
-        validityData
-    } = useFieldRootContext();
-    const { labelId } = useLabelableContext();
-    const { clearErrors } = useFormContext();
-    const fieldsetContext = useFieldsetRootContext(true);
+    const { field, state: fieldState, validation } = useFieldRootContext();
+    const { labelable } = useLabelableContext();
+    const { fieldset } = useFieldsetRootContext();
+    const direction = useDirection();
 
-    const disabled = fieldDisabled || disabledProp;
-    const name = fieldName ?? nameProp;
-    const id = useHeadlessUiId(idProp);
+    const id = useHeadlessUiId(idProp) as string;
 
-    const [checkedValue, setCheckedValueUnwrapped] = useControlledState({
-        prop: externalValue,
-        defaultProp: defaultValue,
-        caller: 'RadioGroup'
-    });
-
-    const onValueChange = useStableCallback(onValueChangeProp);
-
-    const setCheckedValue = useStableCallback(
-        (value: unknown, eventDetails: RadioGroup.ChangeEventDetails) => {
-            onValueChange(value, eventDetails);
-
-            if (eventDetails.isCanceled) {
-                return;
-            }
-
-            setCheckedValueUnwrapped(value);
-        }
-    );
-
-    const controlRef = React.useRef<HTMLElement>(null);
-    const registerControlRef = useStableCallback((element: HTMLElement | null) => {
-        if (controlRef.current == null && element != null) {
-            controlRef.current = element;
-        }
-    });
-
-    useField({
-        id,
-        commit: validation.commit,
-        value: checkedValue,
-        controlRef,
+    const group = useMachine((options) => new RadioGroupMachine(options), {
+        disabled,
+        readOnly,
+        required,
         name,
-        getValue: () => checkedValue ?? null
+        value,
+        defaultValue,
+        onValueChange: onValueChange as RadioGroupOptions['onValueChange'],
+        field,
+        fieldset,
+        labelable,
+        id,
+        direction
     });
+    const { touched } = useStoreState(group.store);
 
-    useValueChanged(checkedValue, () => {
-        clearErrors(name);
+    // Registered again after each render: the registration holds the current value and validity.
+    useIsoLayoutEffect(() => group.registerField());
 
-        setDirty(checkedValue !== validityData.initialValue);
-        setFilled(checkedValue != null);
-
-        if (shouldValidateOnChange()) {
-            validation.commit(checkedValue);
-        }
-        else {
-            validation.commit(checkedValue, true);
-        }
-    });
-
-    const [touched, setTouched] = React.useState(false);
-
-    const onBlur = useStableCallback((event) => {
-        if (!contains(event.currentTarget, event.relatedTarget)) {
-            setFieldTouched(true);
-            setFocused(false);
-
-            if (validationMode === 'onBlur') {
-                validation.commit(checkedValue);
-            }
-        }
-    });
-
-    const onKeyDownCapture = useStableCallback((event) => {
-        if (event.key.startsWith('Arrow')) {
-            setFieldTouched(true);
-            setTouched(true);
-            setFocused(true);
-        }
-    });
-
-    const serializedCheckedValue = React.useMemo(() => {
-        if (checkedValue == null) {
-            return ''; // avoid uncontrolled -> controlled error
-        }
-        if (typeof checkedValue === 'string') {
-            return checkedValue;
-        }
-        return JSON.stringify(checkedValue);
-    }, [checkedValue]);
-
-    const mergedInputRef = useMergedRef(validation.inputRef, inputRefProp);
-
-    const inputProps = mergeProps<'input'>(
-        {
-            'value': serializedCheckedValue,
-            'ref': mergedInputRef,
-            id,
-            'name': serializedCheckedValue ? name : undefined,
-            disabled,
-            readOnly,
-            required,
-            'aria-labelledby': elementProps['aria-labelledby'] ?? fieldsetContext?.legendId,
-            'aria-hidden': true,
-            'tabIndex': -1,
-            'style': visuallyHidden,
-            'onChange': NOOP, // suppress a Next.js error
-            onFocus() {
-                controlRef.current?.focus();
-            }
-        },
-        validation.getInputValidationProps
-    );
+    const checkedValue = group.checkedValue;
+    const groupDisabled = group.disabled;
+    const groupReadOnly = group.readOnly;
+    const groupRequired = group.required;
 
     const state: RadioGroup.State = React.useMemo(
-        () => ({
-            ...fieldState,
-            disabled: disabled ?? false,
-            required: required ?? false,
-            readOnly: readOnly ?? false
-        }),
-        [fieldState, disabled, readOnly, required]
+        () => ({ ...fieldState, disabled: groupDisabled, required: groupRequired, readOnly: groupReadOnly }),
+        [fieldState, groupDisabled, groupReadOnly, groupRequired]
+    );
+
+    // Stable (radios' effects depend on it); accepts updater functions like `setState`.
+    const [setTouched] = React.useState(
+        () =>
+            ((update) =>
+                group.setTouched(typeof update === 'function' ? update(group.touched) : update)) as RadioGroupContextValue['setTouched']
     );
 
     const contextValue: RadioGroupContextValue = React.useMemo(
         () => ({
             ...fieldState,
             checkedValue,
-            disabled,
+            disabled: groupDisabled,
             validation,
-            name,
-            onValueChange,
-            readOnly,
-            registerControlRef,
-            required,
-            setCheckedValue,
+            name: group.name,
+            onValueChange: group.setCheckedValue as RadioGroupContextValue['onValueChange'],
+            readOnly: groupReadOnly,
+            registerControlRef: group.registerControlRef,
+            required: groupRequired,
+            setCheckedValue: group.setCheckedValue as RadioGroupContextValue['setCheckedValue'],
             setTouched,
-            touched
+            touched,
+            group
         }),
-        [
-            checkedValue,
-            disabled,
-            validation,
-            fieldState,
-            name,
-            onValueChange,
-            readOnly,
-            registerControlRef,
-            required,
-            setCheckedValue,
-            setTouched,
-            touched
-        ]
+        [fieldState, checkedValue, groupDisabled, validation, group, groupReadOnly, groupRequired, setTouched, touched]
     );
 
-    const defaultProps: HTMLProps = {
-        'role': 'radiogroup',
-        'aria-required': required || undefined,
-        'aria-disabled': disabled || undefined,
-        'aria-readonly': readOnly || undefined,
-        'aria-labelledby': labelId,
-        onFocus() {
-            setFocused(true);
+    const element = useRenderElement('div', componentProps, {
+        state,
+        ref: [ref, group.composite.setRoot],
+        props: [elementProps, (props) => toReactProps(group.getRootProps(props))],
+        customStyleHookMapping: fieldValidityMapping
+    });
+
+    const inputRef = React.useCallback(
+        (inputElement: HTMLInputElement | null) => {
+            group.setInputElement(inputElement);
+            if (typeof inputRefProp === 'function') {
+                inputRefProp(inputElement);
+            } else if (inputRefProp) {
+                (inputRefProp as React.RefObject<HTMLInputElement | null>).current = inputElement;
+            }
         },
-        onBlur,
-        onKeyDownCapture
-    };
+        [group, inputRefProp]
+    );
 
     return (
         <RadioGroupContext.Provider value={contextValue}>
-            <CompositeRoot
-                render={render}
-                className={className}
-                state={state}
-                props={[defaultProps, validation.getValidationProps, elementProps]}
-                refs={[ref]}
-                stateAttributesMapping={fieldValidityMapping}
-                enableHomeAndEndKeys={false}
-                modifierKeys={MODIFIER_KEYS}
-            />
-            <input {...inputProps} />
+            <CompositeMachineProvider composite={group.composite}>{element}</CompositeMachineProvider>
+            <input {...toReactProps(group.getInputProps(elementProps['aria-labelledby']))} ref={inputRef} />
         </RadioGroupContext.Provider>
     );
 }

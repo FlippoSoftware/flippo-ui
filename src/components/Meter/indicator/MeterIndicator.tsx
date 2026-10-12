@@ -1,9 +1,4 @@
-
-
-import React from 'react';
-
 import { useRenderElement } from '~@lib/hooks';
-import { valueToPercent } from '~@lib/valueToPercent';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
@@ -27,32 +22,11 @@ export function MeterIndicator(componentProps: MeterIndicator.Props) {
         ...elementProps
     } = componentProps;
 
-    const {
-        max,
-        min,
-        value
-    } = useMeterRootContext();
-
-    const percentageValue
-        = Number.isFinite(value) && value !== null ? valueToPercent(value, min, max) : null;
-
-    const getStyles = React.useCallback(() => {
-        if (percentageValue == null) {
-            return {};
-        }
-
-        return {
-            insetInlineStart: 0,
-            height: 'inherit',
-            width: `${percentageValue}%`
-        };
-    }, [percentageValue]);
+    const { meter } = useMeterRootContext();
 
     const element = useRenderElement('div', componentProps, {
         ref,
-        props: [{
-            style: getStyles()
-        }, elementProps]
+        props: [{ style: meter.getIndicatorStyle() }, elementProps]
     });
 
     return element;

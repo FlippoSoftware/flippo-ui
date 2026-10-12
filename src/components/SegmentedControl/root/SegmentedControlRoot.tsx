@@ -1,25 +1,21 @@
 import React from 'react';
 
-import { useControlledState, useMergedRef } from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
-import { useValueChanged } from '@flippo-ui/hooks/use-value-changed';
+import { SegmentedControlMachine } from '@flippo-software/core-components/segmented-control';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import { useHeadlessUiId } from '~@lib/hooks';
-import { mergeProps } from '~@lib/merge';
-import { NOOP } from '~@lib/noop';
-import { visuallyHidden } from '~@lib/visuallyHidden';
-import { contains } from '~@packages/floating-ui-react/utils';
+import type { SegmentedControlOptions } from '@flippo-software/core-components/segmented-control';
+
+import { toReactProps, useMachine, useTracker } from '~@lib/core';
+import { useDirection, useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { REASONS } from '~@lib/reason';
-import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '~@lib/types';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
-import { CompositeRoot } from '../../Composite/root/CompositeRoot';
+import { CompositeMachineProvider } from '../../Composite/root/CompositeMachineProvider';
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
-import { useField } from '../../Field/useField';
 import { fieldValidityMapping } from '../../Field/utils/constants';
 import { useFieldsetRootContext } from '../../Fieldset/root/FieldsetRootContext';
-import { useFormContext } from '../../Form/FormContext';
 import { useLabelableContext } from '../../LabelableProvider';
 
 import type { FieldRoot } from '../../Field/root/FieldRoot';
@@ -46,201 +42,102 @@ const stateAttributesMapping = {
 };
 
 /**
- * Provides a shared state to a series of mutually exclusive option buttons.
- * Renders a `<div>` element with role="radiogroup".
- *
- * Unlike ToggleGroup, a selected item cannot be deselected by clicking it again.
- *
- * @example
- * <SegmentedControl.Root defaultValue="week" onValueChange={setValue}>
- *   <SegmentedControl.Item value="day">Day</SegmentedControl.Item>
- *   <SegmentedControl.Item value="week">Week</SegmentedControl.Item>
- *   <SegmentedControl.Item value="month">Month</SegmentedControl.Item>
- * </SegmentedControl.Root>
+ * A set of mutually exclusive options shown as buttons.
+ * Renders a `<div>` element and a hidden `<input>` beside.
  */
 export function SegmentedControlRoot(componentProps: SegmentedControlRoot.Props) {
     const {
-        value: valueProp,
+        value,
         defaultValue = null,
-        onValueChange: onValueChangeProp,
-        disabled: disabledProp,
+        onValueChange,
+        disabled,
         readOnly,
         required,
         orientation = 'horizontal',
         loopFocus = true,
-        name: nameProp,
+        name,
         inputRef: inputRefProp,
         id: idProp,
+        /* eslint-disable unused-imports/no-unused-vars */
         render,
         className,
+        /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
     } = componentProps;
 
-    const {
-        setTouched: setFieldTouched,
-        setFocused,
-        shouldValidateOnChange,
-        validationMode,
-        name: fieldName,
-        disabled: fieldDisabled,
-        state: fieldState,
-        validation,
-        setDirty,
-        setFilled,
-        validityData
-    } = useFieldRootContext();
-    const { labelId } = useLabelableContext();
-    const { clearErrors } = useFormContext();
-    const fieldsetContext = useFieldsetRootContext(true);
+    const { field, state: fieldState } = useFieldRootContext();
+    const { labelable } = useLabelableContext();
+    const { fieldset } = useFieldsetRootContext();
+    const direction = useDirection();
 
-    const disabled = fieldDisabled || disabledProp;
-    const name = fieldName ?? nameProp;
-    const id = useHeadlessUiId(idProp);
+    const id = useHeadlessUiId(idProp) as string;
 
-    const [value, setValueState] = useControlledState({
-        prop: valueProp,
-        defaultProp: defaultValue,
-        caller: 'SegmentedControl'
-    });
-
-    const onValueChange = useStableCallback(onValueChangeProp ?? (() => {}));
-
-    const setValue = useStableCallback(
-        (nextValue: string, eventDetails: HeadlessUIChangeEventDetails<typeof REASONS.none>) => {
-            if (nextValue === value || readOnly)
-                return;
-            onValueChange(nextValue, eventDetails);
-            if (eventDetails.isCanceled)
-                return;
-            setValueState(nextValue);
-        }
-    );
-
-    const controlRef = React.useRef<HTMLElement>(null);
-
-    useField({
-        id,
-        commit: validation.commit,
-        value: value ?? null,
-        controlRef,
+    const control = useMachine((options) => new SegmentedControlMachine(options), {
+        value,
+        defaultValue,
+        onValueChange: onValueChange as SegmentedControlOptions['onValueChange'],
+        disabled,
+        readOnly,
+        required,
+        orientation,
+        loopFocus,
         name,
-        getValue: () => value ?? null
+        field,
+        fieldset,
+        labelable,
+        id,
+        direction
     });
+    const track = useTracker();
 
-    useValueChanged(value, () => {
-        clearErrors(name);
-        setDirty(value !== validityData.initialValue);
-        setFilled(value != null);
+    // Registered again after each render: the registration holds the current value and validity.
+    useIsoLayoutEffect(() => control.registerField());
 
-        if (shouldValidateOnChange()) {
-            validation.commit(value);
-        }
-        else {
-            validation.commit(value, true);
-        }
-    });
+    const { disabled: controlDisabled, readOnly: controlReadOnly } = track(() => control.getState());
+    const controlValue = control.value;
 
-    const serializedValue = React.useMemo(() => {
-        if (value == null)
-            return '';
-        return typeof value === 'string' ? value : JSON.stringify(value);
-    }, [value]);
-
-    const mergedInputRef = useMergedRef(validation.inputRef, inputRefProp);
-
-    const inputProps = mergeProps<'input'>(
-        {
-            'value': serializedValue,
-            'ref': mergedInputRef,
-            id,
-            'name': serializedValue ? name : undefined,
-            disabled,
-            readOnly,
-            required,
-            'aria-labelledby': elementProps['aria-labelledby'] ?? fieldsetContext?.legendId,
-            'aria-hidden': true,
-            'tabIndex': -1,
-            'style': visuallyHidden,
-            'onChange': NOOP,
-            onFocus() {
-                controlRef.current?.focus();
-            }
-        },
-        validation.getInputValidationProps
-    );
-
+    // biome-ignore lint/correctness/useExhaustiveDependencies: the machine state derives from these.
     const state: SegmentedControlRoot.State = React.useMemo(
-        () => ({
-            ...fieldState,
-            disabled: disabled ?? false,
-            readOnly: readOnly ?? false,
-            orientation
-        }),
-        [fieldState, disabled, readOnly, orientation]
+        () => ({ ...fieldState, ...track(() => control.getState()) }),
+        [fieldState, control, controlValue, controlDisabled, controlReadOnly, orientation]
     );
 
     const contextValue: SegmentedControlContextValue = React.useMemo(
         () => ({
-            value: value ?? null,
-            setValue,
-            disabled: disabled ?? false,
-            readOnly: readOnly ?? false,
-            orientation
+            value: controlValue,
+            setValue: control.setValue as SegmentedControlContextValue['setValue'],
+            disabled: controlDisabled,
+            readOnly: controlReadOnly,
+            orientation,
+            control
         }),
-        [
-            value,
-            setValue,
-            disabled,
-            readOnly,
-            orientation
-        ]
+        [controlValue, control, controlDisabled, controlReadOnly, orientation]
     );
 
-    const onBlur = useStableCallback((event: React.FocusEvent<HTMLElement>) => {
-        if (!contains(event.currentTarget, event.relatedTarget)) {
-            setFieldTouched(true);
-            setFocused(false);
+    const element = useRenderElement('div', componentProps, {
+        state,
+        ref: [ref, control.setRootElement],
+        props: [elementProps, (props) => track(() => toReactProps(control.getRootProps(props)))],
+        customStyleHookMapping: stateAttributesMapping
+    });
 
-            if (validationMode === 'onBlur') {
-                validation.commit(value);
+    const inputRef = React.useCallback(
+        (inputElement: HTMLInputElement | null) => {
+            control.setInputElement(inputElement);
+            if (typeof inputRefProp === 'function') {
+                inputRefProp(inputElement);
+            } else if (inputRefProp) {
+                (inputRefProp as React.RefObject<HTMLInputElement | null>).current = inputElement;
             }
-        }
-    });
-
-    const onKeyDownCapture = useStableCallback((event: React.KeyboardEvent<HTMLElement>) => {
-        if (event.key.startsWith('Arrow')) {
-            setFieldTouched(true);
-            setFocused(true);
-        }
-    });
-
-    const defaultProps: HTMLProps = {
-        'role': 'radiogroup',
-        'aria-required': required || undefined,
-        'aria-disabled': disabled || undefined,
-        'aria-readonly': readOnly || undefined,
-        'aria-orientation': orientation,
-        'aria-labelledby': labelId,
-        onFocus() {
-            setFocused(true);
         },
-        onBlur,
-        onKeyDownCapture
-    };
+        [control, inputRefProp]
+    );
 
     return (
         <SegmentedControlContext.Provider value={contextValue}>
-            <CompositeRoot
-                render={render}
-                className={className}
-                state={state}
-                refs={[ref, controlRef]}
-                props={[defaultProps, validation.getValidationProps, elementProps]}
-                stateAttributesMapping={stateAttributesMapping}
-                loopFocus={loopFocus}
-            />
-            <input {...inputProps} />
+            <CompositeMachineProvider composite={control.composite}>{element}</CompositeMachineProvider>
+            <input {...track(() => toReactProps(control.getInputProps(elementProps['aria-labelledby'])))} ref={inputRef} />
         </SegmentedControlContext.Provider>
     );
 }
@@ -307,8 +204,7 @@ export type SegmentedControlRootProps = {
 } & HeadlessUIComponentProps<'div', SegmentedControlRoot.State>;
 
 export type SegmentedControlRootChangeEventReason = typeof REASONS.none;
-export type SegmentedControlRootChangeEventDetails
-    = HeadlessUIChangeEventDetails<SegmentedControlRoot.ChangeEventReason>;
+export type SegmentedControlRootChangeEventDetails = HeadlessUIChangeEventDetails<SegmentedControlRoot.ChangeEventReason>;
 
 export namespace SegmentedControlRoot {
     export type State = SegmentedControlRootState;

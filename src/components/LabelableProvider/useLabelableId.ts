@@ -1,48 +1,24 @@
 import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
-import { isElement } from '@floating-ui/utils/dom';
 
 import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
-import { NOOP } from '~@lib/noop';
 
 import { useLabelableContext } from './LabelableContext';
 
+/**
+ * Registers the id of a labelable control (explicit `id`, or implicit labelling by a wrapping `<label>`)
+ * and returns the id to use.
+ */
 export function useLabelableId(params: useLabelableId.Parameters = {}) {
     const { id, implicit = false, controlRef } = params;
-    const { controlId, setControlId } = useLabelableContext();
-    const defaultId = useHeadlessUiId(id);
 
-    useIsoLayoutEffect(() => {
-        if ((!implicit && !id) || setControlId === NOOP) {
-            return undefined;
-        }
+    const { controlId, labelable } = useLabelableContext();
+    const defaultId = useHeadlessUiId(id) as string;
 
-        if (implicit) {
-            const elem = controlRef?.current;
-
-            if (isElement(elem) && elem.closest('label') != null) {
-                setControlId(id ?? null);
-            }
-            else {
-                setControlId(controlId ?? defaultId);
-            }
-        }
-        else if (id) {
-            setControlId(id);
-        }
-
-        return () => {
-            if (id) {
-                setControlId(undefined);
-            }
-        };
-    }, [
-        id,
-        controlRef,
-        controlId,
-        setControlId,
-        implicit,
-        defaultId
-    ]);
+    useIsoLayoutEffect(
+        () => labelable?.registerControl({ id, implicit, controlElement: controlRef?.current, defaultId }),
+        // `controlId` is a dependency: implicit labelling keeps the current id.
+        [id, controlRef, controlId, labelable, implicit, defaultId]
+    );
 
     return controlId ?? defaultId;
 }

@@ -1,11 +1,12 @@
 import React from 'react';
 
-import { CompositeTooltipList } from '../composite';
+import { TooltipMultipleMachine } from '@flippo-software/core-components/tooltip';
+
+import { useMachine } from '~@lib/core';
 
 import type { TooltipRoot } from '../root/TooltipRoot';
 
 import { TooltipMultipleContext } from './TooltipMultipleContext';
-import { TooltipMultipleStore } from './TooltipMultipleStore';
 
 /**
  * Wrapper component that synchronizes multiple tooltips.
@@ -38,38 +39,18 @@ import { TooltipMultipleStore } from './TooltipMultipleStore';
  * ```
  */
 export function TooltipMultiple(props: TooltipMultiple.Props) {
-    const {
-        open = false,
-        defaultOpen = false,
+    const { open, defaultOpen = false, onOpenChange, disabled, delay, closeDelay, children } = props;
+
+    const multiple = useMachine((options) => new TooltipMultipleMachine(options), {
+        open,
+        defaultOpen,
         onOpenChange,
         disabled,
         delay,
-        closeDelay,
-        children
-    } = props;
+        closeDelay
+    });
 
-    const store = TooltipMultipleStore.useStore(open ?? defaultOpen);
-    const elementsRef = React.useRef<(HTMLElement | null)[]>([]);
-
-    store.useContextCallback('onOpenChange', onOpenChange);
-
-    const contextValue = React.useMemo(
-        () => ({
-            store,
-            disabled,
-            delay,
-            closeDelay
-        }),
-        [store, disabled, delay, closeDelay]
-    );
-
-    return (
-        <TooltipMultipleContext value={contextValue}>
-            <CompositeTooltipList elementsRef={elementsRef}>
-                {children}
-            </CompositeTooltipList>
-        </TooltipMultipleContext>
-    );
+    return <TooltipMultipleContext value={multiple}>{children}</TooltipMultipleContext>;
 }
 
 export type TooltipMultipleProps = {

@@ -1,19 +1,15 @@
 import React from 'react';
 
-import type { useAnchorPositioning } from '~@lib/hooks/useAnchorPositioning';
+import type { NavigationMenuPositionerMachine } from '@flippo-software/core-components/navigation-menu';
 
-export type NavigationMenuPositionerContextValue = ReturnType<typeof useAnchorPositioning>;
+export type NavigationMenuPositionerContextValue = {
+    positioner: NavigationMenuPositionerMachine;
+};
 
-export const NavigationMenuPositionerContext = React.createContext<
-  NavigationMenuPositionerContextValue | undefined
->(undefined);
+export const NavigationMenuPositionerContext = React.createContext<NavigationMenuPositionerContextValue | undefined>(undefined);
 
-export function useNavigationMenuPositionerContext(
-    optional: true,
-): NavigationMenuPositionerContextValue | undefined;
-export function useNavigationMenuPositionerContext(
-    optional?: false,
-): NavigationMenuPositionerContextValue;
+export function useNavigationMenuPositionerContext(optional: true): NavigationMenuPositionerContextValue | undefined;
+export function useNavigationMenuPositionerContext(optional?: false): NavigationMenuPositionerContextValue;
 export function useNavigationMenuPositionerContext(optional = false) {
     const context = React.use(NavigationMenuPositionerContext);
     if (!context && !optional) {

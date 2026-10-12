@@ -1,6 +1,9 @@
 import React from 'react';
 
+import type { ComboboxChipMachine } from '@flippo-software/core-components/combobox';
+
 export type ComboboxChipContextValue = {
+    chip: ComboboxChipMachine;
     index: number;
 };
 
@@ -11,6 +14,5 @@ export function useComboboxChipContext() {
     if (!context) {
         throw new Error('useComboboxChipContext must be used within a ComboboxChip');
     }
-
     return context;
 }

@@ -1,21 +1,14 @@
 import React from 'react';
 
+import { ButtonMachine } from '@flippo-software/core-components/button';
 import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
 
+import { toReactProps, useMachine, useStoreSelector } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
-import type {
-    HeadlessUIComponentProps,
-    HTMLProps,
-    NonNativeButtonProps,
-    Orientation
-} from '~@lib/types';
+import type { HeadlessUIComponentProps, HTMLProps, NonNativeButtonProps, Orientation } from '~@lib/types';
 
-import {
-    IndexGuessBehavior,
-    useCompositeListItem
-} from '../../Composite/list/useCompositeListItem';
-import { useButton } from '../../use-button';
+import { IndexGuessBehavior, useCompositeListItem } from '../../Composite/list/useCompositeListItem';
 import { useListRootContext } from '../root/ListRootContext';
 import { NestedListContext, useNestedListContext } from '../root/NestedListContext';
 
@@ -47,14 +40,14 @@ export function ListItem(componentProps: ListItem.Props) {
     } = componentProps;
 
     const [subheaderId, setSubheaderId] = React.useState<string | undefined>(undefined);
-    const nested = useNestedListContext() !== undefined;
+    const nested = useNestedListContext(true) !== undefined;
 
     const { store } = useListRootContext();
 
-    const orientation = store.useState('orientation');
-    const type = store.useState('type');
-    const virtualized = store.useState('virtualized');
-    const elementsRef = store.useState('elementsRef');
+    const orientation = useStoreSelector(store, 'orientation');
+    const type = useStoreSelector(store, 'type');
+    const virtualized = useStoreSelector(store, 'virtualized');
+    const elementsRef = useStoreSelector(store, 'elementsRef');
 
     const listItem = useCompositeListItem({
         index: indexProp,
@@ -66,13 +59,13 @@ export function ListItem(componentProps: ListItem.Props) {
     const index = indexProp ?? listItem.index;
     const hasRegistered = listItem.index !== -1;
 
-    const { getButtonProps, buttonRef } = useButton({ disabled, focusableWhenDisabled, native: nativeButton });
+    const button = useMachine((options) => new ButtonMachine(options), { disabled, focusableWhenDisabled, native: nativeButton });
 
     // Register element in elementsRef when virtualized
     useIsoLayoutEffect(() => {
         const shouldRun = hasRegistered && (virtualized || indexProp != null);
         if (!shouldRun) {
-            return undefined;
+            return;
         }
 
         const list = elementsRef.current;
@@ -81,62 +74,56 @@ export function ListItem(componentProps: ListItem.Props) {
         return () => {
             delete list[index];
         };
-    }, [
-        hasRegistered,
-        virtualized,
-        index,
-        indexProp,
-        elementsRef
-    ]);
+    }, [hasRegistered, virtualized, index, indexProp, elementsRef]);
 
-    const state: ListItem.State = React.useMemo(() => ({
-        index,
-        orientation,
-        interactive,
-        disabled,
-        selected,
-        nested,
-        type
-    }), [
-        index,
-        orientation,
-        interactive,
-        disabled,
-        selected,
-        nested,
-        type
-    ]);
+    const state: ListItem.State = React.useMemo(
+        () => ({
+            index,
+            orientation,
+            interactive,
+            disabled,
+            selected,
+            nested,
+            type
+        }),
+        [index, orientation, interactive, disabled, selected, nested, type]
+    );
 
-    const listItemProps = React.useMemo<HTMLProps>(() => ({
-        'aria-selected': selected && interactive && !disabled
-    }), [disabled, interactive, selected]);
+    const listItemProps = React.useMemo<HTMLProps>(
+        () => ({
+            'aria-selected': selected && interactive && !disabled
+        }),
+        [disabled, interactive, selected]
+    );
 
-    const context = React.useMemo<ListItemContextValue>(() => ({
-        index,
-        setSubheaderId
-    }), [index]);
+    const context = React.useMemo<ListItemContextValue>(
+        () => ({
+            index,
+            setSubheaderId
+        }),
+        [index]
+    );
 
-    const nestedContext = React.useMemo<NestedListContextValue>(() =>
-        ({ subheaderId, nestedListItemNumber: index + 1 }), [subheaderId, index]);
+    const nestedContext = React.useMemo<NestedListContextValue>(
+        () => ({ subheaderId, nestedListItemNumber: index + 1 }),
+        [subheaderId, index]
+    );
 
     const element = useRenderElement('li', componentProps, {
         state,
-        ref: [listItem.ref, refProp, buttonRef, itemRef],
-        props: [listItemProps, interactive ? getButtonProps(elementProps) : elementProps]
+        ref: [listItem.ref, refProp, button.setElement, itemRef],
+        props: [listItemProps, interactive ? toReactProps(button.getButtonProps(elementProps)) : elementProps]
     });
 
     return (
         <ListItemContext value={context}>
-            <NestedListContext value={nestedContext}>
-                {element}
-            </NestedListContext>
+            <NestedListContext value={nestedContext}>{element}</NestedListContext>
         </ListItemContext>
     );
 }
 
 export namespace ListItem {
     export type State = {
-
         /**
          * Index of this item in the filtered list.
          */
@@ -198,5 +185,6 @@ export namespace ListItem {
          * the need to calculate the index automatically from the DOM.
          */
         index?: number;
-    } & NonNativeButtonProps & HeadlessUIComponentProps<'li', State>;
+    } & NonNativeButtonProps &
+        HeadlessUIComponentProps<'li', State>;
 }

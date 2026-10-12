@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { PopoverArrow as PopoverArrowCore } from '@flippo-software/core-components/popover';
+
+import { toReactProps, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 
@@ -26,29 +29,21 @@ export function PopoverArrow(componentProps: PopoverArrow.Props) {
     } = componentProps;
 
     const { store } = usePopoverRootContext();
-    const open = store.useState('open');
-    const {
-        arrowRef,
-        side,
-        align,
-        arrowUncentered,
-        arrowStyles
-    } = usePopoverPositionerContext();
+    const { positioner } = usePopoverPositionerContext();
 
-    const state: PopoverArrow.State = React.useMemo(
+    const arrow = React.useMemo(
         () => ({
-            open,
-            side,
-            align,
-            uncentered: arrowUncentered
+            getState: () => PopoverArrowCore.getState(store, positioner),
+            setElement: (element: Element | null) => PopoverArrowCore.setElement(positioner, element)
         }),
-        [open, side, align, arrowUncentered]
+        [store, positioner]
     );
+    const state: PopoverArrow.State = useMachineState(arrow, [positioner.controller]);
 
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: [ref, arrowRef],
-        props: [{ 'style': arrowStyles, 'aria-hidden': true }, elementProps],
+        ref: [ref, arrow.setElement],
+        props: [elementProps, (props) => toReactProps(PopoverArrowCore.getProps(positioner, props))],
         customStyleHookMapping: popupStateMapping
     });
 

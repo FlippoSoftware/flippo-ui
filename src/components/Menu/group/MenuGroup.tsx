@@ -29,7 +29,7 @@ export function MenuGroup(componentProps: MenuGroup.Props) {
     const element = useRenderElement('div', componentProps, {
         ref,
         props: {
-            'role': 'group',
+            role: 'group',
             'aria-labelledby': labelId,
             ...elementProps
         }

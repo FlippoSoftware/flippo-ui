@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { FloatingPortal } from '~@packages/floating-ui-react';
+import { useStoreSelector } from '~@lib/core';
+import { FloatingPortal } from '~@lib/floating';
 
 import { usePopoverRootContext } from '../root/PopoverRootContext';
 
@@ -17,7 +18,7 @@ export function PopoverPortal(props: PopoverPortal.Props) {
     const { keepMounted = false, ...portalProps } = props;
 
     const { store } = usePopoverRootContext();
-    const mounted = store.useState('mounted');
+    const mounted = useStoreSelector(store, 'mounted');
 
     const shouldRender = mounted || keepMounted;
     if (!shouldRender) {

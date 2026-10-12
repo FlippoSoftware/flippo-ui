@@ -15,53 +15,52 @@ import { useSelectItemContext } from '../item/SelectItemContext';
  * The core implementation of the indicator is split here to avoid paying the hooks
  * costs unless the element needs to be mounted.
  */
-const Inner = React.memo(
-    (
-        componentProps: SelectItemIndicator.Props
-    ) => {
-        const {
-            /* eslint-disable unused-imports/no-unused-vars */
-            render,
-            className,
-            /* eslint-enable unused-imports/no-unused-vars */
-            ref,
-            ...elementProps
-        } = componentProps;
+const Inner = React.memo((componentProps: SelectItemIndicator.Props) => {
+    const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        render,
+        className,
+        /* eslint-enable unused-imports/no-unused-vars */
+        ref,
+        ...elementProps
+    } = componentProps;
 
-        const { selected } = useSelectItemContext();
+    const { selected } = useSelectItemContext();
 
-        const indicatorRef = React.useRef<HTMLSpanElement | null>(null);
+    const indicatorRef = React.useRef<HTMLSpanElement | null>(null);
 
-        const { transitionStatus, setMounted } = useTransitionStatus(selected);
+    const { transitionStatus, setMounted } = useTransitionStatus(selected);
 
-        const state: SelectItemIndicator.State = {
-            selected,
-            transitionStatus
-        };
+    const state: SelectItemIndicator.State = {
+        selected,
+        transitionStatus
+    };
 
-        const element = useRenderElement('span', componentProps, {
-            ref: [ref, indicatorRef],
-            state,
-            props: [{
+    const element = useRenderElement('span', componentProps, {
+        ref: [ref, indicatorRef],
+        state,
+        props: [
+            {
                 'aria-hidden': true,
-                'children': '✔️'
-            }, elementProps],
-            customStyleHookMapping: transitionStatusMapping
-        });
+                children: '✔️'
+            },
+            elementProps
+        ],
+        customStyleHookMapping: transitionStatusMapping
+    });
 
-        useOpenChangeComplete({
-            open: selected,
-            ref: indicatorRef,
-            onComplete() {
-                if (!selected) {
-                    setMounted(false);
-                }
+    useOpenChangeComplete({
+        open: selected,
+        ref: indicatorRef,
+        onComplete() {
+            if (!selected) {
+                setMounted(false);
             }
-        });
+        }
+    });
 
-        return element;
-    }
-);
+    return element;
+});
 
 /**
  * The core implementation of the indicator is split here to avoid paying the hooks

@@ -1,9 +1,8 @@
-
-
 import React from 'react';
 
-import { useTimeout } from '@flippo-ui/hooks';
+import { AvatarFallbackDelay } from '@flippo-software/core-components/avatar';
 
+import { useMachine, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -31,15 +30,8 @@ export function AvatarFallback(componentProps: AvatarFallback.Props) {
     } = componentProps;
 
     const { imageLoadingStatus } = useAvatarRootContext();
-    const [delayPassed, setDelayPassed] = React.useState(delay === undefined);
-    const timeout = useTimeout();
-
-    React.useEffect(() => {
-        if (delay !== undefined) {
-            timeout.start(delay, () => setDelayPassed(true));
-        }
-        return timeout.clear;
-    }, [timeout, delay]);
+    const fallbackDelay = useMachine((options) => new AvatarFallbackDelay(options.delay), { delay });
+    const track = useTracker();
 
     const state: AvatarRoot.State = React.useMemo(
         () => ({
@@ -53,7 +45,7 @@ export function AvatarFallback(componentProps: AvatarFallback.Props) {
         ref,
         props: elementProps,
         customStyleHookMapping: avatarStyleHookMapping,
-        enabled: imageLoadingStatus !== 'loaded' && delayPassed
+        enabled: track(() => fallbackDelay.isRendered(imageLoadingStatus))
     });
 
     return element;

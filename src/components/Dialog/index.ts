@@ -1,8 +1,8 @@
-export type * from './backdrop/DialogBackdrop';
+export * as Dialog from './index.parts';
 
+export type * from './backdrop/DialogBackdrop';
 export type * from './close/DialogClose';
 export type * from './description/DialogDescription';
-export * as Dialog from './index.parts';
 export type * from './popup/DialogPopup';
 export type * from './portal/DialogPortal';
 export type * from './root/DialogRoot';

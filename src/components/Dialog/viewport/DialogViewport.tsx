@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
 
+import { useStoreSelector } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -45,11 +46,11 @@ export function DialogViewport(componentProps: DialogViewportProps) {
     const keepMounted = useDialogPortalContext();
     const { store } = useDialogRootContext();
 
-    const open = store.useState('open');
-    const nested = store.useState('nested');
-    const transitionStatus = store.useState('transitionStatus');
-    const nestedOpenDialogCount = store.useState('nestedOpenDialogCount');
-    const mounted = store.useState('mounted');
+    const open = useStoreSelector(store, 'open');
+    const nested = useStoreSelector(store, 'nested');
+    const transitionStatus = useStoreSelector(store, 'transitionStatus');
+    const nestedOpenDialogCount = useStoreSelector(store, 'nestedOpenDialogCount');
+    const mounted = useStoreSelector(store, 'mounted');
 
     const nestedDialogOpen = nestedOpenDialogCount > 0;
 
@@ -64,17 +65,21 @@ export function DialogViewport(componentProps: DialogViewportProps) {
     );
 
     const shouldRender = keepMounted || mounted;
+    const setViewportElement = React.useCallback((element: HTMLElement | null) => store.set('viewportElement', element), [store]);
 
     return useRenderElement('div', componentProps, {
         enabled: shouldRender,
         state,
-        ref: [ref, store.useStateSetter('viewportElement')],
+        ref: [ref, setViewportElement],
         customStyleHookMapping: stateAttributesMapping,
-        props: [{
-            role: 'presentation',
-            hidden: !mounted,
-            children
-        }, elementProps]
+        props: [
+            {
+                role: 'presentation',
+                hidden: !mounted,
+                children
+            },
+            elementProps
+        ]
     });
 }
 

@@ -36,15 +36,16 @@ export function ComboboxGroup(componentProps: ComboboxGroup.Props) {
 
     const element = useRenderElement('div', componentProps, {
         ref,
-        props: [{
-            'role': 'group',
-            'aria-labelledby': labelId
-        }, elementProps]
+        props: [
+            {
+                role: 'group',
+                'aria-labelledby': labelId
+            },
+            elementProps
+        ]
     });
 
-    const wrappedElement = (
-        <ComboboxGroupContext.Provider value={contextValue}>{element}</ComboboxGroupContext.Provider>
-    );
+    const wrappedElement = <ComboboxGroupContext.Provider value={contextValue}>{element}</ComboboxGroupContext.Provider>;
 
     if (items) {
         return <GroupCollectionProvider items={items}>{wrappedElement}</GroupCollectionProvider>;

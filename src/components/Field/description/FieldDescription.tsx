@@ -34,7 +34,7 @@ export function FieldDescription(componentProps: FieldDescription.Props) {
 
     useIsoLayoutEffect(() => {
         if (!id) {
-            return undefined;
+            return;
         }
 
         setMessageIds((v) => v.concat(id));

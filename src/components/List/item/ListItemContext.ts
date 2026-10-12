@@ -11,8 +11,7 @@ export function useListItemContext() {
     const context = React.use(ListItemContext);
 
     if (!context) {
-        throw new Error('Headless UI: ListItemContext is missing. ListItem parts must be placed within <List.Item>.'
-        );
+        throw new Error('Headless UI: ListItemContext is missing. ListItem parts must be placed within <List.Item>.');
     }
 
     return context;

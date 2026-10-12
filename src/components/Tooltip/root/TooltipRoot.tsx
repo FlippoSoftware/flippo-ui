@@ -1,221 +1,75 @@
 import React from 'react';
+import * as ReactDOM from 'react-dom';
 
-import {
-    useIsoLayoutEffect
-} from '@flippo-ui/hooks';
+import { TooltipRootMachine } from '@flippo-software/core-components/tooltip';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import { useImplicitActiveTrigger, useOpenStateTransitions } from '~@lib/popups';
-import { REASONS } from '~@lib/reason';
-import { visuallyHidden } from '~@lib/visuallyHidden';
-import {
-    useClientPoint,
-    useDismiss,
-    useFocus,
-    useInteractions,
-    useSyncedFloatingRootContext
-} from '~@packages/floating-ui-react';
+import type { TooltipHandle } from '@flippo-software/core-components/tooltip';
+
+import { useMachine, useStoreSelector } from '~@lib/core';
+import { useFloatingTree } from '~@lib/floating';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import type { PayloadChildRenderFunction } from '~@lib/popups';
+import type { PayloadChildRenderFunction } from '~@lib/popupTypes';
+import type { REASONS } from '~@lib/reason';
 
-import { useCompositeTooltipListItem } from '../composite';
 import { useTooltipMultipleContext } from '../multiple/TooltipMultipleContext';
-import { TooltipStore } from '../store/TooltipStore';
-
-import type { TooltipHandle } from '../store/TooltipHandle';
 
 import { TooltipRootContext } from './TooltipRootContext';
 
-import type { TooltipRootContextValue } from './TooltipRootContext';
-
 export function TooltipRoot<Payload>(props: TooltipRoot.Props<Payload>) {
     const {
-        disabled = false,
+        disabled: disabledProp,
         defaultOpen = false,
-        open: openProp,
+        open,
         disableHoverablePopup = false,
         trackCursorAxis = 'none',
         actionsRef,
         onOpenChange,
         onOpenChangeComplete,
         handle,
-        triggerId: triggerIdProp,
-        defaultTriggerId: defaultTriggerIdProp = null,
+        triggerId,
+        defaultTriggerId = null,
         children
     } = props;
 
-    const { ref: multipleItemRef, index: multipleItemIndex } = useCompositeTooltipListItem();
+    const multiple = useTooltipMultipleContext();
+    const tree = useFloatingTree();
+    const floatingId = useHeadlessUiId();
 
-    // Check if inside TooltipMultiple - if so, ignore local open/defaultOpen
-    const multipleContext = useTooltipMultipleContext();
-    const isInsideMultiple = multipleContext !== null;
-
-    // When inside Multiple, use Multiple's defaultOpen for initial state
-    const effectiveDefaultOpen = isInsideMultiple
-        ? multipleContext.store.select('open')
-        : (openProp ?? defaultOpen);
-
-    const store = TooltipStore.useStore<Payload>(handle?.store, {
-        open: effectiveDefaultOpen,
-        activeTriggerId: triggerIdProp !== undefined ? triggerIdProp : defaultTriggerIdProp
-    });
-
-    // Register with TooltipMultiple if inside one
-    React.useEffect(() => {
-        if (!multipleContext) {
-            return;
+    const root = useMachine(
+        (options) =>
+            new TooltipRootMachine<Payload>(options, {
+                store: handle?.store,
+                multiple,
+                floatingId,
+                tree,
+                flushSync: ReactDOM.flushSync
+            }),
+        {
+            disabled: disabledProp ?? false,
+            defaultOpen,
+            open,
+            disableHoverablePopup,
+            trackCursorAxis,
+            onOpenChange: onOpenChange as never,
+            onOpenChangeComplete,
+            triggerId,
+            defaultTriggerId
         }
-        return multipleContext.store.registerStore(store);
-    }, [multipleContext, store]);
-
-    // When inside Multiple, don't use controlled prop for open - Multiple handles it
-    store.useControlledProp('open', isInsideMultiple ? undefined : openProp);
-    store.useControlledProp('activeTriggerId', triggerIdProp);
-
-    store.useContextCallback('onOpenChange', onOpenChange);
-    store.useContextCallback('onOpenChangeComplete', onOpenChangeComplete);
-
-    // When inside Multiple, use Multiple's open state
-    const openState = store.useOpen();
-
-    const activeTriggerId = store.useState('activeTriggerId');
-    const payload = store.useState('payload') as Payload | undefined;
-
-    store.useSyncedValues({
-        trackCursorAxis,
-        disableHoverablePopup,
-        multipleItemIndex,
-        multipleItemRef
-    });
-
-    const open = !disabled && openState;
-
-    useIsoLayoutEffect(() => {
-        if (openState && disabled) {
-            store.setOpen(false, createChangeEventDetails(REASONS.disabled));
-        }
-    }, [openState, disabled, store]);
-
-    store.useSyncedValue('disabled', disabled);
-
-    // Pass the correct open state (from Multiple if inside, otherwise from store)
-    useImplicitActiveTrigger(store, openState);
-    const { forceUnmount, transitionStatus } = useOpenStateTransitions(open, store);
-    const isInstantPhase = store.useState('isInstantPhase');
-    const instantType = store.useState('instantType');
-    const lastOpenChangeReason = store.useState('lastOpenChangeReason');
-
-    // Animations should be instant in two cases:
-    // 1) Opening during the provider's instant phase (adjacent tooltip opens instantly)
-    // 2) Closing because another tooltip opened (reason === 'none')
-    // Otherwise, allow the animation to play. In particular, do not disable animations
-    // during the 'ending' phase unless it's due to a sibling opening.
-    const previousInstantTypeRef = React.useRef<string | undefined | null>(null);
-    useIsoLayoutEffect(() => {
-        if (
-            (transitionStatus === 'ending' && lastOpenChangeReason === REASONS.none)
-            || (transitionStatus !== 'ending' && isInstantPhase)
-        ) {
-            // Capture the current instant type so we can restore it later
-            // and set to 'delay' to disable animations while moving from one trigger to another
-            // within a delay group.
-            if (instantType !== 'delay') {
-                previousInstantTypeRef.current = instantType;
-            }
-            store.set('instantType', 'delay');
-        }
-        else if (previousInstantTypeRef.current !== null) {
-            store.set('instantType', previousInstantTypeRef.current);
-            previousInstantTypeRef.current = null;
-        }
-    }, [
-        transitionStatus,
-        isInstantPhase,
-        lastOpenChangeReason,
-        instantType,
-        store
-    ]);
-
-    useIsoLayoutEffect(() => {
-        if (open) {
-            if (activeTriggerId == null) {
-                store.set('payload', undefined);
-            }
-        }
-    }, [store, activeTriggerId, open]);
-
-    const handleImperativeClose = React.useCallback(() => {
-        store.setOpen(false, createTooltipEventDetails(store, REASONS.imperativeAction));
-    }, [store]);
-
-    React.useImperativeHandle(
-        actionsRef,
-        () => ({ unmount: forceUnmount, close: handleImperativeClose }),
-        [forceUnmount, handleImperativeClose]
     );
 
-    const floatingRootContext = useSyncedFloatingRootContext({
-        popupStore: store,
-        onOpenChange: store.setOpen
-    });
+    React.useImperativeHandle(actionsRef, () => root.actions, [root]);
 
-    // For Multiple: block blur close if focus moves to another element in the group
-    const shouldBlockBlurClose = React.useCallback(
-        (relatedTarget: Element | null) => {
-            if (!multipleContext || !relatedTarget) {
-                return false;
-            }
-
-            return multipleContext.store.isElementInGroup(relatedTarget);
-        },
-        [multipleContext]
-    );
-
-    const focus = useFocus(floatingRootContext, {
-        enabled: !disabled,
-        shouldBlockBlurClose: isInsideMultiple ? shouldBlockBlurClose : undefined
-    });
-    const dismiss = useDismiss(floatingRootContext, { enabled: !disabled, referencePress: true });
-    const clientPoint = useClientPoint(floatingRootContext, {
-        enabled: !disabled && trackCursorAxis !== 'none',
-        axis: trackCursorAxis === 'none' ? undefined : trackCursorAxis
-    });
-
-    const { getReferenceProps, getFloatingProps, getTriggerProps } = useInteractions([focus, dismiss, clientPoint]);
-
-    const activeTriggerProps = React.useMemo(() => getReferenceProps(), [getReferenceProps]);
-    const inactiveTriggerProps = React.useMemo(() => getTriggerProps(), [getTriggerProps]);
-    const popupProps = React.useMemo(() => getFloatingProps(), [getFloatingProps]);
-
-    store.useSyncedValues({
-        floatingRootContext,
-        activeTriggerProps,
-        inactiveTriggerProps,
-        popupProps
-    });
+    const payload = useStoreSelector(root.store, 'payload') as Payload | undefined;
 
     return (
-        <TooltipRootContext.Provider value={store as TooltipRootContextValue}>
-            {/* Hidden marker for CompositeList registration inside Tooltip.Multiple */}
-            {isInsideMultiple && <span ref={multipleItemRef} style={visuallyHidden} />}
+        <TooltipRootContext value={root as TooltipRootMachine<unknown>}>
+            {/* Hidden marker registering the tooltip in the list of Tooltip.Multiple */}
+            {root.isInsideMultiple && <span ref={root.setMultipleItemElement} style={root.multipleMarkerStyle} />}
             {typeof children === 'function' ? children({ payload }) : children}
-        </TooltipRootContext.Provider>
+        </TooltipRootContext>
     );
-}
-
-function createTooltipEventDetails<P>(
-    store: TooltipStore<P>,
-    reason: TooltipRoot.ChangeEventReason
-) {
-    const details: TooltipRoot.ChangeEventDetails
-        = createChangeEventDetails<TooltipRoot.ChangeEventReason>(
-            reason
-        ) as TooltipRoot.ChangeEventDetails;
-    details.preventUnmountOnClose = () => {
-        store.set('preventUnmountingOnClose', true);
-    };
-    return details;
 }
 
 export type TooltipRootState = {};
@@ -288,23 +142,23 @@ export type TooltipRootProps<Payload = unknown> = {
 
 export type TooltipRootActions = {
     unmount: () => void;
+    close: () => void;
 };
 
-export type TooltipRootChangeEventReason
-    = | typeof REASONS.triggerHover
-      | typeof REASONS.triggerFocus
-      | typeof REASONS.triggerPress
-      | typeof REASONS.outsidePress
-      | typeof REASONS.escapeKey
-      | typeof REASONS.disabled
-      | typeof REASONS.imperativeAction
-      | typeof REASONS.none;
+export type TooltipRootChangeEventReason =
+    | typeof REASONS.triggerHover
+    | typeof REASONS.triggerFocus
+    | typeof REASONS.triggerPress
+    | typeof REASONS.outsidePress
+    | typeof REASONS.escapeKey
+    | typeof REASONS.disabled
+    | typeof REASONS.imperativeAction
+    | typeof REASONS.none;
 
-export type TooltipRootChangeEventDetails
-  = HeadlessUIChangeEventDetails<TooltipRoot.ChangeEventReason> & {
-      preventUnmountOnClose: () => void;
-      multipleItemIndex?: number | null;
-  };
+export type TooltipRootChangeEventDetails = HeadlessUIChangeEventDetails<TooltipRoot.ChangeEventReason> & {
+    preventUnmountOnClose: () => void;
+    multipleItemIndex?: number | null;
+};
 
 export namespace TooltipRoot {
     export type State = TooltipRootState;

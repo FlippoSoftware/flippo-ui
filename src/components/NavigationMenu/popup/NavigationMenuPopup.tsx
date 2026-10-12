@@ -1,7 +1,10 @@
 import React from 'react';
 
+import { NavigationMenuPopup as NavigationMenuPopupCore } from '@flippo-software/core-components/navigation-menu';
+
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
+import { toReactProps, useMachineState, useTracker } from '~@lib/core';
 import { useDirection, useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 import { popupStateMapping as baseMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -10,7 +13,7 @@ import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useNavigationMenuPositionerContext } from '../positioner/NavigationMenuPositionerContext';
-import { useNavigationMenuRootContext } from '../root/NavigationMenuRootContext';
+import { useNavigationMenuRoot } from '../root/NavigationMenuRootContext';
 
 const stateAttributesMapping: StateAttributesMapping<NavigationMenuPopup.State> = {
     ...baseMapping,
@@ -34,59 +37,27 @@ export function NavigationMenuPopup(componentProps: NavigationMenuPopupProps) {
         ...elementProps
     } = componentProps;
 
-    const { open, transitionStatus, setPopupElement } = useNavigationMenuRootContext();
-    const positioning = useNavigationMenuPositionerContext();
+    const root = useNavigationMenuRoot();
+    const { positioner } = useNavigationMenuPositionerContext();
     const direction = useDirection();
+    const id = useHeadlessUiId(idProp) as string;
 
-    const id = useHeadlessUiId(idProp);
-
-    const state: NavigationMenuPopup.State = React.useMemo(
+    const popup = React.useMemo(
         () => ({
-            open,
-            transitionStatus,
-            side: positioning.side,
-            align: positioning.align,
-            anchorHidden: positioning.anchorHidden
+            getState: () => NavigationMenuPopupCore.getState(root, positioner),
+            setElement: (element: HTMLElement | null) => NavigationMenuPopupCore.setElement(root, element)
         }),
-        [
-            open,
-            transitionStatus,
-            positioning.side,
-            positioning.align,
-            positioning.anchorHidden
-        ]
+        [root, positioner]
     );
+    const state: NavigationMenuPopup.State = useMachineState(popup, [positioner]);
+    const track = useTracker();
 
-    // Ensure popup size transitions correctly when anchored to `bottom` (side=top) or `right` (side=left).
-    let isOriginSide = positioning.side === 'top';
-    let isPhysicalLeft = positioning.side === 'left';
-    if (direction === 'rtl') {
-        isOriginSide = isOriginSide || positioning.side === 'inline-end';
-        isPhysicalLeft = isPhysicalLeft || positioning.side === 'inline-end';
-    }
-    else {
-        isOriginSide = isOriginSide || positioning.side === 'inline-start';
-        isPhysicalLeft = isPhysicalLeft || positioning.side === 'inline-start';
-    }
-
-    const element = useRenderElement('nav', componentProps, {
+    return useRenderElement('nav', componentProps, {
         state,
-        ref: [ref, setPopupElement],
-        props: [{
-            id,
-            tabIndex: -1,
-            style: isOriginSide
-                ? {
-                    position: 'absolute',
-                    [positioning.side === 'top' ? 'bottom' : 'top']: '0',
-                    [isPhysicalLeft ? 'right' : 'left']: '0'
-                }
-                : {}
-        }, elementProps],
+        ref: [ref, popup.setElement],
+        props: [elementProps, (props) => track(() => toReactProps(NavigationMenuPopupCore.getProps(id, positioner, direction, props)))],
         customStyleHookMapping: stateAttributesMapping
     });
-
-    return element;
 }
 
 export type NavigationMenuPopupState = {

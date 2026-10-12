@@ -1,15 +1,17 @@
 import React from 'react';
 
-import { useControlledState } from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { ToggleGroupMachine } from '@flippo-software/core-components/toggle-group';
 
-import { useRenderElement } from '~@lib/hooks';
+import type { ToggleGroupOptions } from '@flippo-software/core-components/toggle-group';
+
+import { toReactProps, useMachine, useTracker } from '~@lib/core';
+import { useDirection, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { REASONS } from '~@lib/reason';
-import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '~@lib/types';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
-import { CompositeRoot } from '../Composite/root/CompositeRoot';
+import { CompositeMachineProvider } from '../Composite/root/CompositeMachineProvider';
 import { useToolbarRootContext } from '../Toolbar/root/ToolbarRootContext';
 
 import { ToggleGroupContext } from './ToggleGroupContext';
@@ -26,120 +28,73 @@ const stateAttributesMapping = {
     }
 };
 
-const DEFAULT_VALUE: readonly any[] = [];
 /**
  * Provides a shared state to a series of toggle buttons.
- *
- * Documentation: [Base UI Toggle Group](https://base-ui.com/react/components/toggle-group)
+ * Renders a `<div>` element.
  */
 export function ToggleGroup(componentProps: ToggleGroup.Props) {
     const {
-        defaultValue: defaultValueProp,
-        disabled: disabledProp = false,
+        defaultValue,
+        disabled = false,
         loopFocus = true,
         onValueChange,
         orientation = 'horizontal',
         multiple = false,
-        value: valueProp,
+        value,
+        /* eslint-disable unused-imports/no-unused-vars */
         className,
         render,
+        /* eslint-enable unused-imports/no-unused-vars */
         ref,
         ...elementProps
     } = componentProps;
 
     const toolbarContext = useToolbarRootContext(true);
+    const direction = useDirection();
 
-    const defaultValue = React.useMemo(() => {
-        if (valueProp === undefined) {
-            return defaultValueProp ?? [];
-        }
-
-        return undefined;
-    }, [valueProp, defaultValueProp]);
-
-    const disabled = (toolbarContext?.disabled ?? false) || disabledProp;
-
-    const [groupValue, setValueState] = useControlledState({
-        prop: valueProp,
-        defaultProp: defaultValue,
-        caller: 'ToggleGroup'
+    const group = useMachine((options) => new ToggleGroupMachine(options), {
+        value,
+        defaultValue,
+        disabled,
+        loopFocus,
+        orientation,
+        multiple,
+        onValueChange: onValueChange as ToggleGroupOptions['onValueChange'],
+        toolbarDisabled: toolbarContext?.disabled,
+        // Inside a toolbar, the toolbar's composite navigates the toggles.
+        inToolbar: Boolean(toolbarContext),
+        direction
     });
+    const track = useTracker();
 
-    const setGroupValue = useStableCallback(
-        (
-            newValue: string,
-            nextPressed: boolean,
-            eventDetails: HeadlessUIChangeEventDetails<typeof REASONS.none>
-        ) => {
-            let newGroupValue: any[] | undefined;
-            if (multiple) {
-                newGroupValue = groupValue!.slice();
-                if (nextPressed) {
-                    newGroupValue.push(newValue);
-                }
-                else {
-                    newGroupValue.splice(groupValue!.indexOf(newValue), 1);
-                }
-            }
-            else {
-                newGroupValue = nextPressed ? [newValue] : [];
-            }
-            if (Array.isArray(newGroupValue)) {
-                onValueChange?.(newGroupValue, eventDetails);
-
-                if (eventDetails.isCanceled) {
-                    return;
-                }
-
-                setValueState(newGroupValue);
-            }
-        }
-    );
+    const { disabled: groupDisabled } = track(() => group.getState());
+    const groupValue = track(() => group.value);
 
     const state: ToggleGroup.State = React.useMemo(
-        () => ({ disabled, multiple, orientation }),
-        [disabled, orientation, multiple]
+        () => ({ disabled: groupDisabled, multiple, orientation }),
+        [groupDisabled, multiple, orientation]
     );
 
     const contextValue: ToggleGroupContextValue = React.useMemo(
         () => ({
-            disabled,
+            disabled: groupDisabled,
             orientation,
-            setGroupValue,
-            value: groupValue ?? DEFAULT_VALUE
+            setGroupValue: group.setGroupValue as ToggleGroupContextValue['setGroupValue'],
+            value: groupValue
         }),
-        [disabled, orientation, setGroupValue, groupValue]
+        [groupDisabled, orientation, group, groupValue]
     );
 
-    const defaultProps: HTMLProps = {
-        role: 'group'
-    };
-
     const element = useRenderElement('div', componentProps, {
-        enabled: Boolean(toolbarContext),
         state,
-        ref,
-        props: [defaultProps, elementProps],
+        ref: toolbarContext ? ref : [ref, group.composite.setRoot],
+        props: [toReactProps(group.getRootProps()), elementProps],
         customStyleHookMapping: stateAttributesMapping
     });
 
     return (
         <ToggleGroupContext.Provider value={contextValue}>
-            {toolbarContext
-                ? (
-                    element
-                )
-                : (
-                    <CompositeRoot
-                        render={render}
-                        className={className}
-                        state={state}
-                        refs={[ref]}
-                        props={[defaultProps, elementProps]}
-                        stateAttributesMapping={stateAttributesMapping}
-                        loopFocus={loopFocus}
-                    />
-                )}
+            {toolbarContext ? element : <CompositeMachineProvider composite={group.composite}>{element}</CompositeMachineProvider>}
         </ToggleGroupContext.Provider>
     );
 }

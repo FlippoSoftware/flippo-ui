@@ -1,10 +1,44 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
-	"root": false,
-	"extends": ["@flippo/biome/base", "@flippo/biome/react"],
-	"vcs": { "root": "../../../../.." },
-	"plugins": [
-		"./node_modules/@flippo/biome/src/plugins/no-node-process-import/no-node-process-import.grit",
-		"./node_modules/@flippo/biome/src/plugins/effector/biome-plugin-effector.grit"
-	]
+    "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+    "root": true,
+    "vcs": {
+        "enabled": true,
+        "clientKind": "git",
+        "useIgnoreFile": true,
+        "defaultBranch": "main"
+    },
+    "extends": ["@flippo-software/biome/base", "@flippo-software/biome/react", "@flippo-software/biome/test"],
+    "plugins": [
+        "./node_modules/@flippo-software/biome/src/plugins/no-node-process-import/no-node-process-import.grit",
+        "./node_modules/@flippo-software/biome/src/plugins/effector/biome-plugin-effector.grit"
+    ],
+    "linter": {
+        "rules": {
+            "performance": {
+                "noReExportAll": "off",
+                "noBarrelFile": "off"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "includes": ["scripts/**"],
+            "linter": {
+                "rules": {
+                    "correctness": {
+                        "noNodejsModules": "off"
+                    },
+                    "suspicious": {
+                        "noConsole": "off"
+                    },
+                    "style": {
+                        "useFilenamingConvention": "off"
+                    }
+                }
+            }
+        }
+    ],
+    "javascript": {
+        "jsxRuntime": "reactClassic"
+    }
 }

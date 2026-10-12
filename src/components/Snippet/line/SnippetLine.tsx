@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { getSnippetLineText } from '@flippo-software/core-components/snippet';
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useRenderElement } from '~@lib/hooks';
@@ -23,31 +24,23 @@ export function SnippetLine(componentProps: SnippetLine.Props) {
     const elementRef = React.useRef<HTMLPreElement | null>(null);
     const [textFromElement, setTextFromElement] = React.useState<string | null>(null);
 
+    // Without an explicit value, the copied text is read from the rendered line (without its symbols).
     useIsoLayoutEffect(() => {
-        if (valueProp !== undefined || typeof children === 'string') {
+        if (valueProp !== undefined || typeof children === 'string' || !elementRef.current) {
             return;
         }
-
-        if (elementRef.current) {
-            const cloned = elementRef.current.cloneNode(true) as HTMLElement;
-            const symbolElements = cloned.querySelectorAll('[data-snippet-symbol]');
-            symbolElements.forEach((el) => el.remove());
-            const text = cloned.textContent;
-            setTextFromElement(text);
-        }
+        setTextFromElement(getSnippetLineText(elementRef.current));
     }, [children, valueProp]);
 
-    const value = React.useMemo<string | null>(() => {
-        if (valueProp !== undefined) {
-            return valueProp;
-        }
-        if (typeof children === 'string') {
-            return children;
-        }
-        return textFromElement;
-    }, [valueProp, children, textFromElement]);
+    let text: SnippetLine.Metadata = textFromElement;
+    if (valueProp !== undefined) {
+        text = valueProp;
+    } else if (typeof children === 'string') {
+        text = children;
+    }
 
-    const { ref: itemRef, index } = useCompositeListItem({ metadata: value });
+    const metadata = React.useMemo(() => ({ text }), [text]);
+    const { ref: itemRef, index } = useCompositeListItem({ metadata });
 
     const state: SnippetLine.State = React.useMemo(
         () => ({
@@ -59,7 +52,7 @@ export function SnippetLine(componentProps: SnippetLine.Props) {
     const element = useRenderElement('pre', componentProps, {
         ref: [ref, itemRef, elementRef],
         state,
-        props: elementProps
+        props: [elementProps, { children }]
     });
 
     return element;
@@ -75,5 +68,10 @@ export namespace SnippetLine {
         index: number;
     };
 
-    export type Props = { value: Metadata } & HeadlessUIComponentProps<'pre', State>;
+    export type Props = {
+        /**
+         * The text copied for this line. Defaults to the line's text content without its symbols.
+         */
+        value?: Metadata;
+    } & HeadlessUIComponentProps<'pre', State>;
 }

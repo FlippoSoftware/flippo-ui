@@ -8,11 +8,7 @@ const PATTERNS = {
 // Cache for custom patterns to avoid re-compilation
 const patternCache = new Map<string, RegExp>();
 
-export function testPattern(
-    value: string,
-    type?: 'alphanumeric' | 'numeric' | 'alphabetic',
-    pattern?: string
-): boolean {
+export function testPattern(value: string, type?: 'alphanumeric' | 'numeric' | 'alphabetic', pattern?: string): boolean {
     // Empty value should not pass validation
     if (value === '') {
         return false;

@@ -1,32 +1,17 @@
 import React from 'react';
 
-import {
-    AnimationFrame,
-    useAnimationFrame,
-    useControlledState,
-    useEventCallback,
-    useIsoLayoutEffect,
-    useMergedRef,
-    useOnMount
-} from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { AccordionMachine } from '@flippo-software/core-components/accordion';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { AccordionOptions } from '@flippo-software/core-components/accordion';
+
+import { toReactProps, useMachine, useTracker } from '~@lib/core';
 import { useDirection, useRenderElement } from '~@lib/hooks';
-import { REASONS } from '~@lib/reason';
-import { warn } from '~@lib/warn';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '~@lib/types';
-
-import { CollapsiblePanelDataAttributes } from '../../Collapsible/panel/CollapsiblePanelDataAttributes';
-import { CompositeList } from '../../Composite/list/CompositeList';
-
-import type { CollapsibleRoot } from '../../Collapsible/root/CollapsibleRoot';
-import type { AnimationType, Dimensions } from '../../Collapsible/root/useCollapsibleRoot';
+import type { REASONS } from '~@lib/reason';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
 import { AccordionRootContext } from './AccordionRootContext';
-import { AccordionRootDataAttributes } from './AccordionRootDataAttributes';
 
 import type { AccordionRootContextValue } from './AccordionRootContext';
 
@@ -34,13 +19,9 @@ const rootStateAttributesMapping = {
     value: () => null
 };
 
-const EMPTY_ACCORDION_VALUE: AccordionValue = [];
-
 /**
  * Groups all parts of the accordion.
  * Renders a `<div>` element.
- *
- * Documentation: [Base UI Accordion](https://base-ui.com/react/components/accordion)
  */
 export function AccordionRoot(componentProps: AccordionRootProps) {
     const {
@@ -49,130 +30,50 @@ export function AccordionRoot(componentProps: AccordionRootProps) {
         className,
         /* eslint-enable unused-imports/no-unused-vars */
         disabled = false,
-        hiddenUntilFound: hiddenUntilFoundProp,
-        keepMounted: keepMountedProp,
+        hiddenUntilFound,
+        keepMounted,
         loopFocus = true,
-        onValueChange: onValueChangeProp,
+        onValueChange,
         multiple = false,
         orientation = 'vertical',
-        value: valueProp,
-        defaultValue: defaultValueProp,
+        value,
+        defaultValue,
         ref,
         ...elementProps
     } = componentProps;
 
     const direction = useDirection();
 
-    if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        useIsoLayoutEffect(() => {
-            if (hiddenUntilFoundProp && keepMountedProp === false) {
-                warn(
-                    'The `keepMounted={false}` prop on a Accordion.Root will be ignored when using `hiddenUntilFound` since it requires Panels to remain mounted when closed.'
-                );
-            }
-        }, [hiddenUntilFoundProp, keepMountedProp]);
-    }
-
-    // memoized to allow omitting both defaultValue and value
-    // which would otherwise trigger a warning in useControlled
-    const defaultValue = React.useMemo(() => {
-        if (valueProp === undefined) {
-            return defaultValueProp ?? [];
-        }
-
-        return undefined;
-    }, [valueProp, defaultValueProp]);
-
-    const onValueChange = useStableCallback(onValueChangeProp);
-
-    const accordionItemRefs = React.useRef<(HTMLElement | null)[]>([]);
-
-    const [value, setValue] = useControlledState({
-        prop: valueProp,
-        defaultProp: defaultValue ?? EMPTY_ACCORDION_VALUE,
-        caller: 'Accordion'
+    const accordion = useMachine((options) => new AccordionMachine(options), {
+        disabled,
+        hiddenUntilFound,
+        keepMounted,
+        loopFocus,
+        onValueChange: onValueChange as AccordionOptions['onValueChange'],
+        multiple,
+        orientation,
+        value,
+        defaultValue,
+        direction
     });
+    const track = useTracker();
 
-    const handleValueChange = useStableCallback((newValue: number | string, nextOpen: boolean) => {
-        const details = createChangeEventDetails(REASONS.none);
-        if (!multiple) {
-            const nextValue = value[0] === newValue ? [] : [newValue];
-            onValueChange(nextValue, details);
-            if (details.isCanceled) {
-                return;
-            }
-            setValue(nextValue);
-        }
-        else if (nextOpen) {
-            const nextOpenValues = value.slice();
-            nextOpenValues.push(newValue);
-            onValueChange(nextOpenValues, details);
-            if (details.isCanceled) {
-                return;
-            }
-            setValue(nextOpenValues);
-        }
-        else {
-            const nextOpenValues = value.filter((v) => v !== newValue);
-            onValueChange(nextOpenValues, details);
-            if (details.isCanceled) {
-                return;
-            }
-            setValue(nextOpenValues);
-        }
-    });
-
+    const { value: openValues } = track(() => accordion.getState());
     const state: AccordionRoot.State = React.useMemo(
-        () => ({
-            value,
-            disabled,
-            orientation
-        }),
-        [value, disabled, orientation]
+        () => ({ value: openValues, disabled, orientation }),
+        [openValues, disabled, orientation]
     );
 
-    const contextValue: AccordionRootContextValue = React.useMemo(
-        () => ({
-            accordionItemRefs,
-            direction,
-            disabled,
-            handleValueChange,
-            hiddenUntilFound: hiddenUntilFoundProp ?? false,
-            keepMounted: keepMountedProp ?? false,
-            loopFocus,
-            orientation,
-            state,
-            value
-        }),
-        [
-            direction,
-            disabled,
-            handleValueChange,
-            hiddenUntilFoundProp,
-            keepMountedProp,
-            loopFocus,
-            orientation,
-            state,
-            value
-        ]
-    );
+    const contextValue: AccordionRootContextValue = React.useMemo(() => ({ accordion, state }), [accordion, state]);
 
     const element = useRenderElement('div', componentProps, {
         state,
         ref,
-        props: [{
-            dir: direction,
-            role: 'region'
-        }, elementProps],
+        props: [toReactProps(accordion.getRootProps()), elementProps],
         customStyleHookMapping: rootStateAttributesMapping
     });
 
-    return (
-        <AccordionRootContext.Provider value={contextValue}>
-            <CompositeList elementsRef={accordionItemRefs}>{element}</CompositeList>
-        </AccordionRootContext.Provider>
-    );
+    return <AccordionRootContext.Provider value={contextValue}>{element}</AccordionRootContext.Provider>;
 }
 
 export type AccordionValue = (any | null)[];
@@ -244,8 +145,7 @@ export type AccordionRootProps = {
 
 export type AccordionRootChangeEventReason = typeof REASONS.triggerPress | typeof REASONS.none;
 
-export type AccordionRootChangeEventDetails
-    = HeadlessUIChangeEventDetails<AccordionRoot.ChangeEventReason>;
+export type AccordionRootChangeEventDetails = HeadlessUIChangeEventDetails<AccordionRoot.ChangeEventReason>;
 
 export namespace AccordionRoot {
     export type State = AccordionRootState;

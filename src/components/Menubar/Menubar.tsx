@@ -1,32 +1,20 @@
 import React from 'react';
 
-import { useOpenInteractionType, useScrollLock } from '@flippo-ui/hooks';
+import { MenubarMachine } from '@flippo-software/core-components/menubar';
 
-import { useHeadlessUiId } from '~@lib/hooks';
-import {
-    FloatingNode,
-    FloatingTree,
-    useFloatingNodeId,
-    useFloatingTree
-} from '~@packages/floating-ui-react';
+import { toReactProps, useMachine, useStoreState } from '~@lib/core';
+import { FloatingNode, FloatingTree } from '~@lib/floating';
+import { useDirection, useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { CompositeRoot } from '../Composite/root/CompositeRoot';
+import { CompositeMachineProvider } from '../Composite/root/CompositeMachineProvider';
 
 import type { MenuRoot } from '../Menu/root/MenuRoot';
-import type { MenuOpenEventDetails } from '../Menu/utils/types';
 
-import { MenubarContext, useMenubarContext } from './MenubarContext';
+import { MenubarContext } from './MenubarContext';
 
-import type { MenubarContextValue } from './MenubarContext';
-
-/**
- * The container for menus.
- *
- * Documentation: [Base UI Menubar](https://base-ui.com/react/components/menubar)
- */
 const menubarStateAttributesMapping: StateAttributesMapping<Menubar.State> = {
     hasSubmenuOpen(value) {
         return {
@@ -42,10 +30,12 @@ const menubarStateAttributesMapping: StateAttributesMapping<Menubar.State> = {
  */
 export function Menubar(componentProps: Menubar.Props) {
     const {
-        orientation = 'horizontal',
-        loopFocus = true,
+        /* eslint-disable unused-imports/no-unused-vars */
         render,
         className,
+        /* eslint-enable unused-imports/no-unused-vars */
+        orientation = 'horizontal',
+        loopFocus = true,
         modal = true,
         disabled = false,
         id: idProp,
@@ -53,109 +43,38 @@ export function Menubar(componentProps: Menubar.Props) {
         ...elementProps
     } = componentProps;
 
-    const [contentElement, setContentElement] = React.useState<HTMLElement | null>(null);
-    const [hasSubmenuOpen, setHasSubmenuOpen] = React.useState(false);
+    const id = useHeadlessUiId(idProp) as string;
+    const nodeId = useHeadlessUiId() as string;
+    const direction = useDirection();
 
-    const {
-        openMethod,
-        triggerProps: interactionTypeProps,
-        reset: resetOpenInteractionType
-    } = useOpenInteractionType(hasSubmenuOpen);
+    const menubar = useMachine((options) => new MenubarMachine(options, { id, nodeId, direction }), {
+        orientation,
+        loopFocus,
+        modal,
+        disabled
+    });
+    const { hasSubmenuOpen } = useStoreState(menubar.store);
 
-    React.useEffect(() => {
-        if (!hasSubmenuOpen) {
-            resetOpenInteractionType();
-        }
-    }, [hasSubmenuOpen, resetOpenInteractionType]);
+    const state: Menubar.State = React.useMemo(() => ({ orientation, modal, hasSubmenuOpen }), [orientation, modal, hasSubmenuOpen]);
 
-    useScrollLock(modal && hasSubmenuOpen && openMethod !== 'touch', contentElement);
-
-    const id = useHeadlessUiId(idProp);
-
-    const state = React.useMemo(
-        () => ({
-            orientation,
-            modal,
-            hasSubmenuOpen
-        }),
-        [orientation, modal, hasSubmenuOpen]
-    );
-
-    const contentRef = React.useRef<HTMLDivElement>(null);
-    const allowMouseUpTriggerRef = React.useRef(false);
-
-    const context: MenubarContextValue = React.useMemo(
-        () => ({
-            contentElement,
-            setContentElement,
-            setHasSubmenuOpen,
-            hasSubmenuOpen,
-            modal,
-            disabled,
-            orientation,
-            allowMouseUpTriggerRef,
-            rootId: id
-        }),
-        [
-            contentElement,
-            hasSubmenuOpen,
-            modal,
-            disabled,
-            orientation,
-            id
-        ]
-    );
+    const element = useRenderElement('div', componentProps, {
+        state,
+        ref: [ref, menubar.setElement],
+        props: [elementProps, (props) => toReactProps(menubar.getMenubarProps(props))],
+        customStyleHookMapping: menubarStateAttributesMapping
+    });
 
     return (
-        <MenubarContext.Provider value={context}>
-            <FloatingTree>
-                <MenubarContent>
-                    <CompositeRoot
-                      render={render}
-                      className={className}
-                      state={state}
-                      stateAttributesMapping={menubarStateAttributesMapping}
-                      refs={[ref, setContentElement, contentRef]}
-                      props={[{ role: 'menubar', id }, interactionTypeProps, elementProps]}
-                      orientation={orientation}
-                      loopFocus={loopFocus}
-                      highlightItemOnHover={hasSubmenuOpen}
-                    />
-                </MenubarContent>
+        <MenubarContext value={menubar}>
+            <FloatingTree tree={menubar.tree}>
+                <FloatingNode id={nodeId}>
+                    <CompositeMachineProvider composite={menubar.composite} highlightItemOnHover={hasSubmenuOpen}>
+                        {element}
+                    </CompositeMachineProvider>
+                </FloatingNode>
             </FloatingTree>
-        </MenubarContext.Provider>
+        </MenubarContext>
     );
-}
-
-function MenubarContent(props: React.PropsWithChildren<{}>) {
-    const nodeId = useFloatingNodeId();
-    const { events: menuEvents } = useFloatingTree()!;
-    const rootContext = useMenubarContext();
-
-    React.useEffect(() => {
-        function onSubmenuOpenChange(details: MenuOpenEventDetails) {
-            if (!details.nodeId || details.parentNodeId !== nodeId) {
-                return;
-            }
-
-            if (details.open) {
-                if (!rootContext.hasSubmenuOpen) {
-                    rootContext.setHasSubmenuOpen(true);
-                }
-            }
-            else if (details.reason !== 'sibling-open' && details.reason !== 'list-navigation') {
-                rootContext.setHasSubmenuOpen(false);
-            }
-        }
-
-        menuEvents.on('menuopenchange', onSubmenuOpenChange);
-
-        return () => {
-            menuEvents.off('menuopenchange', onSubmenuOpenChange);
-        };
-    }, [menuEvents, nodeId, rootContext]);
-
-    return <FloatingNode id={nodeId}>{props.children}</FloatingNode>;
 }
 
 export type MenubarState = {

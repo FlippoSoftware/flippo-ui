@@ -1,13 +1,13 @@
-import React from 'react';
+import { ButtonMachine } from '@flippo-software/core-components/button';
 
 import { triggerOpenStateMapping } from '~@lib/collapsibleOpenStateMapping';
+import { toReactProps, useMachine } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button';
 import { useCollapsibleRootContext } from '../root/CollapsibleRootContext';
 
 import type { CollapsibleRoot } from '../root/CollapsibleRoot';
@@ -20,17 +20,9 @@ const styleHookMapping: StateAttributesMapping<CollapsibleRoot.State> = {
 /**
  * A button that opens and closes the collapsible panel.
  * Renders a `<button>` element.
- *
- * Documentation: [Base UI Collapsible](https://base-ui.com/react/components/collapsible)
  */
 export function CollapsibleTrigger(componentProps: CollapsibleTriggerProps) {
-    const {
-        panelId,
-        open,
-        handleTrigger,
-        state,
-        disabled: contextDisabled
-    } = useCollapsibleRootContext();
+    const { collapsible, state } = useCollapsibleRootContext();
 
     const {
         /* eslint-disable unused-imports/no-unused-vars */
@@ -38,36 +30,24 @@ export function CollapsibleTrigger(componentProps: CollapsibleTriggerProps) {
         render,
         id,
         /* eslint-enable unused-imports/no-unused-vars */
-        disabled = contextDisabled,
+        disabled = state.disabled,
         nativeButton = true,
         ref,
         ...elementProps
     } = componentProps;
 
-    const { getButtonProps, buttonRef } = useButton({
+    const button = useMachine((options) => new ButtonMachine(options), {
         disabled,
         focusableWhenDisabled: true,
         native: nativeButton
     });
 
-    const props = React.useMemo(
-        () => ({
-            'aria-controls': open ? panelId : undefined,
-            'aria-expanded': open,
-            disabled,
-            'onClick': handleTrigger
-        }),
-        [panelId, disabled, open, handleTrigger]
-    );
-
-    const element = useRenderElement('button', componentProps, {
+    return useRenderElement('button', componentProps, {
         state,
-        ref: [ref, buttonRef],
-        props: [props, elementProps, getButtonProps],
+        ref: [ref, button.setElement],
+        props: [elementProps, (props) => toReactProps(collapsible.getTriggerProps(button, props, disabled))],
         customStyleHookMapping: styleHookMapping
     });
-
-    return element;
 }
 
 export type CollapsibleTriggerProps = {} & NativeButtonProps & HeadlessUIComponentProps<'button', CollapsibleRoot.State>;

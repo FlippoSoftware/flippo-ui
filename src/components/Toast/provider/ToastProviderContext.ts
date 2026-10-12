@@ -1,8 +1,11 @@
 import React from 'react';
 
+import type { ToastProviderMachine } from '@flippo-software/core-components/toast';
+
 import type { ToastObject, useToastManager } from '../useToastManager';
 
 export type ToastContextValue<Data extends object> = {
+    provider: ToastProviderMachine;
     toasts: ToastObject<Data>[];
     setToasts: React.Dispatch<React.SetStateAction<ToastObject<Data>[]>>;
     hovering: boolean;
@@ -11,10 +14,7 @@ export type ToastContextValue<Data extends object> = {
     setFocused: React.Dispatch<React.SetStateAction<boolean>>;
     add: (options: useToastManager.AddOptions<Data>) => string;
     update: (id: string, options: useToastManager.UpdateOptions<Data>) => void;
-    promise: <Value>(
-        value: Promise<Value>,
-        options: useToastManager.PromiseOptions<Value, Data>,
-    ) => Promise<Value>;
+    promise: <Value>(value: Promise<Value>, options: useToastManager.PromiseOptions<Value, Data>) => Promise<Value>;
     close: (id: string) => void;
     pauseTimers: () => void;
     resumeTimers: () => void;

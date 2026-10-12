@@ -1,23 +1,19 @@
-import React from 'react';
+import { TabsPanelMachine } from '@flippo-software/core-components/tabs';
 
+import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
 import { tabsStyleHookMapping } from '../root/styleHooks';
 import { useTabsRootContext } from '../root/TabsRootContext';
 
 import type { TabsRoot } from '../root/TabsRoot';
 import type { TabsTab } from '../tab/TabsTab';
 
-import { TabsPanelDataAttributes } from './TabsPanelDataAttributes';
-
 /**
  * A panel displayed when the corresponding tab is active.
  * Renders a `<div>` element.
- *
- * Documentation: [Base UI Tabs](https://base-ui.com/react/components/tabs)
  */
 export function TabsPanel(componentProps: TabsPanel.Props) {
     const {
@@ -26,65 +22,28 @@ export function TabsPanel(componentProps: TabsPanel.Props) {
         render,
         /* eslint-enable unused-imports/no-unused-vars */
         children,
-        value: valueProp,
+        value,
         keepMounted = false,
         ref,
         ...elementProps
     } = componentProps;
 
-    const {
-        value: selectedValue,
-        getTabIdByPanelValueOrIndex,
-        orientation,
-        tabActivationDirection
-    } = useTabsRootContext();
+    const { tabs, orientation, tabActivationDirection } = useTabsRootContext();
 
-    const id = useHeadlessUiId();
+    const id = useHeadlessUiId() as string;
 
-    const metadata = React.useMemo(
-        () => ({
-            id,
-            value: valueProp
-        }),
-        [id, valueProp]
-    );
+    const panel = useMachine((options) => new TabsPanelMachine(tabs, options), { value, keepMounted, id });
+    const track = useTracker();
+    const panelState = useMachineState(panel);
 
-    const { ref: listItemRef, index } = useCompositeListItem<TabsPanel.Metadata>({
-        metadata
-    });
+    const state: TabsPanel.State = { ...panelState, orientation, tabActivationDirection } as TabsPanel.State;
 
-    const tabPanelValue = valueProp ?? index;
-
-    const hidden = tabPanelValue !== selectedValue;
-
-    const correspondingTabId = React.useMemo(() => {
-        return getTabIdByPanelValueOrIndex(valueProp, index);
-    }, [getTabIdByPanelValueOrIndex, index, valueProp]);
-
-    const state: TabsPanel.State = React.useMemo(
-        () => ({
-            hidden,
-            orientation,
-            tabActivationDirection
-        }),
-        [hidden, orientation, tabActivationDirection]
-    );
-
-    const element = useRenderElement('div', componentProps, {
+    return useRenderElement('div', componentProps, {
         state,
-        ref: [ref, listItemRef],
-        props: [{
-            'aria-labelledby': correspondingTabId,
-            hidden,
-            'id': id ?? undefined,
-            'role': 'tabpanel',
-            'tabIndex': hidden ? -1 : 0,
-            [TabsPanelDataAttributes.index as string]: index
-        }, elementProps, { children: hidden && !keepMounted ? undefined : children }],
+        ref: [ref, panel.setElement],
+        props: [track(() => toReactProps(panel.getProps())), elementProps, { children: panel.rendersChildren ? children : undefined }],
         customStyleHookMapping: tabsStyleHookMapping
     });
-
-    return element;
 }
 
 export type TabsPanelMetadata = {

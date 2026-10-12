@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { AnchorPositioner } from '@flippo-software/core-components/positioning';
 
+import { toReactProps, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 
@@ -9,8 +10,7 @@ import type { Align, Side } from '~@lib/hooks/useAnchorPositioning';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useComboboxPositionerContext } from '../positioner/ComboboxPositionerContext';
-import { useComboboxRootContext } from '../root/ComboboxRootContext';
-import { selectors } from '../store';
+import { useComboboxRootMachine } from '../root/ComboboxRootContext';
 
 /**
  * Displays an element positioned against the anchor.
@@ -26,36 +26,27 @@ export function ComboboxArrow(componentProps: ComboboxArrow.Props) {
         ...elementProps
     } = componentProps;
 
-    const store = useComboboxRootContext();
-    const {
-        arrowRef,
-        side,
-        align,
-        arrowUncentered,
-        arrowStyles
-    } = useComboboxPositionerContext();
+    const root = useComboboxRootMachine();
+    const { positioner } = useComboboxPositionerContext();
+    const anchor = positioner.positioner;
 
-    const open = useStore(store, selectors.open);
-
-    const state: ComboboxArrow.State = React.useMemo(
+    const arrow = React.useMemo(
         () => ({
-            open,
-            side,
-            align,
-            uncentered: arrowUncentered
+            getState: (): ComboboxArrow.State => {
+                const { side, align } = positioner.getState();
+                return { open: root.store.state.open, side, align, uncentered: AnchorPositioner.arrowUncentered(anchor.store.state) };
+            },
+            setElement: (element: Element | null) => anchor.setArrow(element)
         }),
-        [open, side, align, arrowUncentered]
+        [root, positioner, anchor]
     );
+    const state = useMachineState(arrow);
 
     return useRenderElement('div', componentProps, {
-        ref: [arrowRef, ref],
-        customStyleHookMapping: popupStateMapping,
         state,
-        props: {
-            'style': arrowStyles,
-            'aria-hidden': true,
-            ...elementProps
-        }
+        ref: [ref, arrow.setElement],
+        props: [elementProps, (props) => toReactProps({ style: positioner.getArrowStyles(), 'aria-hidden': true, ...props })],
+        customStyleHookMapping: popupStateMapping
     });
 }
 

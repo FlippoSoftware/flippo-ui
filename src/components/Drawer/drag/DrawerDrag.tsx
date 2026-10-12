@@ -1,8 +1,11 @@
 import React from 'react';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { DrawerDragMachine } from '@flippo-software/core-components/drawer';
+
+import type { DrawerDragOptions } from '@flippo-software/core-components/drawer';
+
+import { toReactProps, useMachine, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
-import { mergeProps } from '~@lib/merge';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
@@ -12,7 +15,6 @@ import { useDialogRootContext } from '../../Dialog/root/DialogRootContext';
 import { useDrawerRootContext } from '../root/DrawerRootContext';
 
 import { DrawerDragDataAttributes } from './DrawerDragDataAttributes';
-import { useDrawerGesture } from './useDrawerGesture';
 
 const customStyleHookMapping: StateAttributesMapping<DrawerDrag.State> = {
     ...popupStateMapping,
@@ -27,6 +29,12 @@ const customStyleHookMapping: StateAttributesMapping<DrawerDrag.State> = {
  */
 export function DrawerDrag(componentProps: DrawerDrag.Props) {
     const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        className,
+        render,
+        containerRef,
+        /* eslint-enable unused-imports/no-unused-vars */
+        ref,
         closeThreshold,
         velocityThreshold,
         scrollLockTimeout,
@@ -40,77 +48,23 @@ export function DrawerDrag(componentProps: DrawerDrag.Props) {
     const { store: drawerStore } = useDrawerRootContext();
     const { store: dialogStore } = useDialogRootContext();
 
-    const isDragging = drawerStore.useState('isDragging');
-    const open = dialogStore.useState('open');
-
-    const draggableRef = React.useRef<HTMLElement>(null);
-
-    const popupElement = dialogStore.useState('popupElement');
-    const direction = drawerStore.useState('direction');
-    const shouldDrag = drawerStore.useState('shouldDrag');
-    const snapPoints = drawerStore.useState('snapPoints');
-    const activeSnapPointIndex = drawerStore.useState('activeSnapPointIndex');
-    const containerRef = drawerStore.useState('containerRef');
-
-    const { gestureProps, gestureOffset, isGesturing } = useDrawerGesture({
-        swipeDirection: direction,
-        containerRef,
-        draggableRef: drawerStore.context.dragRef,
+    const drag = useMachine((options) => new DrawerDragMachine(drawerStore, dialogStore, options), {
         closeThreshold,
         velocityThreshold,
         scrollLockTimeout,
-        enabled: shouldDrag && open,
-        snapPoints,
-        activeSnapPointIndex,
-        panelRef: popupElement,
-        onDragEnd(event, details) {
-            if (details.shouldClose) {
-                dialogStore.setOpen(false, createChangeEventDetails('drag'));
-            }
-
-            onDragEnd?.(event, details);
-        },
+        onDragEnd,
         onDragMove,
         onDragStart,
-        onActiveSnapPointIndexChange(index) {
-            drawerStore.setActiveSnapPoint(index);
-            onActiveSnapPointIndexChange?.(index);
-        }
+        onActiveSnapPointIndexChange
     });
+    const state: DrawerDrag.State = useMachineState(drag);
 
-    drawerStore.useSyncedValues({
-        dragOffset: gestureOffset,
-        isDragging: isGesturing,
-        popupStyle: gestureProps.style,
-        popupDataAttributes: gestureProps.dataAttributes
-    });
-
-    const state: DrawerDrag.State = React.useMemo(
-        () => ({
-            dragging: isDragging,
-            open
-        }),
-        [isDragging, open]
-    );
-
-    const dragProps = React.useMemo(() => {
-        return mergeProps({
-            onPointerDown: gestureProps.onPointerDown,
-            onPointerMove: gestureProps.onPointerMove,
-            onPointerUp: gestureProps.onPointerUp
-        }, elementProps, {
-            'aria-hidden': true
-        });
-    }, [elementProps, gestureProps.onPointerDown, gestureProps.onPointerMove, gestureProps.onPointerUp]);
-
-    const element = useRenderElement('div', componentProps, {
+    return useRenderElement('div', componentProps, {
         state,
-        ref: [drawerStore.context.dragRef, draggableRef],
-        props: dragProps,
+        ref: [ref, drag.setElement],
+        props: [elementProps, (props) => toReactProps(drag.getDragProps(props))],
         customStyleHookMapping
     });
-
-    return element;
 }
 
 export namespace DrawerDrag {
@@ -156,24 +110,24 @@ export namespace DrawerDrag {
          *
          * @default undefined
          */
-        onDragEnd?: useDrawerGesture.Params['onDragEnd'];
+        onDragEnd?: DrawerDragOptions['onDragEnd'];
         /**
          * The callback function to be called when the drag moves.
          *
          * @default undefined
          */
-        onDragMove?: useDrawerGesture.Params['onDragMove'];
+        onDragMove?: DrawerDragOptions['onDragMove'];
         /**
          * The callback function to be called when the drag starts.
          *
          * @default undefined
          */
-        onDragStart?: useDrawerGesture.Params['onDragStart'];
+        onDragStart?: DrawerDragOptions['onDragStart'];
         /**
          * The callback function to be called when the active snap point index changes.
          *
          * @default undefined
          */
-        onActiveSnapPointIndexChange?: useDrawerGesture.Params['onActiveSnapPointIndexChange'];
+        onActiveSnapPointIndexChange?: DrawerDragOptions['onActiveSnapPointIndexChange'];
     } & HeadlessUIComponentProps<'div', State>;
 }

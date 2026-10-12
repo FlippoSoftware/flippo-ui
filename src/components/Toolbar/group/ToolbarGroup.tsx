@@ -54,9 +54,7 @@ export function ToolbarGroup(componentProps: ToolbarGroup.Props) {
         props: [{ role: 'group' }, elementProps]
     });
 
-    return (
-        <ToolbarGroupContext value={contextValue}>{element}</ToolbarGroupContext>
-    );
+    return <ToolbarGroupContext value={contextValue}>{element}</ToolbarGroupContext>;
 }
 
 export namespace ToolbarGroup {

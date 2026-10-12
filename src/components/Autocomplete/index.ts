@@ -2,25 +2,23 @@ export type {
     ComboboxArrowProps as AutocompleteArrowProps,
     ComboboxArrowState as AutocompleteArrowState
 } from '../Combobox/arrow/ComboboxArrow';
-
 export type {
     ComboboxBackdropProps as AutocompleteBackdropProps,
     ComboboxBackdropState as AutocompleteBackdropState
 } from '../Combobox/backdrop/ComboboxBackdrop';
 export type { ComboboxCollectionProps as AutocompleteCollectionProps } from '../Combobox/collection/ComboboxCollection';
-
 export type {
     ComboboxEmptyProps as AutocompleteEmptyProps,
     ComboboxEmptyState as AutocompleteEmptyState
 } from '../Combobox/empty/ComboboxEmpty';
 export type {
-    ComboboxGroupLabelProps as AutocompleteGroupLabelProps,
-    ComboboxGroupLabelState as AutocompleteGroupLabelState
-} from '../Combobox/group-label/ComboboxGroupLabel';
-export type {
     ComboboxGroupProps as AutocompleteGroupProps,
     ComboboxGroupState as AutocompleteGroupState
 } from '../Combobox/group/ComboboxGroup';
+export type {
+    ComboboxGroupLabelProps as AutocompleteGroupLabelProps,
+    ComboboxGroupLabelState as AutocompleteGroupLabelState
+} from '../Combobox/group-label/ComboboxGroupLabel';
 export type {
     ComboboxInputProps as AutocompleteInputProps,
     ComboboxInputState as AutocompleteInputState
@@ -54,7 +52,8 @@ export type {
     ComboboxTriggerProps as AutocompleteTriggerProps,
     ComboboxTriggerState as AutocompleteTriggerState
 } from '../Combobox/trigger/ComboboxTrigger';
-export * as Autocomplete from './index.parts';
-export type * from './root/AutocompleteRoot';
 
+export * as Autocomplete from './index.parts';
+
+export type * from './root/AutocompleteRoot';
 export type * from './value/AutocompleteValue';

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useStoreSelector } from '~@lib/core';
+
 import { Dialog as DialogHeadless } from '../../Dialog';
 import { useDrawerRootContext } from '../root/DrawerRootContext';
 
@@ -10,7 +12,7 @@ import { useDrawerRootContext } from '../root/DrawerRootContext';
 export function DrawerBackdrop(componentProps: DrawerBackdrop.Props) {
     const { store: drawerStore } = useDrawerRootContext();
 
-    const dataAttributes = drawerStore.useState('popupDataAttributes');
+    const dataAttributes = useStoreSelector(drawerStore, 'popupDataAttributes');
 
     return <DialogHeadless.Backdrop {...componentProps} {...dataAttributes} />;
 }

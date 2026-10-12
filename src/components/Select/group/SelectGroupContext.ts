@@ -11,9 +11,7 @@ export function useSelectGroupContext() {
     const context = React.use(SelectGroupContext);
 
     if (context === undefined) {
-        throw new Error(
-            'Headless UI: SelectGroupContext is missing. SelectGroup parts must be placed within <Select.Group>.'
-        );
+        throw new Error('Headless UI: SelectGroupContext is missing. SelectGroup parts must be placed within <Select.Group>.');
     }
 
     return context;

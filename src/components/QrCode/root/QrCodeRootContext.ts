@@ -1,10 +1,12 @@
 import React from 'react';
 
+import type { QrCodeMachine } from '@flippo-software/core-components/qr-code';
 import type QRCodeStyling from 'qr-code-styling';
 
 import type { QrCodeRoot } from './QrCodeRoot';
 
 export type QrCodeRootContextValue = {
+    qrCode: QrCodeMachine<QRCodeStyling>;
     value: string;
     size: {
         width: number;
@@ -22,9 +24,7 @@ export function useQrCodeRootContext() {
     const context = React.use(QrCodeRootContext);
 
     if (context === undefined) {
-        throw new Error(
-            'Headless UI: QrCodeRootContext is missing. QrCode parts must be placed within <QrCode.Root>.'
-        );
+        throw new Error('Headless UI: QrCodeRootContext is missing. QrCode parts must be placed within <QrCode.Root>.');
     }
 
     return context;

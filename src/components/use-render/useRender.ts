@@ -14,9 +14,7 @@ export function useRender<
     State extends Record<string, unknown>,
     RenderedElementType extends Element,
     Enabled extends boolean | undefined = undefined
->(
-    params: useRender.Parameters<State, RenderedElementType, Enabled>
-): useRender.ReturnValue<Enabled> {
+>(params: useRender.Parameters<State, RenderedElementType, Enabled>): useRender.ReturnValue<Enabled> {
     const renderParams = params as useRender.Parameters<State, RenderedElementType, Enabled> & {
         customStyleHookMapping?: StateAttributesMapping<State>;
     };
@@ -27,12 +25,11 @@ export function useRender<
 }
 
 export namespace useRender {
-    export type RenderProp<State = Record<string, unknown>>
-        = | ComponentRenderFn<React.HTMLAttributes<any>, State>
-          | React.ReactElement<Record<string, unknown>>;
+    export type RenderProp<State = Record<string, unknown>> =
+        | ComponentRenderFn<React.HTMLAttributes<any>, State>
+        | React.ReactElement<Record<string, unknown>>;
 
-    export type ElementProps<ElementType extends React.ElementType>
-        = React.ComponentPropsWithRef<ElementType>;
+    export type ElementProps<ElementType extends React.ElementType> = React.ComponentPropsWithRef<ElementType>;
 
     export type ComponentProps<
         ElementType extends React.ElementType,
@@ -45,16 +42,10 @@ export namespace useRender {
          *
          * Accepts a `ReactElement` or a function that returns the element to render.
          */
-        render?:
-          | ComponentRenderFn<RenderFunctionProps, State>
-          | React.ReactElement<Record<string, unknown>>;
+        render?: ComponentRenderFn<RenderFunctionProps, State> | React.ReactElement<Record<string, unknown>>;
     };
 
-    export type Parameters<
-        State,
-        RenderedElementType extends Element,
-        Enabled extends boolean | undefined
-    > = {
+    export type Parameters<State, RenderedElementType extends Element, Enabled extends boolean | undefined> = {
         /**
          * The React element or a function that returns one to override the default element.
          */
@@ -99,10 +90,7 @@ export namespace useRender {
          * @default false
          */
         asChild?: boolean;
-
     };
 
-    export type ReturnValue<Enabled extends boolean | undefined> = Enabled extends false
-        ? null
-        : React.ReactElement;
+    export type ReturnValue<Enabled extends boolean | undefined> = Enabled extends false ? null : React.ReactElement;
 }

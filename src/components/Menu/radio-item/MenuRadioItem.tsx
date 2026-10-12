@@ -1,22 +1,18 @@
 import React from 'react';
 
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { MenuRadioItemMachine } from '@flippo-software/core-components/menu';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { toReactProps, useMachine, useMachineState } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
-import { REASONS } from '~@lib/reason';
 
 import type { HeadlessUIComponentProps, NonNativeButtonProps } from '~@lib/types';
 
-import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
-import { REGULAR_ITEM, useMenuItem } from '../item/useMenuItem';
-import { useMenuPositionerContext } from '../positioner/MenuPositionerContext';
+import { useMenuItemSetup } from '../item/useMenuItem';
 import { useMenuRadioGroupContext } from '../radio-group/MenuRadioGroupContext';
 import { useMenuRootContext } from '../root/MenuRootContext';
 import { itemMapping } from '../utils/stateAttributesMapping';
 
 import { MenuRadioItemContext } from './MenuRadioItemContext';
-
 /**
  * A menu item that works like a radio button in a given group.
  * Renders a `<div>` element.
@@ -32,70 +28,36 @@ export function MenuRadioItem(componentProps: MenuRadioItem.Props) {
         id: idProp,
         label,
         nativeButton = false,
-        disabled: disabledProp = false,
+        disabled = false,
         closeOnClick = false,
         value,
         ref,
         ...elementProps
     } = componentProps;
 
-    const listItem = useCompositeListItem({ label });
-    const menuPositionerContext = useMenuPositionerContext(true);
-    const id = useHeadlessUiId(idProp);
-
+    const id = useHeadlessUiId(idProp) as string;
     const { store } = useMenuRootContext();
-    const highlighted = store.useState('isActive', listItem.index);
-    const itemProps = store.useState('itemProps');
+    const group = useMenuRadioGroupContext();
+    const setup = useMenuItemSetup();
 
-    const {
-        value: selectedValue,
-        setValue: setSelectedValue,
-        disabled: groupDisabled
-    } = useMenuRadioGroupContext();
-
-    const disabled = groupDisabled || disabledProp;
-    const checked = selectedValue === value;
-
-    const { getItemProps, itemRef } = useMenuItem({
-        closeOnClick,
-        disabled,
-        highlighted,
+    const item = useMachine((options) => new MenuRadioItemMachine(store, group, options, setup), {
         id,
-        store,
+        label,
         nativeButton,
-        nodeId: menuPositionerContext?.nodeId,
-        itemMetadata: REGULAR_ITEM
+        disabled,
+        closeOnClick,
+        value
     });
-
-    const state: MenuRadioItem.State = React.useMemo(
-        () => ({
-            disabled,
-            highlighted,
-            checked
-        }),
-        [disabled, highlighted, checked]
-    );
-
-    const handleClick = useStableCallback((event: React.MouseEvent) => {
-        const details = {
-            ...createChangeEventDetails(REASONS.itemPress, event.nativeEvent),
-            preventUnmountOnClose: () => {}
-        };
-        setSelectedValue(value, details);
-    });
+    const state: MenuRadioItem.State = useMachineState(item);
 
     const element = useRenderElement('div', componentProps, {
         state,
         customStyleHookMapping: itemMapping,
-        props: [itemProps, {
-            'role': 'menuitemradio',
-            'aria-checked': checked,
-            'onClick': handleClick
-        }, elementProps, getItemProps],
-        ref: [itemRef, ref, listItem.ref]
+        props: [elementProps, (props) => toReactProps(item.getRadioItemProps(props))],
+        ref: [ref, item.setElement]
     });
 
-    return <MenuRadioItemContext.Provider value={state}>{element}</MenuRadioItemContext.Provider>;
+    return <MenuRadioItemContext value={state}>{element}</MenuRadioItemContext>;
 }
 
 export type MenuRadioItemState = {
@@ -141,7 +103,8 @@ export type MenuRadioItemProps = {
      * @default false
      */
     closeOnClick?: boolean;
-} & NonNativeButtonProps & HeadlessUIComponentProps<'div', MenuRadioItem.State>;
+} & NonNativeButtonProps &
+    HeadlessUIComponentProps<'div', MenuRadioItem.State>;
 
 export namespace MenuRadioItem {
     export type State = MenuRadioItemState;

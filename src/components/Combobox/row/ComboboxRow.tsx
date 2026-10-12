@@ -26,7 +26,7 @@ export function ComboboxRow(componentProps: ComboboxRow.Props) {
         props: [{ role: 'row' }, elementProps]
     });
 
-    return <ComboboxRowContext.Provider value>{element}</ComboboxRowContext.Provider>;
+    return <ComboboxRowContext.Provider value={true}>{element}</ComboboxRowContext.Provider>;
 }
 
 export type ComboboxRowState = {};

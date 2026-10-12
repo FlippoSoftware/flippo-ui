@@ -10,9 +10,7 @@ export function useSwitchRootContext() {
     const context = React.use(SwitchRootContext);
 
     if (context === undefined) {
-        throw new Error(
-            'Headless UI: SwitchRootContext is missing. Switch parts must be placed within <Switch.Root>.'
-        );
+        throw new Error('Headless UI: SwitchRootContext is missing. Switch parts must be placed within <Switch.Root>.');
     }
 
     return context;

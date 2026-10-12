@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
 
+import { toReactProps, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -35,42 +36,31 @@ export function MenuArrow(componentProps: MenuArrow.Props) {
     } = componentProps;
 
     const { store } = useMenuRootContext();
-    const {
-        arrowRef,
-        side,
-        align,
-        arrowUncentered,
-        arrowStyles
-    } = useMenuPositionerContext();
-    const open = store.useState('open');
-    const transitionStatus = store.useState('transitionStatus');
+    const { positioner } = useMenuPositionerContext();
 
-    const state: MenuArrow.State = React.useMemo(
+    const arrow = React.useMemo(
         () => ({
-            open,
-            side,
-            align,
-            uncentered: arrowUncentered,
-            transitionStatus
+            getState: (): MenuArrow.State => {
+                const { side, align } = positioner.getState();
+                return {
+                    open: store.select('open'),
+                    side,
+                    align,
+                    uncentered: positioner.controller.isArrowUncentered(),
+                    transitionStatus: store.select('transitionStatus')
+                };
+            },
+            setElement: (element: Element | null) => positioner.controller.setArrow(element)
         }),
-        [
-            open,
-            side,
-            align,
-            arrowUncentered,
-            transitionStatus
-        ]
+        [store, positioner]
     );
+    const state = useMachineState(arrow, [positioner.controller]);
 
     return useRenderElement('div', componentProps, {
-        ref: [arrowRef, ref],
-        customStyleHookMapping: stateAttributesMapping,
         state,
-        props: {
-            'style': arrowStyles,
-            'aria-hidden': true,
-            ...elementProps
-        }
+        ref: [ref, arrow.setElement],
+        props: [elementProps, (props) => toReactProps({ style: positioner.controller.getArrowStyles(), 'aria-hidden': true, ...props })],
+        customStyleHookMapping: stateAttributesMapping
     });
 }
 

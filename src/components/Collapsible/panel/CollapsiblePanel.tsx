@@ -1,11 +1,7 @@
-import React from 'react';
-
-import { useIsoLayoutEffect, useOpenChangeComplete } from '@flippo-ui/hooks';
-
 import type { TransitionStatus } from '@flippo-ui/hooks';
 
+import { toReactProps, useSyncDuringRender } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
-import { warn } from '~@lib/warn';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
@@ -14,14 +10,9 @@ import { collapsibleStyleHookMapping } from '../root/styleHooks';
 
 import type { CollapsibleRoot } from '../root/CollapsibleRoot';
 
-import { CollapsiblePanelCssVars } from './CollapsiblePanelCssVars';
-import { useCollapsiblePanel } from './useCollapsiblePanel';
-
 /**
  * A panel with the collapsible contents.
  * Renders a `<div>` element.
- *
- * Documentation: [Base UI Collapsible](https://base-ui.com/react/components/collapsible)
  */
 export function CollapsiblePanel(componentProps: CollapsiblePanelProps) {
     const {
@@ -29,128 +20,25 @@ export function CollapsiblePanel(componentProps: CollapsiblePanelProps) {
         className,
         render,
         /* eslint-enable unused-imports/no-unused-vars */
-        hiddenUntilFound: hiddenUntilFoundProp,
-        keepMounted: keepMountedProp,
-        id: idProp,
+        hiddenUntilFound,
+        keepMounted,
+        id,
         ref,
         ...elementProps
     } = componentProps;
 
-    if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        useIsoLayoutEffect(() => {
-            if (hiddenUntilFoundProp && keepMountedProp === false) {
-                warn(
-                    'The `keepMounted={false}` prop on a Collapsible will be ignored when using `hiddenUntilFound` since it requires the Panel to remain mounted even when closed.'
-                );
-            }
-        }, [hiddenUntilFoundProp, keepMountedProp]);
-    }
+    const { collapsible, state } = useCollapsibleRootContext();
 
-    const {
-        abortControllerRef,
-        animationTypeRef,
-        height,
-        mounted,
-        onOpenChange,
-        open,
-        panelId,
-        panelRef,
-        runOnceAnimationsFinish,
-        setDimensions,
-        setHiddenUntilFound,
-        setKeepMounted,
-        setMounted,
-        setPanelIdState,
-        setOpen,
-        setVisible,
-        state,
-        transitionDimensionRef,
-        visible,
-        width,
-        transitionStatus
-    } = useCollapsibleRootContext();
-
-    const hiddenUntilFound = hiddenUntilFoundProp ?? false;
-    const keepMounted = keepMountedProp ?? false;
-
-    useIsoLayoutEffect(() => {
-        if (idProp) {
-            setPanelIdState(idProp);
-            return () => {
-                setPanelIdState(undefined);
-            };
-        }
-        return undefined;
-    }, [idProp, setPanelIdState]);
-
-    useIsoLayoutEffect(() => {
-        setHiddenUntilFound(hiddenUntilFound);
-    }, [setHiddenUntilFound, hiddenUntilFound]);
-
-    useIsoLayoutEffect(() => {
-        setKeepMounted(keepMounted);
-    }, [setKeepMounted, keepMounted]);
-
-    const { props } = useCollapsiblePanel({
-        abortControllerRef,
-        animationTypeRef,
-        externalRef: ref,
-        height,
-        hiddenUntilFound,
-        id: panelId,
-        keepMounted,
-        mounted,
-        onOpenChange,
-        open,
-        panelRef,
-        runOnceAnimationsFinish,
-        setDimensions,
-        setMounted,
-        setOpen,
-        setVisible,
-        transitionDimensionRef,
-        visible,
-        width
-    });
-
-    useOpenChangeComplete({
-        open: open && transitionStatus === 'idle',
-        ref: panelRef,
-        onComplete() {
-            if (!open) {
-                return;
-            }
-
-            setDimensions({ height: undefined, width: undefined });
-        }
-    });
-
-    const panelState: CollapsiblePanel.State = React.useMemo(
-        () => ({
-            ...state,
-            transitionStatus
-        }),
-        [state, transitionStatus]
-    );
+    useSyncDuringRender(() => collapsible.setPanelOptions({ id, hiddenUntilFound, keepMounted }));
 
     const element = useRenderElement('div', componentProps, {
-        state: panelState,
-        ref: [ref, panelRef],
-        props: [props, {
-            style: {
-                [CollapsiblePanelCssVars.collapsiblePanelHeight as string]:
-                        height === undefined ? 'auto' : `${height}px`,
-                [CollapsiblePanelCssVars.collapsiblePanelWidth as string]:
-                        width === undefined ? 'auto' : `${width}px`
-            }
-        }, elementProps],
+        state,
+        ref: [ref, collapsible.setPanel],
+        props: [toReactProps(collapsible.getPanelProps()), elementProps],
         customStyleHookMapping: collapsibleStyleHookMapping
     });
 
-    const shouldRender = keepMounted || hiddenUntilFound || (!keepMounted && mounted);
-
-    if (!shouldRender) {
+    if (!collapsible.shouldRenderPanel()) {
         return null;
     }
 

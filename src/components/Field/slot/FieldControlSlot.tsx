@@ -48,8 +48,14 @@ export function FieldControlSlot(componentProps: FieldControlSlot.Props) {
 export namespace FieldControlSlot {
     export type State = FieldRoot.State;
 
-    export type InputProps = Omit<HeadlessUIComponentProps<'input', State>, keyof Omit <React.InputHTMLAttributes<HTMLInputElement>, keyof React.HTMLAttributes <HTMLInputElement>>>;
-    export type TextAreaProps = Omit<HeadlessUIComponentProps<'textarea', State>, keyof Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, keyof React.HTMLAttributes<HTMLTextAreaElement>>>;
+    export type InputProps = Omit<
+        HeadlessUIComponentProps<'input', State>,
+        keyof Omit<React.InputHTMLAttributes<HTMLInputElement>, keyof React.HTMLAttributes<HTMLInputElement>>
+    >;
+    export type TextAreaProps = Omit<
+        HeadlessUIComponentProps<'textarea', State>,
+        keyof Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, keyof React.HTMLAttributes<HTMLTextAreaElement>>
+    >;
 
     export type Props = InputProps | TextAreaProps;
 }

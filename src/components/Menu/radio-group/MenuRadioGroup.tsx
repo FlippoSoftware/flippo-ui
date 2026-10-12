@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { useControlledState } from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { MenuRadioGroupMachine } from '@flippo-software/core-components/menu';
 
+import { toReactProps, useMachine, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -11,80 +11,43 @@ import type { MenuRoot } from '../root/MenuRoot';
 
 import { MenuRadioGroupContext } from './MenuRadioGroupContext';
 
-import type { MenuRadioGroupContextValue } from './MenuRadioGroupContext';
-
 /**
  * Groups related radio items.
  * Renders a `<div>` element.
  *
  * Documentation: [Base UI Menu](https://base-ui.com/react/components/menu)
  */
-const Inner = React.memo(
-    (
-        componentProps: MenuRadioGroup.Props
-    ) => {
-        const {
-            /* eslint-disable unused-imports/no-unused-vars */
-            render,
-            className,
-            /* eslint-enable unused-imports/no-unused-vars */
-            value: valueProp,
-            defaultValue,
-            onValueChange: onValueChangeProp,
-            disabled = false,
-            ref,
-            ...elementProps
-        } = componentProps;
-
-        const [value, setValueUnwrapped] = useControlledState({
-            prop: valueProp,
-            defaultProp: defaultValue,
-            caller: 'MenuRadioGroup'
-        });
-
-        const onValueChange = useStableCallback(onValueChangeProp);
-
-        const setValue = useStableCallback(
-            (newValue: any, eventDetails: MenuRadioGroup.ChangeEventDetails) => {
-                onValueChange?.(newValue, eventDetails);
-
-                if (eventDetails.isCanceled) {
-                    return;
-                }
-
-                setValueUnwrapped(newValue);
-            }
-        );
-
-        const state: MenuRadioGroup.State = { disabled };
-
-        const element = useRenderElement('div', componentProps, {
-            state,
-            ref,
-            props: {
-                'role': 'group',
-                'aria-disabled': disabled || undefined,
-                ...elementProps
-            }
-        });
-
-        const context: MenuRadioGroupContextValue = React.useMemo(
-            () => ({
-                value,
-                setValue,
-                disabled
-            }),
-            [value, setValue, disabled]
-        );
-
-        return (
-            <MenuRadioGroupContext.Provider value={context}>{element}</MenuRadioGroupContext.Provider>
-        );
-    }
-);
-
 export function MenuRadioGroup(componentProps: MenuRadioGroup.Props) {
-    return <Inner {...componentProps} />;
+    const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        render,
+        className,
+        /* eslint-enable unused-imports/no-unused-vars */
+        value,
+        defaultValue,
+        onValueChange,
+        disabled = false,
+        ref,
+        ...elementProps
+    } = componentProps;
+
+    const group = useMachine((options) => new MenuRadioGroupMachine(options), {
+        value,
+        defaultValue,
+        onValueChange: onValueChange as never,
+        disabled
+    });
+    const track = useTracker();
+
+    const state: MenuRadioGroup.State = React.useMemo(() => ({ disabled }), [disabled]);
+
+    const element = useRenderElement('div', componentProps, {
+        state,
+        ref,
+        props: [elementProps, (props) => track(() => toReactProps(group.getGroupProps(props)))]
+    });
+
+    return <MenuRadioGroupContext value={group}>{element}</MenuRadioGroupContext>;
 }
 
 export type MenuRadioGroupProps = {

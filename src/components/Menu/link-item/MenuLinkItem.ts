@@ -1,13 +1,14 @@
 'use client';
 import * as React from 'react';
 
+import { MenuLinkItemMachine } from '@flippo-software/core-components/menu';
+
+import { toReactProps, useMachine, useMachineState } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
-import { useMenuItemCommonProps } from '../item/useMenuItemCommonProps';
-import { useMenuPositionerContext } from '../positioner/MenuPositionerContext';
+import { useMenuItemSetup } from '../item/useMenuItem';
 import { useMenuRootContext } from '../root/MenuRootContext';
 
 /**
@@ -29,38 +30,18 @@ export function MenuLinkItem(componentProps: MenuLinkItem.Props) {
         ...elementProps
     } = componentProps;
 
-    const linkRef = React.useRef<HTMLAnchorElement | null>(null);
-
-    const listItem = useCompositeListItem({ label });
-    const menuPositionerContext = useMenuPositionerContext(true);
-    const nodeId = menuPositionerContext?.nodeId;
-
-    const id = useHeadlessUiId(idProp);
-
+    const id = useHeadlessUiId(idProp) as string;
     const { store } = useMenuRootContext();
-    const highlighted = store.useState('isActive', listItem.index);
-    const itemProps = store.useState('itemProps');
+    const setup = useMenuItemSetup();
 
-    const commonProps = useMenuItemCommonProps({
-        closeOnClick,
-        highlighted,
-        id,
-        nodeId,
-        store,
-        itemRef: linkRef
-    });
-
-    const state: MenuLinkItem.State = React.useMemo(
-        () => ({
-            highlighted
-        }),
-        [highlighted]
-    );
+    const item = useMachine((options) => new MenuLinkItemMachine(store, options, setup), { id, label, closeOnClick });
+    const link = React.useMemo(() => ({ getState: () => item.getLinkState() }), [item]);
+    const state: MenuLinkItem.State = useMachineState(link);
 
     return useRenderElement('a', componentProps, {
         state,
-        props: [itemProps, elementProps, commonProps],
-        ref: [linkRef, ref, listItem.ref]
+        props: [elementProps, (props) => toReactProps(item.getLinkProps(props))],
+        ref: [ref, item.setElement]
     });
 }
 

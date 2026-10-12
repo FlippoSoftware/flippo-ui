@@ -1,11 +1,10 @@
-import React from 'react';
+import { QrCodeGenerateTriggerMachine } from '@flippo-software/core-components/qr-code';
 
+import { toReactProps, useMachine, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
-import { mergeProps } from '~@lib/merge';
 
-import type { HeadlessUIComponentProps, HTMLProps, NativeButtonProps } from '~@lib/types';
+import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
-import { useButton } from '../../use-button';
 import { useQrCodeRootContext } from '../root/QrCodeRootContext';
 import { qrCodeStyleHookMapping } from '../utils/styleHooks';
 
@@ -19,43 +18,19 @@ export function QrCodeGenerateTrigger(componentProps: QrCodeGenerateTrigger.Prop
         /* eslint-enable unused-imports/no-unused-vars */
         ref,
         nativeButton,
-        disabled: disabledProp,
+        disabled,
         ...elementProps
     } = componentProps;
 
-    const { status, qrCodeStyling, generateQrCode } = useQrCodeRootContext();
+    const { qrCode } = useQrCodeRootContext();
 
-    const disabled = Boolean(status === 'loading' || qrCodeStyling || disabledProp);
-
-    const { getButtonProps, buttonRef } = useButton({
-        disabled,
-        native: nativeButton
-    });
-
-    const getTriggerProps = React.useCallback(
-        (externalProps?: HTMLProps): HTMLProps => {
-            return mergeProps(
-                {
-                    onClick: generateQrCode
-                },
-                externalProps,
-                getButtonProps
-            );
-        },
-        [generateQrCode, getButtonProps]
-    );
-    const state: QrCodeGenerateTrigger.State = React.useMemo(
-        () => ({
-            status,
-            disabled
-        }),
-        [status, disabled]
-    );
+    const trigger = useMachine((options) => new QrCodeGenerateTriggerMachine(qrCode, options), { disabled, nativeButton });
+    const state: QrCodeGenerateTrigger.State = useMachineState(trigger);
 
     const element = useRenderElement('button', componentProps, {
         state,
-        ref: [ref, buttonRef],
-        props: [elementProps, getTriggerProps],
+        ref: [ref, trigger.button.setElement],
+        props: [elementProps, (props) => toReactProps(trigger.getProps(props))],
         customStyleHookMapping: qrCodeStyleHookMapping
     });
 
@@ -74,5 +49,6 @@ export namespace QrCodeGenerateTrigger {
          * @default false
          */
         disabled?: boolean;
-    } & NativeButtonProps & HeadlessUIComponentProps<'button', State>;
+    } & NativeButtonProps &
+        HeadlessUIComponentProps<'button', State>;
 }

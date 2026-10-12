@@ -1,18 +1,16 @@
 import React from 'react';
 
-import { useControlledState } from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { TabsMachine } from '@flippo-software/core-components/tabs';
 
+import type { TabsOptions } from '@flippo-software/core-components/tabs';
+
+import { useMachine, useStoreState } from '~@lib/core';
 import { useDirection, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import type { REASONS } from '~@lib/reason';
 import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
 
-import { CompositeList } from '../../Composite/list/CompositeList';
-
-import type { CompositeMetadata } from '../../Composite/list/CompositeList';
-import type { TabsPanel } from '../panel/TabsPanel';
 import type { TabsTab } from '../tab/TabsTab';
 
 import { tabsStyleHookMapping } from './styleHooks';
@@ -20,6 +18,10 @@ import { TabsRootContext } from './TabsRootContext';
 
 import type { TabsRootContextValue } from './TabsRootContext';
 
+/**
+ * Groups the tabs and the corresponding panels.
+ * Renders a `<div>` element.
+ */
 export function TabsRoot(componentProps: TabsRoot.Props) {
     const {
         /* eslint-disable unused-imports/no-unused-vars */
@@ -27,153 +29,45 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
         render,
         /* eslint-enable unused-imports/no-unused-vars */
         defaultValue = 0,
-        onValueChange: onValueChangeProp,
+        onValueChange,
         orientation = 'horizontal',
-        value: valueProp,
+        value,
         ref,
         ...elementProps
     } = componentProps;
 
     const direction = useDirection();
 
-    const tabPanelRefs = React.useRef<(HTMLElement | null)[]>([]);
-
-    const [value, setValue] = useControlledState({
-        prop: valueProp,
-        defaultProp: defaultValue,
-        caller: 'Tabs'
+    const tabs = useMachine((options) => new TabsMachine(options), {
+        value,
+        defaultValue,
+        orientation,
+        onValueChange: onValueChange as TabsOptions['onValueChange'],
+        direction
     });
+    const internalState = useStoreState(tabs.store);
 
-    const [tabPanelMap, setTabPanelMap] = React.useState(
-        () => new Map<Node, CompositeMetadata<TabsPanel.Metadata> | null>()
-    );
-    const [tabMap, setTabMap] = React.useState(
-        () => new Map<Node, CompositeMetadata<TabsTab.Metadata> | null>()
-    );
+    const tabsValue = tabs.value;
+    const { tabActivationDirection } = internalState;
 
-    const [tabActivationDirection, setTabActivationDirection]
-        = React.useState<TabsTab.ActivationDirection>('none');
-
-    const onValueChange = useStableCallback(
-        (newValue: TabsTab.Value, eventDetails: TabsRoot.ChangeEventDetails) => {
-            onValueChangeProp?.(newValue, eventDetails);
-
-            if (eventDetails.isCanceled) {
-                return;
-            }
-
-            setValue(newValue);
-            setTabActivationDirection(eventDetails.activationDirection);
-        }
-    );
-
-    // get the `id` attribute of <Tabs.Panel> to set as the value of `aria-controls` on <Tabs.Tab>
-    const getTabPanelIdByTabValueOrIndex = React.useCallback(
-        (tabValue: TabsTab.Value | undefined, index: number) => {
-            if (tabValue === undefined && index < 0) {
-                return undefined;
-            }
-
-            for (const tabPanelMetadata of tabPanelMap.values()) {
-                // find by tabValue
-                if (tabValue !== undefined && tabPanelMetadata && tabValue === tabPanelMetadata?.value) {
-                    return tabPanelMetadata.id;
-                }
-
-                // find by index
-                if (
-                    tabValue === undefined
-                    && tabPanelMetadata?.index
-                    && tabPanelMetadata?.index === index
-                ) {
-                    return tabPanelMetadata.id;
-                }
-            }
-
-            return undefined;
-        },
-        [tabPanelMap]
-    );
-
-    // get the `id` attribute of <Tabs.Tab> to set as the value of `aria-labelledby` on <Tabs.Panel>
-    const getTabIdByPanelValueOrIndex = React.useCallback(
-        (tabPanelValue: TabsTab.Value | undefined, index: number) => {
-            if (tabPanelValue === undefined && index < 0) {
-                return undefined;
-            }
-
-            for (const tabMetadata of tabMap.values()) {
-                // find by tabPanelValue
-                if (
-                    tabPanelValue !== undefined
-                    && index > -1
-                    && tabPanelValue === (tabMetadata?.value ?? tabMetadata?.index ?? undefined)
-                ) {
-                    return tabMetadata?.id;
-                }
-
-                // find by index
-                if (
-                    tabPanelValue === undefined
-                    && index > -1
-                    && index === (tabMetadata?.value ?? tabMetadata?.index ?? undefined)
-                ) {
-                    return tabMetadata?.id;
-                }
-            }
-
-            return undefined;
-        },
-        [tabMap]
-    );
-
-    // used in `useActivationDirectionDetector` for setting data-activation-direction
-    const getTabElementBySelectedValue = React.useCallback(
-        (selectedValue: TabsTab.Value | undefined): HTMLElement | null => {
-            if (selectedValue === undefined) {
-                return null;
-            }
-
-            for (const [tabElement, tabMetadata] of tabMap.entries()) {
-                if (tabMetadata != null && selectedValue === (tabMetadata.value ?? tabMetadata.index)) {
-                    return tabElement as HTMLElement;
-                }
-            }
-
-            return null;
-        },
-        [tabMap]
-    );
-
+    // biome-ignore lint/correctness/useExhaustiveDependencies: `internalState` holds the tab and panel maps the lookups read.
     const tabsContextValue: TabsRootContextValue = React.useMemo(
         () => ({
             direction,
-            getTabElementBySelectedValue,
-            getTabIdByPanelValueOrIndex,
-            getTabPanelIdByTabValueOrIndex,
-            onValueChange,
+            getTabElementBySelectedValue: (selectedValue) => tabs.getTabElementBySelectedValue(selectedValue),
+            getTabIdByPanelValueOrIndex: (panelValue, index) => tabs.getTabIdByPanelValueOrIndex(panelValue, index),
+            getTabPanelIdByTabValueOrIndex: (tabValue, index) => tabs.getTabPanelIdByTabValueOrIndex(tabValue, index),
+            onValueChange: tabs.onValueChange as TabsRootContextValue['onValueChange'],
             orientation,
-            setTabMap,
+            setTabMap: tabs.setTabMap as unknown as TabsRootContextValue['setTabMap'],
             tabActivationDirection,
-            value
+            value: tabsValue,
+            tabs
         }),
-        [
-            direction,
-            getTabElementBySelectedValue,
-            getTabIdByPanelValueOrIndex,
-            getTabPanelIdByTabValueOrIndex,
-            onValueChange,
-            orientation,
-            setTabMap,
-            tabActivationDirection,
-            value
-        ]
+        [direction, tabs, orientation, tabActivationDirection, tabsValue, internalState]
     );
 
-    const state: TabsRoot.State = {
-        orientation,
-        tabActivationDirection
-    };
+    const state: TabsRoot.State = { orientation, tabActivationDirection };
 
     const element = useRenderElement('div', componentProps, {
         state,
@@ -182,13 +76,7 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
         customStyleHookMapping: tabsStyleHookMapping
     });
 
-    return (
-        <TabsRootContext.Provider value={tabsContextValue}>
-            <CompositeList<TabsPanel.Metadata> elementsRef={tabPanelRefs} onMapChange={setTabPanelMap}>
-                {element}
-            </CompositeList>
-        </TabsRootContext.Provider>
-    );
+    return <TabsRootContext.Provider value={tabsContextValue}>{element}</TabsRootContext.Provider>;
 }
 
 export type TabsRootOrientation = Orientation;

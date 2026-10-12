@@ -7,8 +7,8 @@ import { useCompositeListContext } from './CompositeListContext';
 import type { CompositeListContextValue } from './CompositeListContext';
 
 export enum IndexGuessBehavior {
-    None,
-    GuessFromOrder
+    None = 0,
+    GuessFromOrder = 1
 }
 
 /**
@@ -24,37 +24,23 @@ export function createUseCompositeListItem<CreateMetadata>(params: CreateUseComp
     return function useCompositeListItem<Metadata extends CreateMetadata>(
         params: UseCompositeListItemParameters<Metadata> = {}
     ): UseCompositeListItemReturnValue {
-        const {
-            label,
-            metadata,
-            textRef,
-            indexGuessBehavior,
-            index: externalIndex
-        } = params;
+        const { label, metadata, textRef, indexGuessBehavior, index: externalIndex } = params;
 
-        const {
-            register,
-            unregister,
-            subscribeMapChange,
-            elementsRef,
-            labelsRef,
-            nextIndexRef
-        }
-            = useCompositeListContext();
+        const { register, unregister, subscribeMapChange, elementsRef, labelsRef, nextIndexRef } = useCompositeListContext();
 
         const indexRef = React.useRef(-1);
         const [index, setIndex] = React.useState<number>(
-            externalIndex
-            ?? (indexGuessBehavior === IndexGuessBehavior.GuessFromOrder
-                ? () => {
-                    if (indexRef.current === -1) {
-                        const newIndex = nextIndexRef.current;
-                        nextIndexRef.current += 1;
-                        indexRef.current = newIndex;
-                    }
-                    return indexRef.current;
-                }
-                : -1)
+            externalIndex ??
+                (indexGuessBehavior === IndexGuessBehavior.GuessFromOrder
+                    ? () => {
+                          if (indexRef.current === -1) {
+                              const newIndex = nextIndexRef.current;
+                              nextIndexRef.current += 1;
+                              indexRef.current = newIndex;
+                          }
+                          return indexRef.current;
+                      }
+                    : -1)
         );
 
         const componentRef = React.useRef<Element | null>(null);
@@ -68,24 +54,16 @@ export function createUseCompositeListItem<CreateMetadata>(params: CreateUseComp
 
                     if (labelsRef) {
                         const isLabelDefined = label !== undefined;
-                        labelsRef.current[index] = isLabelDefined
-                            ? label
-                            : (textRef?.current?.textContent ?? node.textContent);
+                        labelsRef.current[index] = isLabelDefined ? label : (textRef?.current?.textContent ?? node.textContent);
                     }
                 }
             },
-            [
-                index,
-                elementsRef,
-                labelsRef,
-                label,
-                textRef
-            ]
+            [index, elementsRef, labelsRef, label, textRef]
         );
 
         useIsoLayoutEffect(() => {
             if (externalIndex != null) {
-                return undefined;
+                return;
             }
 
             const node = componentRef.current;
@@ -95,12 +73,12 @@ export function createUseCompositeListItem<CreateMetadata>(params: CreateUseComp
                     unregister(node);
                 };
             }
-            return undefined;
+            return;
         }, [externalIndex, register, unregister, metadata]);
 
         useIsoLayoutEffect(() => {
             if (externalIndex != null) {
-                return undefined;
+                return;
             }
 
             return subscribeMapChange((map) => {

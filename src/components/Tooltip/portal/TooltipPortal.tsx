@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { FloatingPortalLite } from '~@lib/FloatingPortalLite';
+import { useStoreSelector } from '~@lib/core';
+import { FloatingPortal } from '~@lib/floating';
 
 import { useTooltipRootContext } from '../root/TooltipRootContext';
 
@@ -9,8 +10,8 @@ import { TooltipPortalContext } from './TooltipPortalContext';
 export function TooltipPortal(props: TooltipPortalProps) {
     const { keepMounted = false, ...portalProps } = props;
 
-    const store = useTooltipRootContext();
-    const mounted = store.useState('mounted');
+    const root = useTooltipRootContext();
+    const mounted = useStoreSelector(root.store, 'mounted');
 
     const shouldRender = mounted || keepMounted;
     if (!shouldRender) {
@@ -19,7 +20,7 @@ export function TooltipPortal(props: TooltipPortalProps) {
 
     return (
         <TooltipPortalContext.Provider value={keepMounted}>
-            <FloatingPortalLite {...portalProps} />
+            <FloatingPortal {...portalProps} renderGuards={false} />
         </TooltipPortalContext.Provider>
     );
 }
@@ -34,7 +35,7 @@ export type TooltipPortalProps = {
      * @default false
      */
     keepMounted?: boolean;
-} & FloatingPortalLite.Props<TooltipPortal.State>;
+} & Omit<FloatingPortal.Props<TooltipPortal.State>, 'renderGuards'>;
 
 export namespace TooltipPortal {
     export type Props = TooltipPortalProps;

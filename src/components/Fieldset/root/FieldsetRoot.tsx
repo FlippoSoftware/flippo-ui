@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { FieldsetMachine } from '@flippo-software/core-components/fieldset';
+
+import { useMachine, useStoreState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
@@ -25,35 +28,37 @@ export function FieldsetRoot(componentProps: FieldsetRootProps) {
         ...elementProps
     } = componentProps;
 
-    const [legendId, setLegendId] = React.useState<string | undefined>(undefined);
+    const fieldset = useMachine((options) => new FieldsetMachine(options), { disabled });
+    const { legendId } = useStoreState(fieldset.store);
 
-    const state: FieldsetRoot.State = React.useMemo(
-        () => ({
-            disabled
-        }),
-        [disabled]
-    );
+    const state: FieldsetRoot.State = React.useMemo(() => ({ disabled }), [disabled]);
 
     const element = useRenderElement('fieldset', componentProps, {
         ref,
         state,
-        props: [{
-            'aria-labelledby': legendId
-        }, elementProps]
+        props: [{ 'aria-labelledby': legendId }, elementProps]
     });
+
+    // Stable (the legend's effect depends on it); accepts updater functions like `setState`.
+    const [setLegendId] = React.useState(
+        () =>
+            ((update) =>
+                fieldset.setLegendId(
+                    typeof update === 'function' ? update(fieldset.store.state.legendId) : update
+                )) as FieldsetRootContextValue['setLegendId']
+    );
 
     const contextValue: FieldsetRootContextValue = React.useMemo(
         () => ({
             legendId,
             setLegendId,
-            disabled
+            disabled,
+            fieldset
         }),
-        [legendId, setLegendId, disabled]
+        [legendId, setLegendId, fieldset, disabled]
     );
 
-    return (
-        <FieldsetRootContext.Provider value={contextValue}>{element}</FieldsetRootContext.Provider>
-    );
+    return <FieldsetRootContext.Provider value={contextValue}>{element}</FieldsetRootContext.Provider>;
 }
 
 export type FieldsetRootState = {

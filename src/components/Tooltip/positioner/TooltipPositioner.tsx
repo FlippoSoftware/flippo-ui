@@ -1,13 +1,15 @@
 import React from 'react';
 
-import { adaptiveOrigin } from '~@lib/adaptiveOriginMiddleware';
-import { POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
-import { getDisabledMountTransitionStyles } from '~@lib/getDisabledMountTransitionStyles';
-import { useAnchorPositioning, useRenderElement } from '~@lib/hooks';
+import { TooltipPositionerMachine } from '@flippo-software/core-components/tooltip';
+
+import type { PopupPositionerOptions } from '@flippo-software/core-components/popup';
+
+import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
+import { useDirection, useRenderElement } from '~@lib/hooks';
 import { popupStateMapping } from '~@lib/popupStateMapping';
 
-import type { Align, Side } from '~@lib/hooks';
-import type { HeadlessUIComponentProps, HTMLProps } from '~@lib/types';
+import type { Align, Side, useAnchorPositioning } from '~@lib/hooks';
+import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useTooltipPortalContext } from '../portal/TooltipPortalContext';
 import { useTooltipRootContext } from '../root/TooltipRootContext';
@@ -39,108 +41,47 @@ export function TooltipPositioner(componentProps: TooltipPositionerProps) {
         arrowPadding = 5,
         sticky = false,
         disableAnchorTracking = false,
-        collisionAvoidance = POPUP_COLLISION_AVOIDANCE,
+        collisionAvoidance,
         ref,
         ...elementProps
     } = componentProps;
 
-    const store = useTooltipRootContext();
+    const root = useTooltipRootContext();
     const keepMounted = useTooltipPortalContext();
+    const direction = useDirection();
 
-    const open = store.useOpen();
-    const mounted = store.useState('mounted');
-    const trackCursorAxis = store.useState('trackCursorAxis');
-    const disableHoverablePopup = store.useState('disableHoverablePopup');
-    const floatingRootContext = store.useState('floatingRootContext');
-    const instantType = store.useState('instantType');
-    const transitionStatus = store.useState('transitionStatus');
-
-    const positioning = useAnchorPositioning({
+    const positioner = useMachine((options) => new TooltipPositionerMachine(root, options), {
         anchor,
         positionMethod,
-        floatingRootContext,
-        mounted,
         side,
-        sideOffset,
         align,
+        sideOffset,
         alignOffset,
         collisionBoundary,
         collisionPadding,
-        sticky,
         arrowPadding,
+        sticky,
         disableAnchorTracking,
-        keepMounted,
         collisionAvoidance,
-        adaptiveOrigin
-    });
-
-    const defaultProps: HTMLProps = React.useMemo(() => {
-        const hiddenStyles: React.CSSProperties = {};
-
-        if (!open || trackCursorAxis === 'both' || disableHoverablePopup) {
-            hiddenStyles.pointerEvents = 'none';
-        }
-
-        if (!mounted) {
-            hiddenStyles.display = 'none';
-        }
-
-        return {
-            role: 'presentation',
-            hidden: !mounted,
-            style: {
-                ...positioning.positionerStyles,
-                ...hiddenStyles
-            }
-        };
-    }, [
-        open,
-        trackCursorAxis,
-        disableHoverablePopup,
-        mounted,
-        positioning.positionerStyles
-    ]);
-
-    const state: TooltipPositioner.State = React.useMemo(
-        () => ({
-            open,
-            side: positioning.side,
-            align: positioning.align,
-            anchorHidden: positioning.anchorHidden,
-            instant: trackCursorAxis !== 'none' ? 'tracking-cursor' : instantType
-        }),
-        [
-            open,
-            positioning.side,
-            positioning.align,
-            positioning.anchorHidden,
-            trackCursorAxis,
-            instantType
-        ]
-    );
+        keepMounted,
+        direction
+    } as PopupPositionerOptions);
+    const track = useTracker();
+    const state: TooltipPositioner.State = useMachineState(positioner, [positioner.controller]);
 
     const contextValue: TooltipPositionerContextValue = React.useMemo(
-        () => ({
-            ...state,
-            arrowRef: positioning.arrowRef,
-            arrowStyles: positioning.arrowStyles,
-            arrowUncentered: positioning.arrowUncentered
-        }),
-        [state, positioning.arrowRef, positioning.arrowStyles, positioning.arrowUncentered]
+        () => ({ positioner: positioner as TooltipPositionerMachine<unknown> }),
+        [positioner]
     );
 
     const element = useRenderElement('div', componentProps, {
         state,
-        props: [defaultProps, getDisabledMountTransitionStyles(transitionStatus), elementProps],
-        ref: [ref, store.useStateSetter('positionerElement')],
+        props: [elementProps, (props) => track(() => toReactProps(positioner.getPositionerProps(props)))],
+        ref: [ref, positioner.setElement],
         customStyleHookMapping: popupStateMapping
     });
 
-    return (
-        <TooltipPositionerContext.Provider value={contextValue}>
-            {element}
-        </TooltipPositionerContext.Provider>
-    );
+    return <TooltipPositionerContext value={contextValue}>{element}</TooltipPositionerContext>;
 }
 
 export type TooltipPositionerState = {
@@ -164,7 +105,8 @@ export type TooltipPositionerProps = {
      * @default 'top'
      */
     side?: Side;
-} & HeadlessUIComponentProps<'div', TooltipPositioner.State> & Omit<useAnchorPositioning.SharedParameters, 'side'>;
+} & HeadlessUIComponentProps<'div', TooltipPositioner.State> &
+    Omit<useAnchorPositioning.SharedParameters, 'side'>;
 
 export namespace TooltipPositioner {
     export type State = TooltipPositionerState;

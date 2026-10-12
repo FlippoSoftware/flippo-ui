@@ -80,10 +80,7 @@ function getFilter(options: UseFilterOptions = {}): Filter {
             const itemString = stringifyAsLabel(item, itemToString);
             const queryLength = query.length;
 
-            return (
-                itemString.length >= queryLength
-                && collator.compare(itemString.slice(itemString.length - queryLength), query) === 0
-            );
+            return itemString.length >= queryLength && collator.compare(itemString.slice(itemString.length - queryLength), query) === 0;
         }
     };
 

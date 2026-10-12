@@ -1,67 +1,28 @@
 import React from 'react';
 
-import { useId, useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { NavigationMenuViewportMachine } from '@flippo-software/core-components/navigation-menu';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
+import { toReactProps, useTracker } from '~@lib/core';
 import { FocusGuard } from '~@lib/FocusGuard';
-import { useRenderElement } from '~@lib/hooks';
-import {
-    contains,
-    getNextTabbable,
-    getPreviousTabbable,
-    isOutsideEvent
-} from '~@packages/floating-ui-react/utils';
-import { getEmptyRootContext } from '~@packages/floating-ui-react/utils/getEmptyRootContext';
+import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useNavigationMenuPositionerContext } from '../positioner/NavigationMenuPositionerContext';
-import { useNavigationMenuRootContext } from '../root/NavigationMenuRootContext';
+import { useNavigationMenuRoot } from '../root/NavigationMenuRootContext';
 
-const EMPTY_ROOT_CONTEXT = getEmptyRootContext();
-
-function Guards({ children }: { children: React.ReactNode }) {
-    const {
-        beforeInsideRef,
-        beforeOutsideRef,
-        afterInsideRef,
-        afterOutsideRef,
-        positionerElement,
-        viewportElement,
-        floatingRootContext
-    } = useNavigationMenuRootContext();
-    const hasPositioner = Boolean(useNavigationMenuPositionerContext(true));
-
-    const referenceElement = positionerElement || viewportElement;
-
-    if (!floatingRootContext && !hasPositioner) {
+function Guards(props: { viewport: NavigationMenuViewportMachine; children: React.ReactNode }) {
+    const { viewport, children } = props;
+    const track = useTracker();
+    if (!track(() => viewport.shouldRenderGuards())) {
         return children;
     }
-
     return (
         <React.Fragment>
-            <FocusGuard
-              ref={beforeInsideRef}
-              onFocus={(event) => {
-                    if (referenceElement && isOutsideEvent(event, referenceElement)) {
-                        getNextTabbable(referenceElement)?.focus();
-                    }
-                    else {
-                        beforeOutsideRef.current?.focus();
-                    }
-                }}
-            />
+            <FocusGuard ref={viewport.setBeforeInsideGuard} onFocus={viewport.onBeforeInsideGuardFocus} />
             {children}
-            <FocusGuard
-              ref={afterInsideRef}
-              onFocus={(event) => {
-                    if (referenceElement && isOutsideEvent(event, referenceElement)) {
-                        getPreviousTabbable(referenceElement)?.focus();
-                    }
-                    else {
-                        afterOutsideRef.current?.focus();
-                    }
-                }}
-            />
+            <FocusGuard ref={viewport.setAfterInsideGuard} onFocus={viewport.onAfterInsideGuardFocus} />
         </React.Fragment>
     );
 }
@@ -85,58 +46,37 @@ export function NavigationMenuViewport(componentProps: NavigationMenuViewportPro
         ...elementProps
     } = componentProps;
 
-    const id = useId(idProp);
-
-    const {
-        setViewportElement,
-        setViewportTargetElement,
-        floatingRootContext,
-        prevTriggerElementRef,
-        viewportInert,
-        setViewportInert
-    } = useNavigationMenuRootContext();
-
+    const root = useNavigationMenuRoot();
     const hasPositioner = Boolean(useNavigationMenuPositionerContext(true));
-    const domReference = (floatingRootContext || EMPTY_ROOT_CONTEXT).useState('domReferenceElement');
+    const id = useHeadlessUiId(idProp) as string;
 
-    useIsoLayoutEffect(() => {
-        if (domReference) {
-            prevTriggerElementRef.current = domReference;
-        }
-    }, [domReference, prevTriggerElementRef]);
+    const [viewport] = React.useState(() => new NavigationMenuViewportMachine(root, hasPositioner));
+    const track = useTracker();
+    useIsoLayoutEffect(() => viewport.connect(), [viewport]);
 
     const element = useRenderElement('div', componentProps, {
-        ref: [ref, setViewportElement],
-        props: [{
-            id,
-            onBlur(event) {
-                const relatedTarget = event.relatedTarget as Element | null;
-                const currentTarget = event.currentTarget as Element;
-
-                // If focus is leaving the viewport and not going to the trigger, make it inert
-                // to prevent a focus loop.
-                if (
-                    relatedTarget
-                    && !contains(currentTarget, relatedTarget)
-                    && relatedTarget !== domReference
-                ) {
-                    setViewportInert(true);
-                }
-            },
-            ...(!hasPositioner && viewportInert && { inert: true }),
-            children: hasPositioner
-                ? (
-                    children
+        ref: [ref, viewport.setElement],
+        props: [
+            elementProps,
+            (props) =>
+                track(() =>
+                    toReactProps(
+                        viewport.getViewportProps(id, {
+                            ...props,
+                            children: hasPositioner ? (
+                                children
+                            ) : (
+                                <Guards viewport={viewport}>
+                                    <div ref={viewport.setTargetElement}>{children}</div>
+                                </Guards>
+                            )
+                        })
+                    )
                 )
-                : (
-                    <Guards>
-                        <div ref={setViewportTargetElement}>{children}</div>
-                    </Guards>
-                )
-        }, elementProps]
+        ]
     });
 
-    return hasPositioner ? <Guards>{element}</Guards> : element;
+    return hasPositioner ? <Guards viewport={viewport}>{element}</Guards> : element;
 }
 
 export type NavigationMenuViewportState = {};

@@ -1,12 +1,13 @@
 export { Separator } from '../Separator/Separator';
+
 export { SelectArrow as Arrow } from './arrow/SelectArrow';
 export { SelectBackdrop as Backdrop } from './backdrop/SelectBackdrop';
-export { SelectGroupLabel as GroupLabel } from './group-label/SelectGroupLabel';
 export { SelectGroup as Group } from './group/SelectGroup';
+export { SelectGroupLabel as GroupLabel } from './group-label/SelectGroupLabel';
 export { SelectIcon as Icon } from './icon/SelectIcon';
+export { SelectItem as Item } from './item/SelectItem';
 export { SelectItemIndicator as ItemIndicator } from './item-indicator/SelectItemIndicator';
 export { SelectItemText as ItemText } from './item-text/SelectItemText';
-export { SelectItem as Item } from './item/SelectItem';
 export { SelectPopup as Popup } from './popup/SelectPopup';
 export { SelectPortal as Portal } from './portal/SelectPortal';
 export { SelectPositioner as Positioner } from './positioner/SelectPositioner';

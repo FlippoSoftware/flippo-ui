@@ -1,22 +1,16 @@
-import React from 'react';
-
-import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
-
+import { toReactProps } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useScrollAreaRootContext } from '../root/ScrollAreaRootContext';
 import { scrollAreaStateAttributesMapping } from '../root/stateAttributes';
-import { useScrollAreaViewportContext } from '../viewport/ScrollAreaViewportContext';
 
 import type { ScrollAreaRoot } from '../root/ScrollAreaRoot';
 
 /**
  * A container for the content of the scroll area.
  * Renders a `<div>` element.
- *
- * Documentation: [Base UI Scroll Area](https://base-ui.com/react/components/scroll-area)
  */
 export function ScrollAreaContent(componentProps: ScrollAreaContent.Props) {
     const {
@@ -28,49 +22,15 @@ export function ScrollAreaContent(componentProps: ScrollAreaContent.Props) {
         ...elementProps
     } = componentProps;
 
-    const contentWrapperRef = React.useRef<HTMLDivElement | null>(null);
+    const { scrollArea, viewportState } = useScrollAreaRootContext();
 
-    const { computeThumbPosition } = useScrollAreaViewportContext();
-    const { viewportState } = useScrollAreaRootContext();
-
-    useIsoLayoutEffect(() => {
-        if (typeof ResizeObserver === 'undefined') {
-            return undefined;
-        }
-
-        let hasInitialized = false;
-        const ro = new ResizeObserver(() => {
-            // ResizeObserver fires once upon observing, so we skip the initial call
-            // to avoid double-calculating the thumb position on mount.
-            if (!hasInitialized) {
-                hasInitialized = true;
-                return;
-            }
-            computeThumbPosition();
-        });
-
-        if (contentWrapperRef.current) {
-            ro.observe(contentWrapperRef.current);
-        }
-
-        return () => {
-            ro.disconnect();
-        };
-    }, [computeThumbPosition]);
-
-    const element = useRenderElement('div', componentProps, {
-        ref: [ref, contentWrapperRef],
+    return useRenderElement('div', componentProps, {
+        // The machine recomputes the thumbs when the content resizes.
+        ref: [ref, scrollArea.setContent],
         state: viewportState,
         customStyleHookMapping: scrollAreaStateAttributesMapping,
-        props: [{
-            role: 'presentation',
-            style: {
-                minWidth: 'fit-content'
-            }
-        }, elementProps]
+        props: [toReactProps(scrollArea.getContentProps()), elementProps]
     });
-
-    return element;
 }
 
 export namespace ScrollAreaContent {

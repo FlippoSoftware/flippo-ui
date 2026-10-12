@@ -1,34 +1,23 @@
 import React from 'react';
 
-import type { Align, Side } from '~@lib/hooks';
+import type { MenuPositionerMachine } from '@flippo-software/core-components/menu';
 
 export type MenuPositionerContextValue = {
+    positioner: MenuPositionerMachine<unknown>;
     /**
-     * The side of the anchor element the popup is positioned relative to.
+     * The floating tree node ID of the menu.
      */
-    side: Side;
-    /**
-     * How to align the popup relative to the specified side.
-     */
-    align: Align;
-    arrowRef: React.RefObject<Element | null>;
-    arrowUncentered: boolean;
-    arrowStyles: React.CSSProperties;
     nodeId: string | undefined;
 };
 
-export const MenuPositionerContext = React.createContext<MenuPositionerContextValue | undefined>(
-    undefined
-);
+export const MenuPositionerContext = React.createContext<MenuPositionerContextValue | undefined>(undefined);
 
 export function useMenuPositionerContext(optional?: false): MenuPositionerContextValue;
 export function useMenuPositionerContext(optional: true): MenuPositionerContextValue | undefined;
 export function useMenuPositionerContext(optional?: boolean) {
     const context = React.use(MenuPositionerContext);
     if (context === undefined && !optional) {
-        throw new Error(
-            'Base UI: MenuPositionerContext is missing. MenuPositioner parts must be placed within <Menu.Positioner>.'
-        );
+        throw new Error('Base UI: MenuPositionerContext is missing. MenuPositioner parts must be placed within <Menu.Positioner>.');
     }
     return context;
 }

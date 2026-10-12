@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 import { useId, useIsoLayoutEffect } from '@flippo-ui/hooks';
@@ -38,7 +37,7 @@ export function ToastDescription(componentProps: ToastDescription.Props) {
 
     useIsoLayoutEffect(() => {
         if (!shouldRender) {
-            return undefined;
+            return;
         }
 
         setDescriptionId(id);

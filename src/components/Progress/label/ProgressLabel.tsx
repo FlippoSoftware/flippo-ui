@@ -1,5 +1,3 @@
-
-
 import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
@@ -30,20 +28,23 @@ export function ProgressLabel(componentProps: ProgressLabel.Props) {
 
     const id = useHeadlessUiId(idProp);
 
-    const { setLabelId, state } = useProgressRootContext();
+    const { progress, state } = useProgressRootContext();
 
     useIsoLayoutEffect(() => {
-        setLabelId(id);
+        progress.setLabelId(id);
 
-        return () => setLabelId(undefined);
-    }, [id, setLabelId]);
+        return () => progress.setLabelId(undefined);
+    }, [id, progress]);
 
     const element = useRenderElement('span', componentProps, {
         state,
         ref,
-        props: [{
-            id
-        }, elementProps],
+        props: [
+            {
+                id
+            },
+            elementProps
+        ],
         customStyleHookMapping: progressStyleHookMapping
     });
 

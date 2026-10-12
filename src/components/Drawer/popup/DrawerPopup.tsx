@@ -1,26 +1,15 @@
 import React from 'react';
 
-import { mergeProps } from '~@lib/merge';
+import { getDrawerPopupProps } from '@flippo-software/core-components/drawer';
 
-import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import type { DrawerDirection } from '@flippo-software/core-components/drawer';
+
+import { toReactProps, useTracker } from '~@lib/core';
+
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { Dialog as DialogHeadless } from '../../Dialog';
 import { useDrawerRootContext } from '../root/DrawerRootContext';
-
-import type { DrawerDirection } from '../store';
-
-import { DrawerPopupCssVars } from './DrawerPopupCssVars';
-import { DrawerPopupDataAttributes } from './DrawerPopupDataAttributes';
-
-const customStyleHookMapping: StateAttributesMapping<DrawerPopup.State> = {
-    dragging(value) {
-        return value ? { [DrawerPopupDataAttributes.dragging]: '' } : null;
-    },
-    direction(value) {
-        return { [DrawerPopupDataAttributes.direction]: value };
-    }
-};
 
 /**
  * A container for the drawer popup with drag and drop support.
@@ -28,34 +17,11 @@ const customStyleHookMapping: StateAttributesMapping<DrawerPopup.State> = {
  */
 export function DrawerPopup(componentProps: DrawerPopup.Props) {
     const { store } = useDrawerRootContext();
+    const track = useTracker();
 
-    const direction = store.useState('direction');
-    const shouldDrag = store.useState('shouldDrag');
-    const isDragging = store.useState('isDragging');
-    const dragOffset = store.useState('dragOffset');
-    const popupStyle = store.useState('popupStyle');
-    const popupDataAttributes = store.useState('popupDataAttributes');
-
-    const drawerProps = React.useMemo(() => {
-        return mergeProps(componentProps, {
-            style: shouldDrag
-                ? { ...popupStyle, [DrawerPopupCssVars.dragOffset]: `${dragOffset}px` }
-                : {},
-            ...customStyleHookMapping.dragging?.(isDragging),
-            ...customStyleHookMapping.direction?.(direction),
-            ...popupDataAttributes
-        });
-    }, [
-        componentProps,
-        shouldDrag,
-        popupStyle,
-        dragOffset,
-        isDragging,
-        direction,
-        popupDataAttributes
-    ]);
-
-    return <DialogHeadless.Popup {...drawerProps} />;
+    return (
+        <DialogHeadless.Popup {...(track(() => toReactProps(getDrawerPopupProps(store, componentProps))) as DialogHeadless.Popup.Props)} />
+    );
 }
 
 export namespace DrawerPopup {

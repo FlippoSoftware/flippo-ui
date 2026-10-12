@@ -1,22 +1,18 @@
 import React from 'react';
 
-import { useEventCallback } from '@flippo-ui/hooks/use-event-callback';
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { ComboboxListMachine } from '@flippo-software/core-components/combobox';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
+import { toReactProps, useMachineState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
-import { stopEvent } from '~@packages/floating-ui-react/utils';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { CompositeList } from '../../Composite/list/CompositeList';
 import { ComboboxCollection } from '../collection/ComboboxCollection';
 import { useComboboxPositionerContext } from '../positioner/ComboboxPositionerContext';
-import {
-    useComboboxDerivedItemsContext,
-    useComboboxFloatingContext,
-    useComboboxRootContext
-} from '../root/ComboboxRootContext';
-import { selectors } from '../store';
+import { useComboboxRootMachine } from '../root/ComboboxRootContext';
+
+import { ComboboxListContext } from './ComboboxListContext';
 
 /**
  * A list container for the items.
@@ -33,36 +29,17 @@ export function ComboboxList(componentProps: ComboboxList.Props) {
         ...elementProps
     } = componentProps;
 
-    const store = useComboboxRootContext();
-    const floatingRootContext = useComboboxFloatingContext();
-    const hasPositionerContext = Boolean(useComboboxPositionerContext(true));
-    const { filteredItems } = useComboboxDerivedItemsContext();
+    const root = useComboboxRootMachine();
+    const hasPositioner = Boolean(useComboboxPositionerContext(true));
 
-    const items = useStore(store, selectors.items);
-    const labelsRef = useStore(store, selectors.labelsRef);
-    const listRef = useStore(store, selectors.listRef);
-    const selectionMode = useStore(store, selectors.selectionMode);
-    const grid = useStore(store, selectors.grid);
-    const popupProps = useStore(store, selectors.popupProps);
-    const disabled = useStore(store, selectors.disabled);
-    const readOnly = useStore(store, selectors.readOnly);
-    const virtualized = useStore(store, selectors.virtualized);
+    const [list] = React.useState(() => new ComboboxListMachine(root, hasPositioner));
+    useIsoLayoutEffect(() => list.connect(), [list]);
 
-    const multiple = selectionMode === 'multiple';
-    const empty = filteredItems.length === 0;
+    const track = useTracker();
+    const state: ComboboxList.State = useMachineState(list);
 
-    const setPositionerElement = useEventCallback((element) => {
-        store.set('positionerElement', element);
-    });
-
-    const setListElement = useEventCallback((element) => {
-        store.set('listElement', element);
-    });
-
-    // Support "closed template" API: if children is a function, implicitly wrap it
-    // with a Combobox.Collection that reads items from context/root.
-    // Ensures this component's `popupProps` subscription does not cause <Combobox.Item>
-    // to re-render on every active index change.
+    // Support the "closed template" API: a function child is wrapped in a `Combobox.Collection` that reads the
+    // filtered items (so this component's subscriptions don't re-render the items).
     const resolvedChildren = React.useMemo(() => {
         if (typeof children === 'function') {
             return <ComboboxCollection>{children}</ComboboxCollection>;
@@ -70,67 +47,18 @@ export function ComboboxList(componentProps: ComboboxList.Props) {
         return children;
     }, [children]);
 
-    const state: ComboboxList.State = React.useMemo(
-        () => ({
-            empty
-        }),
-        [empty]
-    );
-
-    const floatingId = floatingRootContext.useState('floatingId');
-
     const element = useRenderElement('div', componentProps, {
         state,
-        ref: [ref, setListElement, hasPositionerContext ? null : setPositionerElement],
-        props: [popupProps, {
-            'children': resolvedChildren,
-            'tabIndex': -1,
-            'id': floatingId,
-            'role': grid ? 'grid' : 'listbox',
-            'aria-multiselectable': multiple ? 'true' : undefined,
-            onKeyDown(event) {
-                if (disabled || readOnly) {
-                    return;
-                }
-
-                if (event.key === 'Enter') {
-                    const activeIndex = store.state.activeIndex;
-
-                    if (activeIndex == null) {
-                        // Allow form submission when no item is highlighted.
-                        return;
-                    }
-
-                    stopEvent(event);
-
-                    const nativeEvent = event.nativeEvent;
-                    const listItem = store.state.listRef.current[activeIndex];
-
-                    if (listItem) {
-                        store.state.selectionEventRef.current = nativeEvent;
-                        listItem.click();
-                        store.state.selectionEventRef.current = null;
-                    }
-                }
-            },
-            onKeyDownCapture() {
-                store.state.keyboardActiveRef.current = true;
-            },
-            onPointerMoveCapture() {
-                store.state.keyboardActiveRef.current = false;
-            }
-        }, elementProps]
+        ref: [ref, list.setElement],
+        props: [elementProps, (props) => track(() => toReactProps(list.getListProps({ ...props, children: resolvedChildren })))]
     });
 
-    if (virtualized) {
+    // Virtualized items pass their index explicitly and don't register.
+    if (track(() => root.store.state.virtualized)) {
         return element;
     }
 
-    return (
-        <CompositeList elementsRef={listRef} labelsRef={items ? undefined : labelsRef}>
-            {element}
-        </CompositeList>
-    );
+    return <ComboboxListContext value={list}>{element}</ComboboxListContext>;
 }
 
 export type ComboboxListState = {

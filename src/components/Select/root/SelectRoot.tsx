@@ -1,52 +1,19 @@
 import React from 'react';
 
-import {
-    Store,
-    useControlledState,
-    useIsoLayoutEffect,
-    useLazyRef,
-    useMergedRef,
-    useOnFirstRender,
-    useOpenChangeComplete,
-    useOpenInteractionType,
-    useStore,
-    useTransitionStatus
-} from '@flippo-ui/hooks';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
-import { useValueAsRef } from '@flippo-ui/hooks/use-value-as-ref';
-import { useValueChanged } from '@flippo-ui/hooks/use-value-changed';
+import { SelectRootMachine } from '@flippo-software/core-components/select';
+import { useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
 
-import { EMPTY_ARRAY, EMPTY_OBJECT } from '~@lib/constants';
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import { defaultItemEquality, findItemIndex } from '~@lib/itemEquality';
-import { mergeProps } from '~@lib/merge';
-import { REASONS } from '~@lib/reason';
-import { stringifyAsValue } from '~@lib/resolveValueLabel';
-import { visuallyHidden, visuallyHiddenInput } from '~@lib/visuallyHidden';
-import {
-    useClick,
-    useDismiss,
-    useFloatingRootContext,
-    useInteractions,
-    useListNavigation,
-    useTypeahead
-} from '~@packages/floating-ui-react';
+import { toReactProps, useMachine, useTracker } from '~@lib/core';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 
 import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
-import type { BaseOpenChangeReason } from '~@lib/translateOpenChangeReason';
+import type { REASONS } from '~@lib/reason';
 
 import { useFieldRootContext } from '../../Field/root/FieldRootContext';
-import { useField } from '../../Field/useField';
-import { useFormContext } from '../../Form/FormContext';
-import { useLabelableContext, useLabelableId } from '../../LabelableProvider';
-import { selectors } from '../store';
-import { serializeValue } from '../utils/serialize';
+import { useLabelableContext } from '../../LabelableProvider';
 
-import type { State as StoreState } from '../store';
+import { SelectRootContext } from './SelectRootContext';
 
-import { SelectFloatingContext, SelectRootContext } from './SelectRootContext';
-
-import type { SelectRootContextValue } from './SelectRootContext';
 /**
  * Groups all parts of the select.
  * Doesn’t render its own HTML element.
@@ -58,15 +25,15 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
 ): React.JSX.Element {
     const {
         id,
-        value: valueProp,
+        value,
         defaultValue = null,
         onValueChange,
-        open: openProp,
+        open,
         defaultOpen = false,
         autoComplete,
         onOpenChange,
-        name: nameProp,
-        disabled: disabledProp = false,
+        name,
+        disabled = false,
         readOnly = false,
         required = false,
         modal = true,
@@ -77,527 +44,57 @@ export function SelectRoot<Value, Multiple extends boolean | undefined = false>(
         multiple = false,
         itemToStringLabel,
         itemToStringValue,
-        isItemEqualToValue = defaultItemEquality,
+        isItemEqualToValue,
         highlightItemOnHover = true,
         children
     } = props;
 
-    const { clearErrors } = useFormContext();
-    const {
-        setDirty,
-        setTouched,
-        setFocused,
-        shouldValidateOnChange,
-        validityData,
-        setFilled,
-        name: fieldName,
-        disabled: fieldDisabled,
-        validation,
-        validationMode
-    } = useFieldRootContext();
+    const { field } = useFieldRootContext();
+    const { labelable } = useLabelableContext();
+    const defaultId = useHeadlessUiId() as string;
 
-    const generatedId = useLabelableId({ id });
-
-    const disabled = fieldDisabled || disabledProp;
-    const name = fieldName ?? nameProp;
-
-    const [value, setValueUnwrapped] = useControlledState({
-        prop: valueProp,
-        defaultProp: multiple ? (defaultValue ?? EMPTY_ARRAY) : defaultValue,
-        caller: 'Select'
-    });
-
-    const [open, setOpenUnwrapped] = useControlledState({
-        prop: openProp,
-        defaultProp: defaultOpen,
-        caller: 'Select'
-    });
-
-    const listRef = React.useRef<Array<HTMLElement | null>>([]);
-    const labelsRef = React.useRef<Array<string | null>>([]);
-    const popupRef = React.useRef<HTMLDivElement | null>(null);
-    const scrollHandlerRef = React.useRef<((el: HTMLDivElement) => void) | null>(null);
-    const scrollArrowsMountedCountRef = React.useRef(0);
-    const valueRef = React.useRef<HTMLSpanElement | null>(null);
-    const valuesRef = React.useRef<Array<any>>([]);
-    const typingRef = React.useRef(false);
-    const keyboardActiveRef = React.useRef(false);
-    const selectedItemTextRef = React.useRef<HTMLSpanElement | null>(null);
-    const selectionRef = React.useRef({
-        allowSelectedMouseUp: false,
-        allowUnselectedMouseUp: false
-    });
-    const alignItemWithTriggerActiveRef = React.useRef(false);
-
-    const { mounted, setMounted, transitionStatus } = useTransitionStatus(open);
-    const {
-        openMethod,
-        triggerProps: interactionTypeProps,
-        reset: resetOpenInteractionType
-    } = useOpenInteractionType(open);
-
-    const store = useLazyRef(
-        () =>
-            new Store<StoreState>({
-                id: generatedId,
-                modal,
-                multiple,
-                itemToStringLabel,
-                itemToStringValue,
-                isItemEqualToValue,
-                value,
-                open,
-                mounted,
-                transitionStatus,
-                items,
-                forceMount: false,
-                openMethod: null,
-                activeIndex: null,
-                selectedIndex: null,
-                popupProps: {},
-                triggerProps: {},
-                triggerElement: null,
-                positionerElement: null,
-                listElement: null,
-                scrollUpArrowVisible: false,
-                scrollDownArrowVisible: false,
-                hasScrollArrows: false
-            })
-    ).current;
-
-    const activeIndex = useStore(store, selectors.activeIndex);
-    const selectedIndex = useStore(store, selectors.selectedIndex);
-    const triggerElement = useStore(store, selectors.triggerElement);
-    const positionerElement = useStore(store, selectors.positionerElement);
-
-    const serializedValue = React.useMemo(() => {
-        if (multiple && Array.isArray(value) && value.length === 0) {
-            return '';
-        }
-        return stringifyAsValue(value, itemToStringValue);
-    }, [multiple, value, itemToStringValue]);
-
-    const fieldStringValue = React.useMemo(() => {
-        if (multiple && Array.isArray(value)) {
-            return value.map((currentValue) => stringifyAsValue(currentValue, itemToStringValue));
-        }
-        return stringifyAsValue(value, itemToStringValue);
-    }, [multiple, value, itemToStringValue]);
-
-    const controlRef = useValueAsRef(store.state.triggerElement);
-
-    useField({
-        id: generatedId,
-        commit: validation.commit,
+    const root = useMachine((options) => new SelectRootMachine(options, { defaultId, field, labelable }), {
+        id,
         value,
-        controlRef,
+        defaultValue,
+        onValueChange: onValueChange as never,
+        open,
+        defaultOpen,
+        onOpenChange: onOpenChange as never,
+        onOpenChangeComplete,
         name,
-        getValue: () => fieldStringValue
-    });
-
-    const initialValueRef = React.useRef(value);
-    useIsoLayoutEffect(() => {
-        // Ensure the values and labels are registered for programmatic value changes.
-        if (value !== initialValueRef.current) {
-            store.set('forceMount', true);
-        }
-    }, [store, value]);
-
-    useIsoLayoutEffect(() => {
-        setFilled(multiple ? Array.isArray(value) && value.length > 0 : value != null);
-    }, [multiple, value, setFilled]);
-
-    useIsoLayoutEffect(
-        () => {
-            if (open) {
-                return;
-            }
-
-            const registry = valuesRef.current;
-
-            if (multiple) {
-                const currentValue = Array.isArray(value) ? value : [];
-                if (currentValue.length === 0) {
-                    store.set('selectedIndex', null);
-                    return;
-                }
-
-                const lastValue = currentValue[currentValue.length - 1]!;
-                const lastIndex = findItemIndex(registry, lastValue, isItemEqualToValue);
-                store.set('selectedIndex', lastIndex === -1 ? null : lastIndex);
-                return;
-            }
-
-            const index = findItemIndex(registry, value as Value, isItemEqualToValue);
-            store.set('selectedIndex', index === -1 ? null : index);
-        },
-        [
-            multiple,
-            open,
-            value,
-            valuesRef,
-            isItemEqualToValue,
-            store
-        ]
-    );
-
-    useValueChanged(value, () => {
-        clearErrors(name);
-        setDirty(value !== validityData.initialValue);
-
-        if (shouldValidateOnChange()) {
-            validation.commit(value);
-        }
-        else {
-            validation.commit(value, true);
-        }
-    });
-
-    const setOpen = useStableCallback(
-        (nextOpen: boolean, eventDetails: SelectRoot.ChangeEventDetails) => {
-            onOpenChange?.(nextOpen, eventDetails);
-
-            if (eventDetails.isCanceled) {
-                return;
-            }
-
-            setOpenUnwrapped(nextOpen);
-
-            if (
-                !nextOpen
-                && (eventDetails.reason === REASONS.focusOut || eventDetails.reason === REASONS.outsidePress)
-            ) {
-                setTouched(true);
-                setFocused(false);
-
-                if (validationMode === 'onBlur') {
-                    validation.commit(value);
-                }
-            }
-
-            // The active index will sync to the last selected index on the next open.
-            // Workaround `enableFocusInside` in Floating UI setting `tabindex=0` of a non-highlighted
-            // option upon close when tabbing out due to `keepMounted=true`:
-            // https://github.com/floating-ui/floating-ui/pull/3004/files#diff-962a7439cdeb09ea98d4b622a45d517bce07ad8c3f866e089bda05f4b0bbd875R194-R199
-            // This otherwise causes options to retain `tabindex=0` incorrectly when the popup is closed
-            // when tabbing outside.
-            if (!nextOpen && store.state.activeIndex !== null) {
-                const activeOption = listRef.current[store.state.activeIndex];
-                // Wait for Floating UI's focus effect to have fired
-                queueMicrotask(() => {
-                    activeOption?.setAttribute('tabindex', '-1');
-                });
-            }
-        }
-    );
-
-    const handleUnmount = useStableCallback(() => {
-        setMounted(false);
-        store.set('activeIndex', null);
-        resetOpenInteractionType();
-        onOpenChangeComplete?.(false);
-    });
-
-    useOpenChangeComplete({
-        enabled: !actionsRef,
-        open,
-        ref: popupRef,
-        onComplete() {
-            if (!open) {
-                handleUnmount();
-            }
-        }
-    });
-
-    React.useImperativeHandle(actionsRef, () => ({ unmount: handleUnmount }), [handleUnmount]);
-
-    const setValue = useStableCallback(
-        (nextValue: any, eventDetails: SelectRoot.ChangeEventDetails) => {
-            onValueChange?.(nextValue, eventDetails);
-
-            if (eventDetails.isCanceled) {
-                return;
-            }
-
-            setValueUnwrapped(nextValue);
-        }
-    );
-
-    const handleScrollArrowVisibility = useStableCallback(() => {
-        const scroller = store.state.listElement || popupRef.current;
-        if (!scroller) {
-            return;
-        }
-
-        const viewportTop = scroller.scrollTop;
-        const viewportBottom = scroller.scrollTop + scroller.clientHeight;
-        const shouldShowUp = viewportTop > 1;
-        const shouldShowDown = viewportBottom < scroller.scrollHeight - 1;
-
-        if (store.state.scrollUpArrowVisible !== shouldShowUp) {
-            store.set('scrollUpArrowVisible', shouldShowUp);
-        }
-        if (store.state.scrollDownArrowVisible !== shouldShowDown) {
-            store.set('scrollDownArrowVisible', shouldShowDown);
-        }
-    });
-
-    const floatingContext = useFloatingRootContext({
-        open,
-        onOpenChange: setOpen,
-        elements: {
-            reference: triggerElement,
-            floating: positionerElement
-        }
-    });
-
-    const click = useClick(floatingContext, {
-        enabled: !readOnly && !disabled,
-        event: 'mousedown'
-    });
-
-    const dismiss = useDismiss(floatingContext, {
-        bubbles: false
-    });
-
-    const listNavigation = useListNavigation(floatingContext, {
-        enabled: !readOnly && !disabled,
-        listRef,
-        activeIndex,
-        selectedIndex,
-        disabledIndices: EMPTY_ARRAY as number[],
-        onNavigate(nextActiveIndex) {
-            // Retain the highlight while transitioning out.
-            if (nextActiveIndex === null && !open) {
-                return;
-            }
-
-            store.set('activeIndex', nextActiveIndex);
-        },
-        // Implement our own listeners since `onPointerLeave` on each option fires while scrolling with
-        // the `alignItemWithTrigger=true`, causing a performance issue on Chrome.
-        focusItemOnHover: false
-    });
-
-    const typeahead = useTypeahead(floatingContext, {
-        enabled: !readOnly && !disabled && (open || !multiple),
-        listRef: labelsRef,
-        activeIndex,
-        selectedIndex,
-        onMatch(index) {
-            if (open) {
-                store.set('activeIndex', index);
-            }
-            else {
-                setValue(valuesRef.current[index], createChangeEventDetails('none'));
-            }
-        },
-        onTypingChange(typing) {
-            // FIXME: Floating UI doesn't support allowing space to select an item while the popup is
-            // closed and the trigger isn't a native <button>.
-            typingRef.current = typing;
-        }
-    });
-
-    const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([click, dismiss, listNavigation, typeahead]);
-
-    const mergedTriggerProps = React.useMemo(() => {
-        return mergeProps(
-            getReferenceProps(),
-            interactionTypeProps,
-            generatedId ? { id: generatedId } : EMPTY_OBJECT
-        );
-    }, [getReferenceProps, interactionTypeProps, generatedId]);
-
-    useOnFirstRender(() => {
-        store.update({
-            popupProps: getFloatingProps(),
-            triggerProps: mergedTriggerProps
-        });
-    });
-
-    useIsoLayoutEffect(() => {
-        store.update({
-            id: generatedId,
-            modal,
-            multiple,
-            value,
-            open,
-            mounted,
-            transitionStatus,
-            popupProps: getFloatingProps(),
-            triggerProps: mergedTriggerProps,
-            items,
-            itemToStringLabel,
-            itemToStringValue,
-            isItemEqualToValue,
-            openMethod
-        });
-    }, [
-        store,
-        generatedId,
+        autoComplete,
+        disabled,
+        readOnly,
+        required,
         modal,
         multiple,
-        value,
-        open,
-        mounted,
-        transitionStatus,
-        getFloatingProps,
-        mergedTriggerProps,
-        items,
-        itemToStringLabel,
-        itemToStringValue,
-        isItemEqualToValue,
-        openMethod
-    ]);
+        items: items as never,
+        itemToStringLabel: itemToStringLabel as never,
+        itemToStringValue: itemToStringValue as never,
+        isItemEqualToValue: isItemEqualToValue as never,
+        highlightItemOnHover,
+        hasActionsRef: actionsRef != null
+    });
 
-    const contextValue: SelectRootContextValue = React.useMemo(
-        () => ({
-            store,
-            name,
-            required,
-            disabled,
-            readOnly,
-            multiple,
-            itemToStringLabel,
-            itemToStringValue,
-            highlightItemOnHover,
-            setValue,
-            setOpen,
-            listRef,
-            popupRef,
-            scrollHandlerRef,
-            handleScrollArrowVisibility,
-            scrollArrowsMountedCountRef,
-            getItemProps,
-            events: floatingContext.context.events,
-            valueRef,
-            valuesRef,
-            labelsRef,
-            typingRef,
-            selectionRef,
-            selectedItemTextRef,
-            validation,
-            onOpenChangeComplete,
-            keyboardActiveRef,
-            alignItemWithTriggerActiveRef,
-            initialValueRef
-        }),
-        [
-            store,
-            name,
-            required,
-            disabled,
-            readOnly,
-            multiple,
-            itemToStringLabel,
-            itemToStringValue,
-            highlightItemOnHover,
-            setValue,
-            setOpen,
-            getItemProps,
-            floatingContext.context.events,
-            validation,
-            onOpenChangeComplete,
-            handleScrollArrowVisibility
-        ]
-    );
+    useIsoLayoutEffect(() => root.register(), [root]);
+    React.useImperativeHandle(actionsRef, () => root.actions, [root]);
 
-    const ref = useMergedRef(inputRef, validation.inputRef);
-
-    const hasMultipleSelection = multiple && Array.isArray(value) && value.length > 0;
-
-    const hiddenInputs = React.useMemo(() => {
-        if (!multiple || !Array.isArray(value) || !name) {
-            return null;
-        }
-
-        return value.map((v) => {
-            const currentSerializedValue = stringifyAsValue(v, itemToStringValue);
-            return (
-                <input
-                    key={currentSerializedValue}
-                    type={'hidden'}
-                    name={name}
-                    value={currentSerializedValue}
-                />
-            );
-        });
-    }, [multiple, value, name, itemToStringValue]);
+    const inputRefs = useMergedRef(inputRef, root.setInputElement);
+    const track = useTracker();
 
     return (
-        <SelectRootContext.Provider value={contextValue}>
-            <SelectFloatingContext.Provider value={floatingContext}>
-                {children}
-                <input
-                    {...validation.getInputValidationProps({
-                        onFocus() {
-                            // Move focus to the trigger element when the hidden input is focused.
-                            store.state.triggerElement?.focus({
-                                // Supported in Chrome from 144 (January 2026)
-                                // @ts-expect-error - focusVisible is not yet in the lib.dom.d.ts
-                                focusVisible: true
-                            });
-                        },
-                        // Handle browser autofill.
-                        onChange(event: React.ChangeEvent<HTMLInputElement>) {
-                            // Workaround for https://github.com/facebook/react/issues/9023
-                            if (event.nativeEvent.defaultPrevented) {
-                                return;
-                            }
-
-                            const nextValue = event.target.value;
-                            const details = createChangeEventDetails(REASONS.none, event.nativeEvent);
-
-                            function handleChange() {
-                                if (multiple) {
-                                    // Browser autofill only writes a single scalar value.
-                                    return;
-                                }
-
-                                // Handle single selection: match against registered values using serialization
-                                const matchingValue = valuesRef.current.find((v) => {
-                                    const candidate = stringifyAsValue(v, itemToStringValue);
-                                    if (candidate.toLowerCase() === nextValue.toLowerCase()) {
-                                        return true;
-                                    }
-                                    return false;
-                                });
-
-                                if (matchingValue != null) {
-                                    setDirty(matchingValue !== validityData.initialValue);
-                                    setValue(matchingValue, details);
-
-                                    if (shouldValidateOnChange()) {
-                                        validation.commit(matchingValue);
-                                    }
-                                }
-                            }
-
-                            store.set('forceMount', true);
-                            queueMicrotask(handleChange);
-                        }
-                    })}
-                    name={multiple ? undefined : name}
-                    autoComplete={autoComplete}
-                    value={serializedValue}
-                    disabled={disabled}
-                    required={required && !hasMultipleSelection}
-                    readOnly={readOnly}
-                    ref={ref}
-                    style={name ? visuallyHiddenInput : visuallyHidden}
-                    tabIndex={-1}
-                    aria-hidden
-                />
-                {hiddenInputs}
-            </SelectFloatingContext.Provider>
-        </SelectRootContext.Provider>
+        <SelectRootContext value={root}>
+            {children}
+            <input {...track(() => toReactProps(root.getHiddenInputProps()))} ref={inputRefs} />
+            {track(() => root.getHiddenInputs()).map((input) => (
+                <input key={input.value} type='hidden' name={input.name} value={input.value} />
+            ))}
+        </SelectRootContext>
     );
 }
 
-type SelectValueType<Value, Multiple extends boolean | undefined> = Multiple extends true
-    ? Value[]
-    : Value;
+type SelectValueType<Value, Multiple extends boolean | undefined> = Multiple extends true ? Value[] : Value;
 
 export type SelectRootProps<Value, Multiple extends boolean | undefined = false> = {
     children?: React.ReactNode;
@@ -691,10 +188,7 @@ export type SelectRootProps<Value, Multiple extends boolean | undefined = false>
      * <Select.Root items={items} />
      * ```
      */
-    items?:
-      | Record<string, React.ReactNode>
-      | ReadonlyArray<{ label: React.ReactNode; value: any }>
-      | undefined;
+    items?: Record<string, React.ReactNode> | ReadonlyArray<{ label: React.ReactNode; value: any }> | undefined;
     /**
      * When the item values are objects (`<Select.Item value={object}>`), this function converts
      *  the object value to a string representation for display in the trigger.
@@ -729,11 +223,11 @@ export type SelectRootProps<Value, Multiple extends boolean | undefined = false>
      * Event handler called when the value of the select changes.
      */
     onValueChange?:
-    | ((
-        value: SelectValueType<Value, Multiple> | (Multiple extends true ? never : null),
-        eventDetails: SelectRootChangeEventDetails,
-    ) => void)
-    | undefined;
+        | ((
+              value: SelectValueType<Value, Multiple> | (Multiple extends true ? never : null),
+              eventDetails: SelectRootChangeEventDetails
+          ) => void)
+        | undefined;
 };
 
 export type SelectRootState = {};
@@ -742,25 +236,22 @@ export type SelectRootActions = {
     unmount: () => void;
 };
 
-export type SelectRootChangeEventReason
-    = | typeof REASONS.triggerPress
-      | typeof REASONS.outsidePress
-      | typeof REASONS.escapeKey
-      | typeof REASONS.windowResize
-      | typeof REASONS.itemPress
-      | typeof REASONS.focusOut
-      | typeof REASONS.listNavigation
-      | typeof REASONS.cancelOpen
-      | typeof REASONS.none
-      | (string & {});
+export type SelectRootChangeEventReason =
+    | typeof REASONS.triggerPress
+    | typeof REASONS.outsidePress
+    | typeof REASONS.escapeKey
+    | typeof REASONS.windowResize
+    | typeof REASONS.itemPress
+    | typeof REASONS.focusOut
+    | typeof REASONS.listNavigation
+    | typeof REASONS.cancelOpen
+    | typeof REASONS.none
+    | (string & {});
 
 export type SelectRootChangeEventDetails = HeadlessUIChangeEventDetails<SelectRootChangeEventReason>;
 
 export namespace SelectRoot {
-    export type Props<Value, Multiple extends boolean | undefined = false> = SelectRootProps<
-        Value,
-        Multiple
-    >;
+    export type Props<Value, Multiple extends boolean | undefined = false> = SelectRootProps<Value, Multiple>;
     export type State = SelectRootState;
     export type Actions = SelectRootActions;
     export type ChangeEventReason = SelectRootChangeEventReason;

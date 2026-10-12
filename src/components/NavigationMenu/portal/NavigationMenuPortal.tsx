@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { FloatingPortal } from '~@packages/floating-ui-react';
+import { useTracker } from '~@lib/core';
+import { FloatingPortal } from '~@lib/floating';
 
-import { useNavigationMenuRootContext } from '../root/NavigationMenuRootContext';
+import { useNavigationMenuRoot } from '../root/NavigationMenuRootContext';
 
 import { NavigationMenuPortalContext } from './NavigationMenuPortalContext';
 
@@ -16,7 +17,9 @@ import { NavigationMenuPortalContext } from './NavigationMenuPortalContext';
 export function NavigationMenuPortal(componentProps: NavigationMenuPortalProps) {
     const { keepMounted = false, ...portalProps } = componentProps;
 
-    const { mounted } = useNavigationMenuRootContext();
+    const root = useNavigationMenuRoot();
+    const track = useTracker();
+    const mounted = track(() => root.transitions.state.mounted);
 
     const shouldRender = mounted || keepMounted;
     if (!shouldRender) {

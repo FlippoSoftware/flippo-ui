@@ -1,19 +1,15 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
-import { useStore } from '@flippo-ui/hooks/use-store';
+import { ComboboxChipMachine } from '@flippo-software/core-components/combobox';
+import { useIsoLayoutEffect } from '@flippo-ui/hooks';
 
-import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import { toReactProps, useMachineState, useStoreState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
-import { REASONS } from '~@lib/reason';
-import { stopEvent } from '~@packages/floating-ui-react/utils';
 
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
-import { useCompositeListItem } from '../../Composite/list/useCompositeListItem';
 import { useComboboxChipsContext } from '../chips/ComboboxChipsContext';
-import { useComboboxRootContext } from '../root/ComboboxRootContext';
-import { selectors } from '../store';
+import { useComboboxRootMachine } from '../root/ComboboxRootContext';
 
 import { ComboboxChipContext } from './ComboboxChipContext';
 
@@ -29,130 +25,31 @@ export function ComboboxChip(componentProps: ComboboxChip.Props) {
         render,
         className,
         /* eslint-enable unused-imports/no-unused-vars */
-        ref: refProp,
+        ref,
         ...elementProps
     } = componentProps;
 
-    const store = useComboboxRootContext();
-    const { setHighlightedChipIndex, chipsRef } = useComboboxChipsContext()!;
-
-    const disabled = useStore(store, selectors.disabled);
-    const readOnly = useStore(store, selectors.readOnly);
-    const selectedValue = useStore(store, selectors.selectedValue);
-
-    const { ref, index } = useCompositeListItem();
-
-    function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-        let nextIndex: number | undefined = index;
-
-        if (event.key === 'ArrowLeft') {
-            event.preventDefault();
-            if (index > 0) {
-                nextIndex = index - 1;
-            }
-            else {
-                nextIndex = undefined;
-            }
-        }
-        else if (event.key === 'ArrowRight') {
-            event.preventDefault();
-            if (index < selectedValue.length - 1) {
-                nextIndex = index + 1;
-            }
-            else {
-                nextIndex = undefined;
-            }
-        }
-        else if (event.key === 'Backspace' || event.key === 'Delete') {
-            const computedNextIndex
-        = index >= selectedValue.length - 1 ? selectedValue.length - 2 : index;
-            nextIndex = computedNextIndex >= 0 ? computedNextIndex : undefined;
-
-            stopEvent(event);
-
-            store.state.setIndices({ activeIndex: null, selectedIndex: null, type: 'keyboard' });
-            store.state.setSelectedValue(
-                selectedValue.filter((_: any, i: number) => i !== index),
-                createChangeEventDetails(REASONS.none, event.nativeEvent)
-            );
-        }
-        else if (event.key === 'Enter' || event.key === ' ') {
-            stopEvent(event);
-            nextIndex = undefined;
-        }
-        else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-            stopEvent(event);
-            store.state.setOpen(
-                true,
-                createChangeEventDetails(REASONS.listNavigation, event.nativeEvent)
-            );
-            nextIndex = undefined;
-        }
-        else if (
-        // Check for printable characters (letters, numbers, symbols)
-            event.key.length === 1
-            && !event.ctrlKey
-            && !event.metaKey
-            && !event.altKey
-        ) {
-            nextIndex = undefined;
-        }
-
-        return nextIndex;
+    const root = useComboboxRootMachine();
+    const chips = useComboboxChipsContext();
+    if (!chips) {
+        throw new Error('Headless UI: <Combobox.Chip> must be placed within <Combobox.Chips>.');
     }
 
-    const state: ComboboxChip.State = React.useMemo(
-        () => ({
-            disabled
-        }),
-        [disabled]
-    );
+    const [chip] = React.useState(() => new ComboboxChipMachine(root, chips));
+    useIsoLayoutEffect(() => chip.connect(), [chip]);
+    const { index } = useStoreState(chip.index);
+    const state: ComboboxChip.State = useMachineState(chip);
+    const track = useTracker();
+
+    const contextValue: ComboboxChipContextValue = React.useMemo(() => ({ chip, index }), [chip, index]);
 
     const element = useRenderElement('div', componentProps, {
-        ref: [refProp, ref],
+        ref: [ref, chip.setElement],
         state,
-        props: [{
-            'tabIndex': -1,
-            'aria-disabled': disabled || undefined,
-            'aria-readonly': readOnly || undefined,
-            onKeyDown(event) {
-                if (disabled || readOnly) {
-                    return;
-                }
-
-                const nextIndex = handleKeyDown(event);
-
-                ReactDOM.flushSync(() => {
-                    setHighlightedChipIndex(nextIndex);
-                });
-
-                if (nextIndex === undefined) {
-                    store.state.inputRef.current?.focus();
-                }
-                else {
-                    chipsRef.current[nextIndex]?.focus();
-                }
-            },
-            onMouseDown(event) {
-                if (disabled || readOnly) {
-                    return;
-                }
-                event.preventDefault();
-                store.state.inputRef.current?.focus();
-            }
-        }, elementProps]
+        props: [elementProps, (props) => track(() => toReactProps(chip.getChipProps(props)))]
     });
 
-    const contextValue: ComboboxChipContextValue = React.useMemo(
-        () => ({
-            index
-        }),
-        [index]
-    );
-
-    return (
-        <ComboboxChipContext.Provider value={contextValue}>{element}</ComboboxChipContext.Provider>
-    );
+    return <ComboboxChipContext value={contextValue}>{element}</ComboboxChipContext>;
 }
 
 export type ComboboxChipState = {

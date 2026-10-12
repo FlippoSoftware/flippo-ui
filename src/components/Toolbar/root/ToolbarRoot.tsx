@@ -1,10 +1,13 @@
 import React from 'react';
 
-import type { HeadlessUIComponentProps, HTMLProps, Orientation } from '~@lib/types';
+import { ToolbarMachine } from '@flippo-software/core-components/toolbar';
 
-import { CompositeRoot } from '../../Composite/root/CompositeRoot';
+import { toReactProps, useMachine } from '~@lib/core';
+import { useDirection, useRenderElement } from '~@lib/hooks';
 
-import type { CompositeMetadata } from '../../Composite/list/CompositeList';
+import type { HeadlessUIComponentProps, Orientation } from '~@lib/types';
+
+import { CompositeMachineProvider } from '../../Composite/root/CompositeMachineProvider';
 
 import { ToolbarRootContext } from './ToolbarRootContext';
 
@@ -13,65 +16,40 @@ import type { ToolbarRootContextValue } from './ToolbarRootContext';
 /**
  * A container for grouping a set of controls, such as buttons, toggle groups, or menus.
  * Renders a `<div>` element.
- *
- * Documentation: [Base UI Toolbar](https://base-ui.com/react/components/toolbar)
  */
 export function ToolbarRoot(componentProps: ToolbarRoot.Props) {
     const {
+        /* eslint-disable unused-imports/no-unused-vars */
+        className,
+        render,
+        /* eslint-enable unused-imports/no-unused-vars */
         cols = 1,
         disabled = false,
         loopFocus = true,
         orientation = 'horizontal',
-        className,
-        render,
         ref,
         ...elementProps
     } = componentProps;
 
-    const [itemMap, setItemMap] = React.useState(
-        () => new Map<Node, CompositeMetadata<ToolbarRoot.ItemMetadata> | null>()
-    );
-
-    const disabledIndices = React.useMemo(() => {
-        const output: number[] = [];
-        for (const itemMetadata of itemMap.values()) {
-            if (itemMetadata?.index && !itemMetadata.focusableWhenDisabled) {
-                output.push(itemMetadata.index);
-            }
-        }
-        return output;
-    }, [itemMap]);
+    const direction = useDirection();
+    const toolbar = useMachine((options) => new ToolbarMachine(options), { cols, disabled, loopFocus, orientation, direction });
 
     const toolbarRootContext: ToolbarRootContextValue = React.useMemo(
-        () => ({
-            disabled,
-            orientation,
-            setItemMap
-        }),
-        [disabled, orientation, setItemMap]
+        () => ({ disabled, orientation, toolbar }),
+        [disabled, orientation, toolbar]
     );
 
     const state = React.useMemo(() => ({ disabled, orientation }), [disabled, orientation]);
 
-    const defaultProps: HTMLProps = {
-        'aria-orientation': orientation,
-        'role': 'toolbar'
-    };
+    const element = useRenderElement('div', componentProps, {
+        state,
+        ref: [ref, toolbar.composite.setRoot],
+        props: [toReactProps(toolbar.getRootProps()), elementProps]
+    });
 
     return (
         <ToolbarRootContext value={toolbarRootContext}>
-            <CompositeRoot
-              render={render}
-              className={className}
-              state={state}
-              refs={[ref]}
-              props={[defaultProps, elementProps]}
-              cols={cols}
-              disabledIndices={disabledIndices}
-              loopFocus={loopFocus}
-              onMapChange={setItemMap}
-              orientation={orientation}
-            />
+            <CompositeMachineProvider composite={toolbar.composite}>{element}</CompositeMachineProvider>
         </ToolbarRootContext>
     );
 }
