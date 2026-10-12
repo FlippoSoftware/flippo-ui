@@ -1,0 +1,364 @@
+{
+  "name": "@flippo-ui/headless-components",
+  "type": "module",
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.1.2",
+  "description": "",
+  "author": "@BlackPoretsky",
+  "license": "ISC",
+  "keywords": [
+    "react",
+    "react-component",
+    "flippo",
+    "unstyled",
+    "a11y"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./accordion": {
+      "types": "./dist/components/Accordion/index.d.ts",
+      "import": "./dist/components/Accordion/index.es.js",
+      "require": "./dist/components/Accordion/index.cjs.js"
+    },
+    "./autocomplete": {
+      "types": "./dist/components/Autocomplete/index.d.ts",
+      "import": "./dist/components/Autocomplete/index.es.js",
+      "require": "./dist/components/Autocomplete/index.cjs.js"
+    },
+    "./avatar": {
+      "types": "./dist/components/Avatar/index.d.ts",
+      "import": "./dist/components/Avatar/index.es.js",
+      "require": "./dist/components/Avatar/index.cjs.js"
+    },
+    "./button": {
+      "types": "./dist/components/Button/index.d.ts",
+      "import": "./dist/components/Button/index.es.js",
+      "require": "./dist/components/Button/index.cjs.js"
+    },
+    "./c-s-p-provider": {
+      "types": "./dist/components/CSPProvider/index.d.ts",
+      "import": "./dist/components/CSPProvider/index.es.js",
+      "require": "./dist/components/CSPProvider/index.cjs.js"
+    },
+    "./checkbox": {
+      "types": "./dist/components/Checkbox/index.d.ts",
+      "import": "./dist/components/Checkbox/index.es.js",
+      "require": "./dist/components/Checkbox/index.cjs.js"
+    },
+    "./checkbox-card": {
+      "types": "./dist/components/CheckboxCard/index.d.ts",
+      "import": "./dist/components/CheckboxCard/index.es.js",
+      "require": "./dist/components/CheckboxCard/index.cjs.js"
+    },
+    "./checkbox-group": {
+      "types": "./dist/components/CheckboxGroup/index.d.ts",
+      "import": "./dist/components/CheckboxGroup/index.es.js",
+      "require": "./dist/components/CheckboxGroup/index.cjs.js"
+    },
+    "./collapsible": {
+      "types": "./dist/components/Collapsible/index.d.ts",
+      "import": "./dist/components/Collapsible/index.es.js",
+      "require": "./dist/components/Collapsible/index.cjs.js"
+    },
+    "./combobox": {
+      "types": "./dist/components/Combobox/index.d.ts",
+      "import": "./dist/components/Combobox/index.es.js",
+      "require": "./dist/components/Combobox/index.cjs.js"
+    },
+    "./composite": {
+      "types": "./dist/components/Composite/index.d.ts",
+      "import": "./dist/components/Composite/index.es.js",
+      "require": "./dist/components/Composite/index.cjs.js"
+    },
+    "./context-menu": {
+      "types": "./dist/components/ContextMenu/index.d.ts",
+      "import": "./dist/components/ContextMenu/index.es.js",
+      "require": "./dist/components/ContextMenu/index.cjs.js"
+    },
+    "./dialog": {
+      "types": "./dist/components/Dialog/index.d.ts",
+      "import": "./dist/components/Dialog/index.es.js",
+      "require": "./dist/components/Dialog/index.cjs.js"
+    },
+    "./drawer": {
+      "types": "./dist/components/Drawer/index.d.ts",
+      "import": "./dist/components/Drawer/index.es.js",
+      "require": "./dist/components/Drawer/index.cjs.js"
+    },
+    "./field": {
+      "types": "./dist/components/Field/index.d.ts",
+      "import": "./dist/components/Field/index.es.js",
+      "require": "./dist/components/Field/index.cjs.js"
+    },
+    "./fieldset": {
+      "types": "./dist/components/Fieldset/index.d.ts",
+      "import": "./dist/components/Fieldset/index.es.js",
+      "require": "./dist/components/Fieldset/index.cjs.js"
+    },
+    "./form": {
+      "types": "./dist/components/Form/index.d.ts",
+      "import": "./dist/components/Form/index.es.js",
+      "require": "./dist/components/Form/index.cjs.js"
+    },
+    "./input": {
+      "types": "./dist/components/Input/index.d.ts",
+      "import": "./dist/components/Input/index.es.js",
+      "require": "./dist/components/Input/index.cjs.js"
+    },
+    "./labelable-provider": {
+      "types": "./dist/components/LabelableProvider/index.d.ts",
+      "import": "./dist/components/LabelableProvider/index.es.js",
+      "require": "./dist/components/LabelableProvider/index.cjs.js"
+    },
+    "./list": {
+      "types": "./dist/components/List/index.d.ts",
+      "import": "./dist/components/List/index.es.js",
+      "require": "./dist/components/List/index.cjs.js"
+    },
+    "./marquee": {
+      "types": "./dist/components/Marquee/index.d.ts",
+      "import": "./dist/components/Marquee/index.es.js",
+      "require": "./dist/components/Marquee/index.cjs.js"
+    },
+    "./menu": {
+      "types": "./dist/components/Menu/index.d.ts",
+      "import": "./dist/components/Menu/index.es.js",
+      "require": "./dist/components/Menu/index.cjs.js"
+    },
+    "./menubar": {
+      "types": "./dist/components/Menubar/index.d.ts",
+      "import": "./dist/components/Menubar/index.es.js",
+      "require": "./dist/components/Menubar/index.cjs.js"
+    },
+    "./meter": {
+      "types": "./dist/components/Meter/index.d.ts",
+      "import": "./dist/components/Meter/index.es.js",
+      "require": "./dist/components/Meter/index.cjs.js"
+    },
+    "./navigation-menu": {
+      "types": "./dist/components/NavigationMenu/index.d.ts",
+      "import": "./dist/components/NavigationMenu/index.es.js",
+      "require": "./dist/components/NavigationMenu/index.cjs.js"
+    },
+    "./no-ssr": {
+      "types": "./dist/components/NoSsr/index.d.ts",
+      "import": "./dist/components/NoSsr/index.es.js",
+      "require": "./dist/components/NoSsr/index.cjs.js"
+    },
+    "./number-field": {
+      "types": "./dist/components/NumberField/index.d.ts",
+      "import": "./dist/components/NumberField/index.es.js",
+      "require": "./dist/components/NumberField/index.cjs.js"
+    },
+    "./pin-input": {
+      "types": "./dist/components/PinInput/index.d.ts",
+      "import": "./dist/components/PinInput/index.es.js",
+      "require": "./dist/components/PinInput/index.cjs.js"
+    },
+    "./popover": {
+      "types": "./dist/components/Popover/index.d.ts",
+      "import": "./dist/components/Popover/index.es.js",
+      "require": "./dist/components/Popover/index.cjs.js"
+    },
+    "./progress": {
+      "types": "./dist/components/Progress/index.d.ts",
+      "import": "./dist/components/Progress/index.es.js",
+      "require": "./dist/components/Progress/index.cjs.js"
+    },
+    "./qr-code": {
+      "types": "./dist/components/QrCode/index.d.ts",
+      "import": "./dist/components/QrCode/index.es.js",
+      "require": "./dist/components/QrCode/index.cjs.js"
+    },
+    "./radio": {
+      "types": "./dist/components/Radio/index.d.ts",
+      "import": "./dist/components/Radio/index.es.js",
+      "require": "./dist/components/Radio/index.cjs.js"
+    },
+    "./radio-card": {
+      "types": "./dist/components/RadioCard/index.d.ts",
+      "import": "./dist/components/RadioCard/index.es.js",
+      "require": "./dist/components/RadioCard/index.cjs.js"
+    },
+    "./radio-group": {
+      "types": "./dist/components/RadioGroup/index.d.ts",
+      "import": "./dist/components/RadioGroup/index.es.js",
+      "require": "./dist/components/RadioGroup/index.cjs.js"
+    },
+    "./scroll-area": {
+      "types": "./dist/components/ScrollArea/index.d.ts",
+      "import": "./dist/components/ScrollArea/index.es.js",
+      "require": "./dist/components/ScrollArea/index.cjs.js"
+    },
+    "./segmented-control": {
+      "types": "./dist/components/SegmentedControl/index.d.ts",
+      "import": "./dist/components/SegmentedControl/index.es.js",
+      "require": "./dist/components/SegmentedControl/index.cjs.js"
+    },
+    "./select": {
+      "types": "./dist/components/Select/index.d.ts",
+      "import": "./dist/components/Select/index.es.js",
+      "require": "./dist/components/Select/index.cjs.js"
+    },
+    "./separator": {
+      "types": "./dist/components/Separator/index.d.ts",
+      "import": "./dist/components/Separator/index.es.js",
+      "require": "./dist/components/Separator/index.cjs.js"
+    },
+    "./slider": {
+      "types": "./dist/components/Slider/index.d.ts",
+      "import": "./dist/components/Slider/index.es.js",
+      "require": "./dist/components/Slider/index.cjs.js"
+    },
+    "./slot": {
+      "types": "./dist/components/Slot/index.d.ts",
+      "import": "./dist/components/Slot/index.es.js",
+      "require": "./dist/components/Slot/index.cjs.js"
+    },
+    "./snippet": {
+      "types": "./dist/components/Snippet/index.d.ts",
+      "import": "./dist/components/Snippet/index.es.js",
+      "require": "./dist/components/Snippet/index.cjs.js"
+    },
+    "./switch": {
+      "types": "./dist/components/Switch/index.d.ts",
+      "import": "./dist/components/Switch/index.es.js",
+      "require": "./dist/components/Switch/index.cjs.js"
+    },
+    "./tabs": {
+      "types": "./dist/components/Tabs/index.d.ts",
+      "import": "./dist/components/Tabs/index.es.js",
+      "require": "./dist/components/Tabs/index.cjs.js"
+    },
+    "./textarea": {
+      "types": "./dist/components/Textarea/index.d.ts",
+      "import": "./dist/components/Textarea/index.es.js",
+      "require": "./dist/components/Textarea/index.cjs.js"
+    },
+    "./toast": {
+      "types": "./dist/components/Toast/index.d.ts",
+      "import": "./dist/components/Toast/index.es.js",
+      "require": "./dist/components/Toast/index.cjs.js"
+    },
+    "./toggle": {
+      "types": "./dist/components/Toggle/index.d.ts",
+      "import": "./dist/components/Toggle/index.es.js",
+      "require": "./dist/components/Toggle/index.cjs.js"
+    },
+    "./toggle-group": {
+      "types": "./dist/components/ToggleGroup/index.d.ts",
+      "import": "./dist/components/ToggleGroup/index.es.js",
+      "require": "./dist/components/ToggleGroup/index.cjs.js"
+    },
+    "./toolbar": {
+      "types": "./dist/components/Toolbar/index.d.ts",
+      "import": "./dist/components/Toolbar/index.es.js",
+      "require": "./dist/components/Toolbar/index.cjs.js"
+    },
+    "./tooltip": {
+      "types": "./dist/components/Tooltip/index.d.ts",
+      "import": "./dist/components/Tooltip/index.es.js",
+      "require": "./dist/components/Tooltip/index.cjs.js"
+    },
+    "./use-button": {
+      "types": "./dist/components/use-button/index.d.ts",
+      "import": "./dist/components/use-button/index.es.js",
+      "require": "./dist/components/use-button/index.cjs.js"
+    },
+    "./use-render": {
+      "types": "./dist/components/use-render/index.d.ts",
+      "import": "./dist/components/use-render/index.es.js",
+      "require": "./dist/components/use-render/index.cjs.js"
+    },
+    "./merge-props": {
+      "types": "./dist/lib/merge.d.ts",
+      "import": "./dist/lib/merge.es.js",
+      "require": "./dist/lib/merge.cjs.js"
+    },
+    "./direction-provider": {
+      "types": "./dist/lib/hooks/useDirection.d.ts",
+      "import": "./dist/lib/hooks/useDirection.es.js",
+      "require": "./dist/lib/hooks/useDirection.cjs.js"
+    },
+    "./createHeadlessUIEventDetails": {
+      "types": "./dist/lib/createHeadlessUIEventDetails.d.ts",
+      "import": "./dist/lib/createHeadlessUIEventDetails.es.js",
+      "require": "./dist/lib/createHeadlessUIEventDetails.cjs.js"
+    }
+  },
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist",
+    "skills",
+    "package.json"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build && pnpm build:types && node scripts/generate-exports.js",
+    "build:exports": "node scripts/generate-exports.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "inline-scripts": "tsx ./scripts/inlineScripts.mts",
+    "build:types": "tsc -p tsconfig.build.json && node scripts/rewrite-dts-aliases.mjs",
+    "test:watch": "vitest",
+    "lint:check": "biome check",
+    "lint:fix": "biome lint --fix && biome format --fix",
+    "lint:changed": "biome ci --changed",
+    "build:core": "pnpm --dir ../core build"
+  },
+  "peerDependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "dependencies": {
+    "@flippo-software/core-components": "link:../core",
+    "@flippo-ui/hooks": "link:../hooks",
+    "@floating-ui/dom": "^1.8.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "qr-code-styling": "^1.9.2",
+    "qrcode": "^1.5.4",
+    "vite": "6.2.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.11",
+    "@flippo-software/biome": "^1.1.1",
+    "@flippo-software/tsconfig": "^1.0.0",
+    "@flippo/internal-test-utils": "link:../internal-test-utils",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.18.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "@vitest/ui": "^3.2.4",
+    "glob": "^11.0.3",
+    "globby": "^16.0.0",
+    "jsdom": "^24.1.3",
+    "terser": "^5.44.1",
+    "tsx": "^4.21.0",
+    "typescript": "^7.0.2",
+    "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FlippoSoftware/headless-components.git"
+  },
+  "homepage": "https://github.com/FlippoSoftware/headless-components#readme",
+  "bugs": {
+    "url": "https://github.com/FlippoSoftware/headless-components/issues"
+  },
+  "sideEffects": false
+}

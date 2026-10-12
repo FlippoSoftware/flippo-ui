@@ -1,0 +1,52 @@
+import * as React from 'react';
+
+import type { FormController } from '@flippo-software/core-components/form';
+
+import { NOOP } from '~@lib/noop';
+
+import type { FieldValidityData } from '../Field/root/FieldRoot';
+
+import type { Form } from './Form';
+
+export type Errors = Record<string, string | string[]>;
+
+export type FormContextValue = {
+    errors: Errors;
+    clearErrors: (name: string | undefined) => void;
+    formRef: React.RefObject<{
+        fields: Map<
+            string,
+            {
+                name: string | undefined;
+                validate: () => void;
+                validityData: FieldValidityData;
+                controlRef: React.RefObject<HTMLElement | null>;
+                getValue: () => unknown;
+            }
+        >;
+    }>;
+    validationMode: Form.ValidationMode;
+    submitAttemptedRef: React.RefObject<boolean>;
+    /**
+     * The core controller (absent outside of a form).
+     */
+    form?: FormController;
+};
+
+export const FormContext = React.createContext<FormContextValue>({
+    formRef: {
+        current: {
+            fields: new Map()
+        }
+    },
+    errors: {},
+    clearErrors: NOOP,
+    validationMode: 'onSubmit',
+    submitAttemptedRef: {
+        current: false
+    }
+});
+
+export function useFormContext() {
+    return React.use(FormContext);
+}

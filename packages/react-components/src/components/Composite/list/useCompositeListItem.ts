@@ -1,0 +1,123 @@
+import React from 'react';
+
+import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+
+import { useCompositeListContext } from './CompositeListContext';
+
+import type { CompositeListContextValue } from './CompositeListContext';
+
+export enum IndexGuessBehavior {
+    None = 0,
+    GuessFromOrder = 1
+}
+
+/**
+ * Used to register a list item and its index (DOM position) in the `CompositeList`.
+ */
+export type CreateUseCompositeListItemParameters<BaseMetadata> = {
+    useCompositeListContext: () => CompositeListContextValue<BaseMetadata>;
+};
+
+export function createUseCompositeListItem<CreateMetadata>(params: CreateUseCompositeListItemParameters<CreateMetadata>) {
+    const { useCompositeListContext } = params;
+
+    return function useCompositeListItem<Metadata extends CreateMetadata>(
+        params: UseCompositeListItemParameters<Metadata> = {}
+    ): UseCompositeListItemReturnValue {
+        const { label, metadata, textRef, indexGuessBehavior, index: externalIndex } = params;
+
+        const { register, unregister, subscribeMapChange, elementsRef, labelsRef, nextIndexRef } = useCompositeListContext();
+
+        const indexRef = React.useRef(-1);
+        const [index, setIndex] = React.useState<number>(
+            externalIndex ??
+                (indexGuessBehavior === IndexGuessBehavior.GuessFromOrder
+                    ? () => {
+                          if (indexRef.current === -1) {
+                              const newIndex = nextIndexRef.current;
+                              nextIndexRef.current += 1;
+                              indexRef.current = newIndex;
+                          }
+                          return indexRef.current;
+                      }
+                    : -1)
+        );
+
+        const componentRef = React.useRef<Element | null>(null);
+
+        const ref = React.useCallback(
+            (node: HTMLElement | null) => {
+                componentRef.current = node;
+
+                if (index !== -1 && node !== null) {
+                    elementsRef.current[index] = node;
+
+                    if (labelsRef) {
+                        const isLabelDefined = label !== undefined;
+                        labelsRef.current[index] = isLabelDefined ? label : (textRef?.current?.textContent ?? node.textContent);
+                    }
+                }
+            },
+            [index, elementsRef, labelsRef, label, textRef]
+        );
+
+        useIsoLayoutEffect(() => {
+            if (externalIndex != null) {
+                return;
+            }
+
+            const node = componentRef.current;
+            if (node) {
+                register(node, metadata);
+                return () => {
+                    unregister(node);
+                };
+            }
+            return;
+        }, [externalIndex, register, unregister, metadata]);
+
+        useIsoLayoutEffect(() => {
+            if (externalIndex != null) {
+                return;
+            }
+
+            return subscribeMapChange((map) => {
+                const i = componentRef.current ? map.get(componentRef.current)?.index : null;
+
+                if (i != null) {
+                    setIndex(i);
+                }
+            });
+        }, [externalIndex, subscribeMapChange, setIndex]);
+
+        return React.useMemo(
+            () => ({
+                ref,
+                index
+            }),
+            [index, ref]
+        );
+    };
+}
+
+export const useCompositeListItem = createUseCompositeListItem({
+    useCompositeListContext
+});
+
+export type UseCompositeListItemParameters<Metadata> = {
+    index?: number;
+    label?: string | null;
+    metadata?: Metadata;
+    textRef?: React.RefObject<HTMLElement | null>;
+    /**
+     * Enables guessing the indexes. This avoids a re-render after mount, which is useful for
+     * large lists. This should be used for lists that are likely flat and vertical, other cases
+     * might trigger a re-render anyway.
+     */
+    indexGuessBehavior?: IndexGuessBehavior;
+};
+
+export type UseCompositeListItemReturnValue = {
+    ref: (node: HTMLElement | null) => void;
+    index: number;
+};

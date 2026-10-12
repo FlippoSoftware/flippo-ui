@@ -1,0 +1,167 @@
+import React from 'react';
+import * as ReactDOM from 'react-dom';
+
+import { DialogRootMachine } from '@flippo-software/core-components/dialog';
+
+import type { DialogHandle } from '@flippo-software/core-components/dialog';
+
+import { useMachine, useStoreSelector } from '~@lib/core';
+import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
+
+import type { HeadlessUIChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
+import type { PayloadChildRenderFunction } from '~@lib/popupTypes';
+import type { REASONS } from '~@lib/reason';
+
+import { DialogRootContext, useDialogRootContext } from './DialogRootContext';
+
+import type { DialogRootContextValue } from './DialogRootContext';
+
+/**
+ * Groups all parts of the dialog.
+ * Doesn’t render its own HTML element.
+ *
+ * Documentation: [Base UI Dialog](https://base-ui.com/react/components/dialog)
+ */
+export function DialogRoot<Payload>(props: DialogRoot.Props<Payload>) {
+    const {
+        children,
+        open: openProp,
+        defaultOpen = false,
+        onOpenChange,
+        onOpenChangeComplete,
+        disablePointerDismissal = false,
+        modal = true,
+        actionsRef,
+        handle,
+        triggerId: triggerIdProp,
+        defaultTriggerId: defaultTriggerIdProp = null
+    } = props;
+
+    const parentDialogRootContext = useDialogRootContext(true);
+    const fallbackReferenceId = useHeadlessUiId();
+    const floatingId = useHeadlessUiId();
+
+    const root = useMachine(
+        (options) =>
+            new DialogRootMachine<Payload>(options, {
+                store: handle?.store,
+                parentStore: parentDialogRootContext?.store,
+                fallbackReferenceId: fallbackReferenceId as string,
+                floatingId,
+                flushSync: ReactDOM.flushSync
+            }),
+        {
+            open: openProp,
+            defaultOpen,
+            modal,
+            onOpenChange: onOpenChange as never,
+            onOpenChangeComplete,
+            disablePointerDismissal,
+            triggerId: triggerIdProp,
+            defaultTriggerId: defaultTriggerIdProp
+        }
+    );
+
+    React.useImperativeHandle(actionsRef, () => root.actions, [root]);
+
+    const payload = useStoreSelector(root.store, 'payload') as Payload | undefined;
+
+    const contextValue: DialogRootContextValue<Payload> = React.useMemo(() => ({ store: root.store }), [root]);
+
+    return (
+        <DialogRootContext.Provider value={contextValue as DialogRootContextValue}>
+            {typeof children === 'function' ? children({ payload }) : children}
+        </DialogRootContext.Provider>
+    );
+}
+
+export type DialogRootProps<Payload = unknown> = {
+    /**
+     * Whether the dialog is currently open.
+     */
+    open?: boolean;
+    /**
+     * Whether the dialog is initially open.
+     *
+     * To render a controlled dialog, use the `open` prop instead.
+     * @default false
+     */
+    defaultOpen?: boolean;
+    /**
+     * Determines if the dialog enters a modal state when open.
+     * - `true`: user interaction is limited to just the dialog: focus is trapped, document page scroll is locked,
+     *   and pointer interactions on outside elements are disabled.
+     * - `false`: user interaction with the rest of the document is allowed.
+     * - `'trap-focus'`: focus is trapped inside the dialog, but document page scroll is not locked and pointer
+     *   interactions outside of it remain enabled.
+     * @default true
+     */
+    modal?: boolean | 'trap-focus';
+    /**
+     * Event handler called when the dialog is opened or closed.
+     */
+    onOpenChange?: (open: boolean, eventDetails: DialogRoot.ChangeEventDetails) => void;
+    /**
+     * Event handler called after any animations complete when the dialog is opened or closed.
+     */
+    onOpenChangeComplete?: (open: boolean) => void;
+    /**
+     * Determines whether the dialog should close on outside clicks.
+     * @default false
+     */
+    disablePointerDismissal?: boolean;
+    /**
+     * A ref to imperative actions.
+     * - `unmount`: When specified, the dialog will not be unmounted when closed.
+     * Instead, the `unmount` function must be called to unmount the dialog manually.
+     * Useful when the dialog's animation is controlled by an external library.
+     */
+    actionsRef?: React.RefObject<DialogRoot.Actions>;
+    /**
+     * A handle to associate the popover with a trigger.
+     * If specified, allows external triggers to control the popover's open state.
+     * Can be created with the Dialog.createHandle() method.
+     */
+    handle?: DialogHandle<Payload>;
+    /**
+     * The content of the dialog.
+     * This can be a regular React node or a render function that receives the `payload` of the active trigger.
+     */
+    children?: React.ReactNode | PayloadChildRenderFunction<Payload>;
+    /**
+     * ID of the trigger that the dialog is associated with.
+     * This is useful in conjuntion with the `open` prop to create a controlled dialog.
+     * There's no need to specify this prop when the popover is uncontrolled (i.e. when the `open` prop is not set).
+     */
+    triggerId?: string | null;
+    /**
+     * ID of the trigger that the dialog is associated with.
+     * This is useful in conjunction with the `defaultOpen` prop to create an initially open dialog.
+     */
+    defaultTriggerId?: string | null;
+};
+
+export type DialogRootActions = {
+    unmount: () => void;
+    close: () => void;
+};
+
+export type DialogRootChangeEventReason =
+    | typeof REASONS.triggerPress
+    | typeof REASONS.outsidePress
+    | typeof REASONS.escapeKey
+    | typeof REASONS.closePress
+    | typeof REASONS.focusOut
+    | typeof REASONS.imperativeAction
+    | typeof REASONS.none;
+
+export type DialogRootChangeEventDetails = HeadlessUIChangeEventDetails<DialogRoot.ChangeEventReason> & {
+    preventUnmountOnClose: () => void;
+};
+
+export namespace DialogRoot {
+    export type Props<Payload = unknown> = DialogRootProps<Payload>;
+    export type Actions = DialogRootActions;
+    export type ChangeEventReason = DialogRootChangeEventReason;
+    export type ChangeEventDetails = DialogRootChangeEventDetails;
+}
