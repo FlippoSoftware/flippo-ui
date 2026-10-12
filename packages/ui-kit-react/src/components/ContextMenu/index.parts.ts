@@ -1,6 +1,6 @@
 'use client';
 import { contextMenu as recipe } from '@flippo-software/component-styles/context-menu';
-import { ContextMenu as Primitive } from '@flippo-ui/headless-components/context-menu';
+import { ContextMenu as Primitive } from '@flippo-software/react-components/context-menu';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

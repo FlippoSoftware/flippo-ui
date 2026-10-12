@@ -1,5 +1,5 @@
 import { registerDialogDescription } from '@flippo-software/core-components/dialog';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';

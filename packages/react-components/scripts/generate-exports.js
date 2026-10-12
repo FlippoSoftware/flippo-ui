@@ -1,11 +1,6 @@
 #!/usr/bin/env node
 
-import {
-    existsSync,
-    readdirSync,
-    readFileSync,
-    writeFileSync
-} from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -35,12 +30,14 @@ function getComponents() {
  * Преобразует имя компонента в kebab-case для exports
  */
 function toKebabCase(str) {
-    return str
-    // Разделяем по заглавным буквам
-        .replace(/([A-Z])/g, '-$1')
-    // Убираем первый дефис и переводим в нижний регистр
-        .toLowerCase()
-        .replace(/^-/, '');
+    return (
+        str
+            // Разделяем по заглавным буквам
+            .replace(/([A-Z])/g, '-$1')
+            // Убираем первый дефис и переводим в нижний регистр
+            .toLowerCase()
+            .replace(/^-/, '')
+    );
 }
 
 /**
@@ -74,11 +71,9 @@ function generateComponentExport(componentName) {
     if (esExists && cjsExists) {
         exportEntry.import = `${basePath}/index.es.js`;
         exportEntry.require = `${basePath}/index.cjs.js`;
-    }
-    else if (esExists) {
+    } else if (esExists) {
         exportEntry.default = `${basePath}/index.es.js`;
-    }
-    else if (cjsExists) {
+    } else if (cjsExists) {
         exportEntry.default = `${basePath}/index.cjs.js`;
     }
 
@@ -112,11 +107,9 @@ function generateMainExport() {
     if (esExists && cjsExists) {
         exportEntry.import = `${basePath}/index.es.js`;
         exportEntry.require = `${basePath}/index.cjs.js`;
-    }
-    else if (esExists) {
+    } else if (esExists) {
         exportEntry.default = `${basePath}/index.es.js`;
-    }
-    else if (cjsExists) {
+    } else if (cjsExists) {
         exportEntry.default = `${basePath}/index.cjs.js`;
     }
 
@@ -161,7 +154,11 @@ function generateExports() {
     }
 
     // Добавляем дополнительные exports для утилит
-    const utilExports = [{ key: './merge-props', path: './dist/lib/merge' }, { key: './direction-provider', path: './dist/lib/hooks/useDirection' }, { key: './createHeadlessUIEventDetails', path: './dist/lib/createHeadlessUIEventDetails' }];
+    const utilExports = [
+        { key: './merge-props', path: './dist/lib/merge' },
+        { key: './direction-provider', path: './dist/lib/hooks/useDirection' },
+        { key: './createHeadlessUIEventDetails', path: './dist/lib/createHeadlessUIEventDetails' }
+    ];
 
     console.log('📝 Generating utility exports...');
     for (const util of utilExports) {
@@ -177,11 +174,9 @@ function generateExports() {
             if (esExists && cjsExists) {
                 exportEntry.import = `${util.path}.es.js`;
                 exportEntry.require = `${util.path}.cjs.js`;
-            }
-            else if (esExists) {
+            } else if (esExists) {
                 exportEntry.default = `${util.path}.es.js`;
-            }
-            else if (cjsExists) {
+            } else if (cjsExists) {
                 exportEntry.default = `${util.path}.cjs.js`;
             }
 
@@ -213,7 +208,7 @@ function generateExports() {
     }
 
     // Записываем обновленный package.json
-    writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+    writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 4)}\n`);
 
     console.log('✅ Exports generated successfully!');
     console.log(`📄 Updated exports for ${Object.keys(newExports).length} entries`);
@@ -222,8 +217,7 @@ function generateExports() {
 // Запуск скрипта
 try {
     generateExports();
-}
-catch (error) {
+} catch (error) {
     console.error('❌ Error generating exports:', error.message);
     process.exit(1);
 }

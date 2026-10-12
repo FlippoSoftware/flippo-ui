@@ -3,7 +3,7 @@ import React from 'react';
 import { ComboboxPopupMachine } from '@flippo-software/core-components/combobox';
 
 import type { ComboboxPopupOptions } from '@flippo-software/core-components/combobox';
-import type { Interaction, TransitionStatus } from '@flippo-ui/hooks';
+import type { Interaction, TransitionStatus } from '@flippo-software/hooks';
 
 import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { FocusGuards, useFloatingPortalController } from '~@lib/floating';

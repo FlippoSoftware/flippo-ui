@@ -1,5 +1,5 @@
 /**
- * TypeScript declarations for @flippo/internal-test-utils
+ * TypeScript declarations for @flippo-software/internal-test-utils
  */
 
 import '@testing-library/jest-dom';

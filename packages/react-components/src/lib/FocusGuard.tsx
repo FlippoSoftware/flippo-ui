@@ -1,7 +1,6 @@
-
 import * as React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 import { isSafari } from './detectBrowser';
 import { visuallyHidden } from './visuallyHidden';
@@ -25,11 +24,11 @@ export function FocusGuard({ ref, ...props }: Pick<HeadlessUIComponentProps<'spa
 
     const restProps = {
         ref,
-        'tabIndex': 0,
+        tabIndex: 0,
         // Role is only for VoiceOver
         role,
         'aria-hidden': role ? undefined : true,
-        'style': visuallyHidden
+        style: visuallyHidden
     };
 
     return <span {...props} {...restProps} data-base-ui-focus-guard={''} />;

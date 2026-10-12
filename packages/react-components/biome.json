@@ -1,6 +1,6 @@
 {
     "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
-    "root": true,
+    "root": false,
     "vcs": {
         "enabled": true,
         "clientKind": "git",
@@ -33,6 +33,16 @@
                     },
                     "style": {
                         "useFilenamingConvention": "off"
+                    }
+                }
+            }
+        },
+        {
+            "includes": ["**/*.test.ts", "**/*.test.tsx", "src/components/Tabs/indicator/prehydrationScript.*"],
+            "linter": {
+                "rules": {
+                    "security": {
+                        "noSecrets": "off"
                     }
                 }
             }

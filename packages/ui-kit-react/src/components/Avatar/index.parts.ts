@@ -1,6 +1,6 @@
 'use client';
 import { avatar as recipe } from '@flippo-software/component-styles/avatar';
-import { Avatar as Primitive } from '@flippo-ui/headless-components/avatar';
+import { Avatar as Primitive } from '@flippo-software/react-components/avatar';
 
 import { createStyler } from '../../lib/Styled';
 

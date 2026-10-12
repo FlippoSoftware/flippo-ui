@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SegmentedControlMachine } from '@flippo-software/core-components/segmented-control';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 import type { SegmentedControlOptions } from '@flippo-software/core-components/segmented-control';
 

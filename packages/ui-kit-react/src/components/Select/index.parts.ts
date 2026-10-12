@@ -1,6 +1,6 @@
 'use client';
 import { select as recipe } from '@flippo-software/component-styles/select';
-import { Select as Primitive } from '@flippo-ui/headless-components/select';
+import { Select as Primitive } from '@flippo-software/react-components/select';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

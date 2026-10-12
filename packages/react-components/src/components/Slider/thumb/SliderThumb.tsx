@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SliderThumbMachine } from '@flippo-software/core-components/slider';
-import { useOnMount } from '@flippo-ui/hooks';
+import { useOnMount } from '@flippo-software/hooks';
 
 import { toReactProps, useMachine, useTracker } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';

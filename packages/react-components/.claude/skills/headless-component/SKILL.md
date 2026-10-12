@@ -1,6 +1,6 @@
 ---
 name: headless-component
-description: Use when adding or changing a React component or part in @flippo-ui/headless-components (Base UI API on core machines) — wiring a core machine with useMachine/useMachineState/useTracker, render props, state attributes, portals, focus guards, and writing its tests in default and StrictMode.
+description: Use when adding or changing a React component or part in @flippo-software/react-components (Base UI API on core machines) — wiring a core machine with useMachine/useMachineState/useTracker, render props, state attributes, portals, focus guards, and writing its tests in default and StrictMode.
 ---
 
 # Adding or changing a headless React component

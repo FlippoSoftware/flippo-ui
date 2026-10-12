@@ -1,6 +1,6 @@
 'use client';
 import { toolbar as recipe } from '@flippo-software/component-styles/toolbar';
-import { Toolbar as Primitive } from '@flippo-ui/headless-components/toolbar';
+import { Toolbar as Primitive } from '@flippo-software/react-components/toolbar';
 
 import { createStyler } from '../../lib/Styled';
 

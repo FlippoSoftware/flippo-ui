@@ -1,15 +1,7 @@
 import React from 'react';
 
-export function useFocusableWhenDisabled(
-    parameters: NUseFocusableWhenDisabled.Parameters
-): NUseFocusableWhenDisabled.ReturnValue {
-    const {
-        focusableWhenDisabled,
-        disabled,
-        composite = false,
-        tabIndex: tabIndexProp = 0,
-        isNativeButton
-    } = parameters;
+export function useFocusableWhenDisabled(parameters: NUseFocusableWhenDisabled.Parameters): NUseFocusableWhenDisabled.ReturnValue {
+    const { focusableWhenDisabled, disabled, composite = false, tabIndex: tabIndexProp = 0, isNativeButton } = parameters;
 
     const isFocusableComposite = composite && focusableWhenDisabled !== false;
     const isNonFocusableComposite = composite && focusableWhenDisabled === false;
@@ -34,10 +26,7 @@ export function useFocusableWhenDisabled(
             }
         }
 
-        if (
-            (isNativeButton && (focusableWhenDisabled || isFocusableComposite))
-            || (!isNativeButton && disabled)
-        ) {
+        if ((isNativeButton && (focusableWhenDisabled || isFocusableComposite)) || (!isNativeButton && disabled)) {
             additionalProps['aria-disabled'] = disabled;
         }
 
@@ -46,15 +35,7 @@ export function useFocusableWhenDisabled(
         }
 
         return additionalProps;
-    }, [
-        composite,
-        disabled,
-        focusableWhenDisabled,
-        isFocusableComposite,
-        isNonFocusableComposite,
-        isNativeButton,
-        tabIndexProp
-    ]);
+    }, [composite, disabled, focusableWhenDisabled, isFocusableComposite, isNonFocusableComposite, isNativeButton, tabIndexProp]);
 
     return { props };
 }
@@ -62,9 +43,9 @@ export function useFocusableWhenDisabled(
 export namespace NUseFocusableWhenDisabled {
     export type FocusableWhenDisabledProps = {
         'aria-disabled'?: boolean;
-        'disabled'?: boolean;
-        'onKeyDown': (event: React.KeyboardEvent) => void;
-        'tabIndex': number;
+        disabled?: boolean;
+        onKeyDown: (event: React.KeyboardEvent) => void;
+        tabIndex: number;
     };
 
     export type Parameters = {

@@ -10,22 +10,16 @@ const nav = getNavigatorData();
 const platform = getPlatform();
 const userAgent = getUserAgent();
 
-export const isWebKit
-    = typeof CSS === 'undefined' || !CSS.supports
-        ? false
-        : CSS.supports('-webkit-backdrop-filter:none');
+export const isWebKit = typeof CSS === 'undefined' || !CSS.supports ? false : CSS.supports('-webkit-backdrop-filter:none');
 
-export const isIOS
+export const isIOS =
     // iPads can claim to be MacIntel
-    = nav.platform === 'MacIntel' && nav.maxTouchPoints > 1
-        ? true
-        : /iP(?:hone|ad|od)|iOS/.test(nav.platform);
+    nav.platform === 'MacIntel' && nav.maxTouchPoints > 1 ? true : /iP(?:hone|ad|od)|iOS/.test(nav.platform);
 
 export const isFirefox = hasNavigator && /firefox/i.test(userAgent);
 export const isSafari = hasNavigator && /apple/i.test(navigator.vendor);
 export const isAndroid = (hasNavigator && /android/i.test(platform)) || /android/i.test(userAgent);
-export const isMac
-    = hasNavigator && platform.toLowerCase().startsWith('mac') && !navigator.maxTouchPoints;
+export const isMac = hasNavigator && platform.toLowerCase().startsWith('mac') && !navigator.maxTouchPoints;
 export const isJSDOM = userAgent.includes('jsdom/');
 
 // Avoid Chrome DevTools blue warning.

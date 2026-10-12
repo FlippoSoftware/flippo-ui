@@ -7,8 +7,7 @@ export function serializeValue(value: unknown): string {
     }
     try {
         return JSON.stringify(value);
-    }
-    catch {
+    } catch {
         return String(value);
     }
 }

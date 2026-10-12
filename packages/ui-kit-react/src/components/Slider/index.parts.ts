@@ -1,6 +1,6 @@
 'use client';
 import { slider as recipe } from '@flippo-software/component-styles/slider';
-import { Slider as Primitive } from '@flippo-ui/headless-components/slider';
+import { Slider as Primitive } from '@flippo-software/react-components/slider';
 
 import { createStyler } from '../../lib/Styled';
 

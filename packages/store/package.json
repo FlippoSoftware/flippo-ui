@@ -1,0 +1,62 @@
+{
+    "name": "@flippo-software/store",
+    "type": "module",
+    "version": "0.1.0",
+    "description": "Framework-agnostic observable store with computed values, effects, selectors, controlled values and batched notifications.",
+    "author": "BlackPoretsky (Egor Gorochkin)",
+    "license": "ISC",
+    "keywords": [
+        "store",
+        "state",
+        "selectors",
+        "framework-agnostic",
+        "flippo"
+    ],
+    "sideEffects": false,
+    "files": [
+        "README.md",
+        "dist",
+        "skills"
+    ],
+    "scripts": {
+        "build": "tsdown",
+        "dev": "tsdown --watch",
+        "lint:check": "biome check",
+        "lint:fix": "biome lint --fix && biome format --fix",
+        "test": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@flippo-software/biome": "catalog:",
+        "@flippo-software/tsconfig": "catalog:",
+        "@vitest/coverage-v8": "^5.0.3",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "directory": "packages/store"
+    },
+    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/store#readme",
+    "bugs": {
+        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
+    },
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.cts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./package.json": "./package.json"
+    }
+}

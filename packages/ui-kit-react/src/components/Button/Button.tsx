@@ -2,7 +2,7 @@
 import * as React from 'react';
 
 import { button as recipe } from '@flippo-software/component-styles/button';
-import { Button as Primitive } from '@flippo-ui/headless-components/button';
+import { Button as Primitive } from '@flippo-software/react-components/button';
 
 import { createStyler } from '../../lib/Styled';
 import { Spinner } from '../Spinner';

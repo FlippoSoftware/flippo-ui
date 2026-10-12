@@ -1,6 +1,6 @@
 'use client';
 import { pinInput as recipe } from '@flippo-software/component-styles/pin-input';
-import { PinInput as Primitive } from '@flippo-ui/headless-components/pin-input';
+import { PinInput as Primitive } from '@flippo-software/react-components/pin-input';
 
 import { createStyler } from '../../lib/Styled';
 

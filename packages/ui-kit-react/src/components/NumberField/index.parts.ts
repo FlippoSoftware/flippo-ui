@@ -1,6 +1,6 @@
 'use client';
 import { numberField as recipe } from '@flippo-software/component-styles/number-field';
-import { NumberField as Primitive } from '@flippo-ui/headless-components/number-field';
+import { NumberField as Primitive } from '@flippo-software/react-components/number-field';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

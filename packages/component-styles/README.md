@@ -2,7 +2,7 @@
 
 Design tokens, a reset, light and dark themes and the styles of every Flippo component, with class recipes
 ([`@lynstack/class-recipe`](https://lynstack.github.io/recipe/class-recipe/)) that return the classes of each part.
-The styled packages built on `@flippo-software/web-components` and `@flippo-ui/headless-components` use it; you can
+The styled packages built on `@flippo-software/web-components` and `@flippo-software/react-components` use it; you can
 use it directly with plain HTML or any framework.
 
 The design comes from the Figma file "Flippo" (Components & Foundations). Components that are not drawn there

@@ -1,6 +1,6 @@
 'use client';
 import { toggleGroup as recipe } from '@flippo-software/component-styles/toggle-group';
-import { ToggleGroup as Primitive } from '@flippo-ui/headless-components/toggle-group';
+import { ToggleGroup as Primitive } from '@flippo-software/react-components/toggle-group';
 
 import { createStyler } from '../../lib/Styled';
 

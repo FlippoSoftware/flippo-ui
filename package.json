@@ -4,12 +4,19 @@
     "type": "module",
     "packageManager": "pnpm@11.24.0",
     "scripts": {
+        "dev": "pnpm --recursive --parallel --filter \"./packages/{store,core,hooks,react-components,web-components}\" dev",
         "build": "pnpm --recursive build",
         "typecheck": "pnpm --recursive typecheck",
         "lint:check": "pnpm --recursive lint:check",
         "test": "pnpm --recursive test",
         "check": "pnpm build && pnpm lint:check && pnpm typecheck && pnpm test",
         "storybook:react": "pnpm --filter @flippo-software/ui-kit-react storybook",
-        "storybook:web": "pnpm --filter @flippo-software/ui-kit-web storybook"
+        "storybook:web": "pnpm --filter @flippo-software/ui-kit-web storybook",
+        "changeset": "changeset",
+        "version-packages": "changeset version && pnpm install --lockfile-only",
+        "release": "pnpm build && changeset publish"
+    },
+    "devDependencies": {
+        "@changesets/cli": "^3.0.3"
     }
 }

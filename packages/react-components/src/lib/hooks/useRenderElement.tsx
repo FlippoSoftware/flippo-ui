@@ -1,17 +1,12 @@
 import React from 'react';
 
-import { useMergedRef } from '@flippo-ui/hooks';
+import { useMergedRef } from '@flippo-software/hooks';
 
 import { createSlot } from '~@lib/createSlot';
 
 import { EMPTY_OBJECT } from '../constants';
 import { getStyleHookProps } from '../getStyleHookProps';
-import {
-    mergeClassNames,
-    mergeObjects,
-    mergeProps,
-    mergePropsN
-} from '../merge';
+import { mergeClassNames, mergeObjects, mergeProps, mergePropsN } from '../merge';
 import { resolveClassName } from '../resolveClassName';
 
 import type { CustomStyleHookMapping } from '../getStyleHookProps';
@@ -64,22 +59,15 @@ function useRenderElementProps<
 ): React.HTMLAttributes<any> & React.RefAttributes<any> {
     const { className: classNameProp, render: renderProp } = componentProps;
 
-    const {
-        state = EMPTY_OBJECT as State,
-        ref,
-        props,
-        disableStyleHooks,
-        customStyleHookMapping,
-        enabled = true
-    } = params;
+    const { state = EMPTY_OBJECT as State, ref, props, disableStyleHooks, customStyleHookMapping, enabled = true } = params;
 
     const className = enabled ? resolveClassName(classNameProp, state) : undefined;
 
     let styleHooks: Record<string, string> | undefined;
     if (disableStyleHooks !== true) {
-    // SAFETY: We use typings to ensure `disableStyleHooks` is either always set or
-    // always unset, so this `if` block is stable across renders.
-    /* eslint-disable-next-line react-hooks/rules-of-hooks */
+        // SAFETY: We use typings to ensure `disableStyleHooks` is either always set or
+        // always unset, so this `if` block is stable across renders.
+        /* eslint-disable-next-line react-hooks/rules-of-hooks */
         styleHooks = React.useMemo(
             () => (enabled ? getStyleHookProps(state, customStyleHookMapping) : EMPTY_OBJECT),
             [state, customStyleHookMapping, enabled]
@@ -99,11 +87,9 @@ function useRenderElementProps<
     if (typeof document !== 'undefined') {
         if (!enabled) {
             useMergedRef(null, null);
-        }
-        else if (Array.isArray(ref)) {
+        } else if (Array.isArray(ref)) {
             outProps.ref = useMergedRef(outProps.ref, getChildRef(renderProp), ...ref);
-        }
-        else {
+        } else {
             outProps.ref = useMergedRef(outProps.ref, getChildRef(renderProp), ref);
         }
     }
@@ -182,17 +168,12 @@ type RenderFunctionProps<TagName> = TagName extends keyof React.JSX.IntrinsicEle
     : React.HTMLAttributes<any>;
 
 export namespace useRenderElement {
-    export type Parameters<
-        State,
-        RenderedElementType extends Element,
-        TagName,
-        Enabled extends boolean | undefined
-    > = {
-    /**
-     * If `false`, the hook will skip most of its internal logic and return `null`.
-     * This is useful for rendering a component conditionally.
-     * @default true
-     */
+    export type Parameters<State, RenderedElementType extends Element, TagName, Enabled extends boolean | undefined> = {
+        /**
+         * If `false`, the hook will skip most of its internal logic and return `null`.
+         * This is useful for rendering a component conditionally.
+         * @default true
+         */
         enabled?: Enabled;
         /**
          * The ref to apply to the rendered element.
@@ -206,44 +187,37 @@ export namespace useRenderElement {
          * Intrinsic props to be spread on the rendered element.
          */
         props?:
-          | RenderFunctionProps<TagName>
-          | Array<
             | RenderFunctionProps<TagName>
-            | undefined
-            | ((props: RenderFunctionProps<TagName>) => RenderFunctionProps<TagName>)
-          >;
+            | Array<RenderFunctionProps<TagName> | undefined | ((props: RenderFunctionProps<TagName>) => RenderFunctionProps<TagName>)>;
         /**
          * A mapping of state to style hooks.
          */
         customStyleHookMapping?: CustomStyleHookMapping<State>;
     } /* This typing ensures `disableStyleHookMapping` is constantly defined or undefined */ & (
-      | {
-          /**
-           * Disable style hook mapping.
-           */
-          disableStyleHooks: true;
-      }
-      | {
-          /**
-           * Disable style hook mapping.
-           */
-          disableStyleHooks?: false;
-      }
-  );
+        | {
+              /**
+               * Disable style hook mapping.
+               */
+              disableStyleHooks: true;
+          }
+        | {
+              /**
+               * Disable style hook mapping.
+               */
+              disableStyleHooks?: false;
+          }
+    );
 
     export type ComponentProps<State> = {
-    /**
-     * The class name to apply to the rendered element.
-     * Can be a string or a function that accepts the state and returns a string.
-     */
+        /**
+         * The class name to apply to the rendered element.
+         * Can be a string or a function that accepts the state and returns a string.
+         */
         className?: string | ((state: State) => string);
         /**
          * The render prop or React element to override the default element.
          */
-        render?:
-          | undefined
-          | ComponentRenderFn<React.HTMLAttributes<any>, State>
-          | React.ReactElement<Record<string, unknown>>;
+        render?: undefined | ComponentRenderFn<React.HTMLAttributes<any>, State> | React.ReactElement<Record<string, unknown>>;
 
         asChild?: boolean;
     };

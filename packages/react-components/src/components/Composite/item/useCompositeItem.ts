@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useMergedRef } from '@flippo-ui/hooks';
+import { useMergedRef } from '@flippo-software/hooks';
 
 import type { HTMLProps } from '~@lib/types';
 

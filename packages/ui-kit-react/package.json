@@ -4,7 +4,6 @@
     "type": "module",
     "description": "Styled Flippo React components using shared design tokens and recipes.",
     "license": "ISC",
-    "packageManager": "pnpm@11.24.0",
     "files": [
         "dist",
         "src/styles.css",
@@ -22,13 +21,14 @@
         "build-storybook": "storybook build"
     },
     "dependencies": {
-        "@flippo-ui/headless-components": "link:../../../headless-components"
+        "@flippo-software/react-components": "workspace:*"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@flippo-software/biome": "catalog:",
         "@flippo-software/component-styles": "workspace:*",
         "@flippo-software/tsconfig": "catalog:",
+        "@flippo-software/workspace-tools": "workspace:*",
         "@storybook/addon-essentials": "catalog:",
         "@storybook/react": "8.6.14",
         "@storybook/react-vite": "8.6.14",
@@ -316,5 +316,14 @@
         },
         "./package.json": "./package.json",
         "./styles.css": "./src/styles.css"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "directory": "packages/ui-kit-react"
+    },
+    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/ui-kit-react#readme",
+    "bugs": {
+        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
     }
 }

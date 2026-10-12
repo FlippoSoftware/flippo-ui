@@ -2,7 +2,7 @@ import React from 'react';
 
 import { SelectBackdrop as SelectBackdropCore } from '@flippo-software/core-components/select';
 
-import type { TransitionStatus } from '@flippo-ui/hooks';
+import type { TransitionStatus } from '@flippo-software/hooks';
 
 import { toReactProps, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

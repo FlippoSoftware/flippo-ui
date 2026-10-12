@@ -1,6 +1,6 @@
 'use client';
 import { radio as recipe } from '@flippo-software/component-styles/radio';
-import { Radio as Primitive } from '@flippo-ui/headless-components/radio';
+import { Radio as Primitive } from '@flippo-software/react-components/radio';
 
 import { createStyler } from '../../lib/Styled';
 

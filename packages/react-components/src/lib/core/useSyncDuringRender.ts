@@ -1,5 +1,5 @@
 import { deferNotifications, flushNotifications } from '@flippo-software/core-components/store';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 const IS_SERVER = typeof document === 'undefined';
 

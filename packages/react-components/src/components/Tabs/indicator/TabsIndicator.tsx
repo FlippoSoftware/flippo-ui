@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { getTabsIndicatorGeometry } from '@flippo-software/core-components/tabs';
-import { useForcedRerendering, useOnMount } from '@flippo-ui/hooks';
+import { useForcedRerendering, useOnMount } from '@flippo-software/hooks';
 
 import { useRenderElement } from '~@lib/hooks';
 
@@ -106,6 +106,7 @@ export function TabsIndicator(componentProps: TabsIndicator.Props) {
         <React.Fragment>
             {element}
             {!isMounted && renderBeforeHydration && (
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: the script is a constant built from this package's own source (prehydrationScript.template.js).
                 <script dangerouslySetInnerHTML={{ __html: prehydrationScript }} suppressHydrationWarning={true} />
             )}
         </React.Fragment>

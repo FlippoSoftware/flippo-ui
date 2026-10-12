@@ -1,10 +1,10 @@
-# @flippo/internal-test-utils
+# @flippo-software/internal-test-utils
 
 > Внутренняя библиотека тестовых утилит для Flippo headless UI компонентов
 
 ## Обзор
 
-`@flippo/internal-test-utils` - это специализированная библиотека для тестирования headless компонентов в экосистеме Flippo. Она предоставляет набор утилит, которые стандартизируют процесс тестирования и обеспечивают единообразие тестов во всех пакетах.
+`@flippo-software/internal-test-utils` - это специализированная библиотека для тестирования headless компонентов в экосистеме Flippo. Она предоставляет набор утилит, которые стандартизируют процесс тестирования и обеспечивают единообразие тестов во всех пакетах.
 
 ### Ключевые особенности
 
@@ -18,13 +18,13 @@
 ## Установка
 
 ```bash
-pnpm add @flippo/internal-test-utils --save-dev
+pnpm add @flippo-software/internal-test-utils --save-dev
 ```
 
 ## Быстрый старт
 
 ```typescript
-import { init, createRenderer, quickSetup } from '@flippo/internal-test-utils';
+import { init, createRenderer, quickSetup } from '@flippo-software/internal-test-utils';
 
 // Быстрая настройка для unit тестов
 quickSetup.unit();
@@ -54,7 +54,7 @@ describe('MyComponent', () => {
 Создает стандартизированную функцию рендеринга для headless компонентов.
 
 ```typescript
-import { createRenderer } from '@flippo/internal-test-utils';
+import { createRenderer } from '@flippo-software/internal-test-utils';
 
 describe('Component tests', () => {
   const { render } = createRenderer({
@@ -77,7 +77,7 @@ describe('Component tests', () => {
 ### Тестирование compound компонентов
 
 ```typescript
-import { testCompoundComponent, testAriaRelationships } from '@flippo/internal-test-utils';
+import { testCompoundComponent, testAriaRelationships } from '@flippo-software/internal-test-utils';
 
 describe('Dialog Component', () => {
   const dialogTester = testCompoundComponent({
@@ -114,7 +114,7 @@ describe('Dialog Component', () => {
 ### Тестирование доступности
 
 ```typescript
-import { createA11yTestRunner, testKeyboardPatterns, KEYBOARD_PATTERNS } from '@flippo/internal-test-utils';
+import { createA11yTestRunner, testKeyboardPatterns, KEYBOARD_PATTERNS } from '@flippo-software/internal-test-utils';
 
 describe('Accessibility tests', () => {
   it('should pass all a11y checks', async () => {
@@ -145,7 +145,7 @@ describe('Accessibility tests', () => {
 ### Тестирование производительности
 
 ```typescript
-import { testComponentPerformance, createPerformanceRunner, testStressPerformance } from '@flippo/internal-test-utils';
+import { testComponentPerformance, createPerformanceRunner, testStressPerformance } from '@flippo-software/internal-test-utils';
 
 describe('Performance tests', () => {
   it('should render within performance thresholds', async () => {
@@ -178,7 +178,7 @@ describe('Performance tests', () => {
 ### Тестирование событий
 
 ```typescript
-import { createEventTestRunner, testCommonEventPatterns, createMockHeadlessUIEvent } from '@flippo/internal-test-utils';
+import { createEventTestRunner, testCommonEventPatterns, createMockHeadlessUIEvent } from '@flippo-software/internal-test-utils';
 
 describe('Event handling', () => {
   it('should handle HeadlessUI events properly', async () => {
@@ -221,7 +221,7 @@ describe('Event handling', () => {
 ### Кастомные матчеры
 
 ```typescript
-import { initMatchers } from '@flippo/internal-test-utils';
+import { initMatchers } from '@flippo-software/internal-test-utils';
 
 // Инициализация матчеров (обычно в setup файле)
 initMatchers();
@@ -249,7 +249,7 @@ describe('Custom matchers', () => {
 ### Условное пропускание тестов
 
 ```typescript
-import { describeSkipIf } from '@flippo/internal-test-utils';
+import { describeSkipIf } from '@flippo-software/internal-test-utils';
 
 // Пропуск тестов в зависимости от условий
 describeSkipIf(
@@ -287,7 +287,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['@flippo/internal-test-utils/setup'], // Автоматическая настройка
+    setupFiles: ['@flippo-software/internal-test-utils/setup'], // Автоматическая настройка
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
   },
 });
@@ -297,7 +297,7 @@ export default defineConfig({
 
 ```typescript
 // setup.ts
-import { init } from '@flippo/internal-test-utils';
+import { init } from '@flippo-software/internal-test-utils';
 
 init({
   enableA11yTesting: true,
@@ -317,7 +317,7 @@ init({
 ### Тестирование Tooltip компонента
 
 ```typescript
-import { createRenderer, createHeadlessTestUtils, testAriaRelationships } from '@flippo/internal-test-utils';
+import { createRenderer, createHeadlessTestUtils, testAriaRelationships } from '@flippo-software/internal-test-utils';
 
 describe('Tooltip Component', () => {
   const { render } = createRenderer();
@@ -365,7 +365,7 @@ describe('Tooltip Component', () => {
 ### Тестирование Dialog компонента
 
 ```typescript
-import { testCompoundPatterns, testStateSynchronization } from '@flippo/internal-test-utils';
+import { testCompoundPatterns, testStateSynchronization } from '@flippo-software/internal-test-utils';
 
 describe('Dialog Component', () => {
   const dialogTester = testCompoundPatterns().dialog;
@@ -444,7 +444,7 @@ describe('Dialog Component', () => {
 ### 1. Структура тестов
 
 ```typescript
-import { createRenderer, createHeadlessTestUtils } from '@flippo/internal-test-utils';
+import { createRenderer, createHeadlessTestUtils } from '@flippo-software/internal-test-utils';
 
 describe('ComponentName', () => {
   const { render } = createRenderer();
@@ -465,7 +465,7 @@ describe('ComponentName', () => {
 ### 2. Тестирование производительности
 
 ```typescript
-import { testComponentPerformance } from '@flippo/internal-test-utils';
+import { testComponentPerformance } from '@flippo-software/internal-test-utils';
 
 it('should meet performance requirements', async () => {
   await testComponentPerformance({
@@ -482,7 +482,7 @@ it('should meet performance requirements', async () => {
 ### 3. Организация accessibility тестов
 
 ```typescript
-import { createA11yTestRunner, KEYBOARD_PATTERNS } from '@flippo/internal-test-utils';
+import { createA11yTestRunner, KEYBOARD_PATTERNS } from '@flippo-software/internal-test-utils';
 
 describe('Accessibility', () => {
   it('should pass all a11y tests', async () => {
@@ -499,7 +499,7 @@ describe('Accessibility', () => {
 Включите debug режим для получения дополнительной информации:
 
 ```typescript
-import { setupDebugMode } from '@flippo/internal-test-utils';
+import { setupDebugMode } from '@flippo-software/internal-test-utils';
 
 setupDebugMode();
 
@@ -517,7 +517,7 @@ debugDOM(); // Текущее состояние DOM
 import { render } from '@testing-library/react';
 
 // Новый код
-import { createRenderer } from '@flippo/internal-test-utils';
+import { createRenderer } from '@flippo-software/internal-test-utils';
 const { render } = createRenderer();
 ```
 
@@ -525,7 +525,7 @@ const { render } = createRenderer();
 
 ```typescript
 // Вместо множества setup файлов
-import { quickSetup } from '@flippo/internal-test-utils';
+import { quickSetup } from '@flippo-software/internal-test-utils';
 
 quickSetup.unit(); // или integration, performance, accessibility
 ```
@@ -534,7 +534,7 @@ quickSetup.unit(); // или integration, performance, accessibility
 
 ```typescript
 // В CI окружении
-import { init } from '@flippo/internal-test-utils';
+import { init } from '@flippo-software/internal-test-utils';
 
 init({
   enablePerformanceMonitoring: process.env.CI === 'true',
@@ -552,7 +552,7 @@ init({
 1. **"Custom matchers not found"**
    ```typescript
    // Убедитесь что вызвали инициализацию
-   import { init } from '@flippo/internal-test-utils';
+   import { init } from '@flippo-software/internal-test-utils';
    init();
    ```
 

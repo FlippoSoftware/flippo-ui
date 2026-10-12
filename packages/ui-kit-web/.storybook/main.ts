@@ -1,6 +1,6 @@
 import type { StorybookConfig } from '@storybook/web-components-vite';
 
-import { clientConditions, stylesAliases } from '../../../tools/workspace';
+import { clientConditions, stylesAliases } from '@flippo-software/workspace-tools';
 
 const config: StorybookConfig = {
     framework: '@storybook/web-components-vite',

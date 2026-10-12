@@ -3,11 +3,7 @@ import React from 'react';
 import { serializeValue } from './serializeValue';
 
 type ItemRecord = Record<string, React.ReactNode>;
-type ItemsInput
-    = | ItemRecord
-      | ReadonlyArray<LabeledItem>
-      | ReadonlyArray<Group<LabeledItem>>
-      | undefined;
+type ItemsInput = ItemRecord | ReadonlyArray<LabeledItem> | ReadonlyArray<Group<LabeledItem>> | undefined;
 
 type LabeledItem = {
     value: any;
@@ -19,16 +15,8 @@ export type Group<Item = any> = {
     items: Item[];
 };
 
-export function isGroupedItems(
-    items: ReadonlyArray<any | Group<any>> | undefined
-): items is Group<any>[] {
-    return (
-        items != null
-        && items.length > 0
-        && typeof items[0] === 'object'
-        && items[0] != null
-        && 'items' in (items[0] as object)
-    );
+export function isGroupedItems(items: ReadonlyArray<any | Group<any>> | undefined): items is Group<any>[] {
+    return items != null && items.length > 0 && typeof items[0] === 'object' && items[0] != null && 'items' in (items[0] as object);
 }
 
 export function stringifyAsLabel(item: any, itemToStringLabel?: (item: any) => string) {
@@ -56,11 +44,7 @@ export function stringifyAsValue(item: any, itemToStringValue?: (item: any) => s
     return serializeValue(item);
 }
 
-export function resolveSelectedLabel(
-    value: any,
-    items: ItemsInput,
-    itemToStringLabel?: (item: any) => string
-): React.ReactNode {
+export function resolveSelectedLabel(value: any, items: ItemsInput, itemToStringLabel?: (item: any) => string): React.ReactNode {
     if (itemToStringLabel && value != null) {
         return itemToStringLabel(value);
     }
@@ -111,20 +95,12 @@ export function resolveSelectedLabel(
     return stringifyAsLabel(value, itemToStringLabel);
 }
 
-export function resolveMultipleLabels(
-    values: any[],
-    items: ItemsInput,
-    itemToStringLabel?: (item: any) => string
-): React.ReactNode {
+export function resolveMultipleLabels(values: any[], items: ItemsInput, itemToStringLabel?: (item: any) => string): React.ReactNode {
     return values.reduce((acc, value, index) => {
         if (index > 0) {
             acc.push(', ');
         }
-        acc.push(
-            <React.Fragment key={index}>
-                {resolveSelectedLabel(value, items, itemToStringLabel)}
-            </React.Fragment>
-        );
+        acc.push(<React.Fragment key={index}>{resolveSelectedLabel(value, items, itemToStringLabel)}</React.Fragment>);
         return acc;
     }, []);
 }

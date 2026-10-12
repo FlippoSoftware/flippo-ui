@@ -1,6 +1,6 @@
 'use client';
 import { list } from '@flippo-software/component-styles/list';
-import { List as Primitive } from '@flippo-ui/headless-components/list';
+import { List as Primitive } from '@flippo-software/react-components/list';
 
 import { createStyler } from '../../lib/Styled';
 

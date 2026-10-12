@@ -1,6 +1,6 @@
 'use client';
 import { accordion as recipe } from '@flippo-software/component-styles/accordion';
-import { Accordion as Primitive } from '@flippo-ui/headless-components/accordion';
+import { Accordion as Primitive } from '@flippo-software/react-components/accordion';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

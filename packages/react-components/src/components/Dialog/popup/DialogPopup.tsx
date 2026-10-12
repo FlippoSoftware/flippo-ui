@@ -3,8 +3,8 @@ import React from 'react';
 import { DialogPopupMachine } from '@flippo-software/core-components/dialog';
 
 import type { DialogPopupOptions } from '@flippo-software/core-components/dialog';
-import type { Interaction } from '@flippo-ui/hooks/use-enhanced-click-handler';
-import type { TransitionStatus } from '@flippo-ui/hooks/use-transition-status';
+import type { Interaction } from '@flippo-software/hooks/use-enhanced-click-handler';
+import type { TransitionStatus } from '@flippo-software/hooks/use-transition-status';
 
 import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { FocusGuards, useFloatingPortalController } from '~@lib/floating';

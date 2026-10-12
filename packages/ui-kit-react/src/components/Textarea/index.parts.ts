@@ -1,6 +1,6 @@
 'use client';
 import { textarea as recipe } from '@flippo-software/component-styles/textarea';
-import { Textarea as Primitive } from '@flippo-ui/headless-components/textarea';
+import { Textarea as Primitive } from '@flippo-software/react-components/textarea';
 
 import { InputBody } from '../../lib/Input';
 import { createStyler } from '../../lib/Styled';

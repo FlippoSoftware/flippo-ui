@@ -96,8 +96,8 @@ The JS entry points require a browser/custom-element environment. Import the sty
 This package is part of the `ui-kit` pnpm workspace (see the root README): install and run the checks from the root
 (`pnpm install`, `pnpm check`), or one package with `pnpm --filter @flippo-software/ui-kit-web <script>`. It reads
 `component-styles` from its sources in Storybook, tests and typecheck, so style changes show up without a build.
-The sibling repositories `web-components`, `core` and `store` must be built; they are linked with `link:` (replace with published versions before
-releasing).
+The behaviour packages it uses (web-components, core, store) come from the workspace and their `dist`: rebuild
+them after a change (`pnpm build`, or keep `pnpm dev` running at the root).
 
 ## Storybook
 

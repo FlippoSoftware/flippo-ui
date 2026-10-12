@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SwitchMachine } from '@flippo-software/core-components/switch';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 import type { SwitchOptions } from '@flippo-software/core-components/switch';
 

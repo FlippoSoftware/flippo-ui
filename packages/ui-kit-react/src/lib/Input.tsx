@@ -1,7 +1,7 @@
 'use client';
 import type * as React from 'react';
 
-import { Input as Primitive } from '@flippo-ui/headless-components/input';
+import { Input as Primitive } from '@flippo-software/react-components/input';
 
 /** Both Input and Textarea expose the Field control context. */
 export function InputBody(props: React.ComponentPropsWithRef<'div'>) {

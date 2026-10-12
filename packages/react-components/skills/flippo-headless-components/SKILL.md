@@ -1,9 +1,9 @@
 ---
 name: flippo-headless-components
-description: Use when building React UI with @flippo-ui/headless-components — unstyled accessible components with the Base UI API (Dialog, Popover, Menu, Select, Combobox, Tabs, Accordion, Checkbox, Field, Form, Slider, Toast, Tooltip…). Explains imports, parts, render/className props, state data attributes, controlled props and change events.
+description: Use when building React UI with @flippo-software/react-components — unstyled accessible components with the Base UI API (Dialog, Popover, Menu, Select, Combobox, Tabs, Accordion, Checkbox, Field, Form, Slider, Toast, Tooltip…). Explains imports, parts, render/className props, state data attributes, controlled props and change events.
 ---
 
-# Using @flippo-ui/headless-components
+# Using @flippo-software/react-components
 
 Unstyled React components with the API of Base UI (`@base-ui-components/react`): if you know Base UI, the parts,
 props and data attributes are the same. Behaviour comes from `@flippo-software/core-components` state machines.
@@ -11,9 +11,9 @@ props and data attributes are the same. Behaviour comes from `@flippo-software/c
 ## Import
 
 ```tsx
-import { Dialog, Popover, Menu, Select, Tabs } from '@flippo-ui/headless-components';
+import { Dialog, Popover, Menu, Select, Tabs } from '@flippo-software/react-components';
 // or per component (smaller bundles):
-import { Dialog } from '@flippo-ui/headless-components/dialog';
+import { Dialog } from '@flippo-software/react-components/dialog';
 ```
 
 Components: Accordion, Autocomplete, Avatar, Button, Checkbox, CheckboxCard, CheckboxGroup, Collapsible, Combobox,

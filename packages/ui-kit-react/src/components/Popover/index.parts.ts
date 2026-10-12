@@ -1,6 +1,6 @@
 'use client';
 import { popover as recipe } from '@flippo-software/component-styles/popover';
-import { Popover as Primitive } from '@flippo-ui/headless-components/popover';
+import { Popover as Primitive } from '@flippo-software/react-components/popover';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

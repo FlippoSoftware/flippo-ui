@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SelectRootMachine } from '@flippo-software/core-components/select';
-import { useIsoLayoutEffect, useMergedRef } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect, useMergedRef } from '@flippo-software/hooks';
 
 import { toReactProps, useMachine, useTracker } from '~@lib/core';
 import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';

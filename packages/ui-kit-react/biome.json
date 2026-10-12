@@ -15,7 +15,7 @@
             "!**/storybook-static"
         ]
     },
-    "root": true,
+    "root": false,
     "linter": {
         "rules": {
             "performance": {

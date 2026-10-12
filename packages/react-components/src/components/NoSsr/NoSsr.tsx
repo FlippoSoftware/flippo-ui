@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+import { useIsoLayoutEffect } from '@flippo-software/hooks/use-iso-layout-effect';
 
 /**
  * NoSsr purposely removes components from the subject of Server Side Rendering (SSR).

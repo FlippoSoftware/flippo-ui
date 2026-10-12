@@ -1,6 +1,6 @@
 'use client';
 import { marquee as recipe } from '@flippo-software/component-styles/marquee';
-import { Marquee as Primitive } from '@flippo-ui/headless-components/marquee';
+import { Marquee as Primitive } from '@flippo-software/react-components/marquee';
 
 import { createStyler } from '../../lib/Styled';
 

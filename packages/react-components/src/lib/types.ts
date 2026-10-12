@@ -22,8 +22,8 @@ export type WithPreventHeadlessUIHandler<T> = T extends (event: infer E) => any
         ? (event: HeadlessUIEvent<E>) => ReturnType<T>
         : T
     : T extends undefined
-        ? undefined
-        : T;
+      ? undefined
+      : T;
 
 /**
  * Adds a `preventHeadlessUIHandler` method to all event handlers.
@@ -38,20 +38,13 @@ export type WithHeadlessUIEvent<T> = {
  * @template Props Props to be spread on the rendered element.
  * @template State Component's internal state.
  */
-export type ComponentRenderFn<Props, State> = (
-    props: Props,
-    state: State,
-) => React.ReactElement<unknown>;
+export type ComponentRenderFn<Props, State> = (props: Props, state: State) => React.ReactElement<unknown>;
 
 /**
  * Props shared by all Headless UI components.
  * Contains `className` (string or callback taking the component's state as an argument) and `render` (function to customize rendering).
  */
-export type HeadlessUIComponentProps<
-    ElementType extends React.ElementType,
-    State,
-    RenderFunctionProps = HTMLProps
-> = Omit<
+export type HeadlessUIComponentProps<ElementType extends React.ElementType, State, RenderFunctionProps = HTMLProps> = Omit<
     WithHeadlessUIEvent<React.ComponentPropsWithoutRef<ElementType>>,
     'className' | 'color' | 'defaultValue' | 'defaultChecked'
 > & {
@@ -67,9 +60,7 @@ export type HeadlessUIComponentProps<
      *
      * Accepts a `ReactElement` or a function that returns the element to render.
      */
-    render?:
-      | ComponentRenderFn<RenderFunctionProps, State>
-      | React.ReactElement<Record<string, unknown>>;
+    render?: ComponentRenderFn<RenderFunctionProps, State> | React.ReactElement<Record<string, unknown>>;
 
     /**
      * Should a component pass all props to a single child component?
@@ -105,27 +96,26 @@ export type NonNativeButtonProps = {
     nativeButton?: boolean;
 };
 
-export type EventKey
-    = | 'ArrowDown'
-      | 'ArrowUp'
-      | 'ArrowLeft'
-      | 'ArrowRight'
-      | 'Space'
-      | 'Enter'
-      | 'Comma'
-      | 'Escape'
-      | 'Backspace'
-      | 'Delete'
-      | 'Home'
-      | 'End'
-      | 'Tab'
-      | 'PageUp'
-      | 'PageDown'
-      | (string & {});
+export type EventKey =
+    | 'ArrowDown'
+    | 'ArrowUp'
+    | 'ArrowLeft'
+    | 'ArrowRight'
+    | 'Space'
+    | 'Enter'
+    | 'Comma'
+    | 'Escape'
+    | 'Backspace'
+    | 'Delete'
+    | 'Home'
+    | 'End'
+    | 'Tab'
+    | 'PageUp'
+    | 'PageDown'
+    | (string & {});
 
 export type EventKeyMap<T extends HTMLElement = HTMLElement> = {
-    [key in EventKey]?: (event: React.KeyboardEvent<T>) => void
+    [key in EventKey]?: (event: React.KeyboardEvent<T>) => void;
 };
 
-export type NativeEvent<E>
-    = React.ChangeEvent<any> extends E ? InputEvent : E extends React.SyntheticEvent<any, infer T> ? T : never;
+export type NativeEvent<E> = React.ChangeEvent<any> extends E ? InputEvent : E extends React.SyntheticEvent<any, infer T> ? T : never;

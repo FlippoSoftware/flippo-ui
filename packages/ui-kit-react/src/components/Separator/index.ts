@@ -1,6 +1,6 @@
 'use client';
 import { separator as recipe } from '@flippo-software/component-styles/separator';
-import { Separator as Primitive } from '@flippo-ui/headless-components/separator';
+import { Separator as Primitive } from '@flippo-software/react-components/separator';
 
 import { createStyler } from '../../lib/Styled';
 

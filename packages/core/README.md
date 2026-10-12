@@ -1,6 +1,6 @@
 # @flippo-software/core-components
 
-Framework-agnostic state machines for [`@flippo-ui/headless-components`](https://github.com/FlippoSoftware/headless-components).
+Framework-agnostic state machines for [`@flippo-software/react-components`](../react-components).
 
 The core holds component state, selectors and transitions without React. Framework packages are thin adapters:
 they subscribe to stores, pass DOM elements in and render.
@@ -96,7 +96,7 @@ store.setOpen(true, createChangeEventDetails(REASONS.triggerPress, event, trigge
 
 ## Adapter contract
 
-`ComponentStore` (from `@flippo-software/store`) is the framework-free base of `ReactStore` in `@flippo-ui/hooks`,
+`ComponentStore` (from `@flippo-software/store`) is the framework-free base of `ReactStore` in `@flippo-software/hooks`,
 which extends it with hooks and nothing else:
 
 ```ts

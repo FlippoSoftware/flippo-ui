@@ -1,6 +1,6 @@
 'use client';
 import { snippet as recipe } from '@flippo-software/component-styles/snippet';
-import { Snippet as Primitive } from '@flippo-ui/headless-components/snippet';
+import { Snippet as Primitive } from '@flippo-software/react-components/snippet';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

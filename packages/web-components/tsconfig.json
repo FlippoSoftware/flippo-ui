@@ -1,0 +1,12 @@
+{
+    "extends": "@flippo-software/tsconfig",
+    "compilerOptions": {
+        "lib": ["dom", "dom.iterable", "ES2024"],
+        "types": [],
+        "jsx": "react-jsx",
+        "composite": false,
+        "incremental": false
+    },
+    "include": ["src", "test", "tsdown.config.ts", "vitest.config.ts"],
+    "exclude": ["node_modules", "dist"]
+}

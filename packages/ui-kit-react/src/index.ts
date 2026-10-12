@@ -1,5 +1,5 @@
 // Behaviour and utility APIs remain available; explicit styled exports take precedence.
-export * from '@flippo-ui/headless-components';
+export * from '@flippo-software/react-components';
 
 export type { IconName } from '@flippo-software/component-styles/icons';
 

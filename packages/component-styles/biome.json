@@ -1,6 +1,6 @@
 {
     "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
-    "root": true,
+    "root": false,
     "extends": ["@flippo-software/biome/base", "@flippo-software/biome/test"],
     "files": {
         "includes": ["!**/node_modules", "!**/dist", "!**/.git", "!**/*.scss", "!fonts"]

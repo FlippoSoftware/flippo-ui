@@ -4,7 +4,6 @@
     "type": "module",
     "description": "Styled Flippo custom elements using shared design tokens and recipes.",
     "license": "ISC",
-    "packageManager": "pnpm@11.24.0",
     "files": [
         "dist",
         "src/styles.css",
@@ -22,14 +21,15 @@
         "build-storybook": "storybook build"
     },
     "dependencies": {
-        "@flippo-software/store": "link:../../../store",
-        "@flippo-software/web-components": "link:../../../web-components"
+        "@flippo-software/store": "workspace:*",
+        "@flippo-software/web-components": "workspace:*"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@flippo-software/biome": "catalog:",
         "@flippo-software/component-styles": "workspace:*",
         "@flippo-software/tsconfig": "catalog:",
+        "@flippo-software/workspace-tools": "workspace:*",
         "@storybook/addon-essentials": "catalog:",
         "@storybook/web-components": "8.6.14",
         "@storybook/web-components-vite": "8.6.14",
@@ -315,5 +315,14 @@
     },
     "peerDependencies": {
         "@flippo-software/component-styles": "workspace:^"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "directory": "packages/ui-kit-web"
+    },
+    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/ui-kit-web#readme",
+    "bugs": {
+        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
     }
 }

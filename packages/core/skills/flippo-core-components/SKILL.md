@@ -6,7 +6,7 @@ description: Use when building UI on @flippo-software/core-components directly �
 # Using @flippo-software/core-components
 
 Framework-agnostic state machines of the Flippo UI components (Base UI behaviour). Ready-made renderings exist:
-React — `@flippo-ui/headless-components`; custom elements — `@flippo-software/web-components`. Use the machines
+React — `@flippo-software/react-components`; custom elements — `@flippo-software/web-components`. Use the machines
 directly only to write another adapter or a bespoke component. The README in the package lists every entry point.
 
 ## Imports

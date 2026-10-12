@@ -3,7 +3,7 @@
     "release-type": "node",
     "packages": {
         ".": {
-            "package-name": "@flippo-ui/headless-components",
+            "package-name": "@flippo-software/react-components",
             "include-component-in-tag": false
         }
     }

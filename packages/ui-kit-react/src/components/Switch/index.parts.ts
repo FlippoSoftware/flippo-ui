@@ -1,6 +1,6 @@
 'use client';
 import { switchRecipe as recipe } from '@flippo-software/component-styles/switch';
-import { Switch as Primitive } from '@flippo-ui/headless-components/switch';
+import { Switch as Primitive } from '@flippo-software/react-components/switch';
 
 import { createStyler } from '../../lib/Styled';
 

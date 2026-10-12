@@ -1,7 +1,7 @@
 /**
  * Test-only ESM version of `use-sync-external-store/with-selector` (same algorithm as React's).
  *
- * The linked `@flippo-ui/hooks` imports the CJS package from its own node_modules, whose `require('react')`
+ * The linked `@flippo-software/hooks` imports the CJS package from its own node_modules, whose `require('react')`
  * would load a second React; aliasing to this file keeps one React in tests.
  */
 import React from 'react';

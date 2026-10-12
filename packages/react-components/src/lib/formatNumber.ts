@@ -14,22 +14,14 @@ export function getFormatter(locale?: Intl.LocalesArgument, options?: Intl.Numbe
     return formatter;
 }
 
-export function formatNumber(
-    value: number | null | undefined,
-    locale?: Intl.LocalesArgument,
-    options?: Intl.NumberFormatOptions
-) {
+export function formatNumber(value: number | null | undefined, locale?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) {
     if (value == null) {
         return '';
     }
     return getFormatter(locale, options).format(value);
 }
 
-export function formatNumberMaxPrecision(
-    value: number | null,
-    locale?: Intl.LocalesArgument,
-    options?: Intl.NumberFormatOptions
-) {
+export function formatNumberMaxPrecision(value: number | null, locale?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) {
     return formatNumber(value, locale, {
         ...options,
         maximumFractionDigits: 20

@@ -1,6 +1,5 @@
+import { clientConditions, serverConditions } from '@flippo-software/workspace-tools';
 import { defineConfig } from 'vitest/config';
-
-import { clientConditions, serverConditions } from '../../tools/workspace';
 
 export default defineConfig({
     // component-styles from its sources (`tools/workspace.ts`).

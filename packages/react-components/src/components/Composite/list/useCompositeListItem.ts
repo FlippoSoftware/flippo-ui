@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+import { useIsoLayoutEffect } from '@flippo-software/hooks/use-iso-layout-effect';
 
 import { useCompositeListContext } from './CompositeListContext';
 

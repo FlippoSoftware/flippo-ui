@@ -1,5 +1,5 @@
 /**
- * Example usage patterns for @flippo/internal-test-utils
+ * Example usage patterns for @flippo-software/internal-test-utils
  * 
  * These examples demonstrate how to use the testing utilities
  * with different types of headless components.

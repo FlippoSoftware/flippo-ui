@@ -1,6 +1,6 @@
 'use client';
 import { collapsible as recipe } from '@flippo-software/component-styles/collapsible';
-import { Collapsible as Primitive } from '@flippo-ui/headless-components/collapsible';
+import { Collapsible as Primitive } from '@flippo-software/react-components/collapsible';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

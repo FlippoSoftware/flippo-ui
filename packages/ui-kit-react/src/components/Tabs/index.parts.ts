@@ -1,6 +1,6 @@
 'use client';
 import { tabs as recipe } from '@flippo-software/component-styles/tabs';
-import { Tabs as Primitive } from '@flippo-ui/headless-components/tabs';
+import { Tabs as Primitive } from '@flippo-software/react-components/tabs';
 
 import { createStyler } from '../../lib/Styled';
 

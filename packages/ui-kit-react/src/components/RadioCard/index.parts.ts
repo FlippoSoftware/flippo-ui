@@ -1,6 +1,6 @@
 'use client';
 import { radioCard as recipe } from '@flippo-software/component-styles/radio-card';
-import { RadioCard as Primitive } from '@flippo-ui/headless-components/radio-card';
+import { RadioCard as Primitive } from '@flippo-software/react-components/radio-card';
 
 import { createStyler } from '../../lib/Styled';
 

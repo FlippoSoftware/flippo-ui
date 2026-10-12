@@ -1,6 +1,6 @@
 'use client';
 import { toggle as recipe } from '@flippo-software/component-styles/toggle';
-import { Toggle as Primitive } from '@flippo-ui/headless-components/toggle';
+import { Toggle as Primitive } from '@flippo-software/react-components/toggle';
 
 import { createStyler } from '../../lib/Styled';
 

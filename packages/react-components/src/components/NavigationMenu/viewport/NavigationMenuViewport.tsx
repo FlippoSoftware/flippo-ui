@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { NavigationMenuViewportMachine } from '@flippo-software/core-components/navigation-menu';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 import { toReactProps, useTracker } from '~@lib/core';
 import { FocusGuard } from '~@lib/FocusGuard';

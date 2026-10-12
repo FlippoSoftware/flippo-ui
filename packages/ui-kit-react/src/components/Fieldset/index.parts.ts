@@ -1,6 +1,6 @@
 'use client';
 import { fieldset as recipe } from '@flippo-software/component-styles/fieldset';
-import { Fieldset as Primitive } from '@flippo-ui/headless-components/fieldset';
+import { Fieldset as Primitive } from '@flippo-software/react-components/fieldset';
 
 import { createStyler } from '../../lib/Styled';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { deferNotifications, flushNotifications } from '@flippo-software/core-components/store';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 /**
  * A core state machine as the adapter sees it: options are pushed with `setOptions`; `connect` (if any)

@@ -1,6 +1,6 @@
 'use client';
 import { progress as recipe } from '@flippo-software/component-styles/progress';
-import { Progress as Primitive } from '@flippo-ui/headless-components/progress';
+import { Progress as Primitive } from '@flippo-software/react-components/progress';
 
 import { createStyler } from '../../lib/Styled';
 

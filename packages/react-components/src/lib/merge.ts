@@ -2,10 +2,7 @@ import type React from 'react';
 
 import type { HeadlessUIEvent, WithHeadlessUIEvent } from './types';
 
-export function mergeObjects<A extends object | undefined, B extends object | undefined>(
-    a: A,
-    b: B
-) {
+export function mergeObjects<A extends object | undefined, B extends object | undefined>(a: A, b: B) {
     if (a && !b) {
         return a;
     }
@@ -20,10 +17,7 @@ export function mergeObjects<A extends object | undefined, B extends object | un
 
 type ElementType = React.ElementType;
 type PropsOf<T extends React.ElementType> = WithHeadlessUIEvent<React.ComponentPropsWithRef<T>>;
-type InputProps<T extends React.ElementType>
-  = | PropsOf<T>
-    | ((otherProps: PropsOf<T>) => PropsOf<T>)
-    | undefined;
+type InputProps<T extends React.ElementType> = PropsOf<T> | ((otherProps: PropsOf<T>) => PropsOf<T>) | undefined;
 
 const EMPTY_PROPS = {};
 
@@ -51,23 +45,14 @@ const EMPTY_PROPS = {};
 
 export function mergeProps<T extends ElementType>(a: InputProps<T>, b: InputProps<T>): PropsOf<T>;
 export function mergeProps<T extends ElementType>(a: InputProps<T>, b: InputProps<T>): PropsOf<T>;
-export function mergeProps<T extends ElementType>(
-    a: InputProps<T>,
-    b: InputProps<T>,
-    c: InputProps<T>,
-): PropsOf<T>;
-export function mergeProps<T extends ElementType>(
-    a: InputProps<T>,
-    b: InputProps<T>,
-    c: InputProps<T>,
-    d: InputProps<T>,
-): PropsOf<T>;
+export function mergeProps<T extends ElementType>(a: InputProps<T>, b: InputProps<T>, c: InputProps<T>): PropsOf<T>;
+export function mergeProps<T extends ElementType>(a: InputProps<T>, b: InputProps<T>, c: InputProps<T>, d: InputProps<T>): PropsOf<T>;
 export function mergeProps<T extends ElementType>(
     a: InputProps<T>,
     b: InputProps<T>,
     c: InputProps<T>,
     d: InputProps<T>,
-    e: InputProps<T>,
+    e: InputProps<T>
 ): PropsOf<T>;
 export function mergeProps(a: any, b: any, c?: any, d?: any, e?: any) {
     // We need to mutably own `merged`
@@ -144,8 +129,7 @@ function mutablyMergeInto<T extends ElementType>(
             default: {
                 if (isEventHandler(propName, externalPropValue)) {
                     mergedProps[propName] = mergeEventHandlers(mergedProps[propName], externalPropValue);
-                }
-                else {
+                } else {
                     mergedProps[propName] = externalPropValue;
                 }
             }
@@ -160,25 +144,14 @@ function isEventHandler(key: string, value: unknown) {
     const code0 = key.charCodeAt(0);
     const code1 = key.charCodeAt(1);
     const code2 = key.charCodeAt(2);
-    return (
-        code0 === 111
-        && /* o */ code1 === 110
-        && /* n */ code2 >= 65
-        && /* A */ code2 <= 90
-        && /* Z */ typeof value === 'function'
-    );
+    return code0 === 111 && /* o */ code1 === 110 && /* n */ code2 >= 65 && /* A */ code2 <= 90 && /* Z */ typeof value === 'function';
 }
 
-function isPropsGetter<T extends React.ComponentType>(
-    inputProps: InputProps<T>
-): inputProps is (props: PropsOf<T>) => PropsOf<T> {
+function isPropsGetter<T extends React.ComponentType>(inputProps: InputProps<T>): inputProps is (props: PropsOf<T>) => PropsOf<T> {
     return typeof inputProps === 'function';
 }
 
-function resolvePropsGetter<T extends ElementType>(
-    inputProps: InputProps<ElementType>,
-    previousProps: PropsOf<T>
-) {
+function resolvePropsGetter<T extends ElementType>(inputProps: InputProps<ElementType>, previousProps: PropsOf<T>) {
     if (isPropsGetter(inputProps)) {
         return inputProps(previousProps);
     }
@@ -223,10 +196,7 @@ export function makeEventPreventable<T extends React.SyntheticEvent>(event: Head
     return event;
 }
 
-export function mergeClassNames(
-    ourClassName: string | undefined,
-    theirClassName: string | undefined
-) {
+export function mergeClassNames(ourClassName: string | undefined, theirClassName: string | undefined) {
     if (theirClassName) {
         if (ourClassName) {
             return `${theirClassName} ${ourClassName}`;

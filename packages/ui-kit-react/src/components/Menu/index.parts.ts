@@ -1,6 +1,6 @@
 'use client';
 import { menu as recipe } from '@flippo-software/component-styles/menu';
-import { Menu as Primitive } from '@flippo-ui/headless-components/menu';
+import { Menu as Primitive } from '@flippo-software/react-components/menu';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

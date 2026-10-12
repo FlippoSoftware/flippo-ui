@@ -1,6 +1,6 @@
 'use client';
 import { dialog as recipe } from '@flippo-software/component-styles/dialog';
-import { Dialog as Primitive } from '@flippo-ui/headless-components/dialog';
+import { Dialog as Primitive } from '@flippo-software/react-components/dialog';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

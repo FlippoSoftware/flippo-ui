@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 import { useStoreSelector } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';

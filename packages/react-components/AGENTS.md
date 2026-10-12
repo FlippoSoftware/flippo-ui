@@ -1,4 +1,4 @@
-# @flippo-ui/headless-components — notes for agents
+# @flippo-software/react-components — notes for agents
 
 Unstyled, accessible React components with the Base UI API (`Dialog.Root`, `Dialog.Trigger`, …). Every component is
 a thin React adapter over the state machines of `@flippo-software/core-components` (`../core`): the machine owns the
@@ -43,13 +43,13 @@ return useRenderElement('button', componentProps, {
 
 ## Rules
 
-- Behaviour changes go to core, then the adapter. Rebuild core (`pnpm build:core`) — this package uses `link:../core`
-  and its `dist/`.
-- Tests: `@flippo/internal-test-utils` (`createRenderer`, `screen`, user events), `describe.each(RENDER_MODES)`.
+- Behaviour changes go to core, then the adapter. Rebuild core (`pnpm --filter @flippo-software/core-components build`,
+  or `pnpm dev` at the workspace root) — this package uses core's `dist/` (`workspace:*`).
+- Tests: `@flippo-software/internal-test-utils` (`createRenderer`, `screen`, user events), `describe.each(RENDER_MODES)`.
   Write the test against the expected Base UI behaviour first.
 - Build is Vite (+ `tsc -p tsconfig.build.json` and `scripts/rewrite-dts-aliases.mjs` for types); do not move it to
   tsdown. TypeScript 7.
-- `@flippo-ui/hooks` and `@flippo/internal-test-utils` are `link:` dependencies (not on npm): replace them with
+- `@flippo-software/hooks` and `@flippo-software/internal-test-utils` are `link:` dependencies (not on npm): replace them with
   published versions before a release. CI checks them out as siblings.
 
 ## Commands

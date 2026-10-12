@@ -1,8 +1,8 @@
-# @flippo/internal-test-utils - Обзор библиотеки
+# @flippo-software/internal-test-utils - Обзор библиотеки
 
 ## 🎯 Цель
 
-Библиотека `@flippo/internal-test-utils` создана специально для тестирования headless UI компонентов экосистемы Flippo. Она решает специфичные задачи, которые возникают при тестировании unstyled компонентов с compound архитектурой.
+Библиотека `@flippo-software/internal-test-utils` создана специально для тестирования headless UI компонентов экосистемы Flippo. Она решает специфичные задачи, которые возникают при тестировании unstyled компонентов с compound архитектурой.
 
 ## 🧩 Архитектура
 
@@ -17,7 +17,7 @@
 ### Структура пакета
 
 ```
-@flippo/internal-test-utils/
+@flippo-software/internal-test-utils/
 ├── renderer/           # Рендеринг компонентов
 │   ├── createRenderer  # Основная функция рендеринга
 │   └── providers/      # Тестовые провайдеры
@@ -116,7 +116,7 @@ expect(element).toHaveHeadlessFocus();
 
 ## 🎨 Отличия от @mui/internal-test-utils
 
-| Особенность | @mui/internal-test-utils | @flippo/internal-test-utils |
+| Особенность | @mui/internal-test-utils | @flippo-software/internal-test-utils |
 |-------------|--------------------------|------------------------------|
 | **Целевые компоненты** | Styled компоненты MUI | Headless компоненты Flippo |
 | **Архитектура** | Monolithic компоненты | Compound компоненты |
@@ -127,7 +127,7 @@ expect(element).toHaveHeadlessFocus();
 
 ## 📋 Сравнение с стандартным подходом
 
-### Без @flippo/internal-test-utils
+### Без @flippo-software/internal-test-utils
 
 ```typescript
 describe('Tooltip', () => {
@@ -158,7 +158,7 @@ describe('Tooltip', () => {
 });
 ```
 
-### С @flippo/internal-test-utils
+### С @flippo-software/internal-test-utils
 
 ```typescript
 describe('Tooltip', () => {

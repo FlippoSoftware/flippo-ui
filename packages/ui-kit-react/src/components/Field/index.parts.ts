@@ -1,6 +1,6 @@
 'use client';
 import { field as recipe } from '@flippo-software/component-styles/field';
-import { Field as Primitive } from '@flippo-ui/headless-components/field';
+import { Field as Primitive } from '@flippo-software/react-components/field';
 
 import { createStyler } from '../../lib/Styled';
 

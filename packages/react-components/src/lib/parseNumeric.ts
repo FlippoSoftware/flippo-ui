@@ -1,18 +1,6 @@
 import { getFormatter } from './formatNumber';
 
-export const HAN_NUMERALS = [
-    '零',
-    '〇',
-    '一',
-    '二',
-    '三',
-    '四',
-    '五',
-    '六',
-    '七',
-    '八',
-    '九'
-];
+export const HAN_NUMERALS = ['零', '〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 // Map Han numeral characters to ASCII digits. Includes both forms of zero.
 export const HAN_NUMERAL_TO_DIGIT: Record<string, string> = {
     零: '0',
@@ -27,59 +15,14 @@ export const HAN_NUMERAL_TO_DIGIT: Record<string, string> = {
     八: '8',
     九: '9'
 };
-export const ARABIC_NUMERALS = [
-    '٠',
-    '١',
-    '٢',
-    '٣',
-    '٤',
-    '٥',
-    '٦',
-    '٧',
-    '٨',
-    '٩'
-];
-export const PERSIAN_NUMERALS = [
-    '۰',
-    '۱',
-    '۲',
-    '۳',
-    '۴',
-    '۵',
-    '۶',
-    '۷',
-    '۸',
-    '۹'
-];
-export const FULLWIDTH_NUMERALS = [
-    '０',
-    '１',
-    '２',
-    '３',
-    '４',
-    '５',
-    '６',
-    '７',
-    '８',
-    '９'
-];
+export const ARABIC_NUMERALS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+export const PERSIAN_NUMERALS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+export const FULLWIDTH_NUMERALS = ['０', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
 
-export const PERCENTAGES = [
-    '%',
-    '٪',
-    '％',
-    '﹪'
-];
+export const PERCENTAGES = ['%', '٪', '％', '﹪'];
 export const PERMILLE = ['‰', '؉'];
 
-export const UNICODE_MINUS_SIGNS = [
-    '−',
-    '－',
-    '‒',
-    '–',
-    '—',
-    '﹣'
-];
+export const UNICODE_MINUS_SIGNS = ['−', '－', '‒', '–', '—', '﹣'];
 export const UNICODE_PLUS_SIGNS = ['＋', '﹢'];
 
 // Fullwidth punctuation common in CJK inputs
@@ -99,14 +42,7 @@ export const PERSIAN_DETECT_RE = /[۰۱۲۳۴۵۶۷۸۹]/;
 export const HAN_DETECT_RE = /[零〇一二三四五六七八九]/;
 export const FULLWIDTH_DETECT_RE = new RegExp(`[${FULLWIDTH_NUMERALS.join('')}]`);
 
-export const BASE_NON_NUMERIC_SYMBOLS = [
-    '.',
-    ',',
-    FULLWIDTH_DECIMAL,
-    FULLWIDTH_GROUP,
-    '٫',
-    '٬'
-] as const;
+export const BASE_NON_NUMERIC_SYMBOLS = ['.', ',', FULLWIDTH_DECIMAL, FULLWIDTH_GROUP, '٫', '٬'] as const;
 export const SPACE_SEPARATOR_RE = /\p{Zs}/u;
 export const PLUS_SIGNS_WITH_ASCII = ['+', ...UNICODE_PLUS_SIGNS];
 export const MINUS_SIGNS_WITH_ASCII = ['-', ...UNICODE_MINUS_SIGNS];
@@ -124,10 +60,7 @@ export const ANY_PLUS_RE = new RegExp(ANY_PLUS_CLASS, 'gu');
 export const ANY_MINUS_DETECT_RE = new RegExp(ANY_MINUS_CLASS);
 export const ANY_PLUS_DETECT_RE = new RegExp(ANY_PLUS_CLASS);
 
-export function getNumberLocaleDetails(
-    locale?: Intl.LocalesArgument,
-    options?: Intl.NumberFormatOptions
-) {
+export function getNumberLocaleDetails(locale?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) {
     const parts = getFormatter(locale, options).formatToParts(11111.1);
     const result: Partial<Record<Intl.NumberFormatPartTypes, string | undefined>> = {};
 
@@ -147,11 +80,7 @@ export function getNumberLocaleDetails(
     return result;
 }
 
-export function parseNumber(
-    formattedNumber: string,
-    locale?: Intl.LocalesArgument,
-    options?: Intl.NumberFormatOptions
-) {
+export function parseNumber(formattedNumber: string, locale?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) {
     if (formattedNumber == null) {
         return null;
     }
@@ -188,8 +117,7 @@ export function parseNumber(
     if (computedLocale === undefined) {
         if (ARABIC_DETECT_RE.test(input) || PERSIAN_DETECT_RE.test(input)) {
             computedLocale = 'ar';
-        }
-        else if (HAN_DETECT_RE.test(input)) {
+        } else if (HAN_DETECT_RE.test(input)) {
             computedLocale = 'zh';
         }
     }
@@ -258,8 +186,7 @@ export function parseNumber(
 
     if (hasPermilleSymbol) {
         num /= 1000;
-    }
-    else if (!isUnitPercent && hasPercentSymbol) {
+    } else if (!isUnitPercent && hasPercentSymbol) {
         num /= 100;
     }
 

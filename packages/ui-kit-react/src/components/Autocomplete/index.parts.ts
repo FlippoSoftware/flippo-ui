@@ -1,6 +1,6 @@
 'use client';
 import { autocomplete as recipe } from '@flippo-software/component-styles/autocomplete';
-import { Autocomplete as Primitive } from '@flippo-ui/headless-components/autocomplete';
+import { Autocomplete as Primitive } from '@flippo-software/react-components/autocomplete';
 
 import { icon } from '../../lib/Icon';
 import { withAnchor, withAnchorRoot, withAnchorTarget } from '../../lib/InputGroupAnchor';

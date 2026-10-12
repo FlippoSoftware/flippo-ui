@@ -1,4 +1,4 @@
 'use client';
-import { Slot as Primitive } from '@flippo-ui/headless-components/slot';
+import { Slot as Primitive } from '@flippo-software/react-components/slot';
 
 export const Slot: typeof Primitive = Primitive;

@@ -25,13 +25,13 @@ export function InternalBackdrop({ ref, ...props }: InternalBackdrop.Props) {
 
     return (
         <div
-          ref={ref}
-          role={'presentation'}
+            ref={ref}
+            role={'presentation'}
             // Ensures Floating UI's outside press detection runs, as it considers
             // it an element that existed when the popup rendered.
-          data-base-ui-inert={''}
-          {...otherProps}
-          style={{
+            data-base-ui-inert={''}
+            {...otherProps}
+            style={{
                 position: 'fixed',
                 inset: 0,
                 userSelect: 'none',

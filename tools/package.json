@@ -1,0 +1,9 @@
+{
+    "name": "@flippo-software/workspace-tools",
+    "private": true,
+    "type": "module",
+    "description": "Development wiring shared by the packages of the workspace (Vite/Vitest conditions, aliases).",
+    "exports": {
+        ".": "./workspace.ts"
+    }
+}

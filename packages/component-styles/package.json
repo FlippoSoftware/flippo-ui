@@ -14,7 +14,6 @@
         "class-recipe",
         "flippo"
     ],
-    "packageManager": "pnpm@11.24.0",
     "sideEffects": [
         "**/*.css"
     ],
@@ -326,7 +325,8 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/FlippoSoftware/component-styles.git"
+        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "directory": "packages/component-styles"
     },
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
@@ -669,5 +669,9 @@
             "default": "./scss/_index.scss"
         },
         "./fonts/*": "./fonts/*"
+    },
+    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/component-styles#readme",
+    "bugs": {
+        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
     }
 }

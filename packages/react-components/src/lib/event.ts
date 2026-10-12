@@ -16,13 +16,13 @@ export type EventKeyOptions = {
 };
 
 const keyMap: Record<string, string> = {
-    'Up': 'ArrowUp',
-    'Down': 'ArrowDown',
-    'Esc': 'Escape',
+    Up: 'ArrowUp',
+    Down: 'ArrowDown',
+    Esc: 'Escape',
     ' ': 'Space',
     ',': 'Comma',
-    'Left': 'ArrowLeft',
-    'Right': 'ArrowRight'
+    Left: 'ArrowLeft',
+    Right: 'ArrowRight'
 };
 
 const rtlKeyMap: Record<string, string> = {
@@ -35,7 +35,6 @@ export function getEventKey(event: Pick<KeyboardEvent, 'key'>, options: EventKey
     let key = event.key;
     key = keyMap[key] ?? key;
     const isRtl = dir === 'rtl' && orientation === 'horizontal';
-    if (isRtl && key in rtlKeyMap)
-        key = rtlKeyMap[key] ?? key;
+    if (isRtl && key in rtlKeyMap) key = rtlKeyMap[key] ?? key;
     return key;
 }

@@ -45,9 +45,7 @@ type ReasonToEventMap = {
 /**
  * Maps a change `reason` string to the corresponding native event type.
  */
-export type ReasonToEvent<Reason extends string> = Reason extends keyof ReasonToEventMap
-    ? ReasonToEventMap[Reason]
-    : Event;
+export type ReasonToEvent<Reason extends string> = Reason extends keyof ReasonToEventMap ? ReasonToEventMap[Reason] : Event;
 
 type HeadlessUIChangeEventDetail<Reason extends string, CustomProperties extends object> = {
     /**
@@ -83,10 +81,9 @@ type HeadlessUIChangeEventDetail<Reason extends string, CustomProperties extends
 /**
  * Details of custom change events emitted by Base UI components.
  */
-export type HeadlessUIChangeEventDetails<
-    Reason extends string,
-    CustomProperties extends object = {}
-> = Reason extends string ? HeadlessUIChangeEventDetail<Reason, CustomProperties> : never;
+export type HeadlessUIChangeEventDetails<Reason extends string, CustomProperties extends object = {}> = Reason extends string
+    ? HeadlessUIChangeEventDetail<Reason, CustomProperties>
+    : never;
 
 /**
  * Details of custom generic events emitted by Base UI components.
@@ -102,19 +99,15 @@ type HeadlessUIGenericEventDetail<Reason extends string, CustomProperties extend
     event: ReasonToEvent<Reason>;
 } & CustomProperties;
 
-export type HeadlessUIGenericEventDetails<
-    Reason extends string,
-    CustomProperties extends object = {}
-> = Reason extends string ? HeadlessUIGenericEventDetail<Reason, CustomProperties> : never;
+export type HeadlessUIGenericEventDetails<Reason extends string, CustomProperties extends object = {}> = Reason extends string
+    ? HeadlessUIGenericEventDetail<Reason, CustomProperties>
+    : never;
 
 /**
  * Creates a Base UI event details object with the given reason and utilities
  * for preventing Base UI's internal event handling.
  */
-export function createChangeEventDetails<
-    Reason extends string,
-    CustomProperties extends object = {}
->(
+export function createChangeEventDetails<Reason extends string, CustomProperties extends object = {}>(
     reason: Reason,
     event?: ReasonToEvent<Reason>,
     trigger?: HTMLElement,
@@ -144,10 +137,7 @@ export function createChangeEventDetails<
     return details as HeadlessUIChangeEventDetails<Reason, CustomProperties>;
 }
 
-export function createGenericEventDetails<
-    Reason extends string,
-    CustomProperties extends object = {}
->(
+export function createGenericEventDetails<Reason extends string, CustomProperties extends object = {}>(
     reason: Reason,
     event?: ReasonToEvent<Reason>,
     customProperties?: CustomProperties

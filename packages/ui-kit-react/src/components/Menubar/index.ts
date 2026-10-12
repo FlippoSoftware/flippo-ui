@@ -1,7 +1,7 @@
 'use client';
 import { menubar as recipe } from '@flippo-software/component-styles/menubar';
-import { Menu } from '@flippo-ui/headless-components/menu';
-import { Menubar as Primitive } from '@flippo-ui/headless-components/menubar';
+import { Menu } from '@flippo-software/react-components/menu';
+import { Menubar as Primitive } from '@flippo-software/react-components/menubar';
 
 import { createStyler } from '../../lib/Styled';
 

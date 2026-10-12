@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ButtonMachine } from '@flippo-software/core-components/button';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks/use-iso-layout-effect';
+import { useIsoLayoutEffect } from '@flippo-software/hooks/use-iso-layout-effect';
 
 import { toReactProps, useMachine, useStoreSelector } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

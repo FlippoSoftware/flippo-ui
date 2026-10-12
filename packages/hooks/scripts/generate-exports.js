@@ -176,7 +176,7 @@ function generateExports() {
     }
 
     // Записываем обновленный package.json
-    writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+    writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 4)}\n`);
 
     console.log('✅ Exports generated successfully!');
     console.log(`📄 Updated exports for ${Object.keys(newExports).length} entries`);

@@ -1,4 +1,4 @@
-# Руководство по интеграции @flippo/internal-test-utils
+# Руководство по интеграции @flippo-software/internal-test-utils
 
 ## Интеграция с существующими компонентами
 
@@ -9,7 +9,7 @@
 ```json
 {
   "devDependencies": {
-    "@flippo/internal-test-utils": "workspace:*"
+    "@flippo-software/internal-test-utils": "workspace:*"
   }
 }
 ```
@@ -28,7 +28,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['@flippo/internal-test-utils/setup'], // Используем готовую настройку
+    setupFiles: ['@flippo-software/internal-test-utils/setup'], // Используем готовую настройку
     css: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
@@ -45,7 +45,7 @@ export default defineConfig({
 Замените содержимое `packages/ui/uikit/headless/components/src/test/setup.ts`:
 
 ```typescript
-import { init } from '@flippo/internal-test-utils';
+import { init } from '@flippo-software/internal-test-utils';
 
 // Инициализация с настройками для headless компонентов
 init({
@@ -91,7 +91,7 @@ describe('tooltipRoot', () => {
 });
 ```
 
-Обновленный тест с @flippo/internal-test-utils:
+Обновленный тест с @flippo-software/internal-test-utils:
 ```typescript
 // src/components/Tooltip/root/TooltipRoot.test.tsx
 import React from 'react';
@@ -102,7 +102,7 @@ import {
   testAriaRelationships,
   createA11yTestRunner,
   expect,
-} from '@flippo/internal-test-utils';
+} from '@flippo-software/internal-test-utils';
 
 import { Tooltip } from '..';
 
@@ -215,7 +215,7 @@ import {
   testComponentPerformance,
   createA11yTestRunner,
   expect,
-} from '@flippo/internal-test-utils';
+} from '@flippo-software/internal-test-utils';
 
 import { NewComponent } from './NewComponent';
 
@@ -330,7 +330,7 @@ src/
 ### Compound Components (Dialog, Menu, Tooltip)
 
 ```typescript
-import { testCompoundPatterns, testStateSynchronization } from '@flippo/internal-test-utils';
+import { testCompoundPatterns, testStateSynchronization } from '@flippo-software/internal-test-utils';
 
 const componentTester = testCompoundPatterns().dialog; // или menu, tooltip
 await componentTester.testPartConnections(ui);
@@ -340,7 +340,7 @@ await testStateSynchronization({ renderResult, stateChanges });
 ### Form Components (Input, Checkbox, Select)
 
 ```typescript
-import { createHeadlessTestUtils, createEventTestRunner } from '@flippo/internal-test-utils';
+import { createHeadlessTestUtils, createEventTestRunner } from '@flippo-software/internal-test-utils';
 
 const utils = createHeadlessTestUtils(result);
 const eventRunner = createEventTestRunner(result);
@@ -356,7 +356,7 @@ await utils.testEventHandler({
 ### Interactive Components (Button, Toggle, Switch)
 
 ```typescript
-import { testKeyboardPatterns, KEYBOARD_PATTERNS } from '@flippo/internal-test-utils';
+import { testKeyboardPatterns, KEYBOARD_PATTERNS } from '@flippo-software/internal-test-utils';
 
 await testKeyboardPatterns(button, KEYBOARD_PATTERNS.BUTTON);
 ```

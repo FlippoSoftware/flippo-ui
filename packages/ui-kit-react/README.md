@@ -1,6 +1,6 @@
 # @flippo-software/ui-kit-react
 
-Styled React 19 adapters over `@flippo-ui/headless-components`. Behaviour, accessibility and state stay in the headless adapters/core; classes, variants, tokens and CSS come from `@flippo-software/component-styles`.
+Styled React 19 adapters over `@flippo-software/react-components`. Behaviour, accessibility and state stay in the headless adapters/core; classes, variants, tokens and CSS come from `@flippo-software/component-styles`.
 
 This is the former `flippo-components` repository (then `styled-react-components`). Its old component SCSS modules have been replaced by shared recipes.
 
@@ -115,8 +115,8 @@ All 43 original recipe families are included, including Autocomplete, Combobox, 
 This package is part of the `ui-kit` pnpm workspace (see the root README): install and run the checks from the root
 (`pnpm install`, `pnpm check`), or one package with `pnpm --filter @flippo-software/ui-kit-react <script>`. It reads
 `component-styles` from its sources in Storybook, tests and typecheck, so style changes show up without a build.
-The sibling repositories `headless-components`, `core`, `hooks` and `store` must be built; they are linked with `link:` (replace with published versions before
-releasing).
+The behaviour packages it uses (react-components, core, hooks, store) come from the workspace and their `dist`:
+rebuild them after a change (`pnpm build`, or keep `pnpm dev` running at the root).
 
 ## Storybook
 

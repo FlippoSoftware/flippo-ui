@@ -1,6 +1,7 @@
 # The Flippo UI kits: the shared styles and the two kits built on them. Each package is published on its own.
 packages:
     - packages/*
+    - tools
 
 # One version of the shared tools for every package: `"typescript": "catalog:"` in a package.json.
 catalog:

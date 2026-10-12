@@ -1,6 +1,6 @@
 'use client';
 import { meter as recipe } from '@flippo-software/component-styles/meter';
-import { Meter as Primitive } from '@flippo-ui/headless-components/meter';
+import { Meter as Primitive } from '@flippo-software/react-components/meter';
 
 import { createStyler } from '../../lib/Styled';
 

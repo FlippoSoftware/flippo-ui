@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { RadioGroupMachine } from '@flippo-software/core-components/radio-group';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 import type { RadioGroupOptions } from '@flippo-software/core-components/radio-group';
 

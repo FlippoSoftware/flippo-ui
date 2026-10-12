@@ -1,4 +1,4 @@
-import type { TransitionStatus } from '@flippo-ui/hooks';
+import type { TransitionStatus } from '@flippo-software/hooks';
 
 import type { CustomStyleHookMapping } from './getStyleHookProps';
 

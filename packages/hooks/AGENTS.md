@@ -1,13 +1,13 @@
-# @flippo-ui/hooks — notes for agents
+# @flippo-software/hooks — notes for agents
 
-Generic React hooks used by `@flippo-ui/headless-components` and apps, plus the React adapter of
+Generic React hooks used by `@flippo-software/react-components` and apps, plus the React adapter of
 `@flippo-software/store` (`useStore`, `ReactStore`). Peer dependencies: React 19. No README yet (the file `REASME.md`
 is empty) — this file is the map.
 
 ## Layout
 
 ```
-src/hooks/<useName>/index.ts + <useName>.ts   one folder per hook; each is an entry point `@flippo-ui/hooks/use-name`
+src/hooks/<useName>/index.ts + <useName>.ts   one folder per hook; each is an entry point `@flippo-software/hooks/use-name`
 src/hooks/index.ts                            re-exports every hook
 src/hooks/useStore/                           React adapter of the store:
   useStore.ts                                 useStore(store, selector, ...args) on useSyncExternalStore

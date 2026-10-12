@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { MarqueeMachine } from '@flippo-software/core-components/marquee';
-import { useIsoLayoutEffect, useOnMount } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect, useOnMount } from '@flippo-software/hooks';
 
 import { useMachine, useStoreState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

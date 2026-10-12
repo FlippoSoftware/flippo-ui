@@ -1,6 +1,6 @@
 'use client';
 import { tooltip as recipe } from '@flippo-software/component-styles/tooltip';
-import { Tooltip as Primitive } from '@flippo-ui/headless-components/tooltip';
+import { Tooltip as Primitive } from '@flippo-software/react-components/tooltip';
 
 import { createStyler } from '../../lib/Styled';
 

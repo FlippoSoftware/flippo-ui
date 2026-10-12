@@ -1,6 +1,6 @@
 'use client';
 import { scrollArea as recipe } from '@flippo-software/component-styles/scroll-area';
-import { ScrollArea as Primitive } from '@flippo-ui/headless-components/scroll-area';
+import { ScrollArea as Primitive } from '@flippo-software/react-components/scroll-area';
 
 import { createStyler } from '../../lib/Styled';
 

@@ -1,6 +1,6 @@
 'use client';
 import { toast as recipe } from '@flippo-software/component-styles/toast';
-import { Toast as Primitive } from '@flippo-ui/headless-components/toast';
+import { Toast as Primitive } from '@flippo-software/react-components/toast';
 
 import { icon } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

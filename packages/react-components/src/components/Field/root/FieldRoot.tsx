@@ -2,7 +2,7 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import { FieldRootMachine } from '@flippo-software/core-components/field';
-import { useStableCallback } from '@flippo-ui/hooks/use-stable-callback';
+import { useStableCallback } from '@flippo-software/hooks/use-stable-callback';
 
 import { useMachine, useStoreState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

@@ -1,6 +1,6 @@
 'use client';
 import { qrCodeOptions, qrCode as recipe } from '@flippo-software/component-styles/qr-code';
-import { QrCode as Primitive } from '@flippo-ui/headless-components/qr-code';
+import { QrCode as Primitive } from '@flippo-software/react-components/qr-code';
 
 import { createStyler } from '../../lib/Styled';
 

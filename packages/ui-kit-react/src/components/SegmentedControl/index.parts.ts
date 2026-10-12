@@ -1,6 +1,6 @@
 'use client';
 import { segmentedControl as recipe } from '@flippo-software/component-styles/segmented-control';
-import { SegmentedControl as Primitive } from '@flippo-ui/headless-components/segmented-control';
+import { SegmentedControl as Primitive } from '@flippo-software/react-components/segmented-control';
 
 import { createStyler } from '../../lib/Styled';
 

@@ -3,7 +3,7 @@ import React from 'react';
 import { CollapsibleMachine } from '@flippo-software/core-components/collapsible';
 
 import type { CollapsibleOptions } from '@flippo-software/core-components/collapsible';
-import type { TransitionStatus } from '@flippo-ui/hooks';
+import type { TransitionStatus } from '@flippo-software/hooks';
 
 import { useMachine } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useOnMount } from '@flippo-ui/hooks';
+import { useOnMount } from '@flippo-software/hooks';
 
 import { toReactProps } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

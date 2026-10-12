@@ -1,0 +1,49 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+    "root": false,
+    "extends": ["@flippo-software/biome/base", "@flippo-software/biome/test"],
+    "plugins": ["./node_modules/@flippo-software/biome/src/plugins/no-node-process-import/no-node-process-import.grit"],
+    "linter": {
+        "rules": {
+            "performance": {
+                "noReExportAll": "off",
+                "noBarrelFile": "off"
+            },
+            "style": {
+                "noRestrictedImports": {
+                    "level": "error",
+                    "options": {
+                        "patterns": [
+                            {
+                                "group": ["react", "react/*", "react-dom", "react-dom/*", "vue", "vue/*"],
+                                "message": "The web components must stay framework-agnostic (frameworks are only used in tests)."
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "overrides": [
+        {
+            "includes": ["test/**", "src/**/*.test.ts"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "noRestrictedImports": "off",
+                        "noNonNullAssertion": "off"
+                    },
+                    "suspicious": {
+                        "noReactSpecificProps": "off"
+                    },
+                    "security": {
+                        "noSecrets": "off"
+                    },
+                    "performance": {
+                        "useTopLevelRegex": "off"
+                    }
+                }
+            }
+        }
+    ]
+}

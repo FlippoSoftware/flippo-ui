@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { TransitionStatus } from '@flippo-ui/hooks';
+import type { TransitionStatus } from '@flippo-software/hooks';
 
 import { toReactProps, useSyncDuringRender } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

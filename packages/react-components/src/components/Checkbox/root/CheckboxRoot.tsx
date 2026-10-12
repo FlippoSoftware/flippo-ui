@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { CheckboxMachine } from '@flippo-software/core-components/checkbox';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
 import type { CheckboxOptions } from '@flippo-software/core-components/checkbox';
 

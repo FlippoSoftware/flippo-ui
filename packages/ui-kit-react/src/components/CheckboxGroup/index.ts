@@ -1,6 +1,6 @@
 'use client';
 import { checkboxGroup as recipe } from '@flippo-software/component-styles/checkbox-group';
-import { CheckboxGroup as Primitive } from '@flippo-ui/headless-components/checkbox-group';
+import { CheckboxGroup as Primitive } from '@flippo-software/react-components/checkbox-group';
 
 import { createStyler } from '../../lib/Styled';
 

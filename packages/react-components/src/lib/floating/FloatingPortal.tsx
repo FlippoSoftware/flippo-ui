@@ -2,7 +2,7 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import { FloatingPortalController, PORTAL_ATTRIBUTE, resolvePortalContainer } from '@flippo-software/core-components/floating';
-import { useId, useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useId, useIsoLayoutEffect } from '@flippo-software/hooks';
 
 import type { PortalContainer } from '@flippo-software/core-components/floating';
 

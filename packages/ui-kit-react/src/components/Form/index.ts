@@ -1,6 +1,6 @@
 'use client';
 import { form as recipe } from '@flippo-software/component-styles/form';
-import { Form as Primitive } from '@flippo-ui/headless-components/form';
+import { Form as Primitive } from '@flippo-software/react-components/form';
 
 import { createStyler } from '../../lib/Styled';
 

@@ -1,5 +1,5 @@
 /**
- * @flippo/internal-test-utils
+ * @flippo-software/internal-test-utils
  * 
  * Internal testing utilities for Flippo headless UI components.
  * Provides a comprehensive suite of tools for testing React components

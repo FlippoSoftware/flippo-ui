@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom';
 import { SelectPopupMachine } from '@flippo-software/core-components/select';
 
 import type { SelectPopupOptions } from '@flippo-software/core-components/select';
-import type { Interaction, TransitionStatus } from '@flippo-ui/hooks';
+import type { Interaction, TransitionStatus } from '@flippo-software/hooks';
 
 import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { FocusGuards, useFloatingPortalController } from '~@lib/floating';

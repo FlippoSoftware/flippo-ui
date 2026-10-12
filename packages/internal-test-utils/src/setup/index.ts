@@ -1,5 +1,5 @@
 /**
- * Main setup module for @flippo/internal-test-utils
+ * Main setup module for @flippo-software/internal-test-utils
  * 
  * This module provides a one-stop setup for all Flippo headless component testing needs.
  */

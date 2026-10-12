@@ -1,6 +1,6 @@
 'use client';
 import { combobox as recipe } from '@flippo-software/component-styles/combobox';
-import { Combobox as Primitive } from '@flippo-ui/headless-components/combobox';
+import { Combobox as Primitive } from '@flippo-software/react-components/combobox';
 
 import { icon } from '../../lib/Icon';
 import { withAnchor, withAnchorRoot, withAnchorTarget } from '../../lib/InputGroupAnchor';

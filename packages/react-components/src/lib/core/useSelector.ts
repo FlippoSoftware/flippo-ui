@@ -4,7 +4,7 @@ import type { ReadableStore } from './useStoreState';
 
 /**
  * Subscribes to a core store and returns `selector(state, ...args)`; re-renders only when it changes
- * (replacement for `useStore` from `@flippo-ui/hooks`).
+ * (replacement for `useStore` from `@flippo-software/hooks`).
  */
 export function useSelector<State, Args extends unknown[], Result>(
     store: ReadableStore<State>,

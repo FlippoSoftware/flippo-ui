@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { CompositeRootMachine } from '@flippo-software/core-components/composite';
-import { useMergedRef } from '@flippo-ui/hooks';
+import { useMergedRef } from '@flippo-software/hooks';
 
 import { toReactProps, useMachine, useTracker } from '~@lib/core';
 

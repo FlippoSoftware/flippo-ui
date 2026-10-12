@@ -5,9 +5,9 @@ import {
     NavigationMenuContentMachine,
     navigationMenuContentStateAttributesMapping
 } from '@flippo-software/core-components/navigation-menu';
-import { useIsoLayoutEffect } from '@flippo-ui/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/hooks';
 
-import type { TransitionStatus } from '@flippo-ui/hooks';
+import type { TransitionStatus } from '@flippo-software/hooks';
 
 import { toReactProps, useMachineState, useTracker } from '~@lib/core';
 import { FloatingNode } from '~@lib/floating';

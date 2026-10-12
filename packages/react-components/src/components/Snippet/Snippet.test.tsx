@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createRenderer, screen, waitFor } from '@flippo/internal-test-utils';
+import { createRenderer, screen, waitFor } from '@flippo-software/internal-test-utils';
 import { describe, expect, it, vi } from 'vitest';
 
 import { RENDER_MODES } from '../../test/renderModes';

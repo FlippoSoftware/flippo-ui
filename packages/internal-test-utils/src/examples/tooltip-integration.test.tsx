@@ -1,5 +1,5 @@
 /**
- * Example integration test showing how to use @flippo/internal-test-utils
+ * Example integration test showing how to use @flippo-software/internal-test-utils
  * with actual Tooltip component from the headless components package
  */
 
@@ -14,7 +14,7 @@ import {
 } from '../index';
 
 // This would normally be imported from your actual component package:
-// import { Tooltip } from '@flippo-ui/headless-components/tooltip';
+// import { Tooltip } from '@flippo-software/react-components/tooltip';
 
 /**
  * Mock Tooltip components for demonstration

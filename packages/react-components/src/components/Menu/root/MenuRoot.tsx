@@ -2,7 +2,7 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import { MenuRootMachine } from '@flippo-software/core-components/menu';
-import { useId } from '@flippo-ui/hooks';
+import { useId } from '@flippo-software/hooks';
 
 import type { MenuHandle, MenuParent, MenuRootOptions } from '@flippo-software/core-components/menu';
 

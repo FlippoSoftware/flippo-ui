@@ -1,6 +1,6 @@
 'use client';
 import { checkbox as recipe } from '@flippo-software/component-styles/checkbox';
-import { Checkbox as Primitive } from '@flippo-ui/headless-components/checkbox';
+import { Checkbox as Primitive } from '@flippo-software/react-components/checkbox';
 
 import { CHECK_ICONS } from '../../lib/Icon';
 import { createStyler } from '../../lib/Styled';

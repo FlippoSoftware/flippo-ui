@@ -12,7 +12,6 @@
         "flippo",
         "a11y"
     ],
-    "packageManager": "pnpm@11.24.0",
     "sideEffects": false,
     "files": [
         "README.md",
@@ -21,36 +20,38 @@
     ],
     "scripts": {
         "build": "tsdown",
-        "typecheck": "tsc --noEmit",
+        "dev": "tsdown --watch",
         "lint:check": "biome check",
         "lint:fix": "biome lint --fix && biome format --fix",
         "test": "vitest run",
+        "test:coverage": "vitest run --coverage",
         "test:watch": "vitest",
-        "test:coverage": "vitest run --coverage"
+        "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.5.15",
-        "@flippo-software/biome": "^1.1.1",
-        "@flippo-software/tsconfig": "^1.0.0",
+        "@biomejs/biome": "catalog:",
+        "@flippo-software/biome": "catalog:",
+        "@flippo-software/tsconfig": "catalog:",
         "@vitest/coverage-v8": "^5.0.3",
-        "happy-dom": "^20.14.5",
-        "tsdown": "^0.23.0",
-        "typescript": "^7.0.2",
-        "vitest": "^5.0.3"
+        "happy-dom": "catalog:",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
     },
     "publishConfig": {
         "access": "public"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/FlippoSoftware/core.git"
+        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "directory": "packages/core"
     },
-    "homepage": "https://github.com/FlippoSoftware/core#readme",
+    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/core#readme",
     "bugs": {
-        "url": "https://github.com/FlippoSoftware/core/issues"
+        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
     },
     "dependencies": {
-        "@flippo-software/store": "link:../store",
+        "@flippo-software/store": "workspace:*",
         "@floating-ui/core": "^1.8.0",
         "@floating-ui/dom": "^1.8.0",
         "@floating-ui/utils": "^0.2.12",
