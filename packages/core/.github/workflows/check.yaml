@@ -1,0 +1,43 @@
+name: Check
+
+on:
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  path: core
+
+            - name: Set up
+              uses: ./core/.github/actions/setup
+
+            - name: Check formatting & linting
+              working-directory: core
+              run: pnpm lint:check
+
+            - name: Typecheck
+              working-directory: core
+              run: pnpm typecheck
+
+            - name: Build
+              working-directory: core
+              run: pnpm build
+
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  path: core
+
+            - name: Set up
+              uses: ./core/.github/actions/setup
+
+            - name: Run tests
+              working-directory: core
+              run: pnpm test

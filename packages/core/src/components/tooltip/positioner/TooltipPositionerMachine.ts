@@ -1,0 +1,108 @@
+import { untracked } from '@flippo-software/store';
+
+import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
+import { getStyleHookProps } from '~@attributes/getStyleHookProps';
+import { popupStateMapping } from '~@attributes/popupStateMapping';
+import { Connectable } from '~@lib/Connectable';
+import { adaptiveOrigin } from '~@packages/floating-ui/middleware/adaptiveOriginMiddleware';
+import { PopupPositionerController } from '~@popup/PopupPositionerController';
+import { mergeProps } from '~@props/mergeProps';
+
+import type { Align, Side } from '~@lib/types';
+import type { PopupPositionerOptions } from '~@popup/PopupPositionerController';
+import type { Props } from '~@props/mergeProps';
+
+import type { TooltipRootMachine } from '../root/TooltipRootMachine';
+import type { TooltipState } from '../store/TooltipStore';
+
+export type TooltipPositionerState = {
+    open: boolean;
+    side: Side;
+    align: Align;
+    anchorHidden: boolean;
+    instant: string | undefined;
+};
+
+export type TooltipArrowState = {
+    open: boolean;
+    side: Side;
+    align: Align;
+    uncentered: boolean;
+};
+
+/**
+ * State machine of `Tooltip.Positioner` (default side: `top`).
+ */
+export class TooltipPositionerMachine<Payload = unknown> extends Connectable {
+    readonly controller: PopupPositionerController<TooltipState<Payload>>;
+
+    private readonly root: TooltipRootMachine<Payload>;
+
+    constructor(root: TooltipRootMachine<Payload>, options: PopupPositionerOptions = {}) {
+        super();
+        this.root = root;
+        this.controller = new PopupPositionerController(
+            root.store,
+            { getOpen: () => root.getOpenState(), adaptiveOrigin },
+            withDefaults(options)
+        );
+    }
+
+    protected override onConnect() {
+        this.connectChild(this.controller);
+    }
+
+    setOptions(options: PopupPositionerOptions) {
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.controller.setOptions(withDefaults(options));
+        });
+    }
+
+    /**
+     * Updates the anchor positioning after a commit.
+     */
+    afterCommit() {
+        this.controller.afterCommit();
+    }
+
+    setElement = (element: HTMLElement | null) => {
+        this.controller.setElement(element);
+    };
+
+    static attrs(state: TooltipPositionerState) {
+        return getStyleHookProps(state, popupStateMapping);
+    }
+
+    getState(): TooltipPositionerState {
+        const { store } = this.root;
+        return {
+            ...this.controller.getState(),
+            instant: store.select('trackCursorAxis') !== 'none' ? 'tracking-cursor' : store.select('instantType')
+        };
+    }
+
+    getPositionerProps(elementProps: Props = {}): Props {
+        const { store } = this.root;
+        const props = this.controller.getPositionerProps();
+        if (store.select('trackCursorAxis') === 'both' || store.select('disableHoverablePopup')) {
+            props.style.pointerEvents = 'none';
+        }
+        return mergeProps(props, getDisabledMountTransitionStyles(store.select('transitionStatus')), elementProps);
+    }
+
+    getArrowState(): TooltipArrowState {
+        const { side, align, open } = this.controller.getState();
+        return { open, side, align, uncentered: this.controller.isArrowUncentered() };
+    }
+
+    getArrowProps(elementProps: Props = {}): Props {
+        return mergeProps({ style: this.controller.getArrowStyles(), 'aria-hidden': true }, elementProps);
+    }
+
+    protected override onDisconnect() {}
+}
+
+function withDefaults(options: PopupPositionerOptions): PopupPositionerOptions {
+    return { ...options, side: options.side ?? 'top' };
+}
