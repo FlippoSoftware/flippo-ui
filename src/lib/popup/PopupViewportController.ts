@@ -1,8 +1,9 @@
+import { Store } from '@flippo-software/store';
+
 import type { Dimensions } from '@floating-ui/utils';
 
 import { runOnceAnimationsFinish } from '~@dom/animations';
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
 import type { CustomStyleHookMapping } from '~@attributes/getStyleHookProps';

@@ -39,7 +39,7 @@ import each other relatively.
 
 | Entry | Contents |
 | --- | --- |
-| `@flippo-software/core-components/store` | `Store`, `ComponentStore`, `createSelector`, `createSelectorMemoized` |
+| `@flippo-software/core-components/store` | Re-export of [`@flippo-software/store`](https://github.com/FlippoSoftware/store): `Store`, `ComponentStore`, `createSelector`, `createSelectorMemoized`, `deferNotifications`, `flushNotifications` |
 | `@flippo-software/core-components/events` | `REASONS`, `createChangeEventDetails`, `createGenericEventDetails`, `EventEmitter`, `createEventEmitter` |
 | `@flippo-software/core-components/timers` | `Timeout`, `AnimationFrame` |
 | `@flippo-software/core-components/dom` | `whenConnected`, `runOnceAnimationsFinish`, `OpenChangeComplete`, `TransitionStatusController`, `PopupAutoResize`, `acquireScrollLock`, `getInternalBackdropProps` |
@@ -96,8 +96,8 @@ store.setOpen(true, createChangeEventDetails(REASONS.triggerPress, event, trigge
 
 ## Adapter contract
 
-`ComponentStore` is the framework-free part of the former `ReactStore` from `@flippo-ui/hooks`. A React adapter extends it
-with hooks and nothing else:
+`ComponentStore` (from `@flippo-software/store`) is the framework-free base of `ReactStore` in `@flippo-ui/hooks`,
+which extends it with hooks and nothing else:
 
 ```ts
 class ReactStore<State extends object, Context, Selectors> extends ComponentStore<State, Context, Selectors> {
@@ -143,9 +143,11 @@ Rules for adapters:
 2. `setOptions(options)` runs on every render, inside `deferNotifications()` from `@flippo-software/core-components/store`:
    store changes apply immediately, listeners are notified by `flushNotifications()` after the commit (a layout
    effect in React). On the server, call `setOptions` directly.
-3. Machines never call user callbacks from `setOptions`; they react to their own store changes from a listener, so
-   deferred notifications also defer the callbacks.
-4. Controlled props are synchronized with `syncControlledValue`.
+3. Machines never call user callbacks from `setOptions`. They react to their own store changes from a listener
+   (deferred notifications defer the callbacks too), or, for changes of controlled options, in an optional
+   `afterCommit()` the adapter calls after every committed render (a layout effect in React).
+4. Controlled props are synchronized with `syncControlledValue`; local writes to a controlled key are ignored until it
+   becomes uncontrolled again.
 5. Elements reach the core through setters/ref callbacks. Measuring, focusing and `autoUpdate` wait for `whenConnected(element)`.
 6. Portals are rendered by the adapter.
 

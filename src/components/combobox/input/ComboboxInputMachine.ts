@@ -1,10 +1,12 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { isAndroid, isFirefox } from '~@lib/detectBrowser';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { getNativeEvent, stopEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { FieldRootState } from '~@components/field/root/FieldRootMachine';
 import type { Side, TextDirection } from '~@lib/types';
@@ -58,7 +60,18 @@ export class ComboboxInputMachine {
      */
     readonly composition = new Store<{ composingValue: string | null }>({ composingValue: null });
 
-    private options: ComboboxInputOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ComboboxInputOptions>({} as ComboboxInputOptions);
+
+    private get options(): ComboboxInputOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ComboboxInputOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: ComboboxRootMachine;
 
@@ -73,7 +86,10 @@ export class ComboboxInputMachine {
     }
 
     setOptions(options: ComboboxInputOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get disabled(): boolean {

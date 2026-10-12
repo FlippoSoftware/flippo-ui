@@ -1,5 +1,7 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
 import type { TransitionStatus } from '~@lib/types';
@@ -30,20 +32,43 @@ export type TransitionStatusOptions = {
 export class TransitionStatusController extends Connectable {
     readonly store: Store<TransitionStatusState>;
 
-    private options: TransitionStatusOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TransitionStatusOptions>({} as TransitionStatusOptions);
+
+    private get options(): TransitionStatusOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TransitionStatusOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private open: boolean;
 
     private readonly frame = new AnimationFrame();
 
-    constructor(open: boolean, options: TransitionStatusOptions = {}) {
+    /**
+     * @param open Whether the element is initially open.
+     * @param options Transition options.
+     * @param store Where to keep `mounted` and `transitionStatus`, e.g. the store of the component that owns the
+     *   element, so that they don't have to be copied there. Defaults to a store of its own.
+     */
+    constructor(open: boolean, options: TransitionStatusOptions = {}, store?: Store<TransitionStatusState>) {
         super();
         this.options = options;
         this.open = open;
-        this.store = new Store<TransitionStatusState>({
+        const initial: TransitionStatusState = {
             mounted: open,
             transitionStatus: open && options.enableIdleState ? 'idle' : undefined
-        });
+        };
+        if (store) {
+            store.update(initial);
+            this.store = store;
+        } else {
+            this.store = new Store<TransitionStatusState>(initial);
+        }
     }
 
     protected override onConnect() {
@@ -55,8 +80,11 @@ export class TransitionStatusController extends Connectable {
     }
 
     setOptions(options: TransitionStatusOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     setOpen(open: boolean) {

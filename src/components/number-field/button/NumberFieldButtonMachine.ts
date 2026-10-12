@@ -1,5 +1,8 @@
+import { untracked } from '@flippo-software/store';
+
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { createChangeEventDetails, createGenericEventDetails } from '~@events/changeEventDetails';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { parseNumber } from '~@lib/parseNumeric';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
@@ -28,7 +31,18 @@ export type NumberFieldButtonOptions = {
 export class NumberFieldButtonMachine {
     readonly button: ButtonMachine;
 
-    private options: NumberFieldButtonOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<NumberFieldButtonOptions>({} as NumberFieldButtonOptions);
+
+    private get options(): NumberFieldButtonOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: NumberFieldButtonOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly field: NumberFieldMachine;
 
@@ -50,8 +64,11 @@ export class NumberFieldButtonMachine {
     }
 
     setOptions(options: NumberFieldButtonOptions) {
-        this.options = options;
-        this.button.setOptions({ disabled: this.disabled, native: options.nativeButton ?? true });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.button.setOptions({ disabled: this.disabled, native: options.nativeButton ?? true });
+        });
     }
 
     get disabled() {

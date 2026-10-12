@@ -1,11 +1,13 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { createGenericEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { isWebKit } from '~@lib/detectBrowser';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
-import { Store } from '~@store/Store';
 
 import type { Props } from '~@props/mergeProps';
 
@@ -41,7 +43,18 @@ const runImmediately = (fn: () => void) => fn();
 export class NumberFieldScrubAreaMachine extends Connectable {
     readonly store = new Store({ isTouchInput: false, isPointerLockDenied: false });
 
-    private options: NumberFieldScrubAreaOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<NumberFieldScrubAreaOptions>({} as NumberFieldScrubAreaOptions);
+
+    private get options(): NumberFieldScrubAreaOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: NumberFieldScrubAreaOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly field: NumberFieldMachine;
 
@@ -83,8 +96,11 @@ export class NumberFieldScrubAreaMachine extends Connectable {
     }
 
     setOptions(options: NumberFieldScrubAreaOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     protected override onDisconnect() {

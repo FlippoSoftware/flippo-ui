@@ -93,6 +93,7 @@ describe('Toast machines', () => {
         document.body.append(element);
         root.setElement(element);
         root.setOptions({ toast: provider.store.state.toasts[0] ?? toast });
+        root.afterCommit();
 
         const rootProps = root.getRootProps();
         expect(rootProps.role).toBe('alertdialog');
@@ -103,6 +104,7 @@ describe('Toast machines', () => {
         closeProps.onClick(new MouseEvent('click'));
 
         root.setOptions({ toast: provider.store.state.toasts[0] ?? toast });
+        root.afterCommit();
         expect(onRemove).toHaveBeenCalled();
         expect(provider.store.state.toasts).toHaveLength(0);
 

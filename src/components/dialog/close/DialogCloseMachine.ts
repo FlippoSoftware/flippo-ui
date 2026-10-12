@@ -1,6 +1,9 @@
+import { untracked } from '@flippo-software/store';
+
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -27,7 +30,18 @@ export type DialogCloseOptions = {
 export class DialogCloseMachine {
     readonly button: ButtonMachine;
 
-    private options: DialogCloseOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<DialogCloseOptions>({} as DialogCloseOptions);
+
+    private get options(): DialogCloseOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: DialogCloseOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: AnyDialogStore;
 
@@ -38,8 +52,11 @@ export class DialogCloseMachine {
     }
 
     setOptions(options: DialogCloseOptions) {
-        this.options = options;
-        this.button.setOptions({ disabled: options.disabled, native: options.nativeButton });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.button.setOptions({ disabled: options.disabled, native: options.nativeButton });
+        });
     }
 
     setElement = (element: HTMLElement | null) => {

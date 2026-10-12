@@ -1,5 +1,7 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { Orientation, Style } from '~@lib/types';
 
@@ -66,7 +68,18 @@ type MarqueeSizes = {
 export class MarqueeMachine extends Connectable {
     readonly store = new Store<MarqueeSizes>({ containerSize: 0, marqueeSize: 0, multiplier: 1 });
 
-    private options: MarqueeOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<MarqueeOptions>({} as MarqueeOptions);
+
+    private get options(): MarqueeOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: MarqueeOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private root: HTMLElement | null = null;
 
@@ -80,8 +93,15 @@ export class MarqueeMachine extends Connectable {
     }
 
     setOptions(options: MarqueeOptions) {
-        this.options = options;
-        this.calculateSize();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            const previous = this.options;
+            this.options = options;
+            // Only these options change the measurement; `setOptions` may run on every render.
+            if (previous.autoFill !== options.autoFill || previous.orientation !== options.orientation) {
+                this.calculateSize();
+            }
+        });
     }
 
     private get vertical() {
@@ -105,7 +125,7 @@ export class MarqueeMachine extends Connectable {
      * Measures the container and the content.
      */
     calculateSize = () => {
-        if (!this.content || !this.root) {
+        if (!this.connected || !this.content || !this.root) {
             return;
         }
 

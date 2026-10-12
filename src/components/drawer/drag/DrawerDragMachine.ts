@@ -1,7 +1,10 @@
+import { effect, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { mergeProps } from '~@props/mergeProps';
 
 import type { DialogStore } from '~@components/dialog/store/DialogStore';
@@ -40,7 +43,18 @@ const drawerDragStateAttributesMapping = {
 export class DrawerDragMachine extends Connectable {
     readonly gesture: DrawerGesture;
 
-    private options: DrawerDragOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<DrawerDragOptions>({} as DrawerDragOptions);
+
+    private get options(): DrawerDragOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: DrawerDragOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly drawerStore: DrawerStore;
 
@@ -52,18 +66,32 @@ export class DrawerDragMachine extends Connectable {
         this.dialogStore = dialogStore;
         this.options = options;
         this.gesture = new DrawerGesture(this.getGestureOptions());
-        this.syncDrawerStore();
     }
 
     protected override onConnect() {
         this.connectChild(this.gesture);
+        this.syncDrawerStore();
         this.addCleanup(this.gesture.store.subscribe(() => this.syncDrawerStore()));
-        this.addCleanup(this.drawerStore.subscribe(() => this.gesture.setOptions(this.getGestureOptions())));
-        this.addCleanup(this.dialogStore.subscribe(() => this.gesture.setOptions(this.getGestureOptions())));
+        // Follows the drawer and dialog stores (the options read them); applying them reads the gesture's own store.
+        this.addCleanup(
+            effect(() => {
+                const options = this.getGestureOptions();
+                untracked(() => this.gesture.setOptions(options));
+            })
+        );
     }
 
     setOptions(options: DrawerDragOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Passes the options to the gesture after a commit.
+     */
+    afterCommit() {
         this.gesture.setOptions(this.getGestureOptions());
     }
 

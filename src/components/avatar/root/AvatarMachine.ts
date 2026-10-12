@@ -1,4 +1,4 @@
-import { Store } from '~@store/Store';
+import { Store } from '@flippo-software/store';
 
 export type ImageLoadingStatus = 'idle' | 'loading' | 'loaded' | 'error';
 

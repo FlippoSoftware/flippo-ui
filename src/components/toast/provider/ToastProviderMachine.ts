@@ -1,8 +1,10 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { Connectable } from '~@lib/Connectable';
 import { generateId } from '~@lib/generateId';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 import { activeElement, contains, matchesFocusVisible } from '~@packages/floating-ui/utils/element';
-import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
 import type { MutableRef } from '~@lib/types';
@@ -51,13 +53,26 @@ export class ToastProviderMachine extends Connectable {
 
     readonly windowFocusedRef: MutableRef<boolean> = { current: true };
 
-    private options: ToastProviderOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ToastProviderOptions>({} as ToastProviderOptions);
+
+    private get options(): ToastProviderOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ToastProviderOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly timers = new Map<string, TimerInfo>();
 
     private isPaused = false;
 
     private unsubscribeManager: (() => void) | null = null;
+
+    private subscribedManager: ToastManager | undefined;
 
     constructor(options: ToastProviderOptions = {}) {
         super();
@@ -72,9 +87,17 @@ export class ToastProviderMachine extends Connectable {
     }
 
     setOptions(options: ToastProviderOptions) {
-        const managerChanged = options.toastManager !== this.options.toastManager;
-        this.options = options;
-        if (managerChanged) {
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Subscribes to a new toast manager after a commit.
+     */
+    afterCommit() {
+        if (this.connected && this.options.toastManager !== this.subscribedManager) {
             this.subscribeManager();
         }
     }
@@ -254,6 +277,7 @@ export class ToastProviderMachine extends Connectable {
     protected override onDisconnect() {
         this.unsubscribeManager?.();
         this.unsubscribeManager = null;
+        this.subscribedManager = undefined;
         this.pauseTimers();
     }
 
@@ -290,6 +314,7 @@ export class ToastProviderMachine extends Connectable {
         this.unsubscribeManager?.();
         this.unsubscribeManager = null;
         const manager = this.options.toastManager;
+        this.subscribedManager = this.connected ? manager : undefined;
         if (!manager || !this.connected) {
             return;
         }

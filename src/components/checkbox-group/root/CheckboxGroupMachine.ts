@@ -1,11 +1,13 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { fieldValidityMapping } from '~@components/field/utils/fieldValidity';
 import { areArraysEqual } from '~@lib/areArraysEqual';
 import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { FieldRootMachine, FieldRootState } from '~@components/field/root/FieldRootMachine';
 import type { LabelableController } from '~@components/labelable/root/LabelableController';
@@ -60,7 +62,18 @@ export class CheckboxGroupMachine extends Connectable {
      */
     readonly controlRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: CheckboxGroupOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<CheckboxGroupOptions>({} as CheckboxGroupOptions);
+
+    private get options(): CheckboxGroupOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: CheckboxGroupOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly detachedField = createDetachedField();
 
@@ -76,8 +89,10 @@ export class CheckboxGroupMachine extends Connectable {
     }
 
     setOptions(options: CheckboxGroupOptions) {
-        this.options = options;
-        this.onValueChanged();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get field(): FieldRootMachine {
@@ -114,6 +129,14 @@ export class CheckboxGroupMachine extends Connectable {
 
     static attrs(state: CheckboxGroupState): Record<string, string> {
         return getStyleHookProps(state, fieldValidityMapping);
+    }
+
+    /**
+     * Reacts to a controlled `value` change (validation, dirty/filled state). Adapters call it after
+     * committing a render: it may run the field's `validate` callback.
+     */
+    afterCommit() {
+        this.onValueChanged();
     }
 
     /**

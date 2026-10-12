@@ -1,13 +1,15 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { EMPTY_OBJECT } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { CheckboxGroupMachine } from '~@components/checkbox-group/root/CheckboxGroupMachine';
 import type { FieldRootMachine, FieldRootState } from '~@components/field/root/FieldRootMachine';
@@ -68,7 +70,18 @@ export class CheckboxCardMachine extends Connectable {
 
     readonly inputRef: MutableRef<HTMLInputElement | null> = { current: null };
 
-    private options: CheckboxCardOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<CheckboxCardOptions>({} as CheckboxCardOptions);
+
+    private get options(): CheckboxCardOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: CheckboxCardOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly detachedField = createDetachedField();
 
@@ -83,7 +96,17 @@ export class CheckboxCardMachine extends Connectable {
     }
 
     setOptions(options: CheckboxCardOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Reacts to a controlled `checked` change (validation, dirty/filled state). Adapters call it after
+     * committing a render: it may run the field's `validate` callback.
+     */
+    afterCommit() {
         this.onCheckedValueChange();
     }
 

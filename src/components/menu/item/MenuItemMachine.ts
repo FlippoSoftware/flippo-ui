@@ -1,11 +1,13 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { isMac } from '~@lib/detectBrowser';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { ListRegistry } from '~@components/composite/list/ListRegistry';
 import type { MutableRef } from '~@lib/types';
@@ -63,7 +65,18 @@ export class MenuItemMachine<Options extends MenuItemBaseOptions = MenuItemBaseO
      */
     readonly index = new Store<{ index: number }>({ index: -1 });
 
-    protected options: Options;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    protected readonly optionsStore = new OptionsStore<Options>({} as Options);
+
+    protected get options(): Options {
+        return this.optionsStore.state;
+    }
+
+    protected set options(options: Options) {
+        this.optionsStore.setState(options);
+    }
 
     protected readonly store: MenuStore<unknown>;
 
@@ -101,9 +114,12 @@ export class MenuItemMachine<Options extends MenuItemBaseOptions = MenuItemBaseO
     }
 
     setOptions(options: Options) {
-        this.options = options;
-        this.listItem.setLabel(options.label);
-        this.button.setOptions({ disabled: this.disabled, focusableWhenDisabled: true, native: options.nativeButton ?? false });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.listItem.setLabel(options.label);
+            this.button.setOptions({ disabled: this.disabled, focusableWhenDisabled: true, native: options.nativeButton ?? false });
+        });
     }
 
     setElement = (element: HTMLElement | null) => {
@@ -127,9 +143,6 @@ export class MenuItemMachine<Options extends MenuItemBaseOptions = MenuItemBaseO
      */
     getItemProps(elementProps: Props = {}, ownProps?: Props): Props {
         return mergeProps(
-            this.store.select('itemProps'),
-            ownProps,
-            elementProps,
             this.getCommonProps(),
             {
                 onMouseEnter: () => {
@@ -143,6 +156,9 @@ export class MenuItemMachine<Options extends MenuItemBaseOptions = MenuItemBaseO
                     }
                 }
             },
+            this.store.select('itemProps'),
+            ownProps,
+            elementProps,
             (props: Props) => this.button.getButtonProps(props)
         );
     }

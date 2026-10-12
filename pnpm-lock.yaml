@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@flippo-software/store':
+        specifier: link:../store
+        version: link:../store
       '@floating-ui/core':
         specifier: ^1.8.0
         version: 1.8.0

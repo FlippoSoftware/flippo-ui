@@ -1,3 +1,5 @@
+import { effect, untracked } from '@flippo-software/store';
+
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
@@ -7,6 +9,7 @@ import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { DROPDOWN_COLLISION_AVOIDANCE, POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { PopupPositionerController } from '~@popup/PopupPositionerController';
 import { mergeProps } from '~@props/mergeProps';
@@ -45,7 +48,18 @@ export class MenuPositionerMachine<Payload = unknown> extends Connectable {
      */
     readonly items: ListRegistry;
 
-    private options: PopupPositionerOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<PopupPositionerOptions>({} as PopupPositionerOptions);
+
+    private get options(): PopupPositionerOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: PopupPositionerOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: MenuRootMachine<Payload>;
 
@@ -75,8 +89,7 @@ export class MenuPositionerMachine<Payload = unknown> extends Connectable {
             events.off('menuopenchange', this.onParentClose);
             events.off('itemhover', this.onItemHover);
         });
-        this.addCleanup(this.root.store.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     private get store(): MenuStore<Payload> {
@@ -84,8 +97,18 @@ export class MenuPositionerMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: PopupPositionerOptions) {
-        this.options = options;
-        this.controller.setOptions(this.getPositionerOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.controller.setOptions(this.getPositionerOptions());
+        });
+    }
+
+    /**
+     * Updates the anchor positioning after a commit.
+     */
+    afterCommit() {
+        this.controller.afterCommit();
     }
 
     setElement = (element: HTMLElement | null) => {
@@ -201,6 +224,7 @@ export class MenuPositionerMachine<Payload = unknown> extends Connectable {
         const { store } = this;
         // The context menu anchor and the parent type may change.
         this.controller?.setOptions(this.getPositionerOptions());
+        this.controller?.afterCommit();
         this.menuOpenChangeEffect.sync([store.select('open'), store.select('floatingNodeId'), store.select('floatingParentNodeId')]);
     }
 

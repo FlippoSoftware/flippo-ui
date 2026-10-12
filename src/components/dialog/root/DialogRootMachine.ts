@@ -1,7 +1,10 @@
+import { effect, Store, untracked } from '@flippo-software/store';
+
 import { acquireScrollLock } from '~@dom/scrollLock';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { DismissInteraction } from '~@packages/floating-ui/interactions/DismissInteraction';
 import { mergeInteractionProps } from '~@packages/floating-ui/interactions/mergeInteractionProps';
 import { getRoleProps } from '~@packages/floating-ui/interactions/role';
@@ -80,7 +83,18 @@ export class DialogRootMachine<Payload = unknown> extends Connectable {
 
     readonly actions: DialogRootActions;
 
-    private options: DialogRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<DialogRootOptions>({} as DialogRootOptions);
+
+    private get options(): DialogRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: DialogRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: DialogRootSetup<Payload>;
 
@@ -134,8 +148,7 @@ export class DialogRootMachine<Payload = unknown> extends Connectable {
                 treatPopupAsFloatingElement: true,
                 noEmit: true,
                 flush: setup.flushSync,
-                onUnmount: () => this.interactionType.reset(),
-                onChange: () => this.sync()
+                onUnmount: () => this.interactionType.reset()
             },
             this.getControllerOptions()
         );
@@ -154,19 +167,27 @@ export class DialogRootMachine<Payload = unknown> extends Connectable {
     protected override onConnect() {
         this.connectChild(this.controller);
         this.connectChild(this.dismiss);
-        this.addCleanup(this.interactionType.store.subscribe(() => this.sync()));
-        this.addCleanup(this.floatingRoot.subscribe(() => this.sync()));
-        this.sync();
+        // Re-runs when a store it reads changes: the own store, the floating root, the interaction type…
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: DialogRootOptions) {
-        this.options = options;
-        this.controller.setOptions(this.getControllerOptions());
-        this.store.update({
-            modal: options.modal ?? true,
-            disablePointerDismissal: options.disablePointerDismissal ?? false,
-            nested: this.setup.parentStore != null
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.controller.setOptions(this.getControllerOptions());
+            this.store.update({
+                modal: options.modal ?? true,
+                disablePointerDismissal: options.disablePointerDismissal ?? false,
+                nested: this.setup.parentStore != null
+            });
         });
+    }
+
+    /**
+     * Applies the options' side effects (dismissal, scroll lock, parent notification) after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 

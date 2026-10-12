@@ -1,6 +1,6 @@
+import { ComponentStore, createSelector } from '@flippo-software/store';
+
 import { createEventEmitter } from '~@events/EventEmitter';
-import { ComponentStore } from '~@store/ComponentStore';
-import { createSelector } from '~@store/createSelector';
 
 import type { ChangeEventDetails, FloatingOpenChangeDetails, NoCustomProperties } from '~@events/changeEventDetails';
 import type { FloatingEvents } from '~@events/EventEmitter';

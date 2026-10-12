@@ -1,3 +1,5 @@
+import { effect, Store, untracked } from '@flippo-software/store';
+
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
@@ -9,10 +11,10 @@ import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
 import { findItemIndex, selectedValueIncludes } from '~@lib/itemEquality';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { AnchorPositioner } from '~@positioning/AnchorPositioner';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { ListRegistryMap } from '~@components/composite/list/ListRegistry';
 import type { Align, MutableRef, Side, Style } from '~@lib/types';
@@ -57,7 +59,18 @@ export class SelectPositionerMachine extends Connectable {
 
     readonly scrollDownArrowRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: SelectPositionerOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SelectPositionerOptions>({} as SelectPositionerOptions);
+
+    private get options(): SelectPositionerOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SelectPositionerOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: SelectRootMachine;
 
@@ -87,13 +100,20 @@ export class SelectPositionerMachine extends Connectable {
     protected override onConnect() {
         this.connectChild(this.positioner);
         this.connectChild(this.items);
-        this.addCleanup(this.root.store.subscribe(() => this.sync()));
-        this.addCleanup(this.store.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: SelectPositionerOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 

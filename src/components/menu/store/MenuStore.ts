@@ -1,10 +1,10 @@
+import { ComponentStore, createSelector } from '@flippo-software/store';
+
 import { EMPTY_OBJECT } from '~@lib/constants';
 import { createRef } from '~@lib/ref';
 import { FloatingTreeStore } from '~@packages/floating-ui/FloatingTreeStore';
 import { PopupTriggerMap } from '~@popup/PopupTriggerMap';
 import { createInitialPopupStoreState, popupStoreSelectors } from '~@popup/popupStoreState';
-import { ComponentStore } from '~@store/ComponentStore';
-import { createSelector } from '~@store/createSelector';
 
 import type { PopupChangeEventDetails } from '~@events/changeEventDetails';
 import type { REASONS } from '~@events/reasons';
@@ -203,8 +203,6 @@ function createInitialState<Payload>(): MenuState<Payload> {
  * State machine of a menu (also used by ContextMenu and Menubar submenus).
  */
 export class MenuStore<Payload = unknown> extends ComponentStore<Readonly<MenuState<Payload>>, MenuContext, MenuSelectors> {
-    private unsubscribeParentListener: (() => void) | null = null;
-
     constructor(initialState?: Partial<MenuState<Payload>>) {
         super(
             { ...createInitialState<Payload>(), ...initialState },
@@ -225,32 +223,17 @@ export class MenuStore<Payload = unknown> extends ComponentStore<Readonly<MenuSt
     }
 
     /**
-     * Propagates the parent menu's updates to this store until the returned function is called.
+     * Takes the parent's `allowMouseUpTriggerRef` until the returned function is called. (Values this store reads
+     * from a parent menu's store, like `rootId`, are tracked by the effects and React components reading them.)
      */
     connectParent(): () => void {
-        const unobserveParent = this.observe('parent', (parent) => {
-            this.unsubscribeParentListener?.();
-
+        return this.observe('parent', (parent) => {
             if (parent.type === 'menu') {
-                this.unsubscribeParentListener = parent.store.subscribe(() => {
-                    this.notifyAll();
-                });
-
                 this.context.allowMouseUpTriggerRef = parent.store.context.allowMouseUpTriggerRef;
-                return;
-            }
-
-            if (parent.type !== undefined) {
+            } else if (parent.type !== undefined) {
                 this.context.allowMouseUpTriggerRef = parent.context.allowMouseUpTriggerRef;
             }
-
-            this.unsubscribeParentListener = null;
         });
-        return () => {
-            unobserveParent();
-            this.unsubscribeParentListener?.();
-            this.unsubscribeParentListener = null;
-        };
     }
 
     /**

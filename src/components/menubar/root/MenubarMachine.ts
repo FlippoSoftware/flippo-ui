@@ -1,12 +1,14 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { acquireScrollLock } from '~@dom/scrollLock';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
 import { FloatingTreeStore } from '~@packages/floating-ui/FloatingTreeStore';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { MenuOpenEventDetails } from '~@components/menu/positioner/MenuPositionerMachine';
 import type { MenubarParentContext, MenuOrientation } from '~@components/menu/store/MenuStore';
@@ -76,7 +78,18 @@ export class MenubarMachine extends Connectable {
 
     readonly allowMouseUpTriggerRef: MutableRef<boolean> = { current: false };
 
-    private options: MenubarOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<MenubarOptions>({} as MenubarOptions);
+
+    private get options(): MenubarOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: MenubarOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: MenubarSetup;
 
@@ -108,8 +121,17 @@ export class MenubarMachine extends Connectable {
     }
 
     setOptions(options: MenubarOptions) {
-        this.options = options;
-        this.composite.setOptions(this.getCompositeOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.composite.setOptions(this.getCompositeOptions());
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -119,21 +141,40 @@ export class MenubarMachine extends Connectable {
 
     /**
      * The parent context for the menubar's menus (pass it as `{ type: 'menubar', context }`).
+     * One object whose fields always read the current menubar state.
      */
-    get context(): MenubarParentContext {
-        const { contentElement, hasSubmenuOpen } = this.store.state;
+    readonly context: MenubarParentContext = (() => {
+        const machine = this;
         return {
-            disabled: this.options.disabled ?? false,
-            rootId: this.setup.id,
-            allowMouseUpTriggerRef: this.allowMouseUpTriggerRef,
-            modal: this.modal,
-            orientation: this.options.orientation ?? 'horizontal',
-            hasSubmenuOpen,
-            contentElement,
-            tree: this.tree,
-            nodeId: this.setup.nodeId
+            get disabled() {
+                return machine.options.disabled ?? false;
+            },
+            get rootId() {
+                return machine.setup.id;
+            },
+            get allowMouseUpTriggerRef() {
+                return machine.allowMouseUpTriggerRef;
+            },
+            get modal() {
+                return machine.modal;
+            },
+            get orientation() {
+                return machine.options.orientation ?? 'horizontal';
+            },
+            get hasSubmenuOpen() {
+                return machine.store.state.hasSubmenuOpen;
+            },
+            get contentElement() {
+                return machine.store.state.contentElement;
+            },
+            get tree() {
+                return machine.tree;
+            },
+            get nodeId() {
+                return machine.setup.nodeId;
+            }
         };
-    }
+    })();
 
     setElement = (element: HTMLElement | null) => {
         this.store.set('contentElement', element);

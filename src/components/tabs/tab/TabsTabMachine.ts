@@ -1,14 +1,16 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { type ListRegistry, ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { ACTIVE_COMPOSITE_ITEM } from '~@components/composite/utils/compositeKeys';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 import { activeElement, contains } from '~@packages/floating-ui/utils/element';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { Orientation } from '~@lib/types';
 import type { Props } from '~@props/mergeProps';
@@ -54,7 +56,18 @@ export class TabsTabMachine extends Connectable {
 
     readonly store = new Store({ index: -1 });
 
-    private options: TabsTabOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TabsTabOptions>({} as TabsTabOptions);
+
+    private get options(): TabsTabOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TabsTabOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly tabs: TabsMachine;
 
@@ -90,9 +103,26 @@ export class TabsTabMachine extends Connectable {
     }
 
     setOptions(options: TabsTabOptions) {
-        this.options = options;
-        this.button.setOptions({ disabled: options.disabled ?? false, native: options.nativeButton ?? true, focusableWhenDisabled: true });
-        this.listItem.setMetadata(this.metadata);
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            const previous = this.options;
+            this.options = options;
+            this.button.setOptions({
+                disabled: options.disabled ?? false,
+                native: options.nativeButton ?? true,
+                focusableWhenDisabled: true
+            });
+            // Registering again re-sorts the list: only when the metadata changed (`setOptions` may run on every render).
+            if (previous.disabled !== options.disabled || previous.id !== options.id || !Object.is(previous.value, options.value)) {
+                this.listItem.setMetadata(this.metadata);
+            }
+        });
+    }
+
+    /**
+     * Moves the roving highlight to the active tab. Adapters call it after committing a render (it reads focus).
+     */
+    afterCommit() {
         this.syncHighlight();
     }
 

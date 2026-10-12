@@ -1,7 +1,7 @@
+import { ComponentStore, Store } from '@flippo-software/store';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createRef } from '~@lib/ref';
-import { ComponentStore } from '~@store/ComponentStore';
 import { connected } from '~@test/utils/connected';
 
 import { PopupTransitions } from './PopupTransitions';
@@ -250,7 +250,7 @@ describe('PopupTransitions', () => {
         stop();
     });
 
-    it('unmounts after exit animations and reports completion', async () => {
+    it('unmounts after exit animations and reports completion', () => {
         const onOpenChangeComplete = vi.fn();
         const onUnmount = vi.fn();
         const store = createStore({ open: true, mounted: true, activeTriggerId: 't' });
@@ -262,11 +262,10 @@ describe('PopupTransitions', () => {
         const statuses: unknown[] = [];
         store.subscribe((state) => statuses.push(state.transitionStatus));
 
+        // Animations are disabled, so closing passes through `ending` and unmounts within the change:
+        // listeners get the final state only.
         store.set('open', false);
-        expect(statuses).toContain('ending');
-
-        await nextFrame();
-        await nextFrame();
+        expect(statuses).toEqual([undefined]);
         expect(store.state).toMatchObject({ mounted: false, activeTriggerId: null, transitionStatus: undefined });
         expect(onUnmount).toHaveBeenCalledTimes(1);
         expect(onOpenChangeComplete).toHaveBeenCalledWith(false);
@@ -291,14 +290,14 @@ describe('PopupTransitions', () => {
 
     it('clears a stale ending status and follows an external open state', () => {
         const store = createStore({ transitionStatus: 'ending' });
-        let externalOpen = false;
+        // E.g. the shared open state of a tooltip group.
+        const external = new Store({ open: false });
         const transitions = connected(new PopupTransitions(store));
         transitions.setOptions({});
-        transitions.start(() => externalOpen);
+        transitions.start(() => external.state.open);
         expect(store.state.transitionStatus).toBeUndefined();
 
-        externalOpen = true;
-        store.notifyAll();
+        external.set('open', true);
         expect(store.state.mounted).toBe(true);
         transitions.destroy();
     });

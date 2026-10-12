@@ -1,4 +1,7 @@
+import { untracked } from '@flippo-software/store';
+
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { FloatingDelayGroup } from '~@packages/floating-ui/FloatingDelayGroup';
 
 export type TooltipProviderOptions = {
@@ -23,7 +26,18 @@ export type TooltipProviderOptions = {
 export class TooltipProviderMachine extends Connectable {
     readonly delayGroup: FloatingDelayGroup;
 
-    private options: TooltipProviderOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TooltipProviderOptions>({} as TooltipProviderOptions);
+
+    private get options(): TooltipProviderOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TooltipProviderOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: TooltipProviderOptions = {}) {
         super();
@@ -35,8 +49,11 @@ export class TooltipProviderMachine extends Connectable {
     }
 
     setOptions(options: TooltipProviderOptions) {
-        this.options = options;
-        this.delayGroup.setOptions({ delay: { open: options.delay, close: options.closeDelay }, timeoutMs: options.timeout ?? 400 });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.delayGroup.setOptions({ delay: { open: options.delay, close: options.closeDelay }, timeoutMs: options.timeout ?? 400 });
+        });
     }
 
     get delay() {

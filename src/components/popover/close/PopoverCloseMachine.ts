@@ -1,3 +1,5 @@
+import { untracked } from '@flippo-software/store';
+
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
@@ -27,7 +29,10 @@ export class PopoverCloseMachine {
     }
 
     setOptions(options: PopoverCloseOptions) {
-        this.button.setOptions(this.getButtonOptions(options));
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.button.setOptions(this.getButtonOptions(options));
+        });
     }
 
     setElement = (element: HTMLElement | null) => {

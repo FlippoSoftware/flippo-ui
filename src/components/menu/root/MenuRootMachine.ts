@@ -1,8 +1,11 @@
+import { effect, Store, untracked } from '@flippo-software/store';
+
 import { acquireScrollLock } from '~@dom/scrollLock';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY, TYPEAHEAD_RESET_MS } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { warn } from '~@lib/warn';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
 import { DismissInteraction } from '~@packages/floating-ui/interactions/DismissInteraction';
@@ -13,7 +16,6 @@ import { TypeaheadInteraction } from '~@packages/floating-ui/interactions/Typeah
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { PopupRootController } from '~@popup/PopupRootController';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
 import type { FloatingOpenChangeDetails } from '~@events/changeEventDetails';
@@ -130,7 +132,18 @@ export class MenuRootMachine<Payload = unknown> extends Connectable {
      */
     readonly openMethod = new Store<{ openMethod: MenuOpenMethod }>({ openMethod: null });
 
-    private options: MenuRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<MenuRootOptions>({} as MenuRootOptions);
+
+    private get options(): MenuRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: MenuRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: MenuRootSetup<Payload>;
 
@@ -217,8 +230,7 @@ export class MenuRootMachine<Payload = unknown> extends Connectable {
                 onUnmount: () => {
                     this.store.update({ allowMouseEnter: false, stickIfOpen: true });
                     this.openMethod.set('openMethod', null);
-                },
-                onChange: () => this.sync()
+                }
             },
             { onOpenChangeComplete: options.onOpenChangeComplete }
         );
@@ -248,15 +260,23 @@ export class MenuRootMachine<Payload = unknown> extends Connectable {
             this.setOpen(nextOpen, eventDetails);
         this.floatingRoot.context.events.on('setOpen', handleSetOpenEvent);
         this.addCleanup(() => this.floatingRoot.context.events.off('setOpen', handleSetOpenEvent));
-        this.addCleanup(this.openMethod.subscribe(() => this.sync()));
-        this.addCleanup(this.floatingRoot.subscribe(() => this.sync()));
-        this.sync();
+        // Re-runs when a store it reads changes: the own store, the floating root, the interaction type…
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: MenuRootOptions) {
-        this.options = options;
-        this.syncOptions();
-        this.controller.setOptions({ onOpenChangeComplete: options.onOpenChangeComplete });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.syncOptions();
+            this.controller.setOptions({ onOpenChangeComplete: options.onOpenChangeComplete });
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.dismiss.setOptions(this.getDismissOptions());
         this.sync();
     }

@@ -10,32 +10,34 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v4
-
-            - name: Install Node.js
-              uses: actions/setup-node@v4
               with:
-                  node-version-file: ".nvmrc"
-                  cache: "pnpm"
+                  path: core
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+            - name: Set up
+              uses: ./core/.github/actions/setup
 
             - name: Check formatting & linting
+              working-directory: core
               run: pnpm lint:check
 
             - name: Typecheck
+              working-directory: core
               run: pnpm typecheck
 
             - name: Build
+              working-directory: core
               run: pnpm build
 
     test:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
+              with:
+                  path: core
 
-            - name: Test package
-              uses: ./.github/actions/test
+            - name: Set up
+              uses: ./core/.github/actions/setup
+
+            - name: Run tests
+              working-directory: core
+              run: pnpm test

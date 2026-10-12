@@ -1,11 +1,13 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { collapsibleTriggerOpenStateMapping } from '~@attributes/collapsibleOpenStateMapping';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CollapsibleMachine } from '~@components/collapsible/root/CollapsibleMachine';
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { warn } from '~@lib/warn';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import type { CollapsibleChangeEventDetails } from '~@components/collapsible/root/CollapsibleMachine';
@@ -60,7 +62,18 @@ export class AccordionItemMachine extends Connectable {
 
     readonly store: Store<{ index: number; triggerId: string | undefined }>;
 
-    private options: AccordionItemOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<AccordionItemOptions>({} as AccordionItemOptions);
+
+    private get options(): AccordionItemOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: AccordionItemOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly accordion: AccordionMachine;
 
@@ -80,8 +93,11 @@ export class AccordionItemMachine extends Connectable {
     }
 
     setOptions(options: AccordionItemOptions) {
-        this.options = options;
-        this.collapsible.setOptions(this.getCollapsibleOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.collapsible.setOptions(this.getCollapsibleOptions());
+        });
     }
 
     /**
@@ -148,16 +164,19 @@ export class AccordionItemMachine extends Connectable {
      * Applies the panel options, falling back to the accordion's `hiddenUntilFound`/`keepMounted`.
      */
     setPanelOptions(options: { id?: string | undefined; hiddenUntilFound?: boolean | undefined; keepMounted?: boolean | undefined }) {
-        const hiddenUntilFound = options.hiddenUntilFound ?? this.accordion.hiddenUntilFound;
-        if (process.env.NODE_ENV !== 'production' && options.keepMounted === false && hiddenUntilFound) {
-            warn(
-                'The `keepMounted={false}` prop on a Accordion.Panel will be ignored when using `contextHiddenUntilFound` on the Panel or the Root since it requires the panel to remain mounted when closed.'
-            );
-        }
-        this.collapsible.setPanelOptions({
-            id: options.id,
-            hiddenUntilFound,
-            keepMounted: options.keepMounted ?? this.accordion.keepMounted
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            const hiddenUntilFound = options.hiddenUntilFound ?? this.accordion.hiddenUntilFound;
+            if (process.env.NODE_ENV !== 'production' && options.keepMounted === false && hiddenUntilFound) {
+                warn(
+                    'The `keepMounted={false}` prop on a Accordion.Panel will be ignored when using `contextHiddenUntilFound` on the Panel or the Root since it requires the panel to remain mounted when closed.'
+                );
+            }
+            this.collapsible.setPanelOptions({
+                id: options.id,
+                hiddenUntilFound,
+                keepMounted: options.keepMounted ?? this.accordion.keepMounted
+            });
         });
     }
 

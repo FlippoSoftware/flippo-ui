@@ -1,10 +1,12 @@
+import { createSelector } from '@flippo-software/store';
+
+import type { Store } from '@flippo-software/store';
+
 import { compareItemEquality } from '~@lib/itemEquality';
-import { createSelector } from '~@store/createSelector';
 
 import type { ChangeEventDetails, GenericEventDetails } from '~@events/changeEventDetails';
 import type { REASONS } from '~@events/reasons';
 import type { ElementProps, Interaction, MutableRef, Side, TransitionStatus } from '~@lib/types';
-import type { Store } from '~@store/Store';
 
 export type ComboboxChangeEventReason =
     | typeof REASONS.triggerPress

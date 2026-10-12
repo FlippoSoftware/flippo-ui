@@ -1,6 +1,8 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getIndicatorStyle } from '~@components/progress/indicator/getIndicatorStyle';
 import { formatNumber } from '~@lib/formatNumber';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { Style } from '~@lib/types';
 
@@ -33,14 +35,28 @@ function formatValue(value: number, locale?: Intl.LocalesArgument, format?: Intl
 export class MeterMachine {
     readonly store = new Store<{ labelId: string | undefined }>({ labelId: undefined });
 
-    private options: MeterOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<MeterOptions>({} as MeterOptions);
+
+    private get options(): MeterOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: MeterOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: MeterOptions) {
         this.options = options;
     }
 
     setOptions(options: MeterOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get min() {

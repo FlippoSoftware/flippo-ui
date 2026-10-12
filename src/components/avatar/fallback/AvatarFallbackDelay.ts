@@ -1,5 +1,6 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
 import type { ImageLoadingStatus } from '../root/AvatarMachine';
@@ -28,9 +29,12 @@ export class AvatarFallbackDelay extends Connectable {
      * Restarts the delay only when it changed, so it can be called on every render.
      */
     setOptions(options: { delay?: number | undefined }) {
-        if (options.delay !== this.delay) {
-            this.setDelay(options.delay);
-        }
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            if (options.delay !== this.delay) {
+                this.setDelay(options.delay);
+            }
+        });
     }
 
     setDelay(delay: number | undefined) {

@@ -1,8 +1,10 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { ListRegistry, ListRegistryMap } from '~@components/composite/list/ListRegistry';
 import type { Orientation, TextDirection } from '~@lib/types';
@@ -43,7 +45,18 @@ export class ToolbarMachine extends Connectable {
 
     readonly store = new Store<{ itemMap: ListRegistryMap<ToolbarItemMetadata> }>({ itemMap: new Map() });
 
-    private options: ToolbarOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ToolbarOptions>({} as ToolbarOptions);
+
+    private get options(): ToolbarOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ToolbarOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: ToolbarOptions = {}) {
         super();
@@ -51,6 +64,8 @@ export class ToolbarMachine extends Connectable {
         this.composite = new CompositeRootMachine(this.getCompositeOptions());
         this.composite.registry.setOptions({
             onMapChange: (map) => {
+                // Replaces the composite's own handler, which still highlights the item marked active.
+                this.composite.onMapChange(map);
                 this.store.set('itemMap', map as unknown as ListRegistryMap<ToolbarItemMetadata>);
                 this.composite.setOptions(this.getCompositeOptions());
             }
@@ -62,8 +77,11 @@ export class ToolbarMachine extends Connectable {
     }
 
     setOptions(options: ToolbarOptions) {
-        this.options = options;
-        this.composite.setOptions(this.getCompositeOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.composite.setOptions(this.getCompositeOptions());
+        });
     }
 
     private getCompositeOptions() {

@@ -1,12 +1,14 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { COMPOSITE_KEYS, END, HOME } from '~@components/composite/utils/compositeKeys';
 import { Connectable } from '~@lib/Connectable';
 import { formatNumber } from '~@lib/formatNumber';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { valueToPercent } from '~@lib/valueToPercent';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, ARROW_UP } from '~@packages/floating-ui/utils/constants';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { LabelableController } from '~@components/labelable/root/LabelableController';
 import type { Style } from '~@lib/types';
@@ -90,7 +92,18 @@ export class SliderThumbMachine extends Connectable {
         positionPercent: undefined
     });
 
-    private options: SliderThumbOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SliderThumbOptions>({} as SliderThumbOptions);
+
+    private get options(): SliderThumbOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SliderThumbOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly slider: SliderMachine;
 
@@ -113,8 +126,17 @@ export class SliderThumbMachine extends Connectable {
     }
 
     setOptions(options: SliderThumbOptions) {
-        this.options = options;
-        this.listItem.setMetadata({ inputId: this.inputId });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.listItem.setMetadata({ inputId: this.inputId });
+        });
+    }
+
+    /**
+     * Positions an inset thumb. Adapters call it after committing a render: it measures the layout.
+     */
+    afterCommit() {
         this.syncInsetPosition();
     }
 

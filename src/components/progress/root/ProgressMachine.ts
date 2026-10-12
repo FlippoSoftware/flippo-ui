@@ -1,6 +1,8 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { formatNumber } from '~@lib/formatNumber';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { Style } from '~@lib/types';
 
@@ -58,14 +60,28 @@ function getDefaultAriaValueText(formattedValue: string | null, value: number | 
 export class ProgressMachine {
     readonly store = new Store<{ labelId: string | undefined }>({ labelId: undefined });
 
-    private options: ProgressOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ProgressOptions>({} as ProgressOptions);
+
+    private get options(): ProgressOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ProgressOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: ProgressOptions) {
         this.options = options;
     }
 
     setOptions(options: ProgressOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get min() {

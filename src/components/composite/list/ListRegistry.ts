@@ -1,4 +1,7 @@
+import { untracked } from '@flippo-software/store';
+
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { MutableRef } from '~@lib/types';
 
@@ -15,6 +18,20 @@ function sortByDocumentPosition(a: Element, b: Element) {
         return 1;
     }
     return 0;
+}
+
+function isShallowEqual(a: unknown, b: unknown): boolean {
+    if (Object.is(a, b)) {
+        return true;
+    }
+    if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+        return false;
+    }
+    const keys = Object.keys(a);
+    return (
+        keys.length === Object.keys(b).length &&
+        keys.every((key) => Object.is((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]))
+    );
 }
 
 export type ListRegistryOptions<Metadata> = {
@@ -48,7 +65,18 @@ export class ListRegistry<Metadata = Record<string, unknown>> extends Connectabl
      */
     readonly nextIndexRef: MutableRef<number> = { current: 0 };
 
-    private options: ListRegistryOptions<Metadata>;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ListRegistryOptions<Metadata>>({} as ListRegistryOptions<Metadata>);
+
+    private get options(): ListRegistryOptions<Metadata> {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ListRegistryOptions<Metadata>) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly map = new Map<Element, Metadata | null>();
 
@@ -70,7 +98,10 @@ export class ListRegistry<Metadata = Record<string, unknown>> extends Connectabl
     }
 
     setOptions(options: ListRegistryOptions<Metadata>) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get size() {
@@ -274,6 +305,10 @@ export class ListRegistryItem<Metadata = Record<string, unknown>> extends Connec
     }
 
     setMetadata(metadata: Metadata | undefined) {
+        // Registering again re-sorts the list; callers may pass an equal new object on every update.
+        if (isShallowEqual(this.metadata, metadata)) {
+            return;
+        }
         this.metadata = metadata;
         if (this.element && this.externalIndex == null) {
             this.registry.register(this.element, metadata);

@@ -1,7 +1,10 @@
+import { untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { COMPOSITE_KEYS } from '~@components/composite/utils/compositeKeys';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { FocusManager } from '~@packages/floating-ui/FocusManager';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -41,7 +44,18 @@ export type DialogPopupSetup = {
  * State machine of `Dialog.Popup`: focus management (trap for modal dialogs) and the popup's props.
  */
 export class DialogPopupMachine<Payload = unknown> extends Connectable {
-    private options: DialogPopupOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<DialogPopupOptions>({} as DialogPopupOptions);
+
+    private get options(): DialogPopupOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: DialogPopupOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: DialogStore<Payload>;
 
@@ -71,7 +85,16 @@ export class DialogPopupMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: DialogPopupOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Passes the options to the focus manager after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 

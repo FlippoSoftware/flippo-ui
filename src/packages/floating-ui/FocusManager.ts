@@ -1,3 +1,4 @@
+import { untracked } from '@flippo-software/store';
 import { getComputedStyle, getNodeName, isHTMLElement } from '@floating-ui/utils/dom';
 import { focusable, isTabbable, tabbable } from 'tabbable';
 
@@ -6,6 +7,7 @@ import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { CLICK_TRIGGER_IDENTIFIER } from '~@lib/constants';
 import { NOOP } from '~@lib/noop';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerWindow } from '~@lib/owner';
 import { applyStyle, visuallyHidden } from '~@lib/visuallyHidden';
 import { AnimationFrame } from '~@timers/AnimationFrame';
@@ -219,7 +221,18 @@ const DEFAULT_GET_INSIDE_ELEMENTS = () => [];
  * {@link FocusManager.shouldRenderGuards} and the guard handlers.
  */
 export class FocusManager extends Connectable {
-    private options: FocusManagerOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<FocusManagerOptions>({} as FocusManagerOptions);
+
+    private get options(): FocusManagerOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: FocusManagerOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -353,8 +366,11 @@ export class FocusManager extends Connectable {
     }
 
     setOptions(options: FocusManagerOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     protected override onDisconnect() {

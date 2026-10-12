@@ -1,10 +1,10 @@
+import { ComponentStore, createSelector } from '@flippo-software/store';
+
 import { REASONS } from '~@events/reasons';
 import { PATIENT_CLICK_THRESHOLD } from '~@lib/constants';
 import { createRef } from '~@lib/ref';
 import { PopupTriggerMap } from '~@popup/PopupTriggerMap';
 import { createInitialPopupStoreState, popupStoreSelectors } from '~@popup/popupStoreState';
-import { ComponentStore } from '~@store/ComponentStore';
-import { createSelector } from '~@store/createSelector';
 import { Timeout } from '~@timers/Timeout';
 
 import type { FloatingOpenChangeDetails, PopupChangeEventDetails } from '~@events/changeEventDetails';

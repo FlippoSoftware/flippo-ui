@@ -1,8 +1,10 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { createGenericEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { EMPTY_OBJECT } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
-import { Store } from '~@store/Store';
 
 import type { FieldValidityData } from '~@components/field/utils/fieldValidity';
 import type { GenericEventDetails } from '~@events/changeEventDetails';
@@ -70,7 +72,18 @@ export class FormController<Values extends FormValues = FormValues> {
 
     readonly submitAttemptedRef: MutableRef<boolean> = { current: false };
 
-    private options: FormOptions<Values>;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<FormOptions<Values>>({} as FormOptions<Values>);
+
+    private get options(): FormOptions<Values> {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: FormOptions<Values>) {
+        this.optionsStore.setState(options);
+    }
 
     private submitted = false;
 
@@ -83,11 +96,14 @@ export class FormController<Values extends FormValues = FormValues> {
     }
 
     setOptions(options: FormOptions<Values>) {
-        this.options = options;
-        if (options.errors !== this.externalErrors) {
-            this.externalErrors = options.errors;
-            this.setErrors(options.errors);
-        }
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            if (options.errors !== this.externalErrors) {
+                this.externalErrors = options.errors;
+                this.setErrors(options.errors);
+            }
+        });
     }
 
     get validationMode(): FormValidationMode {
@@ -138,7 +154,8 @@ export class FormController<Values extends FormValues = FormValues> {
         this.submitAttemptedRef.current = true;
 
         // Async validation isn't supported to stop the submit event.
-        for (const field of this.fields.values()) {
+        // A snapshot: validating re-renders synchronously, and controls may register again meanwhile.
+        for (const field of Array.from(this.fields.values())) {
             field.validate();
         }
 

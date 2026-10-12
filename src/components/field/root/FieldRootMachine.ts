@@ -1,8 +1,11 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { createDefaultForm } from '~@components/form/root/FormController';
+import { Connectable } from '~@lib/Connectable';
 import { EMPTY_OBJECT } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
 import type { FieldsetMachine } from '~@components/fieldset/root/FieldsetMachine';
@@ -108,7 +111,7 @@ const runImmediately = (fn: () => void) => fn();
  * State machine of a form field: touched/dirty/filled/focused flags and validation.
  * Replacement for `FieldRoot` + `useFieldValidation` + `useField`.
  */
-export class FieldRootMachine {
+export class FieldRootMachine extends Connectable {
     readonly store: Store<FieldInternalState>;
 
     /**
@@ -118,13 +121,25 @@ export class FieldRootMachine {
 
     readonly markedDirtyRef: MutableRef<boolean> = { current: false };
 
-    private options: FieldRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<FieldRootOptions>({} as FieldRootOptions);
+
+    private get options(): FieldRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: FieldRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly timeout = new Timeout();
 
     private readonly defaultForm = createDefaultForm();
 
     constructor(options: FieldRootOptions = {}) {
+        super();
         this.options = options;
         this.store = new Store<FieldInternalState>({
             touched: false,
@@ -142,10 +157,14 @@ export class FieldRootMachine {
     }
 
     setOptions(options: FieldRootOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
-    destroy() {
+    protected override onDisconnect() {
+        // A pending debounced validation is dropped with the field.
         this.timeout.clear();
     }
 

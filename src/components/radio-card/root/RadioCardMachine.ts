@@ -1,3 +1,5 @@
+import { untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ACTIVE_COMPOSITE_ITEM } from '~@components/composite/utils/compositeKeys';
 import { RadioMachine } from '~@components/radio/root/RadioMachine';
@@ -21,7 +23,10 @@ export class RadioCardMachine extends RadioMachine {
     }
 
     override setOptions(options: RadioCardOptions) {
-        super.setOptions({ ...options, defaultInputId: options.defaultId });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            super.setOptions({ ...options, defaultInputId: options.defaultId });
+        });
     }
 
     static override attrs(state: RadioCardState): Record<string, string> {

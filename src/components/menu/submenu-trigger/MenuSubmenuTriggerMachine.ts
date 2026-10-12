@@ -1,3 +1,5 @@
+import { effect, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { triggerOpenStateMapping } from '~@attributes/popupStateMapping';
 import { ClickInteraction } from '~@packages/floating-ui/interactions/ClickInteraction';
@@ -79,14 +81,21 @@ export class MenuSubmenuTriggerMachine extends MenuItemMachine<MenuSubmenuTrigge
             store.context.triggerElements.add(this.options.id, element);
             this.unregisterTrigger = () => store.context.triggerElements.delete(this.options.id);
         }
-        this.addCleanup(store.subscribe(() => this.sync()));
-        this.addCleanup(this.parentStore.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: MenuSubmenuTriggerOptions) {
-        super.setOptions(options);
-        this.store.syncValue('closeDelay', options.closeDelay ?? 0);
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            super.setOptions(options);
+            this.store.syncValue('closeDelay', options.closeDelay ?? 0);
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -136,6 +145,7 @@ export class MenuSubmenuTriggerMachine extends MenuItemMachine<MenuSubmenuTrigge
         );
 
         return mergeProps(
+            this.getCommonProps(),
             ownProps,
             parentStore.select('itemProps'),
             {
@@ -147,7 +157,6 @@ export class MenuSubmenuTriggerMachine extends MenuItemMachine<MenuSubmenuTrigge
                 }
             },
             elementProps,
-            this.getCommonProps(),
             {
                 onMouseEnter: () => parentStore.set('activeIndex', this.index.state.index)
             },

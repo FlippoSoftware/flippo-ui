@@ -1,9 +1,11 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { ComboboxRootMachine } from '~@components/combobox/root/ComboboxRootMachine';
 import { createFilter } from '~@components/combobox/utils/comboboxFilter';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { stringifyAsLabel } from '~@lib/valueLabel';
-import { Store } from '~@store/Store';
 
 import type { ComboboxItemFilter, ComboboxRootOptions, ComboboxRootSetup } from '~@components/combobox/root/ComboboxRootMachine';
 import type { ComboboxChangeEventDetails, ComboboxHighlightEventDetails } from '~@components/combobox/store/ComboboxStore';
@@ -39,7 +41,18 @@ export type AutocompleteRootOptions = Omit<
 export class AutocompleteRootMachine extends Connectable {
     readonly combobox: ComboboxRootMachine;
 
-    private options: AutocompleteRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<AutocompleteRootOptions>({} as AutocompleteRootOptions);
+
+    private get options(): AutocompleteRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: AutocompleteRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly internal: Store<{ internalValue: string; inlineInputValue: string }>;
 
@@ -63,12 +76,22 @@ export class AutocompleteRootMachine extends Connectable {
     }
 
     setOptions(options: AutocompleteRootOptions) {
-        this.options = options;
-        if (options.value !== undefined && options.value !== this.previousControlledValue) {
-            this.internal.set('inlineInputValue', '');
-        }
-        this.previousControlledValue = options.value;
-        this.combobox.setOptions(this.getComboboxOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            if (options.value !== undefined && options.value !== this.previousControlledValue) {
+                this.internal.set('inlineInputValue', '');
+            }
+            this.previousControlledValue = options.value;
+            this.combobox.setOptions(this.getComboboxOptions());
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
+        this.combobox.afterCommit();
     }
 
     /**

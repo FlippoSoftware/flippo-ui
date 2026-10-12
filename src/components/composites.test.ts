@@ -1,3 +1,4 @@
+import { effect } from '@flippo-software/store';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AccordionItemMachine } from '~@components/accordion/item/AccordionItemMachine';
@@ -144,6 +145,27 @@ describe('Slider', () => {
 });
 
 describe('NumberField', () => {
+    it('makes a pending value visible to what reads the value, until the next microtask', async () => {
+        const field = connected(new NumberFieldMachine({ defaultId: 'nf', defaultValue: 1 }));
+        const seen: unknown[] = [];
+        const dispose = effect(() => {
+            seen.push(field.value);
+        });
+
+        field.setPendingValue(5);
+        expect(seen).toEqual([1, 5]);
+        await Promise.resolve();
+        expect(seen).toEqual([1, 5, 1]);
+        dispose();
+    });
+
+    it('shows the incremented value while a pending (pressed) value is set', () => {
+        const field = connected(new NumberFieldMachine({ defaultId: 'nf', defaultValue: 9 }));
+        field.setPendingValue(9);
+        field.incrementValue(1, { direction: 1, reason: 'increment-press' });
+        expect(field.inputValue).toBe('10');
+    });
+
     it('increments, clamps and formats', () => {
         const onValueChange = vi.fn();
         const field = connected(new NumberFieldMachine({ defaultId: 'nf', defaultValue: 9, max: 10, onValueChange }));
@@ -163,6 +185,14 @@ describe('NumberField', () => {
 });
 
 describe('PinInput', () => {
+    it('keeps the uncontrolled value for the hidden input and the form', () => {
+        const pinInput = connected(new PinInputMachine({ id: 'pin', defaultValue: '1' }));
+        expect(pinInput.checkedValue).toBe('1');
+        pinInput.onValueChange('2', 1, new Event('input'));
+        expect(pinInput.checkedValue).toBe('12');
+        expect(pinInput.getInputProps().value).toBe('12');
+    });
+
     it('validates patterns and finds empty slots', () => {
         expect(testPattern('5', 'numeric')).toBe(true);
         expect(testPattern('a', 'numeric')).toBe(false);
@@ -253,5 +283,20 @@ describe('Snippet, Marquee, ScrollArea and QrCode', () => {
         await qrCode.autoGenerate();
         await Promise.resolve();
         expect(qrCode.getState().status).not.toBe('error');
+    });
+
+    it('generates after a commit, not when the options are set', () => {
+        const createRenderer = vi.fn(() => ({ append: vi.fn(), getRawData: async () => null, download: async () => {} }));
+        const options = { value: 'a', createRenderer };
+        const qrCode = new QrCodeMachine(options);
+        qrCode.setOptions(options);
+        expect(createRenderer).not.toHaveBeenCalled();
+        qrCode.afterCommit();
+        qrCode.setOptions(options);
+        qrCode.afterCommit();
+        expect(createRenderer).toHaveBeenCalledTimes(1);
+        qrCode.setOptions({ ...options, value: 'b' });
+        qrCode.afterCommit();
+        expect(createRenderer).toHaveBeenCalledTimes(2);
     });
 });

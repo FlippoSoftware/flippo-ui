@@ -46,6 +46,7 @@ describe('Tooltip machines', () => {
         expect(positioner.getState().instant).toBe('focus');
 
         root.setOptions({ disabled: true });
+        root.afterCommit();
         expect(root.store.select('open')).toBe(false);
 
         popup.destroy();

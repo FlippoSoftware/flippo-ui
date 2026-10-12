@@ -1,8 +1,11 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import type { Dimensions } from '@floating-ui/utils';
 
 import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY } from '~@lib/constants';
 import { isElementDisabled } from '~@lib/isElementDisabled';
+import { OptionsStore } from '~@lib/OptionsStore';
 import {
     createGridCellMap,
     findNonDisabledListIndex,
@@ -15,7 +18,6 @@ import {
     isListIndexDisabled
 } from '~@packages/floating-ui/utils/composite';
 import { ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, ARROW_UP } from '~@packages/floating-ui/utils/constants';
-import { Store } from '~@store/Store';
 
 import type { TextDirection } from '~@lib/types';
 
@@ -105,7 +107,18 @@ export class CompositeRootMachine extends Connectable {
 
     readonly registry: ListRegistry;
 
-    private options: CompositeRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<CompositeRootOptions>({} as CompositeRootOptions);
+
+    private get options(): CompositeRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: CompositeRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private root: HTMLElement | null = null;
 
@@ -122,7 +135,10 @@ export class CompositeRootMachine extends Connectable {
     }
 
     setOptions(options: CompositeRootOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get elementsRef() {
@@ -198,7 +214,11 @@ export class CompositeRootMachine extends Connectable {
 
     protected override onDisconnect() {}
 
-    private readonly onMapChange = (map: ListRegistryMap<Record<string, unknown>>) => {
+    /**
+     * Highlights the item marked active once the items are known. Called by the machine's own registry;
+     * adapters that keep the items in another list registry pass it that list's map changes.
+     */
+    readonly onMapChange = (map: ListRegistryMap<Record<string, unknown>>) => {
         if (map.size === 0 || this.hasSetDefaultIndex) {
             return;
         }

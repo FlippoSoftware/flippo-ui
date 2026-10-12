@@ -1,5 +1,8 @@
+import { untracked } from '@flippo-software/store';
+
 import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Timeout } from '~@timers/Timeout';
 
 import type { MutableRef } from '~@lib/types';
@@ -57,7 +60,18 @@ export type TypeaheadInteractionOptions = {
  * Replacement for `useTypeahead`.
  */
 export class TypeaheadInteraction extends Connectable {
-    private options: TypeaheadInteractionOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TypeaheadInteractionOptions>({} as TypeaheadInteractionOptions);
+
+    private get options(): TypeaheadInteractionOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TypeaheadInteractionOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -91,8 +105,11 @@ export class TypeaheadInteraction extends Connectable {
     }
 
     setOptions(options: TypeaheadInteractionOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     getProps(): InteractionProps {

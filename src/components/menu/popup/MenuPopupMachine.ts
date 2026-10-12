@@ -1,3 +1,5 @@
+import { effect, untracked } from '@flippo-software/store';
+
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { COMPOSITE_KEYS } from '~@components/composite/utils/compositeKeys';
@@ -5,11 +7,13 @@ import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { FocusManager } from '~@packages/floating-ui/FocusManager';
 import { HoverFloatingInteraction } from '~@packages/floating-ui/interactions/hover/HoverFloatingInteraction';
 import { mergeProps } from '~@props/mergeProps';
 
 import type { Align, Side, TransitionStatus } from '~@lib/types';
+import type { FloatingPortalController } from '~@packages/floating-ui/FloatingPortalController';
 import type { FloatingRootStore } from '~@packages/floating-ui/FloatingRootStore';
 import type { FocusManagerOptions, FocusTarget } from '~@packages/floating-ui/FocusManager';
 import type { Props } from '~@props/mergeProps';
@@ -39,13 +43,25 @@ export type MenuPopupSetup = {
      * @default false
      */
     insideToolbar?: boolean | undefined;
+    portal?: FloatingPortalController | null | undefined;
 };
 
 /**
  * State machine of `Menu.Popup`: focus management, hover close and closing on item press.
  */
 export class MenuPopupMachine<Payload = unknown> extends Connectable {
-    private options: MenuPopupOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<MenuPopupOptions>({} as MenuPopupOptions);
+
+    private get options(): MenuPopupOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: MenuPopupOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: MenuRootMachine<Payload>;
 
@@ -76,8 +92,7 @@ export class MenuPopupMachine<Payload = unknown> extends Connectable {
         const events = this.root.tree.events;
         events.on('close', this.handleTreeClose);
         this.addCleanup(() => events.off('close', this.handleTreeClose));
-        this.addCleanup(this.root.store.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     private get store(): MenuStore<Payload> {
@@ -85,7 +100,16 @@ export class MenuPopupMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: MenuPopupOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -159,13 +183,20 @@ export class MenuPopupMachine<Payload = unknown> extends Connectable {
             modal: isContextMenu,
             disabled: !store.select('mounted'),
             returnFocus: this.options.finalFocus === undefined ? returnFocus : this.options.finalFocus,
-            initialFocus: parent.type !== 'menu',
+            // Opened with the keyboard, list navigation highlights an item first: keep the focus on it.
+            initialFocus: parent.type !== 'menu' ? () => this.getActiveItem() ?? true : false,
             restoreFocus: true,
             tree: parent.type !== 'menubar' ? this.root.tree : undefined,
             previousFocusableElement: triggerElement ?? undefined,
             nextFocusableElement: parent.type === undefined ? store.context.triggerFocusTargetRef : undefined,
-            beforeContentFocusGuardRef: parent.type === undefined ? store.context.beforeContentFocusGuardRef : undefined
+            beforeContentFocusGuardRef: parent.type === undefined ? store.context.beforeContentFocusGuardRef : undefined,
+            portal: this.setup.portal
         };
+    }
+
+    private getActiveItem(): HTMLElement | null {
+        const activeIndex = this.store.select('activeIndex');
+        return activeIndex == null ? null : (this.store.context.itemDomElements.current[activeIndex] ?? null);
     }
 
     private getHoverOptions() {

@@ -1,9 +1,12 @@
+import { untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { contains, getFloatingFocusElement } from '~@packages/floating-ui/utils/element';
@@ -55,7 +58,18 @@ type FocusLikeEvent = { relatedTarget: EventTarget | null };
 export class SelectTriggerMachine extends Connectable {
     readonly button: ButtonMachine;
 
-    private options: SelectTriggerOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SelectTriggerOptions>({} as SelectTriggerOptions);
+
+    private get options(): SelectTriggerOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SelectTriggerOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: SelectRootMachine;
 
@@ -84,7 +98,16 @@ export class SelectTriggerMachine extends Connectable {
     }
 
     setOptions(options: SelectTriggerOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 

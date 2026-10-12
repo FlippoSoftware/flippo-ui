@@ -1,10 +1,12 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
-import { Store } from '~@store/Store';
 
 import type { ToggleGroupMachine } from '~@components/toggle-group/root/ToggleGroupMachine';
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
@@ -51,7 +53,18 @@ export class ToggleMachine extends Connectable {
      */
     readonly listItem: ListRegistryItem | null;
 
-    private options: ToggleOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ToggleOptions>({} as ToggleOptions);
+
+    private get options(): ToggleOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ToggleOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: ToggleOptions = {}) {
         super();
@@ -73,7 +86,10 @@ export class ToggleMachine extends Connectable {
     }
 
     setOptions(options: ToggleOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     private get controlledPressed(): boolean | undefined {

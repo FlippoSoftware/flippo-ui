@@ -1,12 +1,14 @@
+import { computed, Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { type ListRegistry, ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { Connectable } from '~@lib/Connectable';
 import { compareItemEquality, findItemIndex } from '~@lib/itemEquality';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { MutableRef } from '~@lib/types';
 import type { Props } from '~@props/mergeProps';
@@ -53,9 +55,31 @@ export class ComboboxItemMachine extends Connectable {
 
     readonly listIndex = new Store<{ index: number }>({ index: -1 });
 
+    /**
+     * The options the item's index depends on, in a store so that the computed values below follow them.
+     */
+    private readonly indexOptions: Store<{ index: number | undefined; value: unknown }>;
+
+    /**
+     * Whether this item is the active one. A computed value: when the active index moves, only the two items
+     * whose answer changes see a change (each item reading `activeIndex` directly would see one).
+     */
+    private readonly isHighlighted = computed(() => this.root.store.state.activeIndex === this.index);
+
     readonly textRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: ComboboxItemOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ComboboxItemOptions>({} as ComboboxItemOptions);
+
+    private get options(): ComboboxItemOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ComboboxItemOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: ComboboxRootMachine;
 
@@ -78,6 +102,7 @@ export class ComboboxItemMachine extends Connectable {
         this.root = root;
         this.options = options;
         this.setup = setup;
+        this.indexOptions = new Store<{ index: number | undefined; value: unknown }>({ index: options.index, value: options.value });
         this.button = new ButtonMachine({ disabled: options.disabled, focusableWhenDisabled: true, native: options.nativeButton ?? false });
         this.listItem = setup.registry
             ? new ListRegistryItem(setup.registry, {
@@ -101,8 +126,18 @@ export class ComboboxItemMachine extends Connectable {
     }
 
     setOptions(options: ComboboxItemOptions) {
-        this.options = options;
-        this.button.setOptions({ disabled: options.disabled, focusableWhenDisabled: true, native: options.nativeButton ?? false });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.indexOptions.update({ index: options.index, value: options.value });
+            this.button.setOptions({ disabled: options.disabled, focusableWhenDisabled: true, native: options.nativeButton ?? false });
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -117,7 +152,7 @@ export class ComboboxItemMachine extends Connectable {
     };
 
     get value(): unknown {
-        return this.options.value ?? null;
+        return this.indexOptions.state.value ?? null;
     }
 
     /**
@@ -125,8 +160,9 @@ export class ComboboxItemMachine extends Connectable {
      */
     get index(): number {
         const { store, derived } = this.root;
-        if (this.options.index != null) {
-            return this.options.index;
+        const indexOption = this.indexOptions.state.index;
+        if (indexOption != null) {
+            return indexOption;
         }
         if (store.state.virtualized) {
             return findItemIndex(derived.state.flatFilteredItems, this.value, store.state.isItemEqualToValue);
@@ -139,7 +175,7 @@ export class ComboboxItemMachine extends Connectable {
     }
 
     get highlighted(): boolean {
-        return this.root.store.state.activeIndex === this.index;
+        return this.isHighlighted.state;
     }
 
     get selected(): boolean {

@@ -1,3 +1,5 @@
+import { computed, Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
@@ -6,10 +8,10 @@ import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { compareItemEquality, removeItem } from '~@lib/itemEquality';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
 import type { ListRegistry } from '~@components/composite/list/ListRegistry';
@@ -55,11 +57,28 @@ export class SelectItemMachine extends Connectable {
     readonly index = new Store<{ index: number }>({ index: -1 });
 
     /**
+     * Whether this item is the active one. A computed value: when the active index moves, only the two items
+     * whose answer changes see a change (each item reading `activeIndex` directly would see one).
+     */
+    private readonly isHighlighted = computed(() => selectSelectors.isActive(this.root.store.state, this.index.state.index));
+
+    /**
      * Ref to the item's text (typeahead label fallback, alignment with the trigger).
      */
     readonly textRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: SelectItemOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SelectItemOptions>({} as SelectItemOptions);
+
+    private get options(): SelectItemOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SelectItemOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: SelectRootMachine;
 
@@ -99,9 +118,18 @@ export class SelectItemMachine extends Connectable {
     }
 
     setOptions(options: SelectItemOptions) {
-        this.options = options;
-        this.listItem.setLabel(options.label);
-        this.button.setOptions({ disabled: options.disabled, focusableWhenDisabled: true, native: options.nativeButton ?? false });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.listItem.setLabel(options.label);
+            this.button.setOptions({ disabled: options.disabled, focusableWhenDisabled: true, native: options.nativeButton ?? false });
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -121,7 +149,7 @@ export class SelectItemMachine extends Connectable {
     }
 
     get highlighted(): boolean {
-        return selectSelectors.isActive(this.root.store.state, this.index.state.index);
+        return this.isHighlighted.state;
     }
 
     get selected(): boolean {

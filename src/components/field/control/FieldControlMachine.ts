@@ -1,8 +1,10 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { LabelableController } from '~@components/labelable/root/LabelableController';
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
@@ -45,7 +47,18 @@ type ControlEvent = Event & { nativeEvent?: Event; key?: string };
 export class FieldControlMachine {
     readonly store: Store<{ value: FieldControlOptions['defaultValue'] }>;
 
-    private options: FieldControlOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<FieldControlOptions>({} as FieldControlOptions);
+
+    private get options(): FieldControlOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: FieldControlOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: FieldControlOptions) {
         this.options = options;
@@ -53,7 +66,10 @@ export class FieldControlMachine {
     }
 
     setOptions(options: FieldControlOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get id() {

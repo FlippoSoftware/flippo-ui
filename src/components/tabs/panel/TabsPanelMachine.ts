@@ -1,6 +1,8 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { Props } from '~@props/mergeProps';
 
@@ -37,7 +39,18 @@ export class TabsPanelMachine extends Connectable {
 
     readonly store = new Store({ index: -1 });
 
-    private options: TabsPanelOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TabsPanelOptions>({} as TabsPanelOptions);
+
+    private get options(): TabsPanelOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TabsPanelOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly tabs: TabsMachine;
 
@@ -56,8 +69,11 @@ export class TabsPanelMachine extends Connectable {
     }
 
     setOptions(options: TabsPanelOptions) {
-        this.options = options;
-        this.listItem.setMetadata({ id: options.id, value: options.value });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.listItem.setMetadata({ id: options.id, value: options.value });
+        });
     }
 
     get hidden() {

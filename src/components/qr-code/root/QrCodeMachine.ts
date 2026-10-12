@@ -1,5 +1,7 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { TransitionStatus } from '~@lib/types';
 
@@ -77,7 +79,18 @@ type QrCodeInternalState<Renderer> = {
 export class QrCodeMachine<Renderer extends QrCodeRenderer = QrCodeRenderer> {
     readonly store = new Store<QrCodeInternalState<Renderer>>({ status: 'idle', error: null, renderer: null });
 
-    private options: QrCodeOptions<Renderer>;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<QrCodeOptions<Renderer>>({} as QrCodeOptions<Renderer>);
+
+    private get options(): QrCodeOptions<Renderer> {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: QrCodeOptions<Renderer>) {
+        this.optionsStore.setState(options);
+    }
 
     private lastGeneratedKey: unknown[] | null = null;
 
@@ -86,7 +99,16 @@ export class QrCodeMachine<Renderer extends QrCodeRenderer = QrCodeRenderer> {
     }
 
     setOptions(options: QrCodeOptions<Renderer>) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Generates after a commit when the value or options changed (see `autoGenerate`).
+     */
+    afterCommit() {
         this.autoGenerate();
     }
 

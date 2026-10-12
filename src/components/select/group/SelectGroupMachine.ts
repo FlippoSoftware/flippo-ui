@@ -1,5 +1,6 @@
+import { Store } from '@flippo-software/store';
+
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { Props } from '~@props/mergeProps';
 

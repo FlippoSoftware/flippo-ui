@@ -1,3 +1,5 @@
+import { untracked } from '@flippo-software/store';
+
 import { getFocusableWhenDisabledProps } from '~@components/button/root/ButtonMachine';
 import { ARROW_LEFT, ARROW_RIGHT } from '~@packages/floating-ui/utils/constants';
 import { stopEvent } from '~@packages/floating-ui/utils/event';
@@ -19,8 +21,11 @@ export class ToolbarInputMachine extends ToolbarItemBase {
     }
 
     setOptions(options: ToolbarItemOptions) {
-        this.options = options;
-        this.listItem.setMetadata({ focusableWhenDisabled: this.focusableWhenDisabled });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.listItem.setMetadata({ focusableWhenDisabled: this.focusableWhenDisabled });
+        });
     }
 
     setElement = (element: HTMLElement | null) => {

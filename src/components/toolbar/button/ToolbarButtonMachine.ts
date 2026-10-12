@@ -1,3 +1,5 @@
+import { untracked } from '@flippo-software/store';
+
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -20,9 +22,12 @@ export class ToolbarButtonMachine extends ToolbarItemBase {
     }
 
     setOptions(options: ToolbarItemOptions) {
-        this.options = options;
-        this.listItem.setMetadata({ focusableWhenDisabled: this.focusableWhenDisabled });
-        this.button.setOptions(this.getButtonOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.listItem.setMetadata({ focusableWhenDisabled: this.focusableWhenDisabled });
+            this.button.setOptions(this.getButtonOptions());
+        });
     }
 
     private getButtonOptions() {

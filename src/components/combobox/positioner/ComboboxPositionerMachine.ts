@@ -1,11 +1,14 @@
+import { untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
 import { getInternalBackdropProps } from '~@dom/internalBackdrop';
 import { acquireScrollLock } from '~@dom/scrollLock';
 import { Connectable } from '~@lib/Connectable';
 import { DROPDOWN_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
-import { AnchorPositioner } from '~@positioning/AnchorPositioner';
+import { AnchorPositioner, resolveAnchor } from '~@positioning/AnchorPositioner';
 import { mergeProps } from '~@props/mergeProps';
 
 import type { Align, Side, Style } from '~@lib/types';
@@ -28,7 +31,20 @@ export type ComboboxPositionerState = {
 export class ComboboxPositionerMachine extends Connectable {
     readonly positioner: AnchorPositioner;
 
-    private options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined };
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined }>(
+        {} as AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined }
+    );
+
+    private get options(): AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined } {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined }) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: ComboboxRootMachine;
 
@@ -55,7 +71,16 @@ export class ComboboxPositionerMachine extends Connectable {
     }
 
     setOptions(options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined }) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -106,9 +131,12 @@ export class ComboboxPositionerMachine extends Connectable {
     private getAnchorOptions() {
         const { store } = this.root;
         const { inputInsidePopup, triggerElement, inputElement, mounted } = store.state;
+        const fallback = inputInsidePopup ? triggerElement : inputElement;
+        const { anchor } = this.options;
         return {
             ...this.options,
-            anchor: this.options.anchor ?? (inputInsidePopup ? triggerElement : inputElement),
+            // An anchor that resolves to nothing (an input group not rendered) falls back to the input.
+            anchor: anchor === undefined ? fallback : () => resolveAnchor(anchor) ?? fallback,
             mounted,
             collisionAvoidance: this.options.collisionAvoidance ?? DROPDOWN_COLLISION_AVOIDANCE,
             lazyFlip: true

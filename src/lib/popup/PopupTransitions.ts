@@ -1,5 +1,8 @@
+import { effect, untracked } from '@flippo-software/store';
+
 import { runOnceAnimationsFinish } from '~@dom/animations';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
 import type { PopupStoreState } from './popupStoreState';
@@ -34,9 +37,24 @@ export class PopupTransitions<State extends PopupStoreState<unknown>> extends Co
 
     private readonly store: AnyPopupStore<State>;
 
-    private options: PopupTransitionsOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<PopupTransitionsOptions>({} as PopupTransitionsOptions);
+
+    private get options(): PopupTransitionsOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: PopupTransitionsOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private getOpen: () => boolean;
+
+    private previousOpen: boolean | undefined;
+
+    private stopWatchingOpen: (() => void) | null = null;
 
     constructor(store: AnyPopupStore<State>, options: PopupTransitionsOptions = {}) {
         super();
@@ -46,7 +64,10 @@ export class PopupTransitions<State extends PopupStoreState<unknown>> extends Co
     }
 
     public setOptions(options: PopupTransitionsOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     /**
@@ -56,24 +77,37 @@ export class PopupTransitions<State extends PopupStoreState<unknown>> extends Co
      * @returns The disconnect function.
      */
     public start(getOpen?: () => boolean): () => void {
-        if (getOpen) {
+        if (getOpen && getOpen !== this.getOpen) {
             this.getOpen = getOpen;
+            if (this.connected) {
+                // Follow the stores the new function reads.
+                this.watchOpen();
+            }
         }
         return this.connect();
     }
 
     protected override onConnect() {
-        let previous: boolean | undefined;
-        const onChange = () => {
-            const next = this.getOpen();
-            if (next !== previous) {
-                previous = next;
-                this.handleOpenChange(next);
-            }
-        };
+        this.previousOpen = undefined;
+        this.watchOpen();
+        this.addCleanup(() => {
+            this.stopWatchingOpen?.();
+            this.stopWatchingOpen = null;
+        });
+    }
 
-        onChange();
-        this.addCleanup(this.store.subscribe(onChange));
+    /**
+     * Follows `getOpen`: re-runs when a store it reads changes (e.g. the shared store of a tooltip group).
+     */
+    private watchOpen() {
+        this.stopWatchingOpen?.();
+        this.stopWatchingOpen = effect(() => {
+            const next = this.getOpen();
+            if (next !== this.previousOpen) {
+                this.previousOpen = next;
+                untracked(() => this.handleOpenChange(next));
+            }
+        });
     }
 
     /**

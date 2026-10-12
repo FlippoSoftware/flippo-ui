@@ -1,5 +1,7 @@
+import { Store, untracked } from '@flippo-software/store';
+
+import { OptionsStore } from '~@lib/OptionsStore';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { Props } from '~@props/mergeProps';
 
@@ -21,7 +23,18 @@ export type MenuRadioGroupOptions = {
 export class MenuRadioGroupMachine {
     readonly store: Store<{ value: unknown }>;
 
-    private options: MenuRadioGroupOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<MenuRadioGroupOptions>({} as MenuRadioGroupOptions);
+
+    private get options(): MenuRadioGroupOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: MenuRadioGroupOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: MenuRadioGroupOptions = {}) {
         this.options = options;
@@ -29,10 +42,13 @@ export class MenuRadioGroupMachine {
     }
 
     setOptions(options: MenuRadioGroupOptions) {
-        this.options = options;
-        if (options.value !== undefined) {
-            this.store.set('value', options.value);
-        }
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            if (options.value !== undefined) {
+                this.store.set('value', options.value);
+            }
+        });
     }
 
     get value(): unknown {

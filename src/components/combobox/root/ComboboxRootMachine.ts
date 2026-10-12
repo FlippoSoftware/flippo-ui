@@ -1,3 +1,5 @@
+import { effect, Store, untracked } from '@flippo-software/store';
+
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
@@ -7,6 +9,7 @@ import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '~@lib/constants';
 import { defaultItemEquality, findItemIndex, itemIncludes, removeItem } from '~@lib/itemEquality';
 import { NOOP } from '~@lib/noop';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { isGroupedItems, stringifyAsLabel, stringifyAsValue } from '~@lib/valueLabel';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { FloatingRootStore } from '~@packages/floating-ui/FloatingRootStore';
@@ -18,7 +21,6 @@ import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { contains, getTarget } from '~@packages/floating-ui/utils/element';
 import { PopupTriggerMap } from '~@popup/PopupTriggerMap';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { FieldRootMachine } from '~@components/field/root/FieldRootMachine';
 import type { LabelableController } from '~@components/labelable/root/LabelableController';
@@ -190,7 +192,18 @@ export class ComboboxRootMachine extends Connectable {
 
     readonly actions: { unmount: () => void };
 
-    private options: ComboboxRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ComboboxRootOptions>({} as ComboboxRootOptions);
+
+    private get options(): ComboboxRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ComboboxRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: ComboboxRootSetup;
 
@@ -222,8 +235,6 @@ export class ComboboxRootMachine extends Connectable {
     private pendingQueryHighlight: null | { hasQuery: boolean } = null;
 
     private lastInteractionType: Interaction = '';
-
-    private readonly openMethodStore = new Store<{ openMethod: Interaction | null }>({ openMethod: null });
 
     private previous: { query: string; selectedValue: unknown; inputValue: string; items: unknown } | null = null;
 
@@ -264,7 +275,6 @@ export class ComboboxRootMachine extends Connectable {
         this.initialSelectedValue = selectedValue;
 
         const open = options.open ?? options.defaultOpen ?? false;
-        this.transitions = new TransitionStatusController(open);
         this.inputValue = new Store({
             inputValue: options.inputValue !== undefined ? toInputString(options.inputValue) : this.initialDefaultInputValue
         });
@@ -304,9 +314,9 @@ export class ComboboxRootMachine extends Connectable {
             autoHighlight: false,
             submitOnItemClick: false,
             hasInputValue: false,
-            mounted: this.transitions.state.mounted,
+            mounted: open,
             forceMounted: false,
-            transitionStatus: this.transitions.state.transitionStatus,
+            transitionStatus: undefined,
             inline: options.inline ?? false,
             activeIndex: null,
             selectedIndex: null,
@@ -331,6 +341,8 @@ export class ComboboxRootMachine extends Connectable {
             forceMount: this.forceMount,
             requestSubmit: this.requestSubmit
         });
+        // Keeps `mounted` and `transitionStatus` in the root store.
+        this.transitions = new TransitionStatusController(open, {}, this.store);
 
         // An inline combobox composed in a dialog animates with the dialog (`[role="dialog"]`).
         const store = this.store;
@@ -377,30 +389,30 @@ export class ComboboxRootMachine extends Connectable {
         this.connectChild(this.click);
         this.connectChild(this.dismiss);
         this.connectChild(this.listNavigation);
-        this.addCleanup(this.store.subscribe(() => this.sync()));
-        this.addCleanup(this.inputValue.subscribe(() => this.sync()));
-        this.addCleanup(this.internal.subscribe(() => this.sync()));
-        this.addCleanup(
-            this.transitions.store.subscribe(() => {
-                this.store.update({ mounted: this.transitions.state.mounted, transitionStatus: this.transitions.state.transitionStatus });
-            })
-        );
-        this.addCleanup(this.openMethodStore.subscribe(() => this.store.set('openMethod', this.openMethodStore.state.openMethod)));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: ComboboxRootOptions) {
-        this.options = options;
-        if (options.selectedValue !== undefined) {
-            this.store.set('selectedValue', options.selectedValue);
-        }
-        if (options.inputValue !== undefined) {
-            this.inputValue.set('inputValue', toInputString(options.inputValue));
-        }
-        if (options.open !== undefined) {
-            this.store.set('open', options.open);
-        }
-        this.syncOptions();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            if (options.selectedValue !== undefined) {
+                this.store.set('selectedValue', options.selectedValue);
+            }
+            if (options.inputValue !== undefined) {
+                this.inputValue.set('inputValue', toInputString(options.inputValue));
+            }
+            if (options.open !== undefined) {
+                this.store.set('open', options.open);
+            }
+            this.syncOptions();
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.click.setOptions(this.getClickOptions());
         this.dismiss.setOptions(this.getDismissOptions());
         this.sync();
@@ -779,7 +791,7 @@ export class ComboboxRootMachine extends Connectable {
         this.transitions.setMounted(false);
         this.options.onOpenChangeComplete?.(false);
         this.internal.update({ queryChangedAfterOpen: false, closeQuery: null });
-        this.openMethodStore.set('openMethod', null);
+        this.store.set('openMethod', null);
 
         if (this.selectionMode === 'none') {
             this.setIndices({ activeIndex: null, selectedIndex: null });
@@ -947,10 +959,15 @@ export class ComboboxRootMachine extends Connectable {
         }
 
         this.transitions.setOpen(open);
+        const referenceElement = inputInsidePopup ? triggerElement : inputElement;
         this.floatingRoot.update({
             open: inline ? true : open,
-            referenceElement: inputInsidePopup ? triggerElement : inputElement,
-            domReferenceElement: (inputInsidePopup ? triggerElement : inputElement) ?? this.floatingRoot.state.domReferenceElement,
+            referenceElement,
+            // Follows the reference only when it changes: a press on the trigger makes the trigger the DOM reference
+            // (so a second press closes the popup), and opening must not reset it to the input.
+            ...(referenceElement !== this.floatingRoot.state.referenceElement && {
+                domReferenceElement: referenceElement ?? this.floatingRoot.state.domReferenceElement
+            }),
             floatingElement: positionerElement
         });
 
@@ -994,6 +1011,8 @@ export class ComboboxRootMachine extends Connectable {
             open,
             inputElement,
             store.state.listElement,
+            // The reference props carry `aria-activedescendant`.
+            store.state.activeIndex,
             this.disabled,
             this.options.readOnly,
             this.id
@@ -1302,7 +1321,7 @@ export class ComboboxRootMachine extends Connectable {
                 interactionType = this.lastInteractionType;
             }
             if (!this.store.state.open) {
-                this.openMethodStore.set('openMethod', interactionType);
+                this.store.set('openMethod', interactionType);
             }
             this.lastInteractionType = '';
         }

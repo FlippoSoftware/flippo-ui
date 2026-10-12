@@ -1,6 +1,5 @@
+import { Store } from '@flippo-software/store';
 import { describe, expect, it } from 'vitest';
-
-import { Store } from '~@store/Store';
 
 import { selectSelectors as s } from './store/SelectStore';
 

@@ -1,3 +1,5 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
@@ -6,6 +8,7 @@ import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '~@lib/constants';
 import { defaultItemEquality, findItemIndex } from '~@lib/itemEquality';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { stringifyAsValue } from '~@lib/valueLabel';
 import { visuallyHidden, visuallyHiddenInput } from '~@lib/visuallyHidden';
 import { FloatingRootStore } from '~@packages/floating-ui/FloatingRootStore';
@@ -17,7 +20,6 @@ import { TypeaheadInteraction } from '~@packages/floating-ui/interactions/Typeah
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { PopupTriggerMap } from '~@popup/PopupTriggerMap';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { FieldRootMachine } from '~@components/field/root/FieldRootMachine';
 import type { LabelableController } from '~@components/labelable/root/LabelableController';
@@ -140,7 +142,18 @@ export class SelectRootMachine extends Connectable {
 
     readonly actions: { unmount: () => void };
 
-    private options: SelectRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SelectRootOptions>({} as SelectRootOptions);
+
+    private get options(): SelectRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SelectRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: SelectRootSetup;
 
@@ -155,8 +168,6 @@ export class SelectRootMachine extends Connectable {
     private readonly typeahead: TypeaheadInteraction;
 
     private readonly openChangeComplete: OpenChangeComplete;
-
-    private readonly openMethodStore = new Store<{ openMethod: Interaction | null }>({ openMethod: null });
 
     private lastInteractionType: Interaction = '';
 
@@ -192,7 +203,6 @@ export class SelectRootMachine extends Connectable {
         };
         this.previousValue = value;
 
-        this.transitions = new TransitionStatusController(open);
         this.store = new Store<SelectState>({
             id: this.id,
             modal: options.modal ?? true,
@@ -202,8 +212,8 @@ export class SelectRootMachine extends Connectable {
             isItemEqualToValue: options.isItemEqualToValue ?? defaultItemEquality,
             value,
             open,
-            mounted: this.transitions.state.mounted,
-            transitionStatus: this.transitions.state.transitionStatus,
+            mounted: open,
+            transitionStatus: undefined,
             items: options.items,
             forceMount: false,
             openMethod: null,
@@ -218,6 +228,8 @@ export class SelectRootMachine extends Connectable {
             scrollDownArrowVisible: false,
             hasScrollArrows: false
         });
+        // Keeps `mounted` and `transitionStatus` in the root store.
+        this.transitions = new TransitionStatusController(open, {}, this.store);
 
         this.floatingRoot = new FloatingRootStore<SelectChangeEventReason>({
             open,
@@ -253,37 +265,37 @@ export class SelectRootMachine extends Connectable {
         this.connectChild(this.listNavigation);
         this.connectChild(this.typeahead);
         this.addCleanup(this.store.subscribe(() => this.sync()));
-        this.addCleanup(
-            this.transitions.store.subscribe(() => {
-                this.store.update({
-                    mounted: this.transitions.state.mounted,
-                    transitionStatus: this.transitions.state.transitionStatus
-                });
-            })
-        );
-        this.addCleanup(this.openMethodStore.subscribe(() => this.store.set('openMethod', this.openMethodStore.state.openMethod)));
         this.sync();
     }
 
     setOptions(options: SelectRootOptions) {
-        this.options = options;
-        const { store } = this;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            const { store } = this;
 
-        if (options.value !== undefined) {
-            store.set('value', options.value);
-        }
-        if (options.open !== undefined) {
-            store.set('open', options.open);
-        }
-        store.update({
-            id: this.id,
-            modal: options.modal ?? true,
-            multiple: options.multiple ?? false,
-            items: options.items,
-            itemToStringLabel: options.itemToStringLabel,
-            itemToStringValue: options.itemToStringValue,
-            isItemEqualToValue: options.isItemEqualToValue ?? defaultItemEquality
+            if (options.value !== undefined) {
+                store.set('value', options.value);
+            }
+            if (options.open !== undefined) {
+                store.set('open', options.open);
+            }
+            store.update({
+                id: this.id,
+                modal: options.modal ?? true,
+                multiple: options.multiple ?? false,
+                items: options.items,
+                itemToStringLabel: options.itemToStringLabel,
+                itemToStringValue: options.itemToStringValue,
+                isItemEqualToValue: options.isItemEqualToValue ?? defaultItemEquality
+            });
         });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.click.setOptions(this.getClickOptions());
         this.sync();
     }
@@ -508,7 +520,7 @@ export class SelectRootMachine extends Connectable {
     private readonly handleUnmount = () => {
         this.transitions.setMounted(false);
         this.store.set('activeIndex', null);
-        this.openMethodStore.set('openMethod', null);
+        this.store.set('openMethod', null);
         this.options.onOpenChangeComplete?.(false);
     };
 
@@ -584,7 +596,7 @@ export class SelectRootMachine extends Connectable {
                 interactionType = this.lastInteractionType;
             }
             if (!this.store.state.open) {
-                this.openMethodStore.set('openMethod', interactionType);
+                this.store.set('openMethod', interactionType);
             }
             this.lastInteractionType = '';
         }

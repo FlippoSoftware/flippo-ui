@@ -1,3 +1,5 @@
+import { untracked } from '@flippo-software/store';
+
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { COMPOSITE_KEYS } from '~@components/composite/utils/compositeKeys';
@@ -6,6 +8,7 @@ import { PopupAutoResize } from '~@dom/PopupAutoResize';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { EMPTY_OBJECT } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { FocusManager } from '~@packages/floating-ui/FocusManager';
 import { HoverFloatingInteraction } from '~@packages/floating-ui/interactions/hover/HoverFloatingInteraction';
 import { mergeProps } from '~@props/mergeProps';
@@ -63,7 +66,18 @@ export type PopoverPopupSetup = {
 export class PopoverPopupMachine<Payload = unknown> extends Connectable {
     readonly store: PopoverStore<Payload>;
 
-    private options: PopoverPopupOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<PopoverPopupOptions>({} as PopoverPopupOptions);
+
+    private get options(): PopoverPopupOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: PopoverPopupOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: PopoverPopupSetup;
 
@@ -97,7 +111,16 @@ export class PopoverPopupMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: PopoverPopupOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Passes the options to the focus manager and interactions after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -157,8 +180,14 @@ export class PopoverPopupMachine<Payload = unknown> extends Connectable {
 
     /**
      * Ensures popup size transitions correctly when anchored to `bottom` (side=top) or `right` (side=left).
+     * Only while the popup auto-resizes (several triggers): the auto-resize gives the positioner the size of the
+     * popup (`--positioner-width`/`--positioner-height`). Otherwise an absolute popup leaves the positioner without a
+     * size, and it is placed and flipped as an empty box.
      */
     private getAnchoringStyles(): Style {
+        if (this.store.context.triggerElements.size <= 1) {
+            return EMPTY_OBJECT as Style;
+        }
         const side = this.setup.positioner?.getState().side ?? 'bottom';
         const isRtl = this.setup.direction === 'rtl';
         const isInlineSide = side === (isRtl ? 'inline-end' : 'inline-start');

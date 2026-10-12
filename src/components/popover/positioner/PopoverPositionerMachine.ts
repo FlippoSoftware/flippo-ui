@@ -1,3 +1,5 @@
+import { untracked } from '@flippo-software/store';
+
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
@@ -52,7 +54,17 @@ export class PopoverPositionerMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: PopoverPositionerOptions) {
-        this.controller.setOptions(options);
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.controller.setOptions(options);
+        });
+    }
+
+    /**
+     * Updates the anchor positioning after a commit.
+     */
+    afterCommit() {
+        this.controller.afterCommit();
     }
 
     setElement = (element: HTMLElement | null) => {

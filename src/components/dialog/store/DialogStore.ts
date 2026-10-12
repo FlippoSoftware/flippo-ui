@@ -1,8 +1,8 @@
+import { ComponentStore, createSelector } from '@flippo-software/store';
+
 import { createRef } from '~@lib/ref';
 import { PopupTriggerMap } from '~@popup/PopupTriggerMap';
 import { createInitialPopupStoreState, popupStoreSelectors } from '~@popup/popupStoreState';
-import { ComponentStore } from '~@store/ComponentStore';
-import { createSelector } from '~@store/createSelector';
 
 import type { FloatingOpenChangeDetails, PopupChangeEventDetails } from '~@events/changeEventDetails';
 import type { REASONS } from '~@events/reasons';

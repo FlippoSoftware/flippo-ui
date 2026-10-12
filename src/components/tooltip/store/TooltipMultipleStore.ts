@@ -1,7 +1,7 @@
+import { ComponentStore, createSelector } from '@flippo-software/store';
+
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
-import { ComponentStore } from '~@store/ComponentStore';
-import { createSelector } from '~@store/createSelector';
 
 import type { TooltipChangeEventDetails, TooltipChangeEventReason, TooltipStore } from './TooltipStore';
 

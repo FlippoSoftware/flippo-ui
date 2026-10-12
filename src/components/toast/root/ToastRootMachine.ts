@@ -1,11 +1,13 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { activeElement, contains, getTarget } from '~@packages/floating-ui/utils/element';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { MutableRef, Style, TransitionStatus } from '~@lib/types';
 import type { Props } from '~@props/mergeProps';
@@ -114,7 +116,18 @@ export class ToastRootMachine extends Connectable {
 
     readonly rootRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: ToastRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ToastRootOptions>({} as ToastRootOptions);
+
+    private get options(): ToastRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ToastRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly provider: ToastProviderMachine;
 
@@ -166,7 +179,16 @@ export class ToastRootMachine extends Connectable {
     }
 
     setOptions(options: ToastRootOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 

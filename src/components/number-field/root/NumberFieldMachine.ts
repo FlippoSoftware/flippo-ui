@@ -1,3 +1,5 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { createChangeEventDetails, createGenericEventDetails } from '~@events/changeEventDetails';
@@ -5,6 +7,7 @@ import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { isIOS } from '~@lib/detectBrowser';
 import { formatNumber, formatNumberMaxPrecision } from '~@lib/formatNumber';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
 import {
     ANY_MINUS_DETECT_RE,
@@ -27,7 +30,6 @@ import {
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { getNativeEvent, stopEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
 import type { FieldRootMachine, FieldRootState } from '~@components/field/root/FieldRootMachine';
@@ -158,7 +160,18 @@ export class NumberFieldMachine extends Connectable {
 
     readonly intentionalTouchCheckTimeout = new Timeout();
 
-    private options: NumberFieldOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<NumberFieldOptions>({} as NumberFieldOptions);
+
+    private get options(): NumberFieldOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: NumberFieldOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly detachedField = createDetachedField();
 
@@ -168,7 +181,11 @@ export class NumberFieldMachine extends Connectable {
 
     private unsubscribeFromGlobalContextMenu: () => void = () => {};
 
-    private valueOverride: number | null | undefined;
+    /**
+     * A value used by stepping until the next microtask (see {@link setPendingValue}). In a store, so that what is
+     * derived from `value` (e.g. a button at the limit) follows it.
+     */
+    private readonly pending = new Store<{ value: number | null | undefined }>({ value: undefined });
 
     private hasTouchedInput = false;
 
@@ -201,7 +218,17 @@ export class NumberFieldMachine extends Connectable {
     }
 
     setOptions(options: NumberFieldOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies option changes (input text, wheel scrubbing, validation of a controlled value). Adapters call it
+     * after committing a render: it attaches listeners and may run the field's `validate` callback.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -217,8 +244,9 @@ export class NumberFieldMachine extends Connectable {
     }
 
     get value(): number | null {
-        if (this.valueOverride !== undefined) {
-            return this.valueOverride;
+        const { value } = this.pending.state;
+        if (value !== undefined) {
+            return value;
         }
         return this.options.value !== undefined ? (this.options.value ?? null) : this.store.state.value;
     }
@@ -317,7 +345,8 @@ export class NumberFieldMachine extends Connectable {
         if (!this.connected) {
             return;
         }
-        const value = this.value;
+        // The stored value, not a pending override: the override only feeds the next increment.
+        const value = this.options.value !== undefined ? (this.options.value ?? null) : this.store.state.value;
         this.field.setFilled(value !== null);
 
         // Keep the input text in sync with the value unless the user is typing.
@@ -521,10 +550,8 @@ export class NumberFieldMachine extends Connectable {
      * Sets the value used by stepping before the next state update (e.g. after parsing the input text).
      */
     setPendingValue(value: number | null) {
-        this.valueOverride = value;
-        queueMicrotask(() => {
-            this.valueOverride = undefined;
-        });
+        this.pending.set('value', value);
+        queueMicrotask(() => this.pending.set('value', undefined));
     }
 
     stopAutoChange = () => {

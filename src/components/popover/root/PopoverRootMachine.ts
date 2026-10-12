@@ -1,7 +1,10 @@
+import { effect, Store, untracked } from '@flippo-software/store';
+
 import { acquireScrollLock } from '~@dom/scrollLock';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { FloatingTreeStore } from '~@packages/floating-ui/FloatingTreeStore';
 import { DismissInteraction } from '~@packages/floating-ui/interactions/DismissInteraction';
 import { mergeInteractionProps } from '~@packages/floating-ui/interactions/mergeInteractionProps';
@@ -83,7 +86,18 @@ export class PopoverRootMachine<Payload = unknown> extends Connectable {
 
     readonly actions: PopoverRootActions;
 
-    private options: PopoverRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<PopoverRootOptions>({} as PopoverRootOptions);
+
+    private get options(): PopoverRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: PopoverRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: PopoverRootSetup<Payload>;
 
@@ -131,8 +145,7 @@ export class PopoverRootMachine<Payload = unknown> extends Connectable {
                 onUnmount: () => {
                     this.store.update({ stickIfOpen: true, openChangeReason: null });
                     this.interactionType.reset();
-                },
-                onChange: () => this.sync()
+                }
             },
             this.getControllerOptions()
         );
@@ -153,16 +166,24 @@ export class PopoverRootMachine<Payload = unknown> extends Connectable {
     protected override onConnect() {
         this.connectChild(this.controller);
         this.connectChild(this.dismiss);
-        this.addCleanup(this.interactionType.store.subscribe(() => this.sync()));
-        this.addCleanup(this.floatingRoot.subscribe(() => this.sync()));
-        this.sync();
+        // Re-runs when a store it reads changes: the own store, the floating root, the interaction type…
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: PopoverRootOptions) {
-        this.options = options;
-        this.controller.setOptions(this.getControllerOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.controller.setOptions(this.getControllerOptions());
+            this.store.syncValue('modal', options.modal ?? false);
+        });
+    }
+
+    /**
+     * Applies the options to the interactions and effects after a commit.
+     */
+    afterCommit() {
         this.dismiss.setOptions(this.getDismissOptions());
-        this.store.syncValue('modal', options.modal ?? false);
         this.sync();
     }
 

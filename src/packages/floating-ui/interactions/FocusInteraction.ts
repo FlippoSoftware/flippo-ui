@@ -1,9 +1,11 @@
+import { untracked } from '@flippo-software/store';
 import { getWindow, isElement, isHTMLElement } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { isMac, isSafari } from '~@lib/detectBrowser';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Timeout } from '~@timers/Timeout';
 
 import type { FloatingOpenChangeDetails } from '~@events/changeEventDetails';
@@ -41,7 +43,18 @@ export type FocusInteractionOptions = {
  * Replacement for `useFocus`.
  */
 export class FocusInteraction extends Connectable {
-    private options: FocusInteractionOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<FocusInteractionOptions>({} as FocusInteractionOptions);
+
+    private get options(): FocusInteractionOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: FocusInteractionOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -76,8 +89,11 @@ export class FocusInteraction extends Connectable {
     }
 
     setOptions(options: FocusInteractionOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     getProps(): InteractionProps {

@@ -1,3 +1,4 @@
+import { Store, untracked } from '@flippo-software/store';
 import { isElement } from '@floating-ui/utils/dom';
 
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
@@ -9,13 +10,13 @@ import { areArraysEqual } from '~@lib/areArraysEqual';
 import { Connectable } from '~@lib/Connectable';
 import { clamp } from '~@lib/clamp';
 import { formatNumber } from '~@lib/formatNumber';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 import { valueToPercent } from '~@lib/valueToPercent';
 import { warn } from '~@lib/warn';
 import { activeElement, contains } from '~@packages/floating-ui/utils/element';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
 import type { FieldRootMachine, FieldRootState } from '~@components/field/root/FieldRootMachine';
@@ -184,7 +185,18 @@ export class SliderMachine extends Connectable {
 
     readonly lastChangeReasonRef: MutableRef<SliderChangeEventReason> = { current: 'none' };
 
-    private options: SliderOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SliderOptions>({} as SliderOptions);
+
+    private get options(): SliderOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SliderOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly detachedField = createDetachedField();
 
@@ -233,8 +245,18 @@ export class SliderMachine extends Connectable {
     }
 
     setOptions(options: SliderOptions) {
-        this.options = options;
-        this.warn();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.warn();
+        });
+    }
+
+    /**
+     * Applies option changes (validation of a controlled value, leaving the disabled state). Adapters call it
+     * after committing a render: it may run the field's `validate` callback and move focus.
+     */
+    afterCommit() {
         this.sync();
     }
 

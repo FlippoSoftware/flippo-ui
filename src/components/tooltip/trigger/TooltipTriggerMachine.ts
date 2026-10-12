@@ -1,7 +1,10 @@
+import { untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { triggerOpenStateMapping } from '~@attributes/popupStateMapping';
 import { Connectable } from '~@lib/Connectable';
 import { OPEN_DELAY } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { warn } from '~@lib/warn';
 import { createDefaultDelayGroup, DelayGroupMember } from '~@packages/floating-ui/FloatingDelayGroup';
 import { FocusInteraction } from '~@packages/floating-ui/interactions/FocusInteraction';
@@ -68,7 +71,18 @@ export type TooltipTriggerSetup = {
 export class TooltipTriggerMachine<Payload = unknown> extends Connectable {
     readonly store: TooltipStore<Payload>;
 
-    private options: TooltipTriggerOptions<Payload>;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TooltipTriggerOptions<Payload>>({} as TooltipTriggerOptions<Payload>);
+
+    private get options(): TooltipTriggerOptions<Payload> {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TooltipTriggerOptions<Payload>) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: TooltipTriggerSetup;
 
@@ -89,6 +103,8 @@ export class TooltipTriggerMachine<Payload = unknown> extends Connectable {
     private delayMemberUnsubscribe: (() => void) | null = null;
 
     private mountedByThisTrigger = false;
+
+    private forwardedChanged = false;
 
     private readonly handleClose: ReturnType<typeof safePolygon>;
 
@@ -114,10 +130,20 @@ export class TooltipTriggerMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: TooltipTriggerOptions<Payload>) {
-        const forwardedChanged = options.payload !== this.options.payload || options.closeDelay !== this.options.closeDelay;
-        this.options = options;
-        this.registration.setOptions(options.id, this.getForwardedState());
-        if (forwardedChanged) {
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.forwardedChanged ||= options.payload !== this.options.payload || options.closeDelay !== this.options.closeDelay;
+            this.options = options;
+        });
+    }
+
+    /**
+     * Registers the trigger under its ID, forwards its state and updates the interactions after a commit.
+     */
+    afterCommit() {
+        this.registration.setOptions(this.options.id, this.getForwardedState());
+        if (this.forwardedChanged && this.connected) {
+            this.forwardedChanged = false;
             this.registration.sync();
         }
         this.sync();

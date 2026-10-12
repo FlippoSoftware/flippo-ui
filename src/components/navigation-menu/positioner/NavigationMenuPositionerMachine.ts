@@ -1,15 +1,17 @@
+import { effect, Store, untracked } from '@flippo-software/store';
+
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
 import { Connectable } from '~@lib/Connectable';
 import { DROPDOWN_COLLISION_AVOIDANCE, POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerWindow } from '~@lib/owner';
 import { adaptiveOrigin } from '~@packages/floating-ui/middleware/adaptiveOriginMiddleware';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { disableFocusInside, enableFocusInside, isOutsideEvent } from '~@packages/floating-ui/utils/tabbable';
 import { AnchorPositioner } from '~@positioning/AnchorPositioner';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
 import type { Align, Side, Style } from '~@lib/types';
@@ -40,7 +42,20 @@ export class NavigationMenuPositionerMachine extends Connectable {
 
     private positionerRoot: FloatingRootStore | undefined | null;
 
-    private options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined };
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined }>(
+        {} as AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined }
+    );
+
+    private get options(): AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined } {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined }) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: NavigationMenuRootMachine;
 
@@ -64,13 +79,20 @@ export class NavigationMenuPositionerMachine extends Connectable {
 
     protected override onConnect() {
         this.connectPositioner();
-        this.addCleanup(this.root.store.subscribe(() => this.sync()));
-        this.addCleanup(this.root.transitions.store.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: AnchorPositioningSharedOptions & { keepMounted?: boolean | undefined }) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 

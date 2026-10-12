@@ -1,13 +1,15 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { FieldRootMachine, FieldRootState } from '~@components/field/root/FieldRootMachine';
 import type { LabelableController } from '~@components/labelable/root/LabelableController';
@@ -76,7 +78,18 @@ export class SwitchMachine extends Connectable {
 
     readonly switchRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: SwitchOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SwitchOptions>({} as SwitchOptions);
+
+    private get options(): SwitchOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SwitchOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly detachedField = createDetachedField();
 
@@ -92,8 +105,18 @@ export class SwitchMachine extends Connectable {
     }
 
     setOptions(options: SwitchOptions) {
-        this.options = options;
-        this.button.setOptions({ disabled: this.disabled, native: options.nativeButton ?? false });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.button.setOptions({ disabled: this.disabled, native: options.nativeButton ?? false });
+        });
+    }
+
+    /**
+     * Reacts to a controlled `checked` change (validation, dirty/filled state). Adapters call it after
+     * committing a render: it may run the field's `validate` callback.
+     */
+    afterCommit() {
         this.onCheckedValueChange();
     }
 

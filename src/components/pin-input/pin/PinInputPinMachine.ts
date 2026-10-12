@@ -1,11 +1,13 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { isModifierKeySet } from '~@components/composite/utils/compositeKeys';
 import { Connectable } from '~@lib/Connectable';
 import { isComposingEvent } from '~@lib/eventKey';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ARABIC_RE, HAN_RE } from '~@lib/parseNumeric';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { Props } from '~@props/mergeProps';
 
@@ -40,7 +42,18 @@ export class PinInputPinMachine extends Connectable {
 
     readonly store = new Store({ index: -1 });
 
-    private options: PinInputPinOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<PinInputPinOptions>({} as PinInputPinOptions);
+
+    private get options(): PinInputPinOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: PinInputPinOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly pinInput: PinInputMachine;
 
@@ -56,7 +69,10 @@ export class PinInputPinMachine extends Connectable {
     }
 
     setOptions(options: PinInputPinOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get index() {
@@ -97,11 +113,12 @@ export class PinInputPinMachine extends Connectable {
                 value: root.values[index] ?? '',
                 dir: direction,
                 inputMode: otp ? 'numeric' : 'text',
-                'aria-invalid': !valid,
+                'aria-invalid': valid === false,
                 'aria-label': `PIN digit ${index + 1}`,
                 'aria-describedby': valid === false ? `${id}-error` : undefined,
                 type: mask ? 'password' : otp ? 'tel' : 'text',
                 readOnly,
+                disabled: root.disabled,
                 autoCapitalize: 'none',
                 autoComplete: otp ? 'one-time-code' : 'off',
                 placeholder: focusedInputIndex === index ? '' : placeholder,
@@ -137,6 +154,8 @@ export class PinInputPinMachine extends Connectable {
                     }
                 },
                 onPaste: (event: ClipboardEvent) => {
+                    // The pasted characters are distributed over the pins instead of inserted into this one.
+                    event.preventDefault();
                     root.handlePasteValue(event.clipboardData?.getData('text') ?? '', index);
                 },
                 onKeyDown: (event: KeyboardEvent) => {

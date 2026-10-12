@@ -1,4 +1,7 @@
+import { untracked } from '@flippo-software/store';
+
 import { error } from '~@lib/error';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { makeEventPreventable, mergeProps } from '~@props/mergeProps';
 
 import type { PreventableEvent, Props } from '~@props/mergeProps';
@@ -93,7 +96,18 @@ type Handler = (event: ButtonEvent) => void;
  * Replacement for `useButton`.
  */
 export class ButtonMachine {
-    private options: ButtonOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ButtonOptions>({} as ButtonOptions);
+
+    private get options(): ButtonOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ButtonOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private element: HTMLElement | null = null;
 
@@ -102,8 +116,11 @@ export class ButtonMachine {
     }
 
     setOptions(options: ButtonOptions) {
-        this.options = options;
-        this.syncCompositeDisabled();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.syncCompositeDisabled();
+        });
     }
 
     /**

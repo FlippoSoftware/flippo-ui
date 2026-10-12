@@ -1,6 +1,7 @@
+import { createSelector } from '@flippo-software/store';
+
 import { EMPTY_OBJECT } from '~@lib/constants';
 import { getEmptyRootContext } from '~@packages/floating-ui/getEmptyRootContext';
-import { createSelector } from '~@store/createSelector';
 
 import type { ElementProps, MutableRef, TransitionStatus } from '~@lib/types';
 import type { FloatingRootStore } from '~@packages/floating-ui/FloatingRootStore';

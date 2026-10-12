@@ -1,7 +1,9 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
 import type { REASONS } from '~@events/reasons';
@@ -64,7 +66,18 @@ export class ToggleGroupMachine extends Connectable {
      */
     readonly composite: CompositeRootMachine;
 
-    private options: ToggleGroupOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ToggleGroupOptions>({} as ToggleGroupOptions);
+
+    private get options(): ToggleGroupOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ToggleGroupOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: ToggleGroupOptions = {}) {
         super();
@@ -78,8 +91,11 @@ export class ToggleGroupMachine extends Connectable {
     }
 
     setOptions(options: ToggleGroupOptions) {
-        this.options = options;
-        this.composite.setOptions(this.getCompositeOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.composite.setOptions(this.getCompositeOptions());
+        });
     }
 
     private getCompositeOptions() {

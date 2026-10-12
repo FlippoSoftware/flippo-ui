@@ -1,3 +1,5 @@
+import { untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { pressableTriggerOpenStateMapping } from '~@attributes/popupStateMapping';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
@@ -6,6 +8,7 @@ import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 import { ClickInteraction } from '~@packages/floating-ui/interactions/ClickInteraction';
 import { mergeInteractionProps } from '~@packages/floating-ui/interactions/mergeInteractionProps';
@@ -45,7 +48,18 @@ export type ComboboxTriggerOptions = {
 export class ComboboxTriggerMachine extends Connectable {
     readonly button: ButtonMachine;
 
-    private options: ComboboxTriggerOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ComboboxTriggerOptions>({} as ComboboxTriggerOptions);
+
+    private get options(): ComboboxTriggerOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ComboboxTriggerOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: ComboboxRootMachine;
 
@@ -74,7 +88,16 @@ export class ComboboxTriggerMachine extends Connectable {
     }
 
     setOptions(options: ComboboxTriggerOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 

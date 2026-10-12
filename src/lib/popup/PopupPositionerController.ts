@@ -1,8 +1,11 @@
+import { untracked } from '@flippo-software/store';
+
 import type { Middleware } from '@floating-ui/dom';
 
 import { runOnceAnimationsFinish } from '~@dom/animations';
 import { Connectable } from '~@lib/Connectable';
 import { POPUP_COLLISION_AVOIDANCE } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { AnchorPositioner } from '~@positioning/AnchorPositioner';
@@ -77,7 +80,18 @@ export class PopupPositionerController<State extends PopupStoreState<unknown>> e
 
     private floatingRoot: FloatingRootStore;
 
-    private options: PopupPositionerOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<PopupPositionerOptions>({} as PopupPositionerOptions);
+
+    private get options(): PopupPositionerOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: PopupPositionerOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: AnyPopupStore<State>;
 
@@ -116,7 +130,16 @@ export class PopupPositionerController<State extends PopupStoreState<unknown>> e
     }
 
     setOptions(options: PopupPositionerOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options to the anchor positioner after a commit.
+     */
+    afterCommit() {
         if (this.connected) {
             this.sync();
         } else {

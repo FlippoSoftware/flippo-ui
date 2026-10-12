@@ -1,5 +1,4 @@
-import { ComponentStore } from '~@store/ComponentStore';
-import { createSelector } from '~@store/createSelector';
+import { ComponentStore, createSelector } from '@flippo-software/store';
 
 import type { MutableRef, Orientation } from '~@lib/types';
 

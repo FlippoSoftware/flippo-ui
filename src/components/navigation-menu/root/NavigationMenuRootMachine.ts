@@ -1,13 +1,15 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
 import { FloatingTreeStore } from '~@packages/floating-ui/FloatingTreeStore';
 import { activeElement, contains } from '~@packages/floating-ui/utils/element';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
 import type { MutableRef } from '~@lib/types';
@@ -46,6 +48,11 @@ type NavigationMenuInternalState = {
      */
     floatingRootContext: FloatingRootStore | undefined;
     viewportInert: boolean;
+    /**
+     * The hover delays of the triggers (from the options), in the store so that the triggers follow them.
+     */
+    delay: number;
+    closeDelay: number;
 };
 
 export type NavigationMenuRootOptions = {
@@ -115,7 +122,18 @@ export class NavigationMenuRootMachine extends Connectable {
 
     readonly currentContentRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: NavigationMenuRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<NavigationMenuRootOptions>({} as NavigationMenuRootOptions);
+
+    private get options(): NavigationMenuRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: NavigationMenuRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: NavigationMenuRootSetup;
 
@@ -146,7 +164,9 @@ export class NavigationMenuRootMachine extends Connectable {
             viewportTargetElement: null,
             activationDirection: null,
             floatingRootContext: undefined,
-            viewportInert: false
+            viewportInert: false,
+            delay: options.delay ?? NAVIGATION_MENU_OPEN_DELAY,
+            closeDelay: options.closeDelay ?? NAVIGATION_MENU_CLOSE_DELAY
         });
 
         const store = this.store;
@@ -179,10 +199,23 @@ export class NavigationMenuRootMachine extends Connectable {
     }
 
     setOptions(options: NavigationMenuRootOptions) {
-        this.options = options;
-        if (options.value !== undefined) {
-            this.store.set('value', options.value);
-        }
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            if (options.value !== undefined) {
+                this.store.set('value', options.value);
+            }
+            this.store.update({
+                delay: options.delay ?? NAVIGATION_MENU_OPEN_DELAY,
+                closeDelay: options.closeDelay ?? NAVIGATION_MENU_CLOSE_DELAY
+            });
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -199,11 +232,11 @@ export class NavigationMenuRootMachine extends Connectable {
     }
 
     get delay(): number {
-        return this.options.delay ?? NAVIGATION_MENU_OPEN_DELAY;
+        return this.store.state.delay;
     }
 
     get closeDelay(): number {
-        return this.options.closeDelay ?? NAVIGATION_MENU_CLOSE_DELAY;
+        return this.store.state.closeDelay;
     }
 
     get orientation(): NavigationMenuOrientation {

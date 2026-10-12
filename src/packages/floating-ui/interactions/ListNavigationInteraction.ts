@@ -1,3 +1,4 @@
+import { untracked } from '@flippo-software/store';
 import { isHTMLElement } from '@floating-ui/utils/dom';
 
 import type { Dimensions } from '@floating-ui/utils';
@@ -5,6 +6,7 @@ import type { Dimensions } from '@floating-ui/utils';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { MutableRef } from '~@lib/types';
 
@@ -194,7 +196,18 @@ type ItemEvent = { currentTarget: EventTarget | null };
  * Replacement for `useListNavigation`.
  */
 export class ListNavigationInteraction extends Connectable {
-    private options: ListNavigationInteractionOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ListNavigationInteractionOptions>({} as ListNavigationInteractionOptions);
+
+    private get options(): ListNavigationInteractionOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ListNavigationInteractionOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -261,8 +274,11 @@ export class ListNavigationInteraction extends Connectable {
     }
 
     setOptions(options: ListNavigationInteractionOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     getProps(): InteractionProps {

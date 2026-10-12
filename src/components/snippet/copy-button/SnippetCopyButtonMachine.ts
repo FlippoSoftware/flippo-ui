@@ -1,5 +1,8 @@
+import { untracked } from '@flippo-software/store';
+
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Clipboard } from '~@patterns/Clipboard';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -31,7 +34,18 @@ export class SnippetCopyButtonMachine extends Connectable {
 
     readonly button: ButtonMachine;
 
-    private options: SnippetCopyButtonOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SnippetCopyButtonOptions>({} as SnippetCopyButtonOptions);
+
+    private get options(): SnippetCopyButtonOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SnippetCopyButtonOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly snippet: SnippetMachine;
 
@@ -45,9 +59,12 @@ export class SnippetCopyButtonMachine extends Connectable {
     }
 
     setOptions(options: SnippetCopyButtonOptions) {
-        this.options = options;
-        this.clipboard.setResetDelay(options.resetDelay ?? 2000);
-        this.button.setOptions({ disabled: this.disabled, native: options.nativeButton });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.clipboard.setResetDelay(options.resetDelay ?? 2000);
+            this.button.setOptions({ disabled: this.disabled, native: options.nativeButton });
+        });
     }
 
     get disabled() {

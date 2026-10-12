@@ -196,6 +196,21 @@ describe('Menu machines', () => {
         contextMenu.destroy();
     });
 
+    it('re-positions a context menu when its anchor moves', () => {
+        const contextMenu = connected(new ContextMenuRootMachine({}, { rootId: 'ctx', fallbackReferenceId: 'ref', nodeId: 'ctx-node' }));
+        const positioner = connected(new MenuPositionerMachine(contextMenu.menu));
+        mount(positioner);
+        const getOptions = vi.spyOn(positioner as never as { getPositionerOptions(): { anchor: unknown } }, 'getPositionerOptions');
+
+        const anchor = { getBoundingClientRect: () => DOMRect.fromRect({ x: 10, y: 20, width: 0, height: 0 }) };
+        contextMenu.setAnchor(anchor as never);
+        expect(getOptions).toHaveBeenCalledTimes(1);
+        expect(getOptions.mock.results[0]?.value.anchor).toBe(anchor);
+
+        positioner.destroy();
+        contextMenu.destroy();
+    });
+
     it('tracks open submenus in a menubar', () => {
         const menubar = connected(new MenubarMachine({}, { id: 'menubar', nodeId: 'menubar-node' }));
         mount(menubar);

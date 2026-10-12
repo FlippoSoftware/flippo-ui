@@ -1,14 +1,18 @@
+import { untracked } from '@flippo-software/store';
+
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
 import { transitionStatusMapping } from '~@attributes/styleHookMapping';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { FocusManager } from '~@packages/floating-ui/FocusManager';
 import { contains, getTarget } from '~@packages/floating-ui/utils/element';
 import { mergeProps } from '~@props/mergeProps';
 
 import type { Align, Interaction, Side, TransitionStatus } from '~@lib/types';
+import type { FloatingPortalController } from '~@packages/floating-ui/FloatingPortalController';
 import type { FocusTarget } from '~@packages/floating-ui/FocusManager';
 import type { Props } from '~@props/mergeProps';
 
@@ -35,18 +39,40 @@ export type ComboboxPopupOptions = {
 export class ComboboxPopupMachine extends Connectable {
     readonly focusManager: FocusManager;
 
-    private options: ComboboxPopupOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ComboboxPopupOptions>({} as ComboboxPopupOptions);
+
+    private get options(): ComboboxPopupOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ComboboxPopupOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: ComboboxRootMachine;
 
     private readonly positioner: ComboboxPositionerMachine | null;
 
+    private readonly portal: FloatingPortalController | null;
+
     private readonly openChangeComplete: OpenChangeComplete;
 
-    constructor(root: ComboboxRootMachine, positioner: ComboboxPositionerMachine | null, options: ComboboxPopupOptions = {}) {
+    /**
+     * @param portal The portal the popup is rendered into (keeps it in the tab order).
+     */
+    constructor(
+        root: ComboboxRootMachine,
+        positioner: ComboboxPositionerMachine | null,
+        options: ComboboxPopupOptions = {},
+        portal: FloatingPortalController | null = null
+    ) {
         super();
         this.root = root;
         this.positioner = positioner;
+        this.portal = portal;
         this.options = options;
         this.focusManager = new FocusManager(root.floatingRoot, this.getFocusManagerOptions());
         this.openChangeComplete = new OpenChangeComplete(root.store.state.popupRef, () => {
@@ -63,7 +89,16 @@ export class ComboboxPopupMachine extends Connectable {
     }
 
     setOptions(options: ComboboxPopupOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -126,7 +161,8 @@ export class ComboboxPopupMachine extends Connectable {
             modal: !inputInsidePopup,
             openInteractionType: openMethod,
             initialFocus: initialFocus === undefined ? defaultInitialFocus : initialFocus,
-            returnFocus: finalFocus ?? (inputInsidePopup ? undefined : false)
+            returnFocus: finalFocus ?? (inputInsidePopup ? undefined : false),
+            portal: this.portal
         };
     }
 

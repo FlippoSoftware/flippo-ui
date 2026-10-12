@@ -1,8 +1,10 @@
+import { untracked } from '@flippo-software/store';
 import { isElement } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 
 import type { FloatingOpenChangeDetails } from '~@events/changeEventDetails';
@@ -63,7 +65,18 @@ export type HoverInteractionOptions = {
  * Replacement for `useHover` (reference and floating listeners in one object).
  */
 export class HoverInteraction extends Connectable {
-    private options: HoverInteractionOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<HoverInteractionOptions>({} as HoverInteractionOptions);
+
+    private get options(): HoverInteractionOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: HoverInteractionOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -106,8 +119,11 @@ export class HoverInteraction extends Connectable {
     }
 
     setOptions(options: HoverInteractionOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     getProps(): InteractionProps {
@@ -275,6 +291,11 @@ export class HoverInteraction extends Connectable {
         };
 
         const onReferenceMouseLeave = (event: MouseEvent) => {
+            // A pending "rest" open is obsolete once the pointer left the trigger (e.g. the popup was opened
+            // by a click and closes before the timer fires).
+            instance.restTimeout.clear();
+            instance.restTimeoutPending = false;
+
             const { handleClose } = this.settings;
             if (isClickLikeOpenEvent(store, instance)) {
                 this.clearPointerEvents();
@@ -284,8 +305,6 @@ export class HoverInteraction extends Connectable {
             instance.unbindMouseMove();
 
             const doc = ownerDocument(floatingElement);
-            instance.restTimeout.clear();
-            instance.restTimeoutPending = false;
 
             if (event.relatedTarget && store.context.triggerElements.hasElement(event.relatedTarget as Element)) {
                 // The cursor moves to another trigger: the popup will be moved, not closed.

@@ -1,5 +1,7 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { AvatarMachine, ImageLoadingStatus } from '../root/AvatarMachine';
 
@@ -17,7 +19,18 @@ export type AvatarImageOptions = {
 export class AvatarImageLoader extends Connectable {
     readonly store = new Store<{ status: ImageLoadingStatus }>({ status: 'idle' });
 
-    private options: AvatarImageOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<AvatarImageOptions>({} as AvatarImageOptions);
+
+    private get options(): AvatarImageOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: AvatarImageOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly avatar: AvatarMachine;
 
@@ -39,8 +52,11 @@ export class AvatarImageLoader extends Connectable {
     }
 
     setOptions(options: AvatarImageOptions) {
-        this.options = options;
-        this.load();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.load();
+        });
     }
 
     get status() {

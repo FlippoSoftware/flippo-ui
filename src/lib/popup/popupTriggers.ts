@@ -1,4 +1,6 @@
-import type { ComponentStore } from '~@store/ComponentStore';
+import { untracked } from '@flippo-software/store';
+
+import type { ComponentStore } from '@flippo-software/store';
 
 import { Connectable } from '../Connectable';
 
@@ -58,11 +60,14 @@ export class PopupTriggerRegistration<State extends PopupStoreState<unknown>> ex
      * Updates the trigger ID and the state the trigger forwards when active.
      */
     public setOptions(triggerId: string | undefined, stateUpdates = {} as TriggerStateUpdates<State>) {
-        if (triggerId !== this.triggerId) {
-            this.triggerId = triggerId;
-            this.setElement(this.element);
-        }
-        this.stateUpdates = stateUpdates;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            if (triggerId !== this.triggerId) {
+                this.triggerId = triggerId;
+                this.setElement(this.element);
+            }
+            this.stateUpdates = stateUpdates;
+        });
     }
 
     /**

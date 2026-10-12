@@ -1,3 +1,5 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
@@ -6,10 +8,10 @@ import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { FieldRootMachine, FieldRootState } from '~@components/field/root/FieldRootMachine';
 import type { LabelableController } from '~@components/labelable/root/LabelableController';
@@ -71,7 +73,18 @@ export class RadioMachine extends Connectable {
      */
     readonly listItem: ListRegistryItem | null;
 
-    protected options: RadioOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    protected readonly optionsStore = new OptionsStore<RadioOptions>({} as RadioOptions);
+
+    protected get options(): RadioOptions {
+        return this.optionsStore.state;
+    }
+
+    protected set options(options: RadioOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly detachedField = createDetachedField();
 
@@ -99,8 +112,11 @@ export class RadioMachine extends Connectable {
     }
 
     setOptions(options: RadioOptions) {
-        this.options = options;
-        this.button.setOptions({ disabled: this.disabled, native: options.nativeButton ?? false });
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.button.setOptions({ disabled: this.disabled, native: options.nativeButton ?? false });
+        });
     }
 
     protected get groupMachine() {

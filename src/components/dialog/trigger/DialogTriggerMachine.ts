@@ -1,8 +1,11 @@
+import { untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { triggerOpenStateMapping } from '~@attributes/popupStateMapping';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
 import { Connectable } from '~@lib/Connectable';
 import { CLICK_TRIGGER_IDENTIFIER } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ClickInteraction } from '~@packages/floating-ui/interactions/ClickInteraction';
 import { mergeInteractionProps } from '~@packages/floating-ui/interactions/mergeInteractionProps';
 import { PopupTriggerRegistration } from '~@popup/popupTriggers';
@@ -40,7 +43,18 @@ export type DialogTriggerOptions<Payload> = {
 export class DialogTriggerMachine<Payload = unknown> extends Connectable {
     readonly button: ButtonMachine;
 
-    private options: DialogTriggerOptions<Payload>;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<DialogTriggerOptions<Payload>>({} as DialogTriggerOptions<Payload>);
+
+    private get options(): DialogTriggerOptions<Payload> {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: DialogTriggerOptions<Payload>) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: DialogStore<Payload>;
 
@@ -51,6 +65,8 @@ export class DialogTriggerMachine<Payload = unknown> extends Connectable {
     private click: ClickInteraction | null = null;
 
     private mountedByThisTrigger = false;
+
+    private payloadChanged = false;
 
     constructor(store: DialogStore<Payload>, options: DialogTriggerOptions<Payload>) {
         super();
@@ -67,11 +83,21 @@ export class DialogTriggerMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: DialogTriggerOptions<Payload>) {
-        const payloadChanged = options.payload !== this.options.payload;
-        this.options = options;
-        this.button.setOptions({ disabled: options.disabled, native: options.nativeButton });
-        this.registration.setOptions(options.id, this.getForwardedState());
-        if (payloadChanged) {
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.payloadChanged ||= options.payload !== this.options.payload;
+            this.options = options;
+            this.button.setOptions({ disabled: options.disabled, native: options.nativeButton });
+        });
+    }
+
+    /**
+     * Registers the trigger under its ID and forwards its payload after a commit.
+     */
+    afterCommit() {
+        this.registration.setOptions(this.options.id, this.getForwardedState());
+        if (this.payloadChanged && this.connected) {
+            this.payloadChanged = false;
             this.registration.sync();
         }
         this.sync();

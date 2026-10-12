@@ -1,3 +1,4 @@
+import { Store, untracked } from '@flippo-software/store';
 import { autoUpdate, computePosition, flip, limitShift, offset, shift, size } from '@floating-ui/dom';
 import { getAlignment, getSide, getSideAxis } from '@floating-ui/utils';
 import { isElement } from '@floating-ui/utils/dom';
@@ -17,12 +18,12 @@ import type { Rect } from '@floating-ui/utils';
 
 import { whenConnected } from '~@dom/whenConnected';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
 import { DEFAULT_SIDES } from '~@packages/floating-ui/middleware/adaptiveOriginMiddleware';
 import { arrow } from '~@packages/floating-ui/middleware/arrow';
 import { hide } from '~@packages/floating-ui/middleware/hideMiddleware';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
-import { Store } from '~@store/Store';
 
 import type { Align, MutableRef, Side, Style } from '~@lib/types';
 import type { FloatingRootStore } from '~@packages/floating-ui/FloatingRootStore';
@@ -190,6 +191,15 @@ function isRef(param: Anchor | undefined): param is MutableRef<Element | null> {
 }
 
 /**
+ * The element (or virtual element) an anchor option points to: the anchor itself, the current value of a ref, or
+ * what a function returns.
+ */
+export function resolveAnchor(anchor: Anchor | undefined): Element | VirtualElement | null {
+    const resolved = typeof anchor === 'function' ? anchor() : anchor;
+    return (isRef(resolved) ? resolved.current : resolved) || null;
+}
+
+/**
  * Wraps a DOM element into a virtual element, like `refs.setPositionReference` of `useFloating`.
  */
 function toPositionReference(node: ReferenceType | null): ReferenceType | null {
@@ -211,7 +221,18 @@ function toPositionReference(node: ReferenceType | null): ReferenceType | null {
 export class AnchorPositioner extends Connectable {
     readonly store: Store<AnchorPositionState>;
 
-    private options: AnchorPositionerOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<AnchorPositionerOptions>({} as AnchorPositionerOptions);
+
+    private get options(): AnchorPositionerOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: AnchorPositionerOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: FloatingRootStore;
 
@@ -250,14 +271,17 @@ export class AnchorPositioner extends Connectable {
     }
 
     setOptions(options: AnchorPositionerOptions) {
-        this.options = options;
-        if (!options.mounted && this.store.state.mountSide !== null) {
-            this.store.set('mountSide', null);
-        }
-        if (!this.store.state.isPositioned) {
-            this.store.set('placement', this.getPlacement());
-        }
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            if (!options.mounted && this.store.state.mountSide !== null) {
+                this.store.set('mountSide', null);
+            }
+            if (!this.store.state.isPositioned) {
+                this.store.set('placement', this.getPlacement());
+            }
+            this.sync();
+        });
     }
 
     /**
@@ -429,8 +453,7 @@ export class AnchorPositioner extends Connectable {
             return;
         }
 
-        const resolvedAnchor = typeof anchor === 'function' ? anchor() : anchor;
-        const finalAnchor = (isRef(resolvedAnchor) ? resolvedAnchor.current : resolvedAnchor) || null;
+        const finalAnchor = resolveAnchor(anchor);
 
         if (finalAnchor !== this.registeredPositionReference) {
             this.registeredPositionReference = finalAnchor;

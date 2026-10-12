@@ -1,3 +1,5 @@
+import { effect, Store } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { OpenChangeComplete } from '~@dom/OpenChangeComplete';
@@ -6,7 +8,6 @@ import { Connectable } from '~@lib/Connectable';
 import { FloatingNodeRegistration } from '~@packages/floating-ui/FloatingNodeRegistration';
 import { contains, getTarget } from '~@packages/floating-ui/utils/element';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { TextDirection, TransitionStatus } from '~@lib/types';
 import type { Props } from '~@props/mergeProps';
@@ -68,9 +69,7 @@ export class NavigationMenuContentMachine extends Connectable {
         this.connectChild(this.transitions);
         this.connectChild(this.composite);
         this.connectChild(this.node);
-        this.addCleanup(this.root.store.subscribe(() => this.sync()));
-        this.addCleanup(this.root.transitions.store.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     get open(): boolean {

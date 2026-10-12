@@ -114,4 +114,12 @@ describe('Popover machines', () => {
         expect(root.store.select('titleElementId')).toBeUndefined();
         destroy();
     });
+
+    it('keeps a popup on the top side in the flow of its positioner with a single trigger', () => {
+        const { popup, positioner, destroy } = setup({ defaultOpen: true });
+        vi.spyOn(positioner, 'getState').mockReturnValue({ ...positioner.getState(), side: 'top' });
+
+        expect(popup.getPopupProps().style).not.toHaveProperty('position');
+        destroy();
+    });
 });

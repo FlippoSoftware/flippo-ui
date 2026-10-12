@@ -1,10 +1,12 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { Props } from '~@props/mergeProps';
 
-import type { QrCodeFileExtension, QrCodeMachine } from '../root/QrCodeMachine';
+import type { QrCodeFileExtension, QrCodeMachine, QrCodeRenderer } from '../root/QrCodeMachine';
 import type { TriggerBaseOptions } from '../utils/TriggerBaseOptions';
 
 export type QrCodeDownloadTriggerOptions = TriggerBaseOptions & {
@@ -23,24 +25,38 @@ export type QrCodeDownloadTriggerOptions = TriggerBaseOptions & {
 /**
  * Button that downloads the generated QR code.
  */
-export class QrCodeDownloadTriggerMachine {
+export class QrCodeDownloadTriggerMachine<Renderer extends QrCodeRenderer = QrCodeRenderer> {
     readonly button = new ButtonMachine();
 
     readonly store = new Store({ downloading: false });
 
-    private options: QrCodeDownloadTriggerOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<QrCodeDownloadTriggerOptions>({} as QrCodeDownloadTriggerOptions);
 
-    private readonly qrCode: QrCodeMachine;
+    private get options(): QrCodeDownloadTriggerOptions {
+        return this.optionsStore.state;
+    }
 
-    constructor(qrCode: QrCodeMachine, options: QrCodeDownloadTriggerOptions = {}) {
+    private set options(options: QrCodeDownloadTriggerOptions) {
+        this.optionsStore.setState(options);
+    }
+
+    private readonly qrCode: QrCodeMachine<Renderer>;
+
+    constructor(qrCode: QrCodeMachine<Renderer>, options: QrCodeDownloadTriggerOptions = {}) {
         this.qrCode = qrCode;
         this.options = options;
         this.syncButton();
     }
 
     setOptions(options: QrCodeDownloadTriggerOptions) {
-        this.options = options;
-        this.syncButton();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.syncButton();
+        });
     }
 
     get disabled() {

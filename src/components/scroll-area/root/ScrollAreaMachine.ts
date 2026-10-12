@@ -1,11 +1,13 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { Connectable } from '~@lib/Connectable';
 import { clamp } from '~@lib/clamp';
 import { isWebKit } from '~@lib/detectBrowser';
 import { styleDisableScrollbar } from '~@lib/disableScrollbar';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { contains } from '~@packages/floating-ui/utils/element';
-import { Store } from '~@store/Store';
 import { Timeout } from '~@timers/Timeout';
 
 import type { Style, TextDirection } from '~@lib/types';
@@ -144,7 +146,18 @@ export class ScrollAreaMachine extends Connectable {
         hiddenState: { x: false, y: false, corner: false }
     });
 
-    private options: ScrollAreaOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ScrollAreaOptions>({} as ScrollAreaOptions);
+
+    private get options(): ScrollAreaOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ScrollAreaOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private root: HTMLElement | null = null;
 
@@ -219,8 +232,11 @@ export class ScrollAreaMachine extends Connectable {
     }
 
     setOptions(options: ScrollAreaOptions) {
-        this.options = options;
-        this.scheduleRecompute();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.scheduleRecompute();
+        });
     }
 
     private get direction(): TextDirection {

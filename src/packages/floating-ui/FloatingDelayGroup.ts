@@ -1,7 +1,9 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Timeout } from '~@timers/Timeout';
 
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
@@ -56,7 +58,10 @@ export class FloatingDelayGroup {
     }
 
     setOptions(options: FloatingDelayGroupOptions) {
-        this.timeoutMs = options.timeoutMs ?? 0;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.timeoutMs = options.timeoutMs ?? 0;
+        });
     }
 
     destroy() {
@@ -89,7 +94,18 @@ export type DelayGroupMemberOptions = {
 export class DelayGroupMember extends Connectable {
     readonly state = new Store({ isInstantPhase: false });
 
-    private options: DelayGroupMemberOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<DelayGroupMemberOptions>({} as DelayGroupMemberOptions);
+
+    private get options(): DelayGroupMemberOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: DelayGroupMemberOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -125,8 +141,11 @@ export class DelayGroupMember extends Connectable {
     }
 
     setOptions(options: DelayGroupMemberOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     /**

@@ -1,13 +1,15 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { Connectable } from '~@lib/Connectable';
 import { getEventKey } from '~@lib/eventKey';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { contains } from '~@packages/floating-ui/utils/element';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { FieldRootMachine, FieldRootState } from '~@components/field/root/FieldRootMachine';
 import type { LabelableController } from '~@components/labelable/root/LabelableController';
@@ -110,7 +112,18 @@ export class PinInputMachine extends Connectable {
 
     readonly controlRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: PinInputOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<PinInputOptions>({} as PinInputOptions);
+
+    private get options(): PinInputOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: PinInputOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly detachedField = createDetachedField();
 
@@ -136,7 +149,17 @@ export class PinInputMachine extends Connectable {
     }
 
     setOptions(options: PinInputOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Reacts to a controlled `value` change (validation, dirty/filled state). Adapters call it after
+     * committing a render: it may run the field's `validate` callback.
+     */
+    afterCommit() {
         this.onValueChanged();
     }
 
@@ -148,12 +171,21 @@ export class PinInputMachine extends Connectable {
      * Current options (read by the pins).
      */
     get optionsSnapshot(): Readonly<PinInputOptions> {
-        return this.options;
+        return this.focusFunnelMode === undefined ? this.options : { ...this.options, focusMode: this.focusFunnelMode };
+    }
+
+    private focusFunnelMode: PinInputFocusMode | undefined;
+
+    /**
+     * The focus mode of an enclosing focus funnel part (overrides the `focusMode` option); `undefined` without one.
+     */
+    setFocusFunnelMode(focusMode: PinInputFocusMode | undefined) {
+        this.focusFunnelMode = focusMode;
     }
 
     // The controlled prop is `value ?? ''` in the React component: it is always controlled.
     get checkedValue() {
-        return this.options.value ?? '';
+        return this.options.value ?? this.store.state.checkedValue ?? '';
     }
 
     get values() {
@@ -452,7 +484,7 @@ export class PinInputMachine extends Connectable {
                 // Trigger value change to check completion logic without changing value
                 this.onValueChange(this.values[index] ?? '', index, nativeEvent);
             },
-            ...(this.options.focusMode === 'first-empty'
+            ...(this.optionsSnapshot.focusMode === 'first-empty'
                 ? {}
                 : {
                       ArrowLeft: () => focus(Math.max(0, index - 1)),

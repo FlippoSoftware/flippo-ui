@@ -1,7 +1,9 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { ListRegistryMap } from '~@components/composite/list/ListRegistry';
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
@@ -53,7 +55,18 @@ export class TabsMachine extends Connectable {
 
     readonly panelRegistry: ListRegistry<TabsPanelMetadata>;
 
-    private options: TabsOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TabsOptions>({} as TabsOptions);
+
+    private get options(): TabsOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TabsOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: TabsOptions = {}) {
         super();
@@ -72,7 +85,10 @@ export class TabsMachine extends Connectable {
     }
 
     setOptions(options: TabsOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get value() {

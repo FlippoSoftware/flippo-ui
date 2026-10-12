@@ -1,8 +1,10 @@
+import { untracked } from '@flippo-software/store';
 import { isElement } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import { Effect } from '../../utils/Effect';
 import { getTarget, isTargetInsideEnabledTrigger } from '../../utils/element';
@@ -55,7 +57,18 @@ function getCloseDelay(value: number | (() => number), pointerType?: string) {
  * Replacement for `useHoverFloatingInteraction`.
  */
 export class HoverFloatingInteraction extends Connectable {
-    private options: HoverFloatingInteractionOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<HoverFloatingInteractionOptions>({} as HoverFloatingInteractionOptions);
+
+    private get options(): HoverFloatingInteractionOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: HoverFloatingInteractionOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -83,8 +96,11 @@ export class HoverFloatingInteraction extends Connectable {
     }
 
     setOptions(options: HoverFloatingInteractionOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     protected override onDisconnect() {

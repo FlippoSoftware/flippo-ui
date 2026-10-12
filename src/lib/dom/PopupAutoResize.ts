@@ -1,7 +1,10 @@
+import { untracked } from '@flippo-software/store';
+
 import type { Dimensions } from '@floating-ui/utils';
 
 import { Connectable } from '~@lib/Connectable';
 import { getCssDimensions } from '~@lib/getCssDimensions';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
 import { runOnceAnimationsFinish } from './animations';
@@ -54,7 +57,18 @@ function overrideElementStyle(element: HTMLElement, property: string, value: str
  * Replacement for `usePopupAutoResize`; call {@link PopupAutoResize.setOptions} whenever an option changes.
  */
 export class PopupAutoResize extends Connectable {
-    private options: PopupAutoResizeOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<PopupAutoResizeOptions>({} as PopupAutoResizeOptions);
+
+    private get options(): PopupAutoResizeOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: PopupAutoResizeOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private isInitialRender = true;
 
@@ -78,8 +92,11 @@ export class PopupAutoResize extends Connectable {
     }
 
     setOptions(options: PopupAutoResizeOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     protected override onDisconnect() {

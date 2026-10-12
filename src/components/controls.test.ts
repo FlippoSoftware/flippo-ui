@@ -1,3 +1,4 @@
+import { deferNotifications, flushNotifications } from '@flippo-software/store';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AvatarFallbackDelay } from '~@components/avatar/fallback/AvatarFallbackDelay';
@@ -15,7 +16,6 @@ import { getSeparatorProps } from '~@components/separator/root/getSeparatorProps
 import { SwitchMachine } from '~@components/switch/root/SwitchMachine';
 import { ToggleMachine } from '~@components/toggle/root/ToggleMachine';
 import { ToggleGroupMachine } from '~@components/toggle-group/root/ToggleGroupMachine';
-import { deferNotifications, flushNotifications } from '~@store/Store';
 import { connected } from '~@test/utils/connected';
 
 function clickEvent(target: Element) {
@@ -201,6 +201,28 @@ describe('Avatar', () => {
 });
 
 describe('Field and Form', () => {
+    it('validates each field once on submit even when a field registers again meanwhile', () => {
+        const form = new FormController();
+        const validate = vi.fn(() => {
+            // Like a control whose registration runs again during the synchronous re-render.
+            const entry = form.fields.get('a');
+            form.fields.delete('a');
+            if (entry) {
+                form.fields.set('a', entry);
+            }
+        });
+        form.fields.set('a', {
+            name: 'a',
+            validate,
+            validityData: { state: { valid: true } } as never,
+            controlRef: { current: null },
+            getValue: () => 'x'
+        });
+        const event = { preventDefault: vi.fn() } as unknown as SubmitEvent;
+        (form.getFormProps().onSubmit as (event: SubmitEvent) => void)(event);
+        expect(validate).toHaveBeenCalledTimes(1);
+    });
+
     it('validates a field and reports errors to the form', async () => {
         const form = new FormController({ errors: { email: 'Taken' } });
         const field = new FieldRootMachine({

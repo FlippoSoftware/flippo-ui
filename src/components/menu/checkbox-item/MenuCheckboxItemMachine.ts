@@ -1,8 +1,9 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
-import { Store } from '~@store/Store';
 
 import type { Props } from '~@props/mergeProps';
 
@@ -40,10 +41,13 @@ export class MenuCheckboxItemMachine extends MenuItemMachine<MenuCheckboxItemOpt
     }
 
     setOptions(options: MenuCheckboxItemOptions) {
-        super.setOptions(options);
-        if (options.checked !== undefined) {
-            this.checkedStore.set('checked', options.checked);
-        }
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            super.setOptions(options);
+            if (options.checked !== undefined) {
+                this.checkedStore.set('checked', options.checked);
+            }
+        });
     }
 
     get checked(): boolean {

@@ -1,3 +1,5 @@
+import { effect, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { pressableTriggerOpenStateMapping } from '~@attributes/popupStateMapping';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
@@ -6,6 +8,7 @@ import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { PATIENT_CLICK_THRESHOLD } from '~@lib/constants';
 import { getPseudoElementBounds } from '~@lib/getPseudoElementBounds';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 import { ClickInteraction } from '~@packages/floating-ui/interactions/ClickInteraction';
 import { FocusInteraction } from '~@packages/floating-ui/interactions/FocusInteraction';
@@ -83,7 +86,18 @@ type FocusLikeEvent = FocusEvent | { nativeEvent: FocusEvent; currentTarget: Eve
 export class MenuTriggerMachine<Payload = unknown> extends Connectable {
     readonly button: ButtonMachine;
 
-    private options: MenuTriggerOptions<Payload>;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<MenuTriggerOptions<Payload>>({} as MenuTriggerOptions<Payload>);
+
+    private get options(): MenuTriggerOptions<Payload> {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: MenuTriggerOptions<Payload>) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly setup: MenuTriggerSetup;
 
@@ -104,6 +118,8 @@ export class MenuTriggerMachine<Payload = unknown> extends Connectable {
     private focus: FocusInteraction | null = null;
 
     private mountedByThisTrigger = false;
+
+    private forwardedChanged = false;
 
     private stickIfOpen = false;
 
@@ -129,16 +145,25 @@ export class MenuTriggerMachine<Payload = unknown> extends Connectable {
 
     protected override onConnect() {
         this.connectChild(this.registration);
-        this.addCleanup(this.store.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: MenuTriggerOptions<Payload>) {
-        const forwardedChanged = options.payload !== this.options.payload || options.closeDelay !== this.options.closeDelay;
-        this.options = options;
-        this.button.setOptions({ disabled: this.disabled, native: options.nativeButton });
-        this.registration.setOptions(options.id, this.getForwardedState());
-        if (forwardedChanged) {
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.forwardedChanged ||= options.payload !== this.options.payload || options.closeDelay !== this.options.closeDelay;
+            this.options = options;
+            this.button.setOptions({ disabled: this.disabled, native: options.nativeButton });
+        });
+    }
+
+    /**
+     * Registers the trigger under its ID, forwards its state and updates the interactions after a commit.
+     */
+    afterCommit() {
+        this.registration.setOptions(this.options.id, this.getForwardedState());
+        if (this.forwardedChanged && this.connected) {
+            this.forwardedChanged = false;
             this.registration.sync();
         }
         this.sync();

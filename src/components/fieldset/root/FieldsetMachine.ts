@@ -1,5 +1,7 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 export type FieldsetState = {
     disabled: boolean;
@@ -18,14 +20,28 @@ export type FieldsetOptions = {
 export class FieldsetMachine {
     readonly store = new Store<{ legendId: string | undefined }>({ legendId: undefined });
 
-    private options: FieldsetOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<FieldsetOptions>({} as FieldsetOptions);
+
+    private get options(): FieldsetOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: FieldsetOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: FieldsetOptions = {}) {
         this.options = options;
     }
 
     setOptions(options: FieldsetOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
     }
 
     get disabled() {

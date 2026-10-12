@@ -1,10 +1,12 @@
+import { createSelector } from '@flippo-software/store';
+
+import type { Store } from '@flippo-software/store';
+
 import { compareItemEquality } from '~@lib/itemEquality';
 import { hasNullItemLabel, stringifyAsValue } from '~@lib/valueLabel';
-import { createSelector } from '~@store/createSelector';
 
 import type { ElementProps, Interaction, TransitionStatus } from '~@lib/types';
 import type { ItemRecord, LabeledItem } from '~@lib/valueLabel';
-import type { Store } from '~@store/Store';
 
 /**
  * @template Label Label type of the adapter (e.g. `React.ReactNode`).

@@ -1,7 +1,10 @@
+import { effect, Store, untracked } from '@flippo-software/store';
+
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { ClientPointInteraction } from '~@packages/floating-ui/interactions/ClientPointInteraction';
 import { DismissInteraction } from '~@packages/floating-ui/interactions/DismissInteraction';
@@ -83,7 +86,18 @@ export class TooltipRootMachine<Payload = unknown> extends Connectable {
 
     readonly actions: TooltipRootActions;
 
-    private options: TooltipRootOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TooltipRootOptions>({} as TooltipRootOptions);
+
+    private get options(): TooltipRootOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TooltipRootOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly multiple: TooltipMultipleMachine | null;
 
@@ -136,8 +150,7 @@ export class TooltipRootMachine<Payload = unknown> extends Connectable {
                 floatingId: setup.floatingId,
                 getTransitionOpen: () => this.isOpen(),
                 getTriggerOpen: () => this.getOpenState(),
-                flush: setup.flushSync,
-                onChange: () => this.sync()
+                flush: setup.flushSync
             },
             this.getControllerOptions()
         );
@@ -159,8 +172,6 @@ export class TooltipRootMachine<Payload = unknown> extends Connectable {
         const multiple = this.multiple;
         if (multiple) {
             this.addCleanup(multiple.store.registerStore(this.store as TooltipStore<unknown>));
-            // Re-run transitions and derived state when the group's shared state changes.
-            this.addCleanup(multiple.store.subscribe(() => this.store.notifyAll()));
         }
         if (this.multipleItem) {
             this.connectChild(this.multipleItem);
@@ -169,13 +180,22 @@ export class TooltipRootMachine<Payload = unknown> extends Connectable {
         this.connectChild(this.focus);
         this.connectChild(this.dismiss);
         this.connectChild(this.clientPoint);
-        this.addCleanup(this.floatingRoot.subscribe(() => this.sync()));
-        this.sync();
+        // Re-runs when a store it reads changes: the own store, the floating root, the interaction type…
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: TooltipRootOptions) {
-        this.options = options;
-        this.controller.setOptions(this.getControllerOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.controller.setOptions(this.getControllerOptions());
+        });
+    }
+
+    /**
+     * Applies the options to the interactions and effects after a commit.
+     */
+    afterCommit() {
         this.focus.setOptions(this.getFocusOptions());
         this.dismiss.setOptions(this.getDismissOptions());
         this.clientPoint.setOptions(this.getClientPointOptions());

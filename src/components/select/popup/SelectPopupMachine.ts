@@ -1,3 +1,5 @@
+import { effect, untracked } from '@flippo-software/store';
+
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
@@ -10,6 +12,7 @@ import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { clamp } from '~@lib/clamp';
 import { isWebKit } from '~@lib/detectBrowser';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument, ownerWindow } from '~@lib/owner';
 import { FocusManager } from '~@packages/floating-ui/FocusManager';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
@@ -18,6 +21,7 @@ import { AnimationFrame } from '~@timers/AnimationFrame';
 import { Timeout } from '~@timers/Timeout';
 
 import type { Align, Side, Style, TransitionStatus } from '~@lib/types';
+import type { FloatingPortalController } from '~@packages/floating-ui/FloatingPortalController';
 import type { FocusTarget } from '~@packages/floating-ui/FocusManager';
 import type { Props } from '~@props/mergeProps';
 
@@ -50,6 +54,7 @@ export type SelectPopupSetup = {
      * `ReactDOM.flushSync` in React.
      */
     flushSync?: ((fn: () => void) => void) | undefined;
+    portal?: FloatingPortalController | null | undefined;
 };
 
 /**
@@ -59,7 +64,18 @@ export type SelectPopupSetup = {
 export class SelectPopupMachine extends Connectable {
     readonly focusManager: FocusManager;
 
-    private options: SelectPopupOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SelectPopupOptions>({} as SelectPopupOptions);
+
+    private get options(): SelectPopupOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SelectPopupOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: SelectRootMachine;
 
@@ -105,13 +121,20 @@ export class SelectPopupMachine extends Connectable {
 
     protected override onConnect() {
         this.connectChild(this.focusManager);
-        this.addCleanup(this.root.store.subscribe(() => this.sync()));
-        this.addCleanup(this.setup.positioner.store.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: SelectPopupOptions) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 
@@ -298,7 +321,8 @@ export class SelectPopupMachine extends Connectable {
             modal: false,
             disabled: !this.root.store.state.mounted,
             returnFocus: this.options.finalFocus,
-            restoreFocus: true
+            restoreFocus: true,
+            portal: this.setup.portal
         };
     }
 

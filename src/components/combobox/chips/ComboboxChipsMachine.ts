@@ -1,6 +1,7 @@
+import { Store } from '@flippo-software/store';
+
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
 
 import type { MutableRef } from '~@lib/types';
 

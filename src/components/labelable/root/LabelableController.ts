@@ -1,7 +1,7 @@
+import { Store } from '@flippo-software/store';
 import { isElement } from '@floating-ui/utils/dom';
 
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { Props } from '~@props/mergeProps';
 

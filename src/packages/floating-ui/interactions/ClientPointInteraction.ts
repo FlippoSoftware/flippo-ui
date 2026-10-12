@@ -1,6 +1,8 @@
+import { untracked } from '@flippo-software/store';
 import { getWindow } from '@floating-ui/utils/dom';
 
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { MutableRef } from '~@lib/types';
 
@@ -104,7 +106,18 @@ export type ClientPointInteractionOptions = {
  * Replacement for `useClientPoint`.
  */
 export class ClientPointInteraction extends Connectable {
-    private options: ClientPointInteractionOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<ClientPointInteractionOptions>({} as ClientPointInteractionOptions);
+
+    private get options(): ClientPointInteractionOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: ClientPointInteractionOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -145,8 +158,11 @@ export class ClientPointInteraction extends Connectable {
     }
 
     setOptions(options: ClientPointInteractionOptions) {
-        this.options = options;
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.sync();
+        });
     }
 
     getProps(): InteractionProps {

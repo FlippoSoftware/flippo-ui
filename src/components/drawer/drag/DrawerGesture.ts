@@ -1,6 +1,8 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { contains, getTarget } from '~@packages/floating-ui/utils/element';
-import { Store } from '~@store/Store';
 
 import type { MutableRef, Style } from '~@lib/types';
 
@@ -125,7 +127,18 @@ function isCloseDirection(direction: DrawerDirection, deltaAxis: number) {
 export class DrawerGesture extends Connectable {
     readonly store: Store<GestureState>;
 
-    private options: DrawerGestureOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<DrawerGestureOptions>({} as DrawerGestureOptions);
+
+    private get options(): DrawerGestureOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: DrawerGestureOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private dragStartPos = { x: 0, y: 0 };
 
@@ -173,12 +186,15 @@ export class DrawerGesture extends Connectable {
     }
 
     setOptions(options: DrawerGestureOptions) {
-        this.options = options;
-        if (options.activeSnapPointIndex !== undefined) {
-            this.store.set('activeSnapPointIndex', options.activeSnapPointIndex);
-        }
-        this.syncTouchMoveListener();
-        this.snapToFirstPoint();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            if (options.activeSnapPointIndex !== undefined) {
+                this.store.set('activeSnapPointIndex', options.activeSnapPointIndex);
+            }
+            this.syncTouchMoveListener();
+            this.snapToFirstPoint();
+        });
     }
 
     get offset(): number {

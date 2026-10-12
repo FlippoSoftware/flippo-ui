@@ -1,5 +1,8 @@
+import { untracked } from '@flippo-software/store';
+
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import { TooltipMultipleStore } from '../store/TooltipMultipleStore';
 
@@ -26,7 +29,18 @@ export class TooltipMultipleMachine extends Connectable {
 
     readonly registry = new ListRegistry();
 
-    private options: TooltipMultipleOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TooltipMultipleOptions>({} as TooltipMultipleOptions);
+
+    private get options(): TooltipMultipleOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TooltipMultipleOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: TooltipMultipleOptions = {}) {
         super();
@@ -40,8 +54,11 @@ export class TooltipMultipleMachine extends Connectable {
     }
 
     setOptions(options: TooltipMultipleOptions) {
-        this.options = options;
-        this.store.setContextValue('onOpenChange', options.onOpenChange);
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.store.setContextValue('onOpenChange', options.onOpenChange);
+        });
     }
 
     get disabled() {

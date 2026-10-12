@@ -16,7 +16,8 @@
     "sideEffects": false,
     "files": [
         "README.md",
-        "dist"
+        "dist",
+        "skills"
     ],
     "scripts": {
         "build": "tsdown",
@@ -49,6 +50,7 @@
         "url": "https://github.com/FlippoSoftware/core/issues"
     },
     "dependencies": {
+        "@flippo-software/store": "link:../store",
         "@floating-ui/core": "^1.8.0",
         "@floating-ui/dom": "^1.8.0",
         "@floating-ui/utils": "^0.2.12",

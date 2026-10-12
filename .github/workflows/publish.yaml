@@ -16,9 +16,15 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
+              with:
+                  path: core
 
-            - name: Test package
-              uses: ./.github/actions/test
+            - name: Set up
+              uses: ./core/.github/actions/setup
+
+            - name: Run tests
+              working-directory: core
+              run: pnpm test
 
     release-please:
         runs-on: ubuntu-latest
@@ -44,23 +50,27 @@ jobs:
         steps:
             - uses: actions/checkout@v4
               with:
-                ref: ${{ needs.release-please.outputs.tag_name }}
+                  ref: ${{ needs.release-please.outputs.tag_name }}
+                  path: core
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v4
+            # A published package must not point to local folders.
+            - name: Refuse local dependencies
+              working-directory: core
+              run: |
+                  if grep -q '"link:' package.json; then
+                      echo 'package.json has link: dependencies; switch them to published versions before releasing.'
+                      exit 1
+                  fi
 
-            - name: Install Node.js
-              uses: actions/setup-node@v4
+            - name: Set up
+              uses: ./core/.github/actions/setup
               with:
-                node-version-file: ".nvmrc"
-                registry-url: "https://registry.npmjs.org"
-                cache: "pnpm"
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+                  registry-url: "https://registry.npmjs.org"
 
             - name: Build package
+              working-directory: core
               run: pnpm build
 
             - name: Publish package
+              working-directory: core
               run: pnpm publish --no-git-checks

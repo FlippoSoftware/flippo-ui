@@ -1,3 +1,5 @@
+import { untracked } from '@flippo-software/store';
+
 import { DialogRootMachine } from '~@components/dialog/root/DialogRootMachine';
 import { Connectable } from '~@lib/Connectable';
 
@@ -46,6 +48,8 @@ export class DrawerRootMachine<Payload = unknown> extends Connectable {
 
     readonly dialog: DialogRootMachine<Payload>;
 
+    private dataAttributesKey: string | null = null;
+
     constructor(options: DrawerRootOptions, setup: DialogRootSetup<Payload>) {
         super();
         this.drawerStore = DrawerStore.create({
@@ -69,8 +73,18 @@ export class DrawerRootMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: DrawerRootOptions) {
-        this.syncDrawer(options);
-        this.dialog.setOptions(this.getDialogOptions(options));
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.syncDrawer(options);
+            this.dialog.setOptions(this.getDialogOptions(options));
+        });
+    }
+
+    /**
+     * Applies the dialog's side effects after a commit.
+     */
+    afterCommit() {
+        this.dialog.afterCommit();
     }
 
     protected override onConnect() {
@@ -112,10 +126,17 @@ export class DrawerRootMachine<Payload = unknown> extends Connectable {
             snapPoints,
             shouldScaleBackground,
             backgroundScale,
-            containerRef,
-            // Initial attributes based on the direction so that CSS selectors work before the first drag.
-            popupDataAttributes: getDrawerDataAttributes(snapPoints.length > 0, direction)
+            containerRef
         });
+
+        // Initial attributes based on the direction so that CSS selectors work before the first drag
+        // (reset only when they change: the gesture updates them while dragging).
+        const hasSnapPoints = snapPoints.length > 0;
+        const dataAttributesKey = `${direction}:${hasSnapPoints}`;
+        if (dataAttributesKey !== this.dataAttributesKey) {
+            this.dataAttributesKey = dataAttributesKey;
+            store.set('popupDataAttributes', getDrawerDataAttributes(hasSnapPoints, direction));
+        }
         store.setContextValue('dragMove', onDrag);
         store.setContextValue('snapPointChange', onSnapPointChange);
         store.setContextValue('dragEnd', (open: boolean) => onDragEnd?.({ open }));

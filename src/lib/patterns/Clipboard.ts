@@ -1,4 +1,5 @@
-import { Store } from '~@store/Store';
+import { Store } from '@flippo-software/store';
+
 import { Timeout } from '~@timers/Timeout';
 
 function transformValue(text: string) {

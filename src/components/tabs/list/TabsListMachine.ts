@@ -1,8 +1,10 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { Connectable } from '~@lib/Connectable';
 import { EMPTY_ARRAY } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { ListRegistryMap } from '~@components/composite/list/ListRegistry';
 import type { Props } from '~@props/mergeProps';
@@ -38,7 +40,18 @@ export class TabsListMachine extends Connectable {
         listElement: null
     });
 
-    private options: TabsListOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<TabsListOptions>({} as TabsListOptions);
+
+    private get options(): TabsListOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: TabsListOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly tabs: TabsMachine;
 
@@ -49,7 +62,13 @@ export class TabsListMachine extends Connectable {
         this.tabs = tabs;
         this.options = options;
         this.composite = new CompositeRootMachine(this.getCompositeOptions());
-        this.composite.registry.setOptions({ onMapChange: (map) => this.tabs.setTabMap(map as ListRegistryMap<TabsTabMetadata>) });
+        this.composite.registry.setOptions({
+            onMapChange: (map) => {
+                // Replaces the composite's own handler, which still highlights the item marked active.
+                this.composite.onMapChange(map);
+                this.tabs.setTabMap(map as ListRegistryMap<TabsTabMetadata>);
+            }
+        });
         this.syncPreviousTabEdge();
     }
 
@@ -58,8 +77,18 @@ export class TabsListMachine extends Connectable {
     }
 
     setOptions(options: TabsListOptions) {
-        this.options = options;
-        this.composite.setOptions(this.getCompositeOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.composite.setOptions(this.getCompositeOptions());
+        });
+    }
+
+    /**
+     * Records the active tab's position (to tell the activation direction). Adapters call it after committing a
+     * render: it measures the layout.
+     */
+    afterCommit() {
         this.syncPreviousTabEdge();
     }
 

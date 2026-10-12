@@ -14,6 +14,7 @@ export * from './isElementDisabled';
 export * from './isOverflowElement';
 export * from './itemEquality';
 export * from './noop';
+export * from './OptionsStore';
 export * from './owner';
 export * from './parseNumeric';
 export * from './ref';

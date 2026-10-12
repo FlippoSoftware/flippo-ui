@@ -1,6 +1,6 @@
+import { ComponentStore, createSelector } from '@flippo-software/store';
+
 import { createRef } from '~@lib/ref';
-import { ComponentStore } from '~@store/ComponentStore';
-import { createSelector } from '~@store/createSelector';
 
 import type { BivariantEventHandler, MutableRef, PointerEventLike, Style } from '~@lib/types';
 

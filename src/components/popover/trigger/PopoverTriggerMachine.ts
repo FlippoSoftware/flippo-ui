@@ -1,3 +1,5 @@
+import { untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { pressableTriggerOpenStateMapping, triggerOpenStateMapping } from '~@attributes/popupStateMapping';
 import { ButtonMachine } from '~@components/button/root/ButtonMachine';
@@ -5,6 +7,7 @@ import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { CLICK_TRIGGER_IDENTIFIER, OPEN_DELAY } from '~@lib/constants';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ClickInteraction } from '~@packages/floating-ui/interactions/ClickInteraction';
 import { HoverReferenceInteraction } from '~@packages/floating-ui/interactions/hover/HoverReferenceInteraction';
 import { mergeInteractionProps } from '~@packages/floating-ui/interactions/mergeInteractionProps';
@@ -66,7 +69,18 @@ export class PopoverTriggerMachine<Payload = unknown> extends Connectable {
 
     readonly button: ButtonMachine;
 
-    private options: PopoverTriggerOptions<Payload>;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<PopoverTriggerOptions<Payload>>({} as PopoverTriggerOptions<Payload>);
+
+    private get options(): PopoverTriggerOptions<Payload> {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: PopoverTriggerOptions<Payload>) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly registration: PopupTriggerRegistration<PopoverState<Payload>>;
 
@@ -81,6 +95,8 @@ export class PopoverTriggerMachine<Payload = unknown> extends Connectable {
     private hover: HoverReferenceInteraction | null = null;
 
     private mountedByThisTrigger = false;
+
+    private forwardedChanged = false;
 
     private readonly handleClose = safePolygon();
 
@@ -99,17 +115,26 @@ export class PopoverTriggerMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: PopoverTriggerOptions<Payload>) {
-        const forwardedChanged =
-            options.payload !== this.options.payload ||
-            options.disabled !== this.options.disabled ||
-            options.openOnHover !== this.options.openOnHover ||
-            options.closeDelay !== this.options.closeDelay;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.forwardedChanged ||=
+                options.payload !== this.options.payload ||
+                options.disabled !== this.options.disabled ||
+                options.openOnHover !== this.options.openOnHover ||
+                options.closeDelay !== this.options.closeDelay;
 
-        this.options = options;
-        this.button.setOptions({ disabled: options.disabled, native: options.nativeButton });
-        this.registration.setOptions(options.id, this.getForwardedState());
+            this.options = options;
+            this.button.setOptions({ disabled: options.disabled, native: options.nativeButton });
+        });
+    }
 
-        if (forwardedChanged) {
+    /**
+     * Registers the trigger under its ID, forwards its state and updates the interactions after a commit.
+     */
+    afterCommit() {
+        this.registration.setOptions(this.options.id, this.getForwardedState());
+        if (this.forwardedChanged && this.connected) {
+            this.forwardedChanged = false;
             this.registration.sync();
         }
         this.sync();

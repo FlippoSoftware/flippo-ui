@@ -16,7 +16,6 @@ export const alias = {
     '~@popup': resolve('./src/lib/popup'),
     '~@positioning': resolve('./src/lib/positioning'),
     '~@props': resolve('./src/lib/props'),
-    '~@store': resolve('./src/lib/store'),
     '~@timers': resolve('./src/lib/timers'),
     '~@test': resolve('./test')
 };

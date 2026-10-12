@@ -1,3 +1,4 @@
+import { effect } from '@flippo-software/store';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
@@ -31,7 +32,7 @@ describe('MenuStore', () => {
         expect(store.select('rootId')).toBe('ctx');
     });
 
-    it('inherits from a parent menu and re-notifies on its updates', () => {
+    it('inherits from a parent menu; effects reading it follow the parent', () => {
         const relay = vi.fn();
         const parent = new MenuStore({ rootId: 'root', keyboardEventRelay: relay });
         const child = new MenuStore({ parent: { type: 'menu', store: parent } });
@@ -42,14 +43,21 @@ describe('MenuStore', () => {
         expect(child.select('keyboardEventRelay')).toBe(relay);
         expect(child.context.allowMouseUpTriggerRef).toBe(parent.context.allowMouseUpTriggerRef);
 
+        const rootIds: unknown[] = [];
+        const dispose = effect(() => {
+            rootIds.push(child.select('rootId'));
+        });
+        parent.set('rootId', 'other');
+        expect(rootIds).toEqual(['root', 'other']);
+
+        // The child store itself does not change.
         const listener = vi.fn();
         child.subscribe(listener);
         parent.set('activeIndex', 2);
-        expect(listener).toHaveBeenCalledTimes(1);
+        expect(listener).not.toHaveBeenCalled();
 
+        dispose();
         disconnect();
-        parent.set('activeIndex', 3);
-        expect(listener).toHaveBeenCalledTimes(1);
     });
 
     it('stops listening to the previous parent menu when the parent changes', () => {

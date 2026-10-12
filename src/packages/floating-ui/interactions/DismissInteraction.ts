@@ -1,9 +1,11 @@
+import { untracked } from '@flippo-software/store';
 import { getOverflowAncestors } from '@floating-ui/dom';
 import { getComputedStyle, getParentNode, isElement, isHTMLElement, isLastTraversableNode, isWebKit } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { Timeout } from '~@timers/Timeout';
 
 import { createAttribute } from '../utils/createAttribute';
@@ -96,7 +98,18 @@ type TouchState = {
  * Replacement for `useDismiss`: document listeners are attached while the element is open.
  */
 export class DismissInteraction extends Connectable {
-    private options: DismissInteractionOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<DismissInteractionOptions>({} as DismissInteractionOptions);
+
+    private get options(): DismissInteractionOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: DismissInteractionOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -148,14 +161,17 @@ export class DismissInteraction extends Connectable {
     }
 
     setOptions(options: DismissInteractionOptions) {
-        const outsidePressChanged =
-            typeof options.outsidePress !== typeof this.options.outsidePress ||
-            (typeof options.outsidePress !== 'function' && options.outsidePress !== this.options.outsidePress);
-        this.options = options;
-        if (outsidePressChanged) {
-            this.clearInsideTree();
-        }
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            const outsidePressChanged =
+                typeof options.outsidePress !== typeof this.options.outsidePress ||
+                (typeof options.outsidePress !== 'function' && options.outsidePress !== this.options.outsidePress);
+            this.options = options;
+            if (outsidePressChanged) {
+                this.clearInsideTree();
+            }
+            this.sync();
+        });
     }
 
     getProps(): InteractionProps {
@@ -469,6 +485,9 @@ export class DismissInteraction extends Connectable {
             !isRootElement(target) &&
             // Clicked on a direct ancestor (e.g. FloatingOverlay).
             !contains(target, floatingElement) &&
+            // A subtree that holds the floating element is not injected content: without portals (popups shown in
+            // the top layer where they are in the document), the backdrop shares its root with the popup.
+            !contains(targetRootAncestor, floatingElement) &&
             // If the target root element contains none of the markers, then the
             // element was injected after the floating element rendered.
             Array.from(markers).every((marker) => !contains(targetRootAncestor, marker))

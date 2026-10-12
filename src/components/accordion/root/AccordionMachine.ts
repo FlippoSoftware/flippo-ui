@@ -1,3 +1,5 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { ListRegistry } from '~@components/composite/list/ListRegistry';
 import { END, HOME } from '~@components/composite/utils/compositeKeys';
@@ -5,11 +7,11 @@ import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { isElementDisabled } from '~@lib/isElementDisabled';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { warn } from '~@lib/warn';
 import { ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, ARROW_UP } from '~@packages/floating-ui/utils/constants';
 import { stopEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
 import type { Orientation, TextDirection } from '~@lib/types';
@@ -35,7 +37,7 @@ function getActiveTriggers(items: (HTMLElement | null)[]): HTMLButtonElement[] {
     const output: HTMLButtonElement[] = [];
     for (const section of items) {
         if (!isElementDisabled(section)) {
-            const trigger = section?.querySelector('[type="button"]') as HTMLButtonElement;
+            const trigger = section?.querySelector('[type="button"], [role="button"]') as HTMLButtonElement;
             if (!isElementDisabled(trigger)) {
                 output.push(trigger);
             }
@@ -77,7 +79,18 @@ export class AccordionMachine extends Connectable {
 
     readonly registry = new ListRegistry();
 
-    private options: AccordionOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<AccordionOptions>({} as AccordionOptions);
+
+    private get options(): AccordionOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: AccordionOptions) {
+        this.optionsStore.setState(options);
+    }
 
     constructor(options: AccordionOptions = {}) {
         super();
@@ -93,8 +106,11 @@ export class AccordionMachine extends Connectable {
     }
 
     setOptions(options: AccordionOptions) {
-        this.options = options;
-        this.warn();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.warn();
+        });
     }
 
     private warn() {

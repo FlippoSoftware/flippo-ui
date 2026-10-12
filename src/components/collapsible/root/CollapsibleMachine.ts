@@ -1,14 +1,16 @@
+import { effect, Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { runOnceAnimationsFinish } from '~@dom/animations';
 import { TransitionStatusController } from '~@dom/TransitionStatusController';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { warn } from '~@lib/warn';
 import { Effect } from '~@packages/floating-ui/utils/Effect';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 import { AnimationFrame } from '~@timers/AnimationFrame';
 
 import type { ButtonMachine } from '~@components/button/root/ButtonMachine';
@@ -86,7 +88,18 @@ export class CollapsibleMachine extends Connectable {
 
     readonly transitions: TransitionStatusController;
 
-    private options: CollapsibleOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<CollapsibleOptions>({} as CollapsibleOptions);
+
+    private get options(): CollapsibleOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: CollapsibleOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private panel: HTMLElement | null = null;
 
@@ -156,15 +169,16 @@ export class CollapsibleMachine extends Connectable {
         });
         this.addCleanup(() => AnimationFrame.cancel(mountFrame));
         this.connectChild(this.transitions);
-        this.addCleanup(this.store.subscribe(() => this.sync()));
-        this.addCleanup(this.transitions.store.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: CollapsibleOptions) {
-        this.options = options;
-        this.transitions.setOpen(this.open);
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.transitions.setOpen(this.open);
+            this.sync();
+        });
     }
 
     protected override onDisconnect() {
@@ -302,15 +316,18 @@ export class CollapsibleMachine extends Connectable {
      * Applies the panel part options (id, `hiddenUntilFound`, `keepMounted`).
      */
     setPanelOptions(options: CollapsiblePanelOptions) {
-        const { id, hiddenUntilFound = false, keepMounted = false } = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            const { id, hiddenUntilFound = false, keepMounted = false } = options;
 
-        if (process.env.NODE_ENV !== 'production' && options.hiddenUntilFound && options.keepMounted === false) {
-            warn(
-                'The `keepMounted={false}` prop on a Collapsible will be ignored when using `hiddenUntilFound` since it requires the Panel to remain mounted even when closed.'
-            );
-        }
+            if (process.env.NODE_ENV !== 'production' && options.hiddenUntilFound && options.keepMounted === false) {
+                warn(
+                    'The `keepMounted={false}` prop on a Collapsible will be ignored when using `hiddenUntilFound` since it requires the Panel to remain mounted even when closed.'
+                );
+            }
 
-        this.store.update({ panelIdState: id, hiddenUntilFound, keepMounted });
+            this.store.update({ panelIdState: id, hiddenUntilFound, keepMounted });
+        });
     }
 
     /**

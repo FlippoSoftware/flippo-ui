@@ -1,3 +1,5 @@
+import { effect, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { triggerOpenStateMapping } from '~@attributes/popupStateMapping';
 import { transitionStatusMapping } from '~@attributes/styleHookMapping';
@@ -7,6 +9,7 @@ import { TransitionStatusController } from '~@dom/TransitionStatusController';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { getNativeEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -30,7 +33,20 @@ export class ComboboxClearMachine extends Connectable {
 
     readonly transitions: TransitionStatusController;
 
-    private options: { disabled?: boolean | undefined; nativeButton?: boolean | undefined };
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<{ disabled?: boolean | undefined; nativeButton?: boolean | undefined }>(
+        {} as { disabled?: boolean | undefined; nativeButton?: boolean | undefined }
+    );
+
+    private get options(): { disabled?: boolean | undefined; nativeButton?: boolean | undefined } {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: { disabled?: boolean | undefined; nativeButton?: boolean | undefined }) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly root: ComboboxRootMachine;
 
@@ -51,13 +67,20 @@ export class ComboboxClearMachine extends Connectable {
 
     protected override onConnect() {
         this.connectChild(this.transitions);
-        this.addCleanup(this.root.store.subscribe(() => this.sync()));
-        this.addCleanup(this.root.inputValue.subscribe(() => this.sync()));
-        this.sync();
+        this.addCleanup(effect(() => this.sync()));
     }
 
     setOptions(options: { disabled?: boolean | undefined; nativeButton?: boolean | undefined }) {
-        this.options = options;
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+        });
+    }
+
+    /**
+     * Applies the options' side effects after a commit.
+     */
+    afterCommit() {
         this.sync();
     }
 

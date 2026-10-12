@@ -1,10 +1,11 @@
+import { Store } from '@flippo-software/store';
+
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
 import { getNativeEvent, stopEvent } from '~@packages/floating-ui/utils/event';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { Props } from '~@props/mergeProps';
 

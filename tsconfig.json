@@ -15,7 +15,6 @@
             "~@popup/*": ["./src/lib/popup/*"],
             "~@positioning/*": ["./src/lib/positioning/*"],
             "~@props/*": ["./src/lib/props/*"],
-            "~@store/*": ["./src/lib/store/*"],
             "~@timers/*": ["./src/lib/timers/*"],
             "~@test/*": ["./test/*"]
         }

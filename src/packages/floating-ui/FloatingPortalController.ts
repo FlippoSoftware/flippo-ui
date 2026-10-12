@@ -1,9 +1,9 @@
+import { Store } from '@flippo-software/store';
 import { isNode } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
 
 import type { ChangeEventDetails } from '~@events/changeEventDetails';
 import type { MutableRef } from '~@lib/types';

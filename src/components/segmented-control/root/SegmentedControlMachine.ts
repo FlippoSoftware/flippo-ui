@@ -1,12 +1,14 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { Connectable } from '~@lib/Connectable';
 import { NOOP } from '~@lib/noop';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { contains } from '~@packages/floating-ui/utils/element';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { FieldRootMachine, FieldRootState } from '~@components/field/root/FieldRootMachine';
 import type { FieldsetMachine } from '~@components/fieldset/root/FieldsetMachine';
@@ -61,7 +63,18 @@ export class SegmentedControlMachine extends Connectable {
 
     readonly controlRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: SegmentedControlOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<SegmentedControlOptions>({} as SegmentedControlOptions);
+
+    private get options(): SegmentedControlOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: SegmentedControlOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly detachedField = createDetachedField();
 
@@ -81,8 +94,18 @@ export class SegmentedControlMachine extends Connectable {
     }
 
     setOptions(options: SegmentedControlOptions) {
-        this.options = options;
-        this.composite.setOptions(this.getCompositeOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.composite.setOptions(this.getCompositeOptions());
+        });
+    }
+
+    /**
+     * Reacts to a controlled `value` change (validation, dirty/filled state). Adapters call it after
+     * committing a render: it may run the field's `validate` callback.
+     */
+    afterCommit() {
         this.onValueChanged();
     }
 

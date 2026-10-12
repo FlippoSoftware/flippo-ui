@@ -78,8 +78,8 @@ describe('valueLabel', () => {
         expect(hasNullItemLabel(items)).toBe(true);
         expect(hasNullItemLabel([{ value: 'a', label: 'A' }])).toBe(false);
         expect(hasNullItemLabel([{ value: 'g', items }])).toBe(true);
-        expect(hasNullItemLabel({ a: 'A' })).toBe(true);
-        expect(hasNullItemLabel({ null: 'None' })).toBe(false);
+        expect(hasNullItemLabel({ a: 'A' })).toBe(false);
+        expect(hasNullItemLabel({ null: 'None' })).toBe(true);
         expect(hasNullItemLabel(undefined)).toBe(false);
     });
 });

@@ -122,11 +122,11 @@ export function resolveMultipleLabels<Label>(
 }
 
 /**
- * Checks if the items array contains an item with a null value that has a non-null label.
+ * Checks if the items (an array, groups, or a record keyed by value) give a label to the `null` value.
  */
 export function hasNullItemLabel<Label>(items: ItemsInput<Label>): boolean {
     if (!Array.isArray(items)) {
-        return items != null && !('null' in items);
+        return items != null && 'null' in items;
     }
 
     return flattenItems<Label>(items).some((item) => item && item.value == null && item.label != null);

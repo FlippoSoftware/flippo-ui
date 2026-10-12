@@ -1,3 +1,5 @@
+import { Store, untracked } from '@flippo-software/store';
+
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { CompositeRootMachine } from '~@components/composite/root/CompositeRootMachine';
 import { SHIFT } from '~@components/composite/utils/compositeKeys';
@@ -5,10 +7,10 @@ import { createDetachedField } from '~@components/field/root/FieldRootMachine';
 import { fieldValidityMapping } from '~@components/field/utils/fieldValidity';
 import { Connectable } from '~@lib/Connectable';
 import { NOOP } from '~@lib/noop';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { visuallyHidden } from '~@lib/visuallyHidden';
 import { contains } from '~@packages/floating-ui/utils/element';
 import { mergeProps } from '~@props/mergeProps';
-import { Store } from '~@store/Store';
 
 import type { ModifierKey } from '~@components/composite/utils/compositeKeys';
 import type { FieldRootMachine, FieldRootState } from '~@components/field/root/FieldRootMachine';
@@ -57,7 +59,18 @@ export class RadioGroupMachine extends Connectable {
 
     readonly controlRef: MutableRef<HTMLElement | null> = { current: null };
 
-    private options: RadioGroupOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<RadioGroupOptions>({} as RadioGroupOptions);
+
+    private get options(): RadioGroupOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: RadioGroupOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly detachedField = createDetachedField();
 
@@ -77,8 +90,18 @@ export class RadioGroupMachine extends Connectable {
     }
 
     setOptions(options: RadioGroupOptions) {
-        this.options = options;
-        this.composite.setOptions(this.getCompositeOptions());
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.composite.setOptions(this.getCompositeOptions());
+        });
+    }
+
+    /**
+     * Reacts to a controlled `value` change (validation, dirty/filled state). Adapters call it after
+     * committing a render: it may run the field's `validate` callback.
+     */
+    afterCommit() {
         this.onValueChanged();
     }
 

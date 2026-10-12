@@ -1,8 +1,10 @@
+import { untracked } from '@flippo-software/store';
 import { isElement } from '@floating-ui/utils/dom';
 
 import { createChangeEventDetails } from '~@events/changeEventDetails';
 import { REASONS } from '~@events/reasons';
 import { Connectable } from '~@lib/Connectable';
+import { OptionsStore } from '~@lib/OptionsStore';
 import { ownerDocument } from '~@lib/owner';
 
 import type { FloatingOpenChangeDetails } from '~@events/changeEventDetails';
@@ -78,7 +80,18 @@ const runImmediately = (fn: () => void) => fn();
  * Replacement for `useHoverReferenceInteraction`.
  */
 export class HoverReferenceInteraction extends Connectable {
-    private options: HoverReferenceInteractionOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    private readonly optionsStore = new OptionsStore<HoverReferenceInteractionOptions>({} as HoverReferenceInteractionOptions);
+
+    private get options(): HoverReferenceInteractionOptions {
+        return this.optionsStore.state;
+    }
+
+    private set options(options: HoverReferenceInteractionOptions) {
+        this.optionsStore.setState(options);
+    }
 
     private readonly store: FloatingRootStore;
 
@@ -111,9 +124,12 @@ export class HoverReferenceInteraction extends Connectable {
     }
 
     setOptions(options: HoverReferenceInteractionOptions) {
-        this.options = options;
-        this.applyHandleCloseOptions();
-        this.sync();
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.options = options;
+            this.applyHandleCloseOptions();
+            this.sync();
+        });
     }
 
     /**
@@ -302,6 +318,10 @@ export class HoverReferenceInteraction extends Connectable {
 
         const onMouseLeave = (event: MouseEvent) => {
             const { handleClose, tree } = this.settings;
+            // A pending "rest" open is obsolete once the pointer left the trigger (e.g. the popup was opened
+            // by a click and closes before the timer fires).
+            instance.restTimeout.clear();
+            instance.restTimeoutPending = false;
 
             if (isClickLikeOpenEvent(store, instance)) {
                 this.clearPointerEvents();
@@ -311,8 +331,6 @@ export class HoverReferenceInteraction extends Connectable {
             instance.unbindMouseMove();
 
             const doc = ownerDocument(store.select('domReferenceElement'));
-            instance.restTimeout.clear();
-            instance.restTimeoutPending = false;
 
             if (isTargetInsideEnabledTrigger(event.relatedTarget, store.context.triggerElements)) {
                 return;

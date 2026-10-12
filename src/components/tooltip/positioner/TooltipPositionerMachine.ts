@@ -1,7 +1,10 @@
+import { untracked } from '@flippo-software/store';
+
 import { getDisabledMountTransitionStyles } from '~@attributes/getDisabledMountTransitionStyles';
 import { getStyleHookProps } from '~@attributes/getStyleHookProps';
 import { popupStateMapping } from '~@attributes/popupStateMapping';
 import { Connectable } from '~@lib/Connectable';
+import { adaptiveOrigin } from '~@packages/floating-ui/middleware/adaptiveOriginMiddleware';
 import { PopupPositionerController } from '~@popup/PopupPositionerController';
 import { mergeProps } from '~@props/mergeProps';
 
@@ -38,7 +41,11 @@ export class TooltipPositionerMachine<Payload = unknown> extends Connectable {
     constructor(root: TooltipRootMachine<Payload>, options: PopupPositionerOptions = {}) {
         super();
         this.root = root;
-        this.controller = new PopupPositionerController(root.store, { getOpen: () => root.getOpenState() }, withDefaults(options));
+        this.controller = new PopupPositionerController(
+            root.store,
+            { getOpen: () => root.getOpenState(), adaptiveOrigin },
+            withDefaults(options)
+        );
     }
 
     protected override onConnect() {
@@ -46,7 +53,17 @@ export class TooltipPositionerMachine<Payload = unknown> extends Connectable {
     }
 
     setOptions(options: PopupPositionerOptions) {
-        this.controller.setOptions(withDefaults(options));
+        // What the machine reads while applying its options is not a dependency of the caller (e.g. an effect).
+        untracked(() => {
+            this.controller.setOptions(withDefaults(options));
+        });
+    }
+
+    /**
+     * Updates the anchor positioning after a commit.
+     */
+    afterCommit() {
+        this.controller.afterCommit();
     }
 
     setElement = (element: HTMLElement | null) => {

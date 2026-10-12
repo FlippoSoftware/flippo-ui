@@ -1,6 +1,8 @@
+import { Store } from '@flippo-software/store';
+
 import { ListRegistryItem } from '~@components/composite/list/ListRegistry';
 import { Connectable } from '~@lib/Connectable';
-import { Store } from '~@store/Store';
+import { OptionsStore } from '~@lib/OptionsStore';
 
 import type { ToolbarGroupMachine } from '../group/ToolbarGroupMachine';
 import type { ToolbarMachine, ToolbarState } from '../root/ToolbarMachine';
@@ -37,7 +39,18 @@ export class ToolbarItemBase extends Connectable {
 
     readonly store = new Store({ index: -1 });
 
-    protected options: ToolbarItemOptions;
+    /**
+     * The options, in a store: computed values and effects reading them follow their changes, key by key.
+     */
+    protected readonly optionsStore = new OptionsStore<ToolbarItemOptions>({} as ToolbarItemOptions);
+
+    protected get options(): ToolbarItemOptions {
+        return this.optionsStore.state;
+    }
+
+    protected set options(options: ToolbarItemOptions) {
+        this.optionsStore.setState(options);
+    }
 
     protected readonly toolbar: ToolbarMachine;
 
