@@ -1,0 +1,10 @@
+// Context menu: the trigger area; the menu itself uses the menu styles.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-context-menu-trigger {
+        display: block;
+        -webkit-touch-callout: none;
+        user-select: none;
+    }
+}

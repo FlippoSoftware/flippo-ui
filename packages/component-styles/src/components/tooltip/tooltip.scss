@@ -1,0 +1,32 @@
+// Tooltip (Figma "Tooltip"): a small label (composes `.fl-popup`). When several tooltips are open at once
+// (`data-multiple-active`) the popup takes the brand colour.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-tooltip-positioner {
+        z-index: var(--fl-z-tooltip);
+        outline: none;
+    }
+
+    .fl-tooltip-popup {
+        --_fl-popup-padding-hook: var(--fl-tooltip-padding);
+        --_fl-popup-padding: var(--fl-spacing-1-5) var(--fl-spacing-3);
+        --_fl-popup-radius-hook: var(--fl-tooltip-radius);
+        --_fl-popup-radius: var(--fl-radius-sm);
+        --_fl-popup-bg-hook: var(--fl-tooltip-bg);
+        --_fl-popup-bg: var(--fl-color-bg-3);
+        --_fl-popup-color-hook: var(--fl-tooltip-color);
+        --_fl-popup-color: var(--fl-color-text-2);
+        --_fl-popup-shadow-hook: var(--fl-tooltip-shadow);
+        --_fl-popup-shadow: var(--fl-shadow-raised);
+
+        position: relative;
+        max-inline-size: var(--fl-tooltip-max-width, var(--_fl-tooltip-max-width, 20rem));
+
+        &:where([data-multiple-active]) {
+            --_fl-popup-bg-hook: var(--fl-tooltip-bg-multiple);
+            --_fl-popup-bg: var(--fl-color-brand-light-subtle);
+            --_fl-popup-color: var(--fl-color-text-white);
+        }
+    }
+}

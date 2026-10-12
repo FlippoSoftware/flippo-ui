@@ -1,0 +1,153 @@
+// Select: the trigger is a control box (composes `.fl-control`) with the value and a chevron; the popup
+// (composes `.fl-popup`) lists the options (compose `.fl-item`) with a check on the selected one.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-select-trigger {
+        justify-content: space-between;
+        // A native `<button>` trigger would size to its content; the trigger fills its container like the inputs.
+        inline-size: var(--fl-select-width, var(--_fl-select-width, 100%));
+        min-inline-size: var(--fl-select-min-width, var(--_fl-select-min-width, 10rem));
+        cursor: pointer;
+        user-select: none;
+        text-align: start;
+
+        // The trigger gets the focus back when the popup closes: it looks focused only for the keyboard (or while
+        // open), so a choice made with the pointer leaves it at rest, as a combobox leaves its input.
+        &:where(:focus:not(:focus-visible)) {
+            --_fl-control-border-color-focus: var(--_fl-control-border-color, transparent);
+            --_fl-control-bg-focus: var(--_fl-control-bg, var(--fl-color-bg-1));
+            --_fl-control-color-focus: var(--_fl-control-color, var(--fl-color-text-primary));
+        }
+
+        @include fl.open {
+            --_fl-control-border-color: var(--fl-color-brand-light);
+            --_fl-control-border-color-hover: var(--fl-color-brand-light);
+            --_fl-control-border-color-focus: var(--fl-color-brand-light);
+        }
+    }
+
+    .fl-select-value {
+        flex: 1 1 auto;
+        min-inline-size: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &:where([data-placeholder]) {
+            color: var(--_fl-control-placeholder-color-hook, var(--fl-control-placeholder-color, var(--_fl-control-placeholder-color, var(--fl-color-text-5))));
+        }
+    }
+
+    .fl-select-icon {
+        color: var(--fl-select-icon-color, var(--_fl-select-icon-color, var(--fl-color-text-5)));
+        transition: rotate var(--fl-duration-fast) var(--fl-ease-standard);
+
+        :where([data-popup-open]) > & {
+            rotate: 180deg;
+        }
+    }
+
+    .fl-select-positioner {
+        z-index: var(--fl-z-dropdown);
+        outline: none;
+    }
+
+    .fl-select-popup {
+        --_fl-popup-max-height: var(--available-height);
+        --_fl-popup-overflow: auto;
+
+        min-inline-size: var(--anchor-width);
+
+        // The item aligned with the trigger (`alignItemWithTrigger`) appears in place, without the scale.
+        &:where([data-side='none']) {
+            --_fl-popup-hidden-scale: 1;
+
+            scroll-padding-block: var(--fl-spacing-6);
+        }
+    }
+
+    .fl-select-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-spacing-0-5);
+        outline: none;
+    }
+
+    .fl-select-item {
+        flex-shrink: 0;
+    }
+
+    .fl-select-item-text {
+        flex: 1 1 auto;
+        min-inline-size: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .fl-select-item-indicator {
+        display: inline-flex;
+        flex-shrink: 0;
+        order: 1;
+        color: var(--fl-select-indicator-color, var(--_fl-select-indicator-color, var(--fl-color-brand-light)));
+
+        & :where(svg) {
+            inline-size: var(--fl-spacing-5);
+            block-size: var(--fl-spacing-5);
+        }
+    }
+
+    .fl-select-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-spacing-0-5);
+    }
+
+    .fl-select-group-label {
+        display: flex;
+        align-items: center;
+        min-block-size: var(--fl-spacing-7);
+        padding-inline: var(--fl-spacing-5);
+        color: var(--fl-color-text-5);
+        user-select: none;
+    }
+
+    .fl-select-separator {
+        flex-shrink: 0;
+        block-size: var(--fl-border-width-thin);
+        margin: var(--fl-spacing-1) var(--fl-spacing-2);
+        background-color: var(--fl-color-stroke-subtle);
+    }
+
+    .fl-select-backdrop {
+        --_fl-backdrop-bg: transparent;
+    }
+
+    .fl-select-scroll-arrow {
+        position: sticky;
+        z-index: 1;
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        block-size: var(--fl-spacing-6);
+        background-color: inherit;
+        color: var(--fl-color-text-5);
+        cursor: default;
+
+        &:where([data-direction='up']) {
+            inset-block-start: calc(var(--_fl-popup-padding-hook, var(--fl-popup-padding, var(--_fl-popup-padding, var(--fl-spacing-1-5)))) * -1);
+        }
+
+        &:where([data-direction='down']) {
+            inset-block-end: calc(var(--_fl-popup-padding-hook, var(--fl-popup-padding, var(--_fl-popup-padding, var(--fl-spacing-1-5)))) * -1);
+        }
+
+        & :where(svg) {
+            inline-size: var(--fl-spacing-4);
+            block-size: var(--fl-spacing-4);
+        }
+    }
+}

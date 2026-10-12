@@ -1,0 +1,24 @@
+// Text styles: `@include fl.text('body', 'stronger')` gives the size, line height, letter spacing and weight of
+// `Body/Stronger`. The font family comes from the root (`--fl-font-family`).
+@use 'sass:list';
+@use 'sass:map';
+@use '../tokens/typography';
+
+@mixin text($style, $weight: 'default') {
+    @if not map.has-key(typography.$text-styles, $style) {
+        @error 'Unknown text style `#{$style}`. Expected one of: #{map.keys(typography.$text-styles)}.';
+    }
+    @if not list.index(typography.$text-weights, $weight) {
+        @error 'Unknown text weight `#{$weight}`. Expected one of: #{typography.$text-weights}.';
+    }
+
+    font-size: var(--fl-text-#{$style}-size);
+    font-weight: var(--fl-text-#{$style}-weight-#{$weight});
+    line-height: var(--fl-text-#{$style}-line-height);
+    letter-spacing: var(--fl-text-#{$style}-letter-spacing);
+}
+
+@mixin mono {
+    font-family: var(--fl-font-family-mono);
+    font-variant-ligatures: none;
+}

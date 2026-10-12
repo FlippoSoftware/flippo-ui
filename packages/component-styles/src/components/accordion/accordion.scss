@@ -1,0 +1,75 @@
+// Accordion: items separated by lines; the trigger (composes `.fl-interactive`, `.fl-focus-ring`) spans the item and
+// turns its chevron when open; the panel animates `--accordion-panel-height`. Collapsible uses the same look.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-accordion-root {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fl-accordion-item {
+        border-block-end: var(--fl-border-width-thin) solid
+            var(--fl-accordion-border-color, var(--_fl-accordion-border-color, var(--fl-color-stroke-subtle)));
+    }
+
+    .fl-accordion-header {
+        display: block;
+        margin: 0;
+    }
+
+    .fl-accordion-trigger {
+        --_fl-focus-ring-offset: calc(var(--fl-focus-width) * -1);
+        --_fl-icon-size: var(--fl-spacing-5);
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--fl-spacing-4);
+        inline-size: 100%;
+        min-block-size: var(--fl-size-large);
+        padding-block: var(--fl-spacing-3);
+        padding-inline: var(--fl-accordion-padding-inline, var(--_fl-accordion-padding-inline, var(--fl-spacing-1)));
+        border-radius: var(--fl-radius-sm);
+        color: var(--fl-accordion-trigger-color, var(--_fl-accordion-trigger-color, var(--fl-color-text-primary)));
+        text-align: start;
+
+        @include fl.hover {
+            color: var(--fl-color-text-strong);
+        }
+
+        @include fl.disabled {
+            color: var(--fl-color-text-disabled);
+        }
+    }
+
+    // The chevron (or plus) of a trigger: turns when the panel is open.
+    .fl-accordion-icon {
+        color: var(--fl-color-text-5);
+        transition: rotate var(--fl-duration-normal) var(--fl-ease-standard);
+
+        :where([data-panel-open]) > & {
+            rotate: var(--fl-accordion-icon-rotation, var(--_fl-accordion-icon-rotation, 180deg));
+        }
+    }
+
+    .fl-accordion-panel {
+        display: block;
+        block-size: var(--accordion-panel-height, var(--collapsible-panel-height, auto));
+        overflow: hidden;
+        color: var(--fl-accordion-panel-color, var(--_fl-accordion-panel-color, var(--fl-color-text-3)));
+        transition: block-size var(--fl-duration-normal) var(--fl-ease-out);
+
+        @include fl.transition-hidden {
+            block-size: 0;
+        }
+    }
+
+    // The padded content inside a panel (padding on the panel itself would show while it is closed).
+    .fl-accordion-content {
+        display: block;
+        padding-block: 0 var(--fl-spacing-4);
+        padding-inline: var(--fl-accordion-padding-inline, var(--_fl-accordion-padding-inline, var(--fl-spacing-1)));
+    }
+}

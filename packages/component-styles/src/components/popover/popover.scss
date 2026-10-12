@@ -1,0 +1,43 @@
+// Popover: a floating card (composes `.fl-popup`) with a title, a description and a close button.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-popover-positioner {
+        z-index: var(--fl-z-dropdown);
+        outline: none;
+    }
+
+    .fl-popover-popup {
+        --_fl-popup-padding-hook: var(--fl-popover-padding);
+        --_fl-popup-padding: var(--fl-spacing-4) var(--fl-spacing-5);
+        --_fl-popup-gap: var(--fl-spacing-1-5);
+        --_fl-popup-radius-hook: var(--fl-popover-radius);
+        --_fl-popup-radius: var(--fl-radius-lg);
+        --_fl-popup-bg-hook: var(--fl-popover-bg);
+        --_fl-popup-bg: var(--fl-color-bg-2);
+        --_fl-popup-color-hook: var(--fl-popover-color);
+        --_fl-popup-color: var(--fl-color-text-3);
+
+        position: relative;
+        max-inline-size: min(var(--fl-popover-max-width, var(--_fl-popover-max-width, 22.5rem)), var(--available-width));
+    }
+
+    .fl-popover-title {
+        padding-inline-end: var(--fl-spacing-8);
+        color: var(--fl-color-text-primary);
+    }
+
+    .fl-popover-description {
+        color: var(--fl-color-text-4);
+    }
+
+    .fl-popover-close {
+        position: absolute;
+        inset-block-start: var(--fl-spacing-2);
+        inset-inline-end: var(--fl-spacing-2);
+    }
+
+    .fl-popover-backdrop {
+        --_fl-backdrop-bg: transparent;
+    }
+}

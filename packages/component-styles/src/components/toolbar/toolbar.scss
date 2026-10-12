@@ -1,0 +1,45 @@
+// Toolbar: buttons, links and inputs on a pill track. Buttons use the button styles (label variant), links the
+// link styles, inputs the control styles.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-toolbar-root {
+        display: flex;
+        align-items: center;
+        gap: var(--fl-toolbar-gap, var(--_fl-toolbar-gap, var(--fl-spacing-1)));
+        padding: var(--fl-toolbar-padding, var(--_fl-toolbar-padding, var(--fl-spacing-1)));
+        border-radius: var(--fl-toolbar-radius, var(--_fl-toolbar-radius, var(--fl-radius-full)));
+        background-color: var(--fl-toolbar-bg, var(--_fl-toolbar-bg, var(--fl-color-bg-1)));
+
+        &:where([data-orientation='vertical']) {
+            flex-direction: column;
+            border-radius: var(--fl-toolbar-radius, var(--_fl-toolbar-radius, var(--fl-radius-xl)));
+        }
+    }
+
+    .fl-toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: var(--fl-toolbar-gap, var(--_fl-toolbar-gap, var(--fl-spacing-1)));
+
+        &:where([data-orientation='vertical']) {
+            flex-direction: column;
+        }
+    }
+
+    .fl-toolbar-separator {
+        flex-shrink: 0;
+        align-self: stretch;
+        inline-size: var(--fl-border-width-thin);
+        margin-block: var(--fl-spacing-1-5);
+        margin-inline: var(--fl-spacing-1);
+        background-color: var(--fl-color-stroke-subtle);
+
+        &:where([data-orientation='horizontal']) {
+            inline-size: auto;
+            block-size: var(--fl-border-width-thin);
+            margin-block: var(--fl-spacing-1);
+            margin-inline: var(--fl-spacing-1-5);
+        }
+    }
+}

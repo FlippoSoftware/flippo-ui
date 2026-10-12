@@ -1,0 +1,36 @@
+// Textarea: a multi-line control box (composes `.fl-control`). The native textarea fills the box and carries the
+// padding itself, so its resize handle sits in the corner of the box, not inside the padding.
+@use '../../styles/layers';
+@use '../input/input';
+
+@layer fl.components {
+    .fl-textarea-root {
+        --_fl-control-height: auto;
+        --_fl-control-radius: var(--fl-radius-md);
+        --_fl-control-padding-inline: 0;
+
+        align-items: stretch;
+
+        // The box has no padding of its own: a leading icon keeps the distance the text has.
+        & > :where(.fl-input-icon) {
+            margin-block-start: var(--fl-spacing-3);
+            margin-inline-start: var(--fl-textarea-padding-inline, var(--_fl-textarea-padding-inline, var(--fl-spacing-5)));
+        }
+    }
+
+    .fl-textarea-control {
+        display: block;
+        box-sizing: border-box;
+        inline-size: 100%;
+        min-block-size: var(--fl-textarea-min-height, var(--_fl-textarea-min-height, 8rem));
+        padding-block: var(--fl-spacing-3);
+        padding-inline: var(--fl-textarea-padding-inline, var(--_fl-textarea-padding-inline, var(--fl-spacing-5)));
+        border: 0;
+        border-radius: inherit;
+        outline: none;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        resize: vertical;
+    }
+}

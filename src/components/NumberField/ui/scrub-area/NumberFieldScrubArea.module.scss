@@ -1,9 +1,0 @@
-@use 'mixins/_common.scss' as common;
-
-.NumberFieldScrubArea {
-  @include common.reset-appearance();
-
-  cursor: ew-resize;
-  font-weight: bold;
-  user-select: none;
-}

@@ -1,0 +1,76 @@
+// Scroll area: a viewport with thin overlay scrollbars that show while hovering or scrolling.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-scroll-area-root {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .fl-scroll-area-viewport {
+        display: block;
+        inline-size: 100%;
+        block-size: 100%;
+        max-block-size: inherit;
+        border-radius: inherit;
+        outline: none;
+        overscroll-behavior: contain;
+
+        @include fl.focus-visible {
+            outline: var(--fl-focus-width) solid var(--fl-focus-color);
+            outline-offset: calc(var(--fl-focus-width) * -1);
+        }
+    }
+
+    .fl-scroll-area-scrollbar {
+        display: flex;
+        padding: var(--fl-spacing-0-5);
+        opacity: 0;
+        pointer-events: none;
+        user-select: none;
+        touch-action: none;
+        transition: opacity var(--fl-duration-fast) var(--fl-ease-standard);
+
+        &:where([data-orientation='vertical']) {
+            inline-size: var(--fl-scroll-area-scrollbar-size, var(--_fl-scroll-area-scrollbar-size, 10px));
+        }
+
+        &:where([data-orientation='horizontal']) {
+            flex-direction: column;
+            block-size: var(--fl-scroll-area-scrollbar-size, var(--_fl-scroll-area-scrollbar-size, 10px));
+        }
+
+        &:where([data-hovering], [data-scrolling]) {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        &:where([data-scrolling]) {
+            transition-duration: 0ms;
+        }
+    }
+
+    .fl-scroll-area-thumb {
+        flex: 1 1 auto;
+        border-radius: var(--fl-radius-full);
+        background-color: var(--fl-scroll-area-thumb-color, var(--_fl-scroll-area-thumb-color, var(--fl-color-stroke)));
+        transition: background-color var(--fl-duration-fast) var(--fl-ease-standard);
+
+        &:where([data-orientation='vertical']) {
+            block-size: var(--scroll-area-thumb-height);
+        }
+
+        &:where([data-orientation='horizontal']) {
+            inline-size: var(--scroll-area-thumb-width);
+        }
+
+        @include fl.hover {
+            background-color: var(--fl-color-stroke-hover);
+        }
+    }
+
+    .fl-scroll-area-corner {
+        background-color: transparent;
+    }
+}

@@ -1,0 +1,149 @@
+// Navigation menu: pill triggers in a row; the open content is a popup (composes `.fl-popup`) whose size follows the
+// active content (`--popup-width`, `--popup-height`) and whose content slides in from the side it was opened from
+// (`data-activation-direction`).
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-navigation-menu-root {
+        position: relative;
+    }
+
+    .fl-navigation-menu-list {
+        display: flex;
+        align-items: center;
+        gap: var(--fl-spacing-1);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        &:where([data-orientation='vertical']) {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
+    .fl-navigation-menu-item {
+        position: relative;
+    }
+
+    .fl-navigation-menu-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--fl-spacing-1-5);
+        block-size: var(--fl-size-small);
+        padding-inline: var(--fl-spacing-4);
+        border-radius: var(--fl-radius-full);
+        background-color: transparent;
+        color: var(--fl-navigation-menu-trigger-color, var(--_fl-navigation-menu-trigger-color, var(--fl-color-text-3)));
+        text-decoration: none;
+
+        @include fl.hover {
+            background-color: var(--fl-color-bg-2-hover);
+            color: var(--fl-color-text-strong);
+        }
+
+        @include fl.open {
+            background-color: var(--fl-color-bg-2);
+            color: var(--fl-color-text-strong);
+        }
+
+        @include fl.disabled {
+            background-color: transparent;
+            color: var(--fl-color-text-disabled);
+        }
+    }
+
+    .fl-navigation-menu-icon {
+        --_fl-icon-size: var(--fl-spacing-4);
+
+        transition: rotate var(--fl-duration-fast) var(--fl-ease-standard);
+
+        :where([data-popup-open]) > & {
+            rotate: 180deg;
+        }
+    }
+
+    .fl-navigation-menu-positioner {
+        display: block;
+        z-index: var(--fl-z-dropdown);
+        transition-property: top, left, right, bottom;
+        transition-duration: var(--fl-duration-normal);
+        transition-timing-function: var(--fl-ease-out);
+
+        &:where([data-instant]) {
+            transition: none;
+        }
+    }
+
+    .fl-navigation-menu-popup {
+        --_fl-popup-padding: 0;
+        --_fl-popup-overflow: hidden;
+        --_fl-popup-radius: var(--fl-radius-lg);
+        --_fl-popup-transition-property: opacity, scale, inline-size, block-size;
+
+        position: relative;
+        inline-size: var(--popup-width);
+        block-size: var(--popup-height);
+    }
+
+    .fl-navigation-menu-viewport {
+        position: relative;
+        inline-size: 100%;
+        block-size: 100%;
+        overflow: hidden;
+    }
+
+    .fl-navigation-menu-content {
+        --_fl-navigation-menu-shift: var(--fl-spacing-12);
+
+        box-sizing: border-box;
+        inline-size: max-content;
+        max-inline-size: min(40rem, calc(100vw - 2 * var(--fl-spacing-4)));
+        padding: var(--fl-navigation-menu-content-padding, var(--_fl-navigation-menu-content-padding, var(--fl-spacing-2)));
+        transition-property: opacity, translate;
+        transition-duration: var(--fl-duration-normal);
+        transition-timing-function: var(--fl-ease-out);
+
+        @include fl.transition-hidden {
+            opacity: 0;
+        }
+
+        &:where([data-starting-style][data-activation-direction='left'], [data-ending-style][data-activation-direction='right']) {
+            translate: calc(var(--_fl-navigation-menu-shift) * -1) 0;
+        }
+
+        &:where([data-starting-style][data-activation-direction='right'], [data-ending-style][data-activation-direction='left']) {
+            translate: var(--_fl-navigation-menu-shift) 0;
+        }
+    }
+
+    // A link inside the content: a title with an optional description.
+    .fl-navigation-menu-link {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-spacing-0-5);
+        padding: var(--fl-spacing-2-5) var(--fl-spacing-3);
+        border-radius: var(--fl-radius-item);
+        color: var(--fl-color-text-primary);
+        text-decoration: none;
+
+        @include fl.hover {
+            background-color: var(--fl-color-bg-3);
+            color: var(--fl-color-text-strong);
+        }
+
+        &:where([data-active], [aria-current='page']) {
+            color: var(--fl-color-brand-light);
+        }
+    }
+
+    .fl-navigation-menu-link-description {
+        display: block;
+        color: var(--fl-color-text-4);
+    }
+
+    .fl-navigation-menu-backdrop {
+        --_fl-backdrop-bg: transparent;
+    }
+}

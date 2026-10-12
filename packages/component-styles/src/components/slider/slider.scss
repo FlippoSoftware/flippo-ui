@@ -1,0 +1,96 @@
+// Slider: a thin track with a brand indicator and round thumbs. Vertical with `data-orientation="vertical"`.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-slider-root {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-spacing-2);
+        inline-size: 100%;
+
+        &:where([data-orientation='vertical']) {
+            inline-size: auto;
+            block-size: 100%;
+        }
+    }
+
+    .fl-slider-value {
+        color: var(--fl-color-text-5);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .fl-slider-control {
+        display: flex;
+        align-items: center;
+        inline-size: 100%;
+        padding-block: var(--fl-spacing-3);
+        touch-action: none;
+        user-select: none;
+
+        &:where([data-orientation='vertical']) {
+            flex-direction: column;
+            inline-size: auto;
+            block-size: 100%;
+            padding-block: 0;
+            padding-inline: var(--fl-spacing-3);
+        }
+    }
+
+    .fl-slider-track {
+        position: relative;
+        inline-size: 100%;
+        block-size: var(--fl-slider-thickness, var(--_fl-slider-thickness, var(--fl-spacing-1)));
+        border-radius: var(--fl-radius-full);
+        background-color: var(--fl-slider-track-color, var(--_fl-slider-track-color, var(--fl-color-bg-2-hover)));
+
+        &:where([data-orientation='vertical']) {
+            inline-size: var(--fl-slider-thickness, var(--_fl-slider-thickness, var(--fl-spacing-1)));
+            block-size: 100%;
+        }
+    }
+
+    .fl-slider-indicator {
+        display: block;
+        border-radius: inherit;
+        background-color: var(--fl-slider-indicator-color, var(--_fl-slider-indicator-color, var(--fl-color-brand-light)));
+
+        @include fl.disabled {
+            background-color: var(--fl-color-text-disabled);
+        }
+    }
+
+    .fl-slider-thumb {
+        inline-size: var(--fl-slider-thumb-size, var(--_fl-slider-thumb-size, var(--fl-spacing-4)));
+        block-size: var(--fl-slider-thumb-size, var(--_fl-slider-thumb-size, var(--fl-spacing-4)));
+        border-radius: 50%;
+        background-color: var(--fl-slider-thumb-color, var(--_fl-slider-thumb-color, var(--fl-color-knob)));
+        box-shadow: var(--fl-shadow-raised);
+        outline: 0 solid transparent;
+        cursor: grab;
+        transition-property: scale, outline-color;
+        transition-duration: var(--fl-duration-fast);
+        transition-timing-function: var(--fl-ease-standard);
+
+        @include fl.hover {
+            scale: 1.15;
+        }
+
+        &:where([data-dragging]) {
+            scale: 1.15;
+            cursor: grabbing;
+        }
+
+        // The thumb wraps the native range input, which takes the focus.
+        &:where(:has(:focus-visible)) {
+            outline-width: var(--fl-focus-width);
+            outline-color: var(--fl-focus-color);
+            outline-offset: var(--fl-focus-offset);
+        }
+
+        @include fl.disabled {
+            background-color: var(--fl-color-text-disabled);
+            cursor: not-allowed;
+        }
+    }
+}

@@ -1,0 +1,22 @@
+// Checkbox card: the root is a card (composes `.fl-choice-card`), the indicator a checkbox box
+// (composes `.fl-check`) whose check mark shows when checked.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-checkbox-card-indicator {
+        & :where(svg) {
+            inline-size: var(--fl-checkbox-icon-size, var(--_fl-checkbox-icon-size, var(--fl-spacing-3-5)));
+            block-size: var(--fl-checkbox-icon-size, var(--_fl-checkbox-icon-size, var(--fl-spacing-3-5)));
+        }
+
+        &:where([data-unchecked]) :where(svg) {
+            visibility: hidden;
+        }
+    }
+
+    // The indicator sits at the end of the card.
+    .fl-checkbox-card-indicator--end {
+        order: 1;
+        margin-inline-start: auto;
+    }
+}

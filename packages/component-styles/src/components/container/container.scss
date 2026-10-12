@@ -1,0 +1,12 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-container { box-sizing: border-box; display: var(--fl-container-display, var(--_fl-container-display, block)); min-inline-size: 0; inline-size: 100%; max-inline-size: var(--fl-container-max-width, var(--_fl-container-max-width, 64rem)); margin-inline: auto; }
+    .fl-container--xs { --_fl-container-max-width: 30rem; }
+    .fl-container--sm { --_fl-container-max-width: 40rem; }
+    .fl-container--md { --_fl-container-max-width: 48rem; }
+    .fl-container--lg { --_fl-container-max-width: 64rem; }
+    .fl-container--xl { --_fl-container-max-width: 80rem; }
+    .fl-container--2xl { --_fl-container-max-width: 96rem; }
+    .fl-container--full { --_fl-container-max-width: 100%; }
+}

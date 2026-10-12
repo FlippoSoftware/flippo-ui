@@ -1,0 +1,25 @@
+{
+    "extends": "@flippo-software/tsconfig",
+    "compilerOptions": {
+        "lib": ["dom", "dom.iterable", "ES2024"],
+        "jsx": "react-jsx",
+        "types": ["node", "react", "react-dom"],
+        "composite": false,
+        "customConditions": ["source"],
+        "incremental": false,
+        "paths": {
+            "~@lib/*": ["./src/lib/*"]
+        }
+    },
+    "include": [
+        "src",
+        "test",
+        "tsdown.config.ts",
+        "vitest.config.ts",
+        "stories",
+        ".storybook/main.ts",
+        ".storybook/preview.ts",
+        ".storybook/env.d.ts"
+    ],
+    "exclude": ["node_modules", "dist", "src/**/*.stories.tsx", "src/components/**/story/**", "src/components/StoryCombine/**"]
+}

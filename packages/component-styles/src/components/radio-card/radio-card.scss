@@ -1,0 +1,27 @@
+// Radio card: the root is a card (composes `.fl-choice-card`), the indicator a round box (composes `.fl-check`)
+// with a dot when checked.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-radio-card-indicator {
+        --_fl-check-radius: 50%;
+
+        &::after {
+            content: '';
+            inline-size: var(--fl-radio-dot-size, var(--_fl-radio-dot-size, var(--fl-spacing-2)));
+            block-size: var(--fl-radio-dot-size, var(--_fl-radio-dot-size, var(--fl-spacing-2)));
+            border-radius: 50%;
+            background-color: var(--fl-radio-dot-color, var(--_fl-radio-dot-color, var(--fl-color-text-white)));
+            visibility: hidden;
+        }
+
+        &:where([data-checked])::after {
+            visibility: visible;
+        }
+    }
+
+    .fl-radio-card-indicator--end {
+        order: 1;
+        margin-inline-start: auto;
+    }
+}

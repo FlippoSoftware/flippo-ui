@@ -1,0 +1,94 @@
+// Switch: a 40×24 track (root) with a sliding thumb. Composes `.fl-focus-ring`.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-switch-root {
+        --_fl-switch-travel: calc(
+            var(--fl-switch-width, var(--_fl-switch-width, var(--fl-spacing-10))) -
+                var(--fl-switch-height, var(--_fl-switch-height, var(--fl-spacing-6)))
+        );
+
+        position: relative;
+        box-sizing: border-box;
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        inline-size: var(--fl-switch-width, var(--_fl-switch-width, var(--fl-spacing-10)));
+        block-size: var(--fl-switch-height, var(--_fl-switch-height, var(--fl-spacing-6)));
+        padding: var(--fl-switch-padding, var(--_fl-switch-padding, var(--fl-spacing-0-5)));
+        border: 0;
+        border-radius: var(--fl-radius-full);
+        background-color: var(--fl-switch-track-color, var(--_fl-switch-track-color, var(--fl-color-bg-3)));
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: background-color var(--fl-duration-fast) var(--fl-ease-standard);
+
+        @include fl.hover {
+            background-color: var(--fl-switch-track-color-hover, var(--_fl-switch-track-color-hover, var(--fl-color-bg-3-hover)));
+        }
+
+        @include fl.checked {
+            background-color: var(--fl-switch-track-color-checked, var(--_fl-switch-track-color-checked, var(--fl-color-brand)));
+        }
+
+        @include fl.checked {
+            @include fl.hover {
+                background-color: var(--fl-switch-track-color-checked-hover, var(--_fl-switch-track-color-checked-hover, var(--fl-color-brand-hover)));
+            }
+        }
+
+        @include fl.invalid {
+            box-shadow: inset 0 0 0 var(--fl-border-width-default) var(--fl-color-error);
+        }
+
+        @include fl.disabled {
+            background-color: var(--fl-color-bg-2);
+            cursor: not-allowed;
+        }
+
+        @include fl.disabled {
+            @include fl.checked {
+                background-color: var(--fl-color-brand-disabled);
+            }
+        }
+    }
+
+    .fl-switch-thumb {
+        display: block;
+        aspect-ratio: 1;
+        block-size: 100%;
+        border-radius: 50%;
+        background-color: var(--fl-switch-thumb-color, var(--_fl-switch-thumb-color, var(--fl-color-knob)));
+        box-shadow: var(--fl-shadow-raised);
+        transition-property: translate, background-color;
+        transition-duration: var(--fl-duration-fast);
+        transition-timing-function: var(--fl-ease-standard);
+
+        @include fl.checked {
+            background-color: var(--fl-switch-thumb-color-checked, var(--_fl-switch-thumb-color-checked, var(--fl-color-knob-active)));
+            translate: var(--_fl-switch-travel) 0;
+        }
+
+        @include fl.disabled {
+            background-color: var(--fl-color-text-disabled);
+        }
+
+        &:where(:dir(rtl)) {
+            @include fl.checked {
+                translate: calc(var(--_fl-switch-travel) * -1) 0;
+            }
+        }
+    }
+
+    .fl-switch-root--small {
+        --_fl-switch-width: var(--fl-spacing-8);
+        --_fl-switch-height: var(--fl-spacing-5);
+    }
+
+    .fl-switch-root--large {
+        --_fl-switch-width: var(--fl-spacing-12);
+        --_fl-switch-height: var(--fl-spacing-7);
+    }
+}

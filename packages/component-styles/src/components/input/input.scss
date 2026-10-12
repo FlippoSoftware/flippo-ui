@@ -1,0 +1,48 @@
+// Input (Figma "Input Field"): a control box (`root`, composes `.fl-control`) around an icon, the native input and a
+// clear button (composes `.fl-control-button`). Searchbar = an input with a magnifier icon and a clear button.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-input-root {
+        cursor: text;
+    }
+
+    .fl-input-control {
+        flex: 1 1 auto;
+        min-inline-size: 0;
+        block-size: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+        outline: none;
+        text-overflow: ellipsis;
+        appearance: none;
+
+        &::-webkit-search-cancel-button,
+        &::-webkit-search-decoration {
+            appearance: none;
+        }
+    }
+
+    .fl-input-icon {
+        --_fl-icon-size-hook: var(--fl-input-icon-size);
+
+        color: var(--fl-input-icon-color, var(--_fl-input-icon-color, var(--fl-color-text-6)));
+        transition: color var(--fl-duration-fast) var(--fl-ease-standard);
+
+        :where(.fl-input-root:hover, .fl-input-root:focus-within) > & {
+            color: var(--fl-color-text-5);
+        }
+    }
+
+    // The clear button sits at the end of the box, closer to its edge than the text.
+    .fl-input-clear {
+        margin-inline-end: calc(
+            var(--fl-spacing-3) - var(--_fl-control-padding-inline-hook, var(--fl-control-padding-inline, var(--_fl-control-padding-inline, var(--fl-spacing-5))))
+        );
+    }
+}

@@ -1,0 +1,133 @@
+// Colour tokens of the Flippo design system.
+//
+// Primitives come from the Figma variables `Color/neutral`, `Color/brand` and `Color/misc` (file "Flippo",
+// page "Components & Foundations"). The intermediate neutral steps (12, 14, 16, 18, 22, 25, 45) are the values the
+// Figma semantic tokens point at; the light steps (95, 98) and `warm-red/subtle` exist for the light theme.
+
+$neutral: (
+    'white': #ffffff,
+    '98': #f8f8fa,
+    '95': #f0f1f3,
+    '90': #e1e2e5,
+    '80': #c4c5cc,
+    '70': #a5a7b3,
+    '60': #878a99,
+    '50': #707380,
+    '45': #64687a,
+    '40': #545766,
+    '30': #3c3e4d,
+    '25': #313440,
+    '22': #2b2d38,
+    '20': #272933,
+    '18': #23252e,
+    '16': #1f2129,
+    '14': #1b1d24,
+    '12': #18191f,
+    '10': #14151a,
+    'black': #000000
+);
+
+$brand: (
+    '10': #d2c2f2,
+    '20': #b698f3,
+    '25': #a073fb,
+    '30': #9265ed,
+    '35': #814aef,
+    '40': #662fd3,
+    '50': #5028a1,
+    '60': #442287,
+    '70': #412873,
+    '80': #38255d,
+    '90': #302050
+);
+
+$misc: (
+    'warm-red-subtle': #fbe4e0,
+    'warm-red-lighter': #ff5f4d,
+    'warm-red-default': #d3341b,
+    'warm-red-darker': #ba1e06,
+    'warm-red-desaturated': #4d2826,
+    'red-lighter': #ff5959,
+    'red-default': #ff4141,
+    'red-darker': #e52222,
+    'yellow-lighter': #f0c82b,
+    'yellow-default': #d6ae12,
+    'yellow-darker': #bd9600,
+    'golden-lighter': #b8ab5f,
+    'golden-default': #9e9352,
+    'golden-darker': #857938,
+    'green-lighter': #4ed95e,
+    'green-default': #31be42,
+    'green-darker': #1ba62b
+);
+
+// Primitive palettes by token group: `--fl-color-<group>-<step>`.
+$primitives: (
+    'neutral': $neutral,
+    'brand': $brand,
+    'misc': $misc
+);
+
+// Semantic tokens: `--fl-color-<name>`, each a `(light, dark)` pair. A string value names a primitive
+// (`'neutral-90'` → `var(--fl-color-neutral-90)`); a colour value is used as is.
+// The dark values are the Figma semantic tokens; the light values mirror the neutral scale.
+$semantic: (
+    // Brand
+    'brand-dark-subtle': ('brand-10', 'brand-50'),
+    'brand': ('brand-40', 'brand-40'),
+    'brand-light-subtle': ('brand-30', 'brand-35'),
+    'brand-hover': ('brand-50', 'brand-30'),
+    'brand-light': ('brand-40', 'brand-25'),
+    'brand-light-hover': ('brand-50', 'brand-10'),
+    'brand-disabled': ('brand-10', 'brand-60'),
+    // Backgrounds
+    'bg-0': ('neutral-95', 'neutral-10'),
+    'bg-area-muted': ('neutral-98', 'neutral-12'),
+    'bg-area-subtle': ('neutral-95', 'neutral-14'),
+    'bg-area': ('neutral-white', 'neutral-16'),
+    'bg-1': ('neutral-white', 'neutral-16'),
+    'bg-1-hover': ('neutral-98', 'neutral-18'),
+    'bg-2': ('neutral-98', 'neutral-18'),
+    'bg-2-hover': ('neutral-95', 'neutral-20'),
+    'bg-3': ('neutral-90', 'neutral-25'),
+    'bg-3-alt': ('neutral-95', 'neutral-22'),
+    'bg-3-hover': ('neutral-80', 'neutral-30'),
+    // Text and symbols
+    'text-white': ('neutral-white', 'neutral-white'),
+    'text-primary': ('neutral-10', 'neutral-90'),
+    'text-2': ('neutral-20', 'neutral-80'),
+    'text-3': ('neutral-30', 'neutral-70'),
+    'text-4': ('neutral-40', 'neutral-60'),
+    'text-5': ('neutral-50', 'neutral-50'),
+    'text-6': ('neutral-60', 'neutral-40'),
+    'text-disabled': ('neutral-80', 'neutral-30'),
+    // `text-strong` is the colour of hovered and selected text: white on dark, the darkest neutral on light.
+    'text-strong': ('neutral-black', 'neutral-white'),
+    // Strokes
+    'stroke': ('neutral-80', 'neutral-30'),
+    'stroke-hover': ('neutral-60', 'neutral-45'),
+    'stroke-subtle': ('neutral-90', 'neutral-20'),
+    'stroke-transparent': (#c4c5cc80, #3d404d4d),
+    'stroke-muted': ('neutral-95', 'neutral-16'),
+    // Entities
+    'set': ('brand-40', 'brand-25'),
+    'folder': ('misc-golden-darker', 'misc-golden-default'),
+    // Status
+    'success': ('misc-green-darker', 'misc-green-default'),
+    'success-hover': ('misc-green-default', 'misc-green-lighter'),
+    'error': ('misc-warm-red-darker', 'misc-warm-red-default'),
+    'error-hover': ('misc-warm-red-default', 'misc-warm-red-lighter'),
+    'error-desaturated': ('misc-warm-red-subtle', 'misc-warm-red-desaturated'),
+    'warning': ('misc-yellow-darker', 'misc-yellow-default'),
+    'warning-hover': ('misc-yellow-default', 'misc-yellow-lighter'),
+    'like': ('misc-red-darker', 'misc-red-default'),
+    'like-hover': ('misc-red-default', 'misc-red-lighter'),
+    // The round handle of switches and sliders: white on light surfaces, light grey on dark ones.
+    'knob': ('neutral-white', 'neutral-80'),
+    'knob-active': ('neutral-white', 'neutral-white'),
+    // Effects
+    'shadow': (#14151a1f, #00000040),
+    'shadow-strong': (#14151a33, #00000059),
+    'backdrop': (#14151a66, #0a0b0db3),
+    'skeleton-highlight': (#ffffffb3, #ffffff0d)
+);

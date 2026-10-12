@@ -1,7 +1,0 @@
-@use 'mixins/_common.scss' as common;
-
-.NumberFieldGroup {
-  @include common.reset-appearance;
-
-  display: flex;
-}

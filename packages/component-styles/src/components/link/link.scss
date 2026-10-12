@@ -1,0 +1,52 @@
+// Link (Figma "Link"): neutral or branded text with an optional icon. Composes `.fl-interactive`,
+// `.fl-focus-ring` and a text style.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-link {
+        --_fl-focus-ring-offset: var(--fl-spacing-0-5);
+
+        display: inline-flex;
+        align-items: center;
+        gap: var(--fl-link-gap, var(--_fl-link-gap, var(--fl-spacing-1-5)));
+        border-radius: var(--fl-radius-xs);
+        color: var(--fl-link-color, var(--_fl-link-color));
+        text-decoration: var(--fl-link-decoration, var(--_fl-link-decoration, none));
+        text-underline-offset: 0.2em;
+
+        & :where(svg) {
+            flex-shrink: 0;
+            inline-size: var(--fl-link-icon-size, var(--_fl-link-icon-size, 1.15em));
+            block-size: var(--fl-link-icon-size, var(--_fl-link-icon-size, 1.15em));
+        }
+
+        @include fl.hover {
+            color: var(--fl-link-color-hover, var(--_fl-link-color-hover));
+        }
+
+        @include fl.active {
+            color: var(--fl-link-color-active, var(--_fl-link-color-active));
+        }
+
+        @include fl.disabled {
+            color: var(--fl-link-color-disabled, var(--_fl-link-color-disabled, var(--fl-color-text-disabled)));
+        }
+    }
+
+    .fl-link--neutral {
+        --_fl-link-color: var(--fl-color-text-2);
+        --_fl-link-color-hover: var(--fl-color-brand-light);
+        --_fl-link-color-active: var(--fl-color-brand);
+    }
+
+    .fl-link--branded {
+        --_fl-link-color: var(--fl-color-brand-light);
+        --_fl-link-color-hover: var(--fl-color-brand-light-hover);
+        --_fl-link-color-active: var(--fl-color-brand-light);
+    }
+
+    .fl-link--underline {
+        --_fl-link-decoration: underline;
+    }
+}

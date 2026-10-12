@@ -1,0 +1,6 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-grid { box-sizing: border-box; display: var(--fl-grid-display, var(--_fl-grid-display, grid)); min-inline-size: 0; gap: var(--fl-grid-gap, var(--_fl-grid-gap, 0)); }
+    .fl-grid-item { min-inline-size: 0; }
+}

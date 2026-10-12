@@ -1,0 +1,103 @@
+// QR code: the code drawn in the text colour on a raised panel, framed by viewfinder corners, with a frosted overlay
+// while it is generated or failed, and the actions below. The styled packages render the code as an SVG in
+// `currentColor` on a transparent background, so it follows the theme.
+@use '../../styles/layers';
+
+@layer fl.components {
+    // A one-column grid: the frame and the overlay share the first cell, so the overlay covers the code only and the
+    // actions below stay usable.
+    .fl-qr-code-root {
+        position: relative;
+        display: inline-grid;
+        justify-items: center;
+        gap: var(--fl-qr-code-gap, var(--_fl-qr-code-gap, var(--fl-spacing-5)));
+        padding: var(--fl-qr-code-padding, var(--_fl-qr-code-padding, var(--fl-spacing-8)));
+        border-radius: var(--fl-qr-code-radius, var(--_fl-qr-code-radius, var(--fl-radius-lg)));
+        background-color: var(--fl-qr-code-bg, var(--_fl-qr-code-bg, var(--fl-color-bg-2-hover)));
+    }
+
+    .fl-qr-code-frame {
+        --_fl-qr-code-corner: var(--fl-qr-code-corner-size, var(--_fl-qr-code-corner-size, var(--fl-spacing-7)));
+        --_fl-qr-code-corner-stroke: var(--fl-qr-code-corner-width, var(--_fl-qr-code-corner-width, var(--fl-border-width-thick)));
+
+        position: relative;
+        grid-area: 1 / 1;
+        display: grid;
+        place-items: center;
+        inline-size: var(--qr-code-width, auto);
+        block-size: var(--qr-code-height, auto);
+        color: var(--fl-qr-code-color, var(--_fl-qr-code-color, var(--fl-color-text-2)));
+        fill: currentColor;
+
+        & > :where(svg, canvas, img) {
+            display: block;
+            inline-size: 100%;
+            block-size: 100%;
+        }
+
+        // The viewfinder: a border drawn only at the corners. The conic mask keeps a corner square of the corner size
+        // in each tile; the tiles are the box minus one corner, so the second tile ends on the far edges. The corner
+        // size must be a length: a percentage would be of the tile, not of the box.
+        &::after {
+            content: '';
+            position: absolute;
+            inset: calc(var(--fl-spacing-3) * -1);
+            border: var(--_fl-qr-code-corner-stroke) solid
+                var(--fl-qr-code-corner-color, var(--_fl-qr-code-corner-color, var(--fl-color-text-6)));
+            border-radius: var(--fl-radius-md);
+            pointer-events: none;
+            mask:
+                conic-gradient(at var(--_fl-qr-code-corner) var(--_fl-qr-code-corner), transparent 75%, #000 0)
+                0 0 / calc(100% - var(--_fl-qr-code-corner)) calc(100% - var(--_fl-qr-code-corner));
+        }
+
+        &:where([data-status-loading]) {
+            opacity: 0.4;
+        }
+    }
+
+    // Shown over the code while it is generated, when it failed or when it is ready (a logo, a message).
+    .fl-qr-code-overlay {
+        position: relative;
+        z-index: 1;
+        grid-area: 1 / 1;
+        align-self: stretch;
+        justify-self: center;
+        display: grid;
+        box-sizing: border-box;
+        inline-size: calc(var(--qr-code-width, 100%) + var(--fl-spacing-3) * 2);
+        margin-block: calc(var(--fl-spacing-3) * -1);
+        place-items: center;
+        padding: var(--fl-spacing-4);
+        border-radius: var(--fl-radius-md);
+        color: var(--fl-color-text-primary);
+        text-align: center;
+        transition-property: opacity, scale;
+        transition-duration: var(--fl-duration-slow);
+        transition-timing-function: var(--fl-ease-out);
+
+        &:where([data-status-loading], [data-status-error]) {
+            backdrop-filter: blur(10px);
+            background-color: color-mix(in srgb, var(--fl-color-bg-2-hover) 40%, transparent);
+            box-shadow:
+                inset 0 0 0 1px var(--fl-color-stroke-transparent),
+                var(--fl-shadow-raised);
+        }
+
+        &:where([data-status-error]) {
+            color: var(--fl-color-error);
+        }
+
+        &:where([data-starting], [data-ending]) {
+            opacity: 0;
+            scale: 0.9;
+        }
+    }
+
+    .fl-qr-code-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--fl-spacing-2);
+    }
+}

@@ -1,0 +1,19 @@
+// Public SCSS API of @flippo-software/component-styles:
+//
+//     @use '@flippo-software/component-styles/scss' as fl;
+//
+//     .my-card {
+//         @include fl.text('body', 'stronger');
+//         @include fl.focus-ring;
+//     }
+//
+// Tokens are Sass maps (`fl.$neutral`, `fl.$semantic`, `fl.$text-styles`, `fl.$spacing`…); the mixins write
+// them as custom properties (`fl.custom-properties`) or apply the shared patterns (`fl.popup`, `fl.control`…).
+@forward 'tokens/color';
+@forward 'tokens/typography';
+@forward 'tokens/scale';
+@forward 'mixins/tokens';
+@forward 'mixins/state';
+@forward 'mixins/typography';
+@forward 'mixins/layout';
+@forward 'mixins/patterns';

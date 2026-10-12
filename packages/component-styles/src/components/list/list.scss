@@ -1,0 +1,98 @@
+// List: items with a marker (numbers or bullets from the list machine), subheaders that name a nested list, and
+// interactive items (`interactive` on List.Item) that behave like rows of a menu. A nested list sits inside its
+// parent item, indented under the item's text.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-list-gap, var(--_fl-list-gap, var(--fl-spacing-2)));
+        margin: 0;
+        padding: 0;
+        color: var(--fl-list-color, var(--_fl-list-color, var(--fl-color-text-3)));
+        list-style: none;
+
+        &:where([data-orientation='horizontal']) {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: var(--fl-list-gap, var(--_fl-list-gap, var(--fl-spacing-4)));
+        }
+
+        // Under the parent item's text: past the marker and its gap.
+        &:where([data-nested]) {
+            flex-basis: 100%;
+            margin-block-start: var(--fl-list-gap, var(--_fl-list-gap, var(--fl-spacing-2)));
+            padding-inline-start: var(
+                --fl-list-indent,
+                var(
+                    --_fl-list-indent,
+                    calc(
+                        var(--fl-list-marker-width, var(--_fl-list-marker-width, 1.25em)) +
+                            var(--fl-list-marker-gap, var(--_fl-list-marker-gap, var(--fl-spacing-3)))
+                    )
+                )
+            );
+        }
+    }
+
+    .fl-list-item {
+        box-sizing: border-box;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: var(--fl-list-marker-gap, var(--_fl-list-marker-gap, var(--fl-spacing-3)));
+
+        // An interactive item is a row: padding, radius and the states of a menu item.
+        &:where([data-interactive]) {
+            @include fl.interactive;
+            @include fl.focus-ring;
+
+            --_fl-focus-ring-offset: calc(-1 * var(--fl-focus-width));
+
+            padding-block: var(--fl-spacing-2);
+            padding-inline: var(--fl-list-item-padding-inline, var(--_fl-list-item-padding-inline, var(--fl-spacing-4)));
+            border-radius: var(--fl-list-item-radius, var(--_fl-list-item-radius, var(--fl-radius-item)));
+            background-color: var(--fl-list-item-bg, var(--_fl-list-item-bg, transparent));
+
+            @include fl.hover {
+                --_fl-list-item-bg: var(--fl-color-bg-2-hover);
+
+                color: var(--fl-color-text-strong);
+            }
+
+            @include fl.active {
+                --_fl-list-item-bg: var(--fl-color-bg-3-alt);
+            }
+
+            @include fl.disabled {
+                --_fl-list-item-bg: transparent;
+
+                color: var(--fl-color-text-disabled);
+            }
+        }
+
+        &:where([data-interactive][data-selected]) {
+            --_fl-list-item-bg: color-mix(in srgb, var(--fl-color-brand-light) 16%, transparent);
+            --_fl-list-marker-color: var(--fl-color-brand-light);
+
+            color: var(--fl-color-text-strong);
+        }
+    }
+
+    .fl-list-marker {
+        flex-shrink: 0;
+        min-inline-size: var(--fl-list-marker-width, var(--_fl-list-marker-width, 1.25em));
+        color: var(--fl-list-marker-color, var(--_fl-list-marker-color, var(--fl-color-text-5)));
+        font-variant-numeric: tabular-nums;
+        text-align: end;
+    }
+
+    .fl-list-subheader {
+        display: block;
+        color: var(--fl-list-subheader-color, var(--_fl-list-subheader-color, var(--fl-color-text-5)));
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+}

@@ -1,7 +1,0 @@
-@use 'mixins/_font.scss' as font;
-
-.CardTitle {
-  @include font.heading-3('default');
-  color: var(--f-color-text-primary);
-  margin: 0;
-}

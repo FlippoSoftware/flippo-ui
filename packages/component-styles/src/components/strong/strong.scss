@@ -1,0 +1,5 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-strong { font-weight: var(--fl-text-body-weight-stronger); }
+}

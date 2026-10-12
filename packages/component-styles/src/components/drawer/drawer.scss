@@ -1,0 +1,159 @@
+// Drawer: a panel that slides in from an edge (`data-swipe-direction-*`) and follows the swipe gesture
+// (`--swipe-movement`, snap points). Title, description, close and actions use the dialog styles.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-drawer-backdrop {
+        --_fl-backdrop-duration: var(--fl-duration-slower);
+
+        z-index: var(--fl-z-modal);
+    }
+
+    .fl-drawer-popup {
+        --_fl-drawer-movement: var(--swipe-movement, 0px);
+        --_fl-drawer-radius: var(--fl-drawer-radius, var(--fl-radius-popup));
+
+        position: fixed;
+        z-index: var(--fl-z-modal);
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-drawer-gap, var(--_fl-drawer-gap, var(--fl-spacing-4)));
+        max-block-size: 100dvh;
+        max-inline-size: 100vw;
+        margin: 0;
+        padding: var(--fl-drawer-padding, var(--_fl-drawer-padding, var(--fl-spacing-6)));
+        overflow: auto;
+        border: 0;
+        background-color: var(--fl-drawer-bg, var(--_fl-drawer-bg, var(--fl-color-bg-1)));
+        box-shadow: var(--fl-shadow-modal);
+        color: var(--fl-color-text-primary);
+        outline: none;
+        overscroll-behavior: contain;
+        transition: translate var(--fl-duration-slower) var(--fl-ease-emphasized);
+
+        &:where([data-swiping]) {
+            transition-duration: 0ms;
+        }
+
+        // From the bottom (the default).
+        &:where([data-swipe-direction-down], :not([data-swipe-direction-up], [data-swipe-direction-left], [data-swipe-direction-right])) {
+            inset: auto 0 0;
+            inline-size: auto;
+            border-radius: var(--_fl-drawer-radius) var(--_fl-drawer-radius) 0 0;
+            translate: 0 var(--_fl-drawer-movement);
+
+            @include fl.transition-hidden {
+                translate: 0 100%;
+            }
+        }
+
+        &:where([data-swipe-direction-up]) {
+            inset: 0 0 auto;
+            inline-size: auto;
+            border-radius: 0 0 var(--_fl-drawer-radius) var(--_fl-drawer-radius);
+            translate: 0 var(--_fl-drawer-movement);
+
+            @include fl.transition-hidden {
+                translate: 0 -100%;
+            }
+        }
+
+        &:where([data-swipe-direction-left]) {
+            inset: 0 auto 0 0;
+            inline-size: var(--fl-drawer-width, var(--_fl-drawer-width, 25rem));
+            // Full height: in the top layer a `[popover]` is `fit-content` tall by default.
+            block-size: auto;
+            border-radius: 0 var(--_fl-drawer-radius) var(--_fl-drawer-radius) 0;
+            translate: var(--_fl-drawer-movement) 0;
+
+            @include fl.transition-hidden {
+                translate: -100% 0;
+            }
+        }
+
+        &:where([data-swipe-direction-right]) {
+            inset: 0 0 0 auto;
+            inline-size: var(--fl-drawer-width, var(--_fl-drawer-width, 25rem));
+            // Full height: in the top layer a `[popover]` is `fit-content` tall by default.
+            block-size: auto;
+            border-radius: var(--_fl-drawer-radius) 0 0 var(--_fl-drawer-radius);
+            translate: var(--_fl-drawer-movement) 0;
+
+            @include fl.transition-hidden {
+                translate: 100% 0;
+            }
+        }
+
+        // Snap points: the popup is as tall (wide) as the largest point and moves to the current one.
+        &:where([data-snap-points]):where([data-swipe-direction-down], [data-swipe-direction-up]) {
+            block-size: var(--snap-point-max);
+        }
+
+        &:where([data-snap-points]):where([data-swipe-direction-left], [data-swipe-direction-right]) {
+            inline-size: var(--snap-point-max);
+        }
+
+        &:where([data-snap-points][data-swipe-direction-down]) {
+            translate: 0 calc(var(--snap-point-transform, 0px) + var(--_fl-drawer-movement));
+        }
+
+        &:where([data-snap-points][data-swipe-direction-up]) {
+            translate: 0 calc(var(--snap-point-transform, 0px) + var(--_fl-drawer-movement));
+        }
+
+        &:where([data-snap-points][data-swipe-direction-left]),
+        &:where([data-snap-points][data-swipe-direction-right]) {
+            translate: calc(var(--snap-point-transform, 0px) + var(--_fl-drawer-movement)) 0;
+        }
+    }
+
+    // The handle at the top of a bottom drawer.
+    .fl-drawer-drag {
+        display: block;
+        flex-shrink: 0;
+        align-self: center;
+        inline-size: var(--fl-spacing-12);
+        block-size: var(--fl-spacing-1);
+        margin-block-end: var(--fl-spacing-2);
+        border-radius: var(--fl-radius-full);
+        background-color: var(--fl-color-stroke);
+        cursor: grab;
+        touch-action: none;
+        transition: background-color var(--fl-duration-fast) var(--fl-ease-standard);
+
+        @include fl.hover {
+            background-color: var(--fl-color-stroke-hover);
+        }
+
+        &:where([data-dragging]) {
+            background-color: var(--fl-color-stroke-hover);
+            cursor: grabbing;
+        }
+
+        // The handle sits on the inner edge, the one the drawer is swiped away from: under a top drawer, and upright
+        // beside a side drawer.
+        :where(.fl-drawer-popup[data-swipe-direction-up]) > & {
+            order: 1;
+            margin-block: var(--fl-spacing-2) 0;
+        }
+
+        :where(.fl-drawer-popup:is([data-swipe-direction-left], [data-swipe-direction-right])) > & {
+            position: absolute;
+            inset-block-start: 50%;
+            inline-size: var(--fl-spacing-1);
+            block-size: var(--fl-spacing-12);
+            margin: 0;
+            translate: 0 -50%;
+        }
+
+        :where(.fl-drawer-popup[data-swipe-direction-right]) > & {
+            inset-inline-start: var(--fl-spacing-2);
+        }
+
+        :where(.fl-drawer-popup[data-swipe-direction-left]) > & {
+            inset-inline-end: var(--fl-spacing-2);
+        }
+    }
+}

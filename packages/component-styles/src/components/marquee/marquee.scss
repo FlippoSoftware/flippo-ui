@@ -1,0 +1,82 @@
+// Marquee: the copies of the content scroll in a loop. The marquee machine sets the `--marquee-*` variables
+// (duration, direction, play state, pause on hover/click); these styles run the animation and fade the edges.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-marquee-root {
+        --_fl-marquee-fade: var(--fl-marquee-fade, 0px);
+
+        display: flex;
+        inline-size: 100%;
+        overflow: hidden;
+        mask-image: linear-gradient(
+            to right,
+            transparent,
+            #000 var(--_fl-marquee-fade),
+            #000 calc(100% - var(--_fl-marquee-fade)),
+            transparent
+        );
+
+        &:where([data-orientation='vertical']) {
+            flex-direction: column;
+            inline-size: fit-content;
+            mask-image: linear-gradient(
+                to bottom,
+                transparent,
+                #000 var(--_fl-marquee-fade),
+                #000 calc(100% - var(--_fl-marquee-fade)),
+                transparent
+            );
+        }
+
+        &:hover > * {
+            --marquee-play: var(--marquee-pause-on-hover);
+        }
+
+        &:active > * {
+            --marquee-play: var(--marquee-pause-on-click);
+        }
+    }
+
+    .fl-marquee-root--fade {
+        --_fl-marquee-fade: var(--fl-marquee-fade, var(--fl-spacing-8));
+    }
+
+    .fl-marquee-track {
+        --_fl-marquee-x: 1;
+        --_fl-marquee-y: 0;
+
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        gap: var(--fl-marquee-gap, var(--_fl-marquee-gap, var(--fl-spacing-6)));
+        min-inline-size: var(--marquee-min-width, auto);
+        padding-inline-end: var(--fl-marquee-gap, var(--_fl-marquee-gap, var(--fl-spacing-6)));
+        animation-name: fl-marquee-scroll;
+        animation-timing-function: linear;
+        animation-duration: var(--marquee-duration, 10s);
+        animation-delay: var(--marquee-delay, 0s);
+        animation-direction: var(--marquee-direction, normal);
+        animation-iteration-count: var(--marquee-iteration-count, infinite);
+        animation-play-state: var(--marquee-play, running);
+
+        :where([data-orientation='vertical']) > & {
+            --_fl-marquee-x: 0;
+            --_fl-marquee-y: 1;
+
+            flex-direction: column;
+            padding-inline-end: 0;
+            padding-block-end: var(--fl-marquee-gap, var(--_fl-marquee-gap, var(--fl-spacing-6)));
+        }
+    }
+
+    @keyframes fl-marquee-scroll {
+        from {
+            translate: 0 0;
+        }
+
+        to {
+            translate: calc(-100% * var(--_fl-marquee-x)) calc(-100% * var(--_fl-marquee-y));
+        }
+    }
+}

@@ -1,0 +1,24 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-text { color: var(--fl-typography-color, var(--_fl-typography-color, inherit)); text-align: var(--fl-typography-align, var(--_fl-typography-align, inherit)); text-transform: var(--fl-typography-transform, var(--_fl-typography-transform, none)); overflow: var(--fl-typography-overflow, var(--_fl-typography-overflow, visible)); white-space: var(--fl-typography-white-space, var(--_fl-typography-white-space, normal)); text-overflow: var(--fl-typography-text-overflow, var(--_fl-typography-text-overflow, clip)); }
+    .fl-text--primary { --_fl-typography-color: var(--fl-color-text-primary); }
+    .fl-text--secondary { --_fl-typography-color: var(--fl-color-text-2); }
+    .fl-text--tertiary { --_fl-typography-color: var(--fl-color-text-3); }
+    .fl-text--quaternary { --_fl-typography-color: var(--fl-color-text-4); }
+    .fl-text--white { --_fl-typography-color: var(--fl-color-text-white); }
+    .fl-text--disabled { --_fl-typography-color: var(--fl-color-text-disabled); }
+    .fl-text--brand { --_fl-typography-color: var(--fl-color-brand-light); }
+    .fl-text--success { --_fl-typography-color: var(--fl-color-success); }
+    .fl-text--error { --_fl-typography-color: var(--fl-color-error); }
+    .fl-text--warning { --_fl-typography-color: var(--fl-color-warning); }
+    .fl-text--left { --_fl-typography-align: left; }
+    .fl-text--center { --_fl-typography-align: center; }
+    .fl-text--right { --_fl-typography-align: right; }
+    .fl-text--justify { --_fl-typography-align: justify; }
+    .fl-text--none { --_fl-typography-transform: none; }
+    .fl-text--uppercase { --_fl-typography-transform: uppercase; }
+    .fl-text--lowercase { --_fl-typography-transform: lowercase; }
+    .fl-text--capitalize { --_fl-typography-transform: capitalize; }
+    .fl-text--truncate { --_fl-typography-overflow: hidden; --_fl-typography-white-space: nowrap; --_fl-typography-text-overflow: ellipsis; }
+}

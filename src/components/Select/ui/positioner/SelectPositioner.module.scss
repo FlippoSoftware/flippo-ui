@@ -1,9 +1,0 @@
-@use 'mixins/_common.scss' as common;
-
-.SelectPositioner {
-  @include common.reset-appearance();
-
-  z-index: 1;
-  -webkit-user-select: none;
-  user-select: none;
-}

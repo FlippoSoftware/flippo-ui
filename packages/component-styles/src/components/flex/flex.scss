@@ -1,0 +1,5 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-flex { box-sizing: border-box; display: var(--fl-flex-display, var(--_fl-flex-display, flex)); min-inline-size: 0; gap: var(--fl-flex-gap, var(--_fl-flex-gap, 0)); }
+}

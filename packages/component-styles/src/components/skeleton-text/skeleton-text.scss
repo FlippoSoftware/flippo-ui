@@ -1,0 +1,26 @@
+// Skeleton text: one bar per line of the current font. Each line is `1lh` tall (the text's line height) with a
+// rounded bar of about the height of the letters in the middle, so the skeleton has the height of the paragraph it
+// replaces, in any text style. The animation modifiers of the skeleton sit on the root; the lines inherit them.
+@use '../../styles/layers';
+@use '../skeleton/skeleton';
+
+@layer fl.components {
+    .fl-skeleton-text {
+        display: flex;
+        flex-direction: column;
+        row-gap: var(--fl-skeleton-text-gap, var(--_fl-skeleton-text-gap, 0px));
+        inline-size: var(--fl-skeleton-text-width, var(--_fl-skeleton-text-width, 100%));
+    }
+
+    .fl-skeleton-text-line {
+        --_fl-skeleton-radius: var(--fl-radius-full);
+        --_fl-skeleton-text-bar: var(--fl-skeleton-text-bar, 0.7em);
+
+        block-size: var(--_fl-skeleton-text-bar);
+        margin-block: calc((1lh - var(--_fl-skeleton-text-bar)) / 2);
+
+        &:last-child:not(:first-child) {
+            inline-size: var(--fl-skeleton-text-last-width, var(--_fl-skeleton-text-last-width, 62%));
+        }
+    }
+}

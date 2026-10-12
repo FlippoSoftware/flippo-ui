@@ -1,0 +1,19 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-code { box-sizing: border-box; font-size: var(--fl-code-font-size, var(--_fl-code-font-size, 0.875em)); line-height: var(--fl-code-line-height, var(--_fl-code-line-height, 1.5)); color: var(--fl-code-color, var(--_fl-code-color, var(--fl-color-text-primary))); font-family: var(--fl-font-family-mono); padding: var(--fl-code-padding, var(--_fl-code-padding, 0.125em 0.4em)); border-radius: var(--fl-code-radius, var(--_fl-code-radius, var(--fl-radius-xs))); background-color: var(--fl-code-bg, var(--_fl-code-bg, var(--fl-color-bg-3))); box-shadow: var(--fl-code-shadow, var(--_fl-code-shadow, none)); }
+    .fl-code--size-1 { --_fl-code-font-size: var(--fl-text-label-size); --_fl-code-line-height: var(--fl-text-label-line-height); }
+    .fl-code--size-2 { --_fl-code-font-size: var(--fl-text-body-minus-size); --_fl-code-line-height: var(--fl-text-body-minus-line-height); }
+    .fl-code--size-3 { --_fl-code-font-size: var(--fl-text-body-size); --_fl-code-line-height: var(--fl-text-body-line-height); }
+    .fl-code--size-4 { --_fl-code-font-size: var(--fl-text-body-plus-size); --_fl-code-line-height: var(--fl-text-body-plus-line-height); }
+    .fl-code--size-5 { --_fl-code-font-size: var(--fl-text-heading-3-size); --_fl-code-line-height: var(--fl-text-heading-3-line-height); }
+    .fl-code--size-6 { --_fl-code-font-size: var(--fl-text-heading-2-size); --_fl-code-line-height: var(--fl-text-heading-2-line-height); }
+    .fl-code--size-7 { --_fl-code-font-size: var(--fl-text-heading-1-size); --_fl-code-line-height: var(--fl-text-heading-1-line-height); }
+    .fl-code--size-8 { --_fl-code-font-size: var(--fl-text-title-3-size); --_fl-code-line-height: var(--fl-text-title-3-line-height); }
+    .fl-code--size-9 { --_fl-code-font-size: var(--fl-text-title-2-size); --_fl-code-line-height: var(--fl-text-title-2-line-height); }
+    .fl-code--ghost { --_fl-code-bg: transparent; --_fl-code-padding: 0; }
+    .fl-code--soft { --_fl-code-bg: var(--fl-color-bg-3); }
+    .fl-code--outline { --_fl-code-bg: transparent; --_fl-code-shadow: inset 0 0 0 var(--fl-border-width-thin) var(--fl-color-stroke-subtle); }
+    .fl-code--solid { --_fl-code-bg: var(--fl-color-brand-light); --_fl-code-color: var(--fl-color-text-white); }
+
+}

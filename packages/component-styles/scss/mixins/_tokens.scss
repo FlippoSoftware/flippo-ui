@@ -1,0 +1,95 @@
+// Mixins that write the design tokens as custom properties.
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:meta';
+@use '../tokens/color';
+@use '../tokens/typography';
+@use '../tokens/scale';
+
+// A semantic value: a primitive name (`'neutral-90'`) becomes its custom property, a colour stays as it is.
+@function -color-ref($value) {
+    @if meta.type-of($value) == 'string' {
+        @return var(--fl-color-#{$value});
+    }
+    @return $value;
+}
+
+// Writes every primitive colour: `--fl-color-neutral-90`, `--fl-color-brand-40`, `--fl-color-misc-red-default`…
+@mixin primitive-colors {
+    @each $group, $palette in color.$primitives {
+        @each $step, $value in $palette {
+            --fl-color-#{$group}-#{$step}: #{$value};
+        }
+    }
+}
+
+// Writes the semantic colours. Without `$scheme` every token is a `light-dark()` pair, so it follows the
+// `color-scheme` of the element that uses it; `'light'` or `'dark'` writes the values of one scheme only.
+@mixin semantic-colors($scheme: null) {
+    @each $name, $pair in color.$semantic {
+        @if $scheme == 'light' {
+            --fl-color-#{$name}: #{-color-ref(list.nth($pair, 1))};
+        } @else if $scheme == 'dark' {
+            --fl-color-#{$name}: #{-color-ref(list.nth($pair, 2))};
+        } @else {
+            --fl-color-#{$name}: light-dark(#{-color-ref(list.nth($pair, 1))}, #{-color-ref(list.nth($pair, 2))});
+        }
+    }
+    --fl-focus-color: var(--fl-color-brand-light);
+}
+
+// Writes the typography tokens: font families and `--fl-text-<style>-size|line-height|letter-spacing|weight-*`.
+@mixin typography-tokens {
+    --fl-font-family: #{typography.$font-family};
+    --fl-font-family-mono: #{typography.$font-family-mono};
+
+    @each $style, $config in typography.$text-styles {
+        --fl-text-#{$style}-size: #{map.get($config, size)};
+        --fl-text-#{$style}-line-height: #{map.get($config, line-height)};
+        --fl-text-#{$style}-letter-spacing: #{map.get($config, letter-spacing)};
+
+        @each $weight in typography.$text-weights {
+            $index: list.index(typography.$text-weights, $weight);
+            --fl-text-#{$style}-weight-#{$weight}: #{list.nth(map.get($config, weights), $index)};
+        }
+    }
+}
+
+// Writes spacing, radii, sizes, borders, shadows, motion, z-indices and focus ring tokens.
+@mixin scale-tokens {
+    @each $name, $value in scale.$spacing {
+        --fl-spacing-#{$name}: #{$value};
+    }
+    @each $name, $value in scale.$radius {
+        --fl-radius-#{$name}: #{$value};
+    }
+    @each $name, $value in scale.$sizes {
+        --fl-size-#{$name}: #{$value};
+    }
+    @each $name, $value in scale.$border-width {
+        --fl-border-width-#{$name}: #{$value};
+    }
+    @each $name, $value in scale.$shadow {
+        --fl-shadow-#{$name}: #{$value};
+    }
+    @each $name, $value in scale.$duration {
+        --fl-duration-#{$name}: #{$value};
+    }
+    @each $name, $value in scale.$ease {
+        --fl-ease-#{$name}: #{$value};
+    }
+    @each $name, $value in scale.$z-index {
+        --fl-z-#{$name}: #{$value};
+    }
+    @each $name, $value in scale.$focus {
+        --fl-focus-#{$name}: #{$value};
+    }
+}
+
+// Writes every token. Use it in your own selector to scope the design system to a part of the page.
+@mixin custom-properties {
+    @include primitive-colors;
+    @include semantic-colors;
+    @include typography-tokens;
+    @include scale-tokens;
+}

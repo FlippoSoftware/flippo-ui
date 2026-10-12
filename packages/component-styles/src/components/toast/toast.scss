@@ -1,0 +1,143 @@
+// Toast (Figma "Toast"): a pill with an icon, a message, an optional action ("Отменить") and a close button,
+// stacked at the bottom of the viewport. `data-type` (success, warning, error, loading, or your own) colours the
+// icon; warning and error colour the message too. The stack follows the toast machine's CSS variables.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-toast-viewport {
+        position: fixed;
+        z-index: var(--fl-z-toast);
+        inset-block-end: var(--fl-toast-offset, var(--_fl-toast-offset, var(--fl-spacing-6)));
+        inset-inline: 0;
+        inline-size: min(var(--fl-toast-width, var(--_fl-toast-width, 32rem)), calc(100vw - 2 * var(--fl-spacing-4)));
+        margin-inline: auto;
+        outline: none;
+    }
+
+    .fl-toast-root {
+        --_fl-toast-gap: var(--fl-spacing-2);
+        --_fl-toast-offset-y: calc(
+            var(--toast-offset-y, 0px) * -1 + var(--toast-index, 0) * var(--_fl-toast-gap) * -1 +
+                var(--toast-swipe-movement-y, 0px)
+        );
+
+        position: absolute;
+        inset-block-end: 0;
+        inset-inline: 0;
+        z-index: calc(1000 - var(--toast-index, 0));
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        gap: var(--fl-spacing-3);
+        min-block-size: var(--fl-toast-height, var(--_fl-toast-height, var(--fl-spacing-12)));
+        padding-block: var(--fl-spacing-1-5);
+        padding-inline: var(--fl-spacing-4) var(--fl-spacing-2);
+        border-radius: var(--fl-toast-radius, var(--_fl-toast-radius, var(--fl-radius-xl)));
+        background-color: var(--fl-toast-bg, var(--_fl-toast-bg, var(--fl-color-bg-2)));
+        box-shadow: var(--fl-shadow-popup);
+        color: var(--fl-toast-color, var(--_fl-toast-color, var(--fl-color-text-primary)));
+        user-select: none;
+        cursor: default;
+        transition-property: translate, scale, opacity, block-size;
+        transition-duration: var(--fl-duration-slower);
+        transition-timing-function: var(--fl-ease-out);
+        translate: var(--toast-swipe-movement-x, 0px)
+            calc(var(--toast-swipe-movement-y, 0px) + min(var(--toast-index, 0), 10) * -20%);
+        scale: calc(max(0, 1 - var(--toast-index, 0) * 0.1));
+
+        // The gap between expanded toasts stays hoverable.
+        &::after {
+            content: '';
+            position: absolute;
+            inset-block-start: 100%;
+            inset-inline: 0;
+            block-size: calc(var(--_fl-toast-gap) + 1px);
+        }
+
+        &:where([data-expanded]) {
+            translate: var(--toast-swipe-movement-x, 0px) var(--_fl-toast-offset-y);
+            scale: 1;
+        }
+
+        @include fl.transition-hidden {
+            translate: 0 150%;
+        }
+
+        &:where([data-limited]) {
+            opacity: 0;
+        }
+
+        &:where([data-ending-style]) {
+            opacity: 0;
+        }
+
+        &:where([data-ending-style][data-swipe-direction='up']) {
+            translate: 0 calc(var(--toast-swipe-movement-y, 0px) - 150%);
+        }
+
+        &:where([data-ending-style][data-swipe-direction='down']) {
+            translate: 0 calc(var(--toast-swipe-movement-y, 0px) + 150%);
+        }
+
+        &:where([data-ending-style][data-swipe-direction='left']) {
+            translate: calc(var(--toast-swipe-movement-x, 0px) - 150%) var(--_fl-toast-offset-y);
+        }
+
+        &:where([data-ending-style][data-swipe-direction='right']) {
+            translate: calc(var(--toast-swipe-movement-x, 0px) + 150%) var(--_fl-toast-offset-y);
+        }
+
+        &:where([data-type='success']) {
+            --_fl-toast-accent: var(--fl-color-brand-light);
+        }
+
+        &:where([data-type='warning']) {
+            --_fl-toast-accent: var(--fl-color-warning);
+            --_fl-toast-message-color: var(--fl-color-warning);
+        }
+
+        &:where([data-type='error']) {
+            --_fl-toast-accent: var(--fl-color-error);
+            --_fl-toast-message-color: var(--fl-color-error-hover);
+        }
+
+        &:where([data-type='like']) {
+            --_fl-toast-accent: var(--fl-color-like);
+        }
+    }
+
+    .fl-toast-icon {
+        --_fl-icon-size: var(--fl-spacing-5);
+
+        color: var(--fl-toast-accent, var(--_fl-toast-accent, var(--fl-color-text-4)));
+    }
+
+    .fl-toast-content {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-inline-size: 0;
+    }
+
+    .fl-toast-title {
+        color: var(--fl-toast-message-color, var(--_fl-toast-message-color, var(--fl-color-text-primary)));
+    }
+
+    .fl-toast-description {
+        color: var(--fl-toast-message-color, var(--_fl-toast-message-color, var(--fl-color-text-primary)));
+    }
+
+    // The countdown ring of an undo toast.
+    .fl-toast-timer {
+        display: inline-grid;
+        flex-shrink: 0;
+        place-items: center;
+        inline-size: var(--fl-spacing-5);
+        block-size: var(--fl-spacing-5);
+        border: var(--fl-border-width-default) solid currentColor;
+        border-radius: 50%;
+        color: var(--fl-color-text-primary);
+        font-variant-numeric: tabular-nums;
+    }
+}

@@ -1,0 +1,4 @@
+// The cascade layers of the package, declared first in every stylesheet so their order never depends on the
+// order of imports. Your own unlayered styles always win over them. `flippo-top-layer` comes first, so the reset of
+// `[popover]` elements that @flippo-software/web-components injects is weaker than every style of the package.
+@layer flippo-top-layer, fl.reset, fl.tokens, fl.shared, fl.components;

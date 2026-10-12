@@ -1,7 +1,0 @@
-@mixin elevation-1() {
-  box-shadow: 0 10px 40px 14px rgba($color: #000000, $alpha: 0.25);
-}
-
-@mixin elevation-modal() {
-  box-shadow: 0 40px 104px 14px rgba($color: #000000, $alpha: 0.35);
-}

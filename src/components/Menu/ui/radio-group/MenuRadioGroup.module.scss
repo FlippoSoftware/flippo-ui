@@ -1,5 +1,0 @@
-@use 'mixins/_flex' as flex;
-
-.MenuRadioGroup {
-  @include flex.display(flex, column, null, null, var(--f-spacing-2));
-}

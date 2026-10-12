@@ -1,0 +1,58 @@
+// Avatar: a round picture with initials as the fallback.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-avatar-root {
+        position: relative;
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        inline-size: var(--fl-avatar-size, var(--_fl-avatar-size, var(--fl-spacing-10)));
+        block-size: var(--fl-avatar-size, var(--_fl-avatar-size, var(--fl-spacing-10)));
+        overflow: hidden;
+        border-radius: var(--fl-avatar-radius, var(--_fl-avatar-radius, 50%));
+        background-color: var(--fl-avatar-bg, var(--_fl-avatar-bg, var(--fl-color-bg-3)));
+        color: var(--fl-avatar-color, var(--_fl-avatar-color, var(--fl-color-text-2)));
+        font-size: calc(var(--fl-avatar-size, var(--_fl-avatar-size, var(--fl-spacing-10))) * 0.4);
+        font-weight: 600;
+        line-height: 1;
+        vertical-align: middle;
+        user-select: none;
+    }
+
+    .fl-avatar-image {
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: cover;
+    }
+
+    .fl-avatar-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: 100%;
+        block-size: 100%;
+        text-transform: uppercase;
+    }
+
+    .fl-avatar-root--x-small {
+        --_fl-avatar-size: var(--fl-spacing-6);
+    }
+
+    .fl-avatar-root--small {
+        --_fl-avatar-size: var(--fl-spacing-8);
+    }
+
+    .fl-avatar-root--large {
+        --_fl-avatar-size: var(--fl-spacing-12);
+    }
+
+    .fl-avatar-root--x-large {
+        --_fl-avatar-size: var(--fl-spacing-20);
+    }
+
+    .fl-avatar-root--square {
+        --_fl-avatar-radius: var(--fl-radius-md);
+    }
+}

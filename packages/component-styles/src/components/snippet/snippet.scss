@@ -1,0 +1,38 @@
+// Snippet: a block of code lines with an optional prompt symbol and a copy button in the corner.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-snippet-root {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        padding-block: var(--fl-spacing-4);
+        padding-inline: var(--fl-spacing-5) var(--fl-spacing-12);
+        overflow-x: auto;
+        border-radius: var(--fl-snippet-radius, var(--_fl-snippet-radius, var(--fl-radius-lg)));
+        background-color: var(--fl-snippet-bg, var(--_fl-snippet-bg, var(--fl-color-bg-area-muted)));
+        color: var(--fl-snippet-color, var(--_fl-snippet-color, var(--fl-color-text-2)));
+    }
+
+    .fl-snippet-line {
+        display: block;
+        white-space: pre;
+    }
+
+    .fl-snippet-symbol {
+        margin-inline-end: var(--fl-spacing-2);
+        color: var(--fl-color-text-5);
+        user-select: none;
+    }
+
+    .fl-snippet-copy-button {
+        position: absolute;
+        inset-block-start: var(--fl-spacing-2);
+        inset-inline-end: var(--fl-spacing-2);
+
+        &:where([data-copied]) {
+            --_fl-button-color: var(--fl-color-success);
+            --_fl-button-color-hover: var(--fl-color-success-hover);
+        }
+    }
+}

@@ -1,0 +1,10 @@
+// Form: a column of fields and fieldsets.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-form-gap, var(--_fl-form-gap, var(--fl-spacing-6)));
+    }
+}

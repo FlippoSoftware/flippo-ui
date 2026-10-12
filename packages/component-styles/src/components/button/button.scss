@@ -1,0 +1,148 @@
+// Button and icon button (Figma "Button", "Icon Button").
+// Variants: primary (CTA), secondary, outlined, label, danger. Sizes: large 56, medium 48, small 40, x-small 24.
+// Composes `.fl-interactive`, `.fl-focus-ring` and a text style (see the recipe).
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-button {
+        --_fl-focus-ring-width: var(--fl-border-width-focus);
+        --_fl-focus-ring-offset: calc(var(--fl-border-width-focus) * -1);
+
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        gap: var(--fl-button-gap, var(--_fl-button-gap));
+        block-size: var(--fl-button-height, var(--_fl-button-height));
+        min-inline-size: var(--fl-button-height, var(--_fl-button-height));
+        padding-block: 0;
+        padding-inline: var(--fl-button-padding-inline, var(--_fl-button-padding-inline));
+        border-radius: var(--fl-button-radius, var(--_fl-button-radius, var(--fl-radius-button)));
+        background-color: var(--fl-button-bg, var(--_fl-button-bg, transparent));
+        box-shadow: inset 0 0 0 var(--fl-border-width-default)
+            var(--fl-button-border-color, var(--_fl-button-border-color, transparent));
+        color: var(--fl-button-color, var(--_fl-button-color));
+        white-space: nowrap;
+        text-decoration: none;
+
+        & :where(svg) {
+            flex-shrink: 0;
+            inline-size: var(--fl-button-icon-size, var(--_fl-button-icon-size));
+            block-size: var(--fl-button-icon-size, var(--_fl-button-icon-size));
+        }
+
+        @include fl.hover {
+            background-color: var(--fl-button-bg-hover, var(--_fl-button-bg-hover, var(--_fl-button-bg, transparent)));
+            box-shadow: inset 0 0 0 var(--fl-border-width-default)
+                var(--fl-button-border-color-hover, var(--_fl-button-border-color-hover, transparent));
+            color: var(--fl-button-color-hover, var(--_fl-button-color-hover, var(--_fl-button-color)));
+        }
+
+        @include fl.active {
+            background-color: var(--fl-button-bg-active, var(--_fl-button-bg-active, var(--_fl-button-bg, transparent)));
+            box-shadow: inset 0 0 0 var(--fl-border-width-default)
+                var(--fl-button-border-color-active, var(--_fl-button-border-color-active, var(--_fl-button-border-color, transparent)));
+            color: var(--fl-button-color-active, var(--_fl-button-color-active, var(--_fl-button-color)));
+        }
+
+        @include fl.focus-visible {
+            --_fl-focus-ring-color-hook: var(--fl-button-focus-color);
+            --_fl-focus-ring-color: var(--_fl-button-focus-color);
+        }
+
+        @include fl.disabled {
+            background-color: var(--fl-button-bg-disabled, var(--_fl-button-bg-disabled, transparent));
+            box-shadow: inset 0 0 0 var(--fl-border-width-default)
+                var(--fl-button-border-color-disabled, var(--_fl-button-border-color-disabled, transparent));
+            color: var(--fl-button-color-disabled, var(--_fl-button-color-disabled, var(--fl-color-text-disabled)));
+        }
+    }
+
+    // Variants: each one is a palette of private variables, read by the states above.
+
+    .fl-button--primary {
+        --_fl-button-bg: var(--fl-color-brand);
+        --_fl-button-bg-hover: var(--fl-color-brand-hover);
+        --_fl-button-bg-active: var(--fl-color-brand);
+        --_fl-button-bg-disabled: var(--fl-color-bg-2);
+        --_fl-button-color: var(--fl-color-text-white);
+        --_fl-button-color-active: var(--fl-color-brand-light-hover);
+        --_fl-button-focus-color: var(--fl-color-text-primary);
+    }
+
+    .fl-button--secondary {
+        --_fl-button-bg: var(--fl-color-bg-3);
+        --_fl-button-bg-hover: var(--fl-color-bg-3-hover);
+        --_fl-button-bg-active: var(--fl-color-bg-3);
+        --_fl-button-bg-disabled: var(--fl-color-bg-2);
+        --_fl-button-color: var(--fl-color-text-2);
+        --_fl-button-color-hover: var(--fl-color-text-strong);
+        --_fl-button-focus-color: var(--fl-color-text-primary);
+    }
+
+    .fl-button--outlined {
+        --_fl-button-border-color: var(--fl-color-stroke);
+        --_fl-button-border-color-hover: var(--fl-color-stroke-hover);
+        --_fl-button-border-color-disabled: var(--fl-color-stroke-subtle);
+        --_fl-button-color: var(--fl-color-text-3);
+        --_fl-button-color-hover: var(--fl-color-text-strong);
+        --_fl-button-focus-color: var(--fl-color-brand-light);
+    }
+
+    .fl-button--label {
+        --_fl-button-bg-hover: var(--fl-color-bg-2-hover);
+        --_fl-button-bg-active: var(--fl-color-bg-2);
+        --_fl-button-color: var(--fl-color-text-4);
+        --_fl-button-color-hover: var(--fl-color-text-strong);
+        --_fl-button-focus-color: var(--fl-color-brand-light);
+    }
+
+    .fl-button--danger {
+        --_fl-button-bg-hover: var(--fl-color-error-desaturated);
+        --_fl-button-bg-active: var(--fl-color-bg-2-hover);
+        --_fl-button-color: var(--fl-color-error);
+        --_fl-button-color-hover: var(--fl-color-error-hover);
+        --_fl-button-focus-color: var(--fl-color-brand-light);
+    }
+
+    // Sizes. `--_fl-button-icon-only-size` is the icon of an icon button of that size.
+
+    .fl-button--large {
+        --_fl-button-height: var(--fl-size-large);
+        --_fl-button-padding-inline: var(--fl-spacing-6);
+        --_fl-button-gap: var(--fl-spacing-2-5);
+        --_fl-button-icon-size: 26px;
+        --_fl-button-icon-only-size: var(--fl-spacing-8);
+    }
+
+    .fl-button--medium {
+        --_fl-button-height: var(--fl-size-medium);
+        --_fl-button-padding-inline: var(--fl-spacing-5);
+        --_fl-button-gap: var(--fl-spacing-2-5);
+        --_fl-button-icon-size: var(--fl-spacing-6);
+        --_fl-button-icon-only-size: var(--fl-spacing-6);
+    }
+
+    .fl-button--small {
+        --_fl-button-height: var(--fl-size-small);
+        --_fl-button-padding-inline: var(--fl-spacing-4-5);
+        --_fl-button-gap: var(--fl-spacing-2);
+        --_fl-button-icon-size: var(--fl-spacing-5);
+        --_fl-button-icon-only-size: var(--fl-spacing-6);
+    }
+
+    .fl-button--x-small {
+        --_fl-button-height: var(--fl-size-x-small);
+        --_fl-button-padding-inline: var(--fl-spacing-2-5);
+        --_fl-button-gap: var(--fl-spacing-1);
+        --_fl-button-icon-size: var(--fl-spacing-4);
+        --_fl-button-icon-only-size: var(--fl-spacing-5);
+    }
+
+    // Icon button: a circle as wide as it is high. Declared after the sizes, so it replaces their padding and icon.
+    .fl-button--icon {
+        --_fl-button-padding-inline: 0;
+        --_fl-button-icon-size: var(--_fl-button-icon-only-size);
+    }
+}

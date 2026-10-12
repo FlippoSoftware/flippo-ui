@@ -1,8 +1,0 @@
-@use 'mixins/_common.scss' as common;
-
-.ScrollAreaViewport {
-  @include common.reset-appearance();
-
-  height: 100%;
-  overscroll-behavior: contain;
-}

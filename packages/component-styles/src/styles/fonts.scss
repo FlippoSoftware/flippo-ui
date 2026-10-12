@@ -1,0 +1,19 @@
+// Vela Sans (SIL Open Font License 1.1, see fonts/LICENSE.txt). The files live in the package's `fonts/` folder.
+$weights: (
+    300: 'Light',
+    400: 'Regular',
+    500: 'Medium',
+    600: 'SemiBold',
+    700: 'Bold',
+    800: 'ExtraBold'
+);
+
+@each $weight, $name in $weights {
+    @font-face {
+        font-family: 'Vela Sans';
+        font-style: normal;
+        font-weight: $weight;
+        font-display: swap;
+        src: url('../../fonts/VelaSans-#{$name}.woff2') format('woff2');
+    }
+}

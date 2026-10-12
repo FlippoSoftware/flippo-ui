@@ -1,0 +1,200 @@
+/* The page background of the Figma screens; components that sit on cards use the inverted appearances. */
+body {
+    margin: 0;
+    background: var(--fl-color-bg-0);
+    color: var(--fl-color-text-primary);
+}
+.story-canvas {
+    box-sizing: border-box;
+    background: var(--fl-color-bg-0);
+    color: var(--fl-color-text-primary);
+    padding: 32px;
+    width: 100%;
+    min-height: 300px;
+}
+.story-example {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+    width: min(100%, 640px);
+    margin-inline: auto;
+}
+.story-stack {
+    display: grid;
+    justify-items: start;
+    gap: 16px;
+}
+.story-surface {
+    box-sizing: border-box;
+    padding: 20px;
+    border: 1px solid var(--fl-color-stroke-subtle);
+    border-radius: var(--fl-radius-card);
+    background: var(--fl-color-bg-2);
+}
+.story-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+}
+/* Buttons, toggles and links keep their width; fields and other full-width components fill the example. */
+.story-stack > section {
+    display: grid;
+    justify-items: start;
+    justify-self: stretch;
+    gap: 8px;
+}
+:where(.story-example, .story-stack > section)
+    > :where(
+        .fl-control,
+        .fl-field-root,
+        .fl-fieldset-root,
+        .fl-form,
+        .fl-input-root,
+        .fl-textarea-root,
+        .fl-slider-root,
+        .fl-progress-root,
+        .fl-accordion-root,
+        .fl-collapsible-root,
+        .fl-tabs-root,
+        .fl-choice-card,
+        .fl-scroll-area-root,
+        .fl-snippet-root,
+        [data-story-target]
+    ) {
+    justify-self: stretch;
+}
+
+/*
+ * Story kit: the layout of the gallery stories, modelled on the Figma component sheets — sections with a title and a
+ * description, "zones" holding the components, rows of states labelled on the left.
+ */
+.sb-page {
+    display: grid;
+    gap: 40px;
+    width: min(100%, 1040px);
+    margin-inline: auto;
+    font-family: var(--fl-font-family);
+}
+.sb-section {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+}
+.sb-section-head {
+    display: grid;
+    gap: 4px;
+}
+.sb-section-title {
+    margin: 0;
+    color: var(--fl-color-text-primary);
+    font-size: var(--fl-text-heading-3-size);
+    font-weight: 600;
+    line-height: 1.4;
+}
+.sb-section-text {
+    max-width: 68ch;
+    margin: 0;
+    color: var(--fl-color-text-4);
+    font-size: var(--fl-text-body-minus-size);
+    line-height: 1.6;
+}
+.sb-section-text code {
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: var(--fl-color-bg-2-hover);
+    color: var(--fl-color-text-2);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.92em;
+}
+.sb-zone {
+    display: grid;
+    gap: 20px;
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid var(--fl-color-stroke-muted);
+    border-radius: var(--fl-radius-xl);
+    background: var(--fl-color-bg-area-muted);
+}
+.sb-zone--raised {
+    background: var(--fl-color-bg-1);
+}
+.sb-row {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+}
+.sb-row-label {
+    color: var(--fl-color-text-5);
+    font-size: var(--fl-text-label-size);
+    line-height: 1.5;
+}
+.sb-items {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+.sb-items--column {
+    flex-direction: column;
+    align-items: stretch;
+}
+.sb-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--sb-min, 240px)), 1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+.sb-card {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    padding: 20px;
+    border-radius: var(--fl-radius-card);
+    background: var(--fl-color-bg-1);
+}
+.sb-caption {
+    color: var(--fl-color-text-5);
+    font-size: var(--fl-text-label-size);
+}
+.sb-narrow {
+    width: min(100%, 360px);
+}
+.sb-medium {
+    width: min(100%, 520px);
+}
+@media (max-width: 600px) {
+    .sb-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+    .sb-zone {
+        padding: 16px;
+    }
+}
+/* Rows of fields: each field takes a comfortable width instead of shrinking to its text. */
+.sb-items--fill > * {
+    flex: 1 1 260px;
+    max-width: 460px;
+}
+/* A container to resize by its corner: layout stories show how their content adapts to the width. */
+.sb-resizable {
+    box-sizing: border-box;
+    display: grid;
+    gap: 8px;
+    inline-size: 100%;
+    min-inline-size: 160px;
+    max-inline-size: 100%;
+    padding: 16px;
+    overflow: auto;
+    resize: horizontal;
+    border: 1px dashed var(--fl-color-stroke);
+    border-radius: 12px;
+}
+.sb-resizable::after {
+    content: 'Потяните за правый нижний угол, чтобы изменить ширину';
+    color: var(--fl-color-text-6);
+    font-size: var(--fl-text-label-size);
+}

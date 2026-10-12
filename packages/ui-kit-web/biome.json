@@ -1,0 +1,64 @@
+{
+    "extends": ["@flippo-software/biome/base", "@flippo-software/biome/test"],
+    "files": {
+        "includes": [
+            "!**/node_modules",
+            "!**/dist",
+            "!**/.git",
+            "!**/.storybook",
+            "!**/story",
+            "!**/StoryCombine",
+            "!**/src/examples",
+            "!**/scripts",
+            "!**/vite.config.ts",
+            "!**/src/vite-env.d.ts",
+            "!**/storybook-static"
+        ]
+    },
+    "root": true,
+    "linter": {
+        "rules": {
+            "performance": {
+                "noReExportAll": "off",
+                "noBarrelFile": "off"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "includes": ["test/**", "*.config.ts"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "noNonNullAssertion": "off",
+                        "useFilenamingConvention": "off"
+                    },
+                    "performance": {
+                        "useTopLevelRegex": "off"
+                    },
+                    "correctness": {
+                        "noNodejsModules": "off"
+                    }
+                }
+            }
+        },
+        {
+            "includes": ["stories/**"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "noDefaultExport": "off",
+                        "useFilenamingConvention": "off",
+                        "useComponentExportOnlyModules": "off"
+                    },
+                    "performance": {
+                        "useTopLevelRegex": "off"
+                    },
+                    "security": {
+                        "noSecrets": "off"
+                    }
+                }
+            }
+        }
+    ]
+}

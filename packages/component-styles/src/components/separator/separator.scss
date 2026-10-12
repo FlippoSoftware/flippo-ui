@@ -1,0 +1,40 @@
+// Separator (Figma "Divider"): a 1px line with optional spacing across it and inset along it.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-separator {
+        // A line has no content: it takes its length from its container, in flex, grid and block layouts alike.
+        display: block;
+        flex-shrink: 0;
+        align-self: stretch;
+        justify-self: stretch;
+        border: 0;
+        background-color: var(--fl-separator-color, var(--_fl-separator-color, var(--fl-color-stroke)));
+        block-size: var(--fl-separator-thickness, var(--_fl-separator-thickness, var(--fl-border-width-thin)));
+        margin-block: var(--fl-separator-spacing, var(--_fl-separator-spacing, 0));
+        margin-inline: var(--fl-separator-inset, var(--_fl-separator-inset, 0));
+
+        &:where([data-orientation='vertical'], [aria-orientation='vertical']) {
+            inline-size: var(--fl-separator-thickness, var(--_fl-separator-thickness, var(--fl-border-width-thin)));
+            block-size: auto;
+            margin-block: var(--fl-separator-inset, var(--_fl-separator-inset, 0));
+            margin-inline: var(--fl-separator-spacing, var(--_fl-separator-spacing, 0));
+        }
+    }
+
+    .fl-separator--spacing-small {
+        --_fl-separator-spacing: var(--fl-spacing-1-5);
+    }
+
+    .fl-separator--spacing-medium {
+        --_fl-separator-spacing: var(--fl-spacing-3);
+    }
+
+    .fl-separator--inset-small {
+        --_fl-separator-inset: var(--fl-spacing-1-5);
+    }
+
+    .fl-separator--inset-medium {
+        --_fl-separator-inset: var(--fl-spacing-3);
+    }
+}

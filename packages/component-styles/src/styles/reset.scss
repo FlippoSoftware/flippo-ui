@@ -1,0 +1,109 @@
+// Resets the browser defaults and sets the root of the design system: font, page colours, scrollbars, motion.
+@use 'layers';
+
+@layer fl.reset {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    * {
+        margin: 0;
+    }
+
+    html {
+        font-family: var(--fl-font-family);
+        line-height: 1.5;
+        -webkit-text-size-adjust: none;
+        text-size-adjust: none;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        tab-size: 4;
+        scrollbar-color: var(--fl-color-stroke) transparent;
+        interpolate-size: allow-keywords;
+    }
+
+    body {
+        min-block-size: 100dvh;
+        background-color: var(--fl-color-bg-0);
+        color: var(--fl-color-text-primary);
+    }
+
+    :where(img, picture, video, canvas, svg) {
+        display: block;
+        max-inline-size: 100%;
+    }
+
+    :where(input, button, textarea, select) {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+    }
+
+    :where(button) {
+        padding: 0;
+        border: 0;
+        background: none;
+    }
+
+    :where(textarea) {
+        resize: vertical;
+    }
+
+    :where(h1, h2, h3, h4, h5, h6) {
+        font-size: inherit;
+        font-weight: inherit;
+        text-wrap: balance;
+    }
+
+    :where(p, h1, h2, h3, h4, h5, h6) {
+        overflow-wrap: break-word;
+    }
+
+    :where(p) {
+        text-wrap: pretty;
+    }
+
+    :where(ul, ol)[role='list'] {
+        padding: 0;
+        list-style: none;
+    }
+
+    :where(a) {
+        color: inherit;
+        text-decoration-skip-ink: auto;
+    }
+
+    :where(fieldset) {
+        min-inline-size: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    :where(table) {
+        border-collapse: collapse;
+    }
+
+    ::selection {
+        background-color: var(--fl-color-brand-light-subtle);
+        color: var(--fl-color-text-white);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        html:focus-within {
+            scroll-behavior: smooth;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}

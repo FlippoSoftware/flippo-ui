@@ -1,0 +1,11 @@
+// Collapsible: a trigger and a panel that animates `--collapsible-panel-height`. The trigger, icon and content
+// reuse the accordion classes (`collapsible()` returns them).
+@use '../../styles/layers';
+@use '../accordion/accordion';
+
+@layer fl.components {
+    .fl-collapsible-root {
+        display: flex;
+        flex-direction: column;
+    }
+}

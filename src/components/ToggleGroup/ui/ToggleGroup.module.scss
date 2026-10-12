@@ -1,5 +1,0 @@
-@use 'mixins/_flex.scss' as flex;
-
-.ToggleGroup {
-  @include flex.display(flex, row, center, center, var(--f-spacing-0));
-}

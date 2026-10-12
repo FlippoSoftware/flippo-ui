@@ -1,0 +1,44 @@
+// Number field: a control box (`group`, composes `.fl-control`) with − and + buttons (compose
+// `.fl-control-button`) around a centred numeric input, and an optional scrub area on the label.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-number-field-root {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--fl-spacing-1-5);
+    }
+
+    .fl-number-field-group {
+        --_fl-control-padding-inline: var(--fl-spacing-1);
+        --_fl-control-gap: var(--fl-spacing-1);
+
+        inline-size: var(--fl-number-field-width, var(--_fl-number-field-width, auto));
+    }
+
+    .fl-number-field-input {
+        flex: 1 1 auto;
+        inline-size: var(--fl-number-field-input-width, var(--_fl-number-field-input-width, 4ch));
+        min-inline-size: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-variant-numeric: tabular-nums;
+        text-align: center;
+        outline: none;
+    }
+
+    .fl-number-field-scrub-area {
+        cursor: ew-resize;
+        user-select: none;
+        touch-action: none;
+    }
+
+    .fl-number-field-scrub-area-cursor {
+        color: var(--fl-color-text-strong);
+        filter: drop-shadow(0 1px 1px var(--fl-color-shadow-strong));
+    }
+}

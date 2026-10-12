@@ -1,0 +1,63 @@
+// Progress and meter: a label and a value above a thin track with a brand indicator. An indeterminate progress
+// (`data-indeterminate`) slides its indicator.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-progress-root {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: var(--fl-spacing-2) var(--fl-spacing-1);
+        inline-size: 100%;
+    }
+
+    .fl-progress-label {
+        color: var(--fl-progress-label-color, var(--_fl-progress-label-color, var(--fl-color-text-4)));
+    }
+
+    .fl-progress-value {
+        grid-column-start: 2;
+        color: var(--fl-progress-label-color, var(--_fl-progress-label-color, var(--fl-color-text-5)));
+        font-variant-numeric: tabular-nums;
+        text-align: end;
+    }
+
+    .fl-progress-track {
+        position: relative;
+        grid-column: 1 / -1;
+        block-size: var(--fl-progress-thickness, var(--_fl-progress-thickness, var(--fl-spacing-1)));
+        overflow: hidden;
+        border-radius: var(--fl-radius-full);
+        background-color: var(--fl-progress-track-color, var(--_fl-progress-track-color, var(--fl-color-bg-2-hover)));
+    }
+
+    .fl-progress-indicator {
+        display: block;
+        block-size: 100%;
+        border-radius: inherit;
+        background-color: var(--fl-progress-indicator-color, var(--_fl-progress-indicator-color, var(--fl-color-brand-light)));
+        transition: inline-size var(--fl-duration-slower) var(--fl-ease-out);
+
+        &:where([data-complete]) {
+            --_fl-progress-indicator-color: var(--fl-progress-complete-color, var(--fl-color-success));
+        }
+
+        &:where([data-indeterminate]) {
+            inline-size: 40%;
+            animation: fl-progress-indeterminate 1.4s var(--fl-ease-in-out) infinite;
+        }
+    }
+
+    .fl-progress-track--large {
+        --_fl-progress-thickness: var(--fl-spacing-2);
+    }
+
+    @keyframes fl-progress-indeterminate {
+        from {
+            translate: -100% 0;
+        }
+
+        to {
+            translate: 250% 0;
+        }
+    }
+}

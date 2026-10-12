@@ -1,0 +1,23 @@
+// Design tokens on `:root` and the themes.
+//
+// Semantic colours are `light-dark()` pairs: they follow the `color-scheme` of the element that uses them. The page
+// follows the system setting; `data-theme="light" | "dark"` fixes the theme of any subtree.
+@use 'layers';
+@use '../../scss' as fl;
+
+@layer fl.tokens {
+    :root {
+        color-scheme: light dark;
+
+        @include fl.custom-properties;
+    }
+
+    // Same specificity as `:root` and declared after it, so `<html data-theme="dark">` wins over the system theme.
+    [data-theme='light'] {
+        color-scheme: light;
+    }
+
+    [data-theme='dark'] {
+        color-scheme: dark;
+    }
+}

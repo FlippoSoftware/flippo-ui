@@ -1,0 +1,9 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-section { box-sizing: border-box; display: var(--fl-section-display, var(--_fl-section-display, block)); min-inline-size: 0; padding-block: var(--fl-section-padding, var(--_fl-section-padding, var(--fl-spacing-10))); }
+    .fl-section--sm { --_fl-section-padding: var(--fl-spacing-6); }
+    .fl-section--md { --_fl-section-padding: var(--fl-spacing-10); }
+    .fl-section--lg { --_fl-section-padding: var(--fl-spacing-16); }
+    .fl-section--xl { --_fl-section-padding: var(--fl-spacing-24); }
+}

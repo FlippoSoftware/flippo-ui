@@ -1,0 +1,18 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-spinner { display: inline-block; box-sizing: border-box; flex-shrink: 0; inline-size: var(--fl-spinner-size, var(--_fl-spinner-size, var(--fl-spacing-6))); block-size: var(--fl-spinner-size, var(--_fl-spinner-size, var(--fl-spacing-6))); border: var(--fl-border-width-thick) solid currentColor; border-inline-end-color: transparent; border-radius: var(--fl-radius-full); color: var(--fl-spinner-color, var(--_fl-spinner-color, currentColor)); animation: fl-spinner-spin var(--fl-spinner-duration, var(--_fl-spinner-duration, 1s)) linear infinite; }
+    @keyframes fl-spinner-spin { to { rotate: 360deg; } }
+    @media (prefers-reduced-motion: reduce) { .fl-spinner { animation: none; } }
+    .fl-spinner--x-small { --_fl-spinner-size: var(--fl-spacing-3); }
+    .fl-spinner--small { --_fl-spinner-size: var(--fl-spacing-4); }
+    .fl-spinner--medium { --_fl-spinner-size: var(--fl-spacing-6); }
+    .fl-spinner--large { --_fl-spinner-size: var(--fl-spacing-8); }
+    .fl-spinner--brand { --_fl-spinner-color: var(--fl-color-brand-light); }
+    .fl-spinner--danger { --_fl-spinner-color: var(--fl-color-error); }
+    .fl-spinner--error { --_fl-spinner-color: var(--fl-color-error); }
+    .fl-spinner--warning { --_fl-spinner-color: var(--fl-color-warning); }
+    .fl-spinner--success { --_fl-spinner-color: var(--fl-color-success); }
+    .fl-spinner--info { --_fl-spinner-color: var(--fl-color-brand-light); }
+    .fl-spinner--current { --_fl-spinner-color: currentColor; }
+}

@@ -1,0 +1,36 @@
+// Checkbox: the root is the box (composes `.fl-check`, `.fl-interactive`, `.fl-focus-ring`), the indicator holds
+// the check mark. Lay a checkbox out with its text with `.fl-choice-label`.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-checkbox-root {
+        position: relative;
+    }
+
+    .fl-checkbox-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: inherit;
+
+        & :where(svg) {
+            inline-size: var(--fl-checkbox-icon-size, var(--_fl-checkbox-icon-size, var(--fl-spacing-3-5)));
+            block-size: var(--fl-checkbox-icon-size, var(--_fl-checkbox-icon-size, var(--fl-spacing-3-5)));
+        }
+
+        &:where([data-unchecked]) {
+            visibility: hidden;
+        }
+    }
+
+    .fl-checkbox-root--small {
+        --_fl-check-size: var(--fl-spacing-4);
+        --_fl-checkbox-icon-size: var(--fl-spacing-2-5);
+    }
+
+    .fl-checkbox-root--large {
+        --_fl-check-size: var(--fl-spacing-6);
+        --_fl-checkbox-icon-size: var(--fl-spacing-4);
+    }
+}

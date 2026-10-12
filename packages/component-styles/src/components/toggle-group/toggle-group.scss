@@ -1,0 +1,23 @@
+// Toggle group: a row (or column) of toggles; style the items with the toggle recipe.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-toggle-group {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--fl-toggle-group-gap, var(--_fl-toggle-group-gap, var(--fl-spacing-1)));
+        padding: var(--fl-toggle-group-padding, var(--_fl-toggle-group-padding, 0));
+        border-radius: var(--fl-toggle-group-radius, var(--_fl-toggle-group-radius, var(--fl-radius-lg)));
+        background-color: var(--fl-toggle-group-bg, var(--_fl-toggle-group-bg, transparent));
+
+        &:where([data-orientation='vertical']) {
+            flex-direction: column;
+        }
+    }
+
+    // A filled track around the toggles.
+    .fl-toggle-group--contained {
+        --_fl-toggle-group-padding: var(--fl-spacing-1);
+        --_fl-toggle-group-bg: var(--fl-color-bg-1);
+    }
+}

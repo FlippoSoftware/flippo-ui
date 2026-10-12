@@ -1,0 +1,85 @@
+// State selectors. Every state is wrapped in `:where()`, so a state rule has the specificity of the class it is
+// nested in: the order of the rules decides which state wins (hover < active < checked < focus < invalid < disabled).
+// States come from the `data-*` attributes of the core machines and from native pseudo-classes.
+
+@mixin hover {
+    @media (hover: hover) {
+        &:where(:hover):not(:where(:disabled, [data-disabled], [aria-disabled='true'], :is(.fl-input-root, .fl-textarea-root):has(:disabled, [data-disabled]))) {
+            @content;
+        }
+    }
+}
+
+@mixin active {
+    &:where(:active):not(:where(:disabled, [data-disabled], [aria-disabled='true'], :is(.fl-input-root, .fl-textarea-root):has(:disabled, [data-disabled]))) {
+        @content;
+    }
+}
+
+@mixin focus-visible {
+    &:where(:focus-visible) {
+        @content;
+    }
+}
+
+// Focus inside the element (an input in a control) or the `data-focused` state of a field.
+@mixin focus-within {
+    &:where(:focus-within, [data-focused]) {
+        @content;
+    }
+}
+
+@mixin highlighted {
+    &:where([data-highlighted]) {
+        @content;
+    }
+}
+
+@mixin selected {
+    &:where([data-selected], [data-active], [aria-selected='true']) {
+        @content;
+    }
+}
+
+@mixin checked {
+    &:where([data-checked], [data-indeterminate]) {
+        @content;
+    }
+}
+
+@mixin pressed {
+    &:where([data-pressed], [aria-pressed='true']) {
+        @content;
+    }
+}
+
+@mixin open {
+    &:where([data-open], [data-popup-open], [data-panel-open]) {
+        @content;
+    }
+}
+
+@mixin invalid {
+    &:where([data-invalid], [aria-invalid='true'], :is(.fl-input-root, .fl-textarea-root):has([data-invalid], [aria-invalid='true'])) {
+        @content;
+    }
+}
+
+@mixin disabled {
+    &:where(:disabled, [data-disabled], [aria-disabled='true'], :is(.fl-input-root, .fl-textarea-root):has(:disabled, [data-disabled])) {
+        @content;
+    }
+}
+
+// Enter and exit transitions of popups and panels.
+@mixin transition-hidden {
+    &:where([data-starting-style], [data-ending-style]) {
+        @content;
+    }
+}
+
+@mixin reduced-motion {
+    @media (prefers-reduced-motion: reduce) {
+        @content;
+    }
+}

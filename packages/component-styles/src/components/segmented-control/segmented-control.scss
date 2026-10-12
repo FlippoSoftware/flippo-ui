@@ -1,0 +1,59 @@
+// Segmented control: pill segments on a filled track; the selected segment is raised.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-segmented-control-root {
+        --_fl-icon-size: var(--fl-spacing-5);
+
+        display: inline-flex;
+        align-items: stretch;
+        gap: var(--fl-spacing-1);
+        padding: var(--fl-segmented-control-padding, var(--_fl-segmented-control-padding, var(--fl-spacing-1)));
+        border-radius: var(--fl-radius-full);
+        background-color: var(--fl-segmented-control-bg, var(--_fl-segmented-control-bg, var(--fl-color-bg-1)));
+
+        &:where([data-orientation='vertical']) {
+            flex-direction: column;
+            border-radius: var(--fl-radius-xl);
+        }
+    }
+
+    .fl-segmented-control-item {
+        --_fl-focus-ring-offset: calc(var(--fl-focus-width) * -1);
+
+        display: inline-flex;
+        flex: 1 1 0;
+        align-items: center;
+        justify-content: center;
+        gap: var(--fl-spacing-2);
+        block-size: var(--fl-segmented-control-height, var(--_fl-segmented-control-height, var(--fl-spacing-8)));
+        padding-inline: var(--fl-spacing-4);
+        border-radius: var(--fl-radius-full);
+        background-color: transparent;
+        color: var(--fl-segmented-control-color, var(--_fl-segmented-control-color, var(--fl-color-text-4)));
+        white-space: nowrap;
+
+        @include fl.hover {
+            color: var(--fl-color-text-strong);
+        }
+
+        @include fl.selected {
+            background-color: var(--fl-segmented-control-bg-selected, var(--_fl-segmented-control-bg-selected, var(--fl-color-bg-3)));
+            color: var(--fl-color-text-strong);
+        }
+
+        @include fl.disabled {
+            color: var(--fl-color-text-disabled);
+        }
+    }
+
+    .fl-segmented-control-root--small {
+        --_fl-icon-size: var(--fl-spacing-4);
+        --_fl-segmented-control-height: var(--fl-spacing-7);
+    }
+
+    .fl-segmented-control-root--large {
+        --_fl-segmented-control-height: var(--fl-size-small);
+    }
+}

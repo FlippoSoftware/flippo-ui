@@ -1,0 +1,168 @@
+// Tabs (Figma "Tabs & Menu"): `line` — horizontal tabs with a sliding underline (Figma "Horizontal Tab"),
+// `pill` — tabs that fill when selected (Figma "Vertical Tab"), `filter` — compact chips with a counter
+// (Figma "Filter Tab"). Tabs compose `.fl-interactive` and `.fl-focus-ring`.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-tabs-root {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-tabs-gap, var(--_fl-tabs-gap, var(--fl-spacing-4)));
+
+        &:where([data-orientation='vertical']) {
+            flex-direction: row;
+        }
+    }
+
+    .fl-tabs-list {
+        position: relative;
+        z-index: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--fl-tabs-list-gap, var(--_fl-tabs-list-gap, var(--fl-spacing-1)));
+        overflow-x: auto;
+        scrollbar-width: none;
+
+        &:where([data-orientation='vertical']) {
+            flex-direction: column;
+            align-items: stretch;
+            overflow: visible;
+        }
+    }
+
+    .fl-tabs-tab {
+        --_fl-focus-ring-offset: calc(var(--fl-focus-width) * -1);
+
+        position: relative;
+        display: inline-flex;
+        flex-direction: var(--_fl-tabs-tab-direction, row);
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: var(--fl-tabs-tab-justify, var(--_fl-tabs-tab-justify, center));
+        gap: var(--fl-tabs-tab-gap, var(--_fl-tabs-tab-gap, var(--fl-spacing-2-5)));
+        block-size: var(--fl-tabs-tab-height, var(--_fl-tabs-tab-height, var(--fl-size-large)));
+        padding-block: var(--_fl-tabs-tab-padding-block, 0);
+        padding-inline: var(--fl-tabs-tab-padding-inline, var(--_fl-tabs-tab-padding-inline, var(--fl-spacing-1-5)));
+        border-radius: var(--fl-tabs-tab-radius, var(--_fl-tabs-tab-radius, var(--fl-radius-sm)));
+        background-color: var(--fl-tabs-tab-bg, var(--_fl-tabs-tab-bg, transparent));
+        color: var(--fl-tabs-tab-color, var(--_fl-tabs-tab-color, var(--fl-color-text-3)));
+        white-space: nowrap;
+
+        & :where(svg) {
+            flex-shrink: 0;
+            inline-size: var(--fl-tabs-icon-size, var(--_fl-tabs-icon-size, var(--fl-spacing-6)));
+            block-size: var(--fl-tabs-icon-size, var(--_fl-tabs-icon-size, var(--fl-spacing-6)));
+        }
+
+        @include fl.hover {
+            background-color: var(--fl-tabs-tab-bg-hover, var(--_fl-tabs-tab-bg-hover, transparent));
+            color: var(--fl-tabs-tab-color-hover, var(--_fl-tabs-tab-color-hover, var(--fl-color-text-primary)));
+        }
+
+        @include fl.active {
+            background-color: var(--fl-tabs-tab-bg-active, var(--_fl-tabs-tab-bg-active, transparent));
+            color: var(--fl-tabs-tab-color-active, var(--_fl-tabs-tab-color-active, var(--fl-color-text-4)));
+        }
+
+        @include fl.selected {
+            background-color: var(--fl-tabs-tab-bg-selected, var(--_fl-tabs-tab-bg-selected, transparent));
+            color: var(--fl-tabs-tab-color-selected, var(--_fl-tabs-tab-color-selected, var(--fl-color-text-strong)));
+        }
+
+        @include fl.disabled {
+            background-color: transparent;
+            color: var(--fl-color-text-disabled);
+        }
+
+        &:where([data-orientation='vertical']) {
+            --_fl-tabs-tab-justify: flex-start;
+        }
+    }
+
+    // The counter after a tab's label ("Tab 1").
+    .fl-tabs-count {
+        align-self: flex-start;
+        margin-block-start: 0.6em;
+        color: var(--fl-color-text-5);
+    }
+
+    // The underline of the selected `line` tab; the tabs machine sets `--active-tab-*`.
+    .fl-tabs-indicator {
+        position: absolute;
+        z-index: -1;
+        inset-block-end: 0;
+        inset-inline-start: 0;
+        inline-size: var(--active-tab-width);
+        block-size: var(--fl-tabs-indicator-thickness, var(--_fl-tabs-indicator-thickness, var(--fl-border-width-thick)));
+        border-radius: var(--fl-radius-full);
+        background-color: var(--fl-tabs-indicator-color, var(--_fl-tabs-indicator-color, var(--fl-color-brand-light)));
+        translate: var(--active-tab-left) 0;
+        transition-property: translate, inline-size, block-size;
+        transition-duration: var(--fl-duration-normal);
+        transition-timing-function: var(--fl-ease-standard);
+
+        &:where([data-orientation='vertical']) {
+            inset-inline-start: auto;
+            inset-inline-end: 0;
+            inset-block: 0 auto;
+            inline-size: var(--fl-tabs-indicator-thickness, var(--_fl-tabs-indicator-thickness, var(--fl-border-width-thick)));
+            block-size: var(--active-tab-height);
+            translate: 0 var(--active-tab-top);
+        }
+    }
+
+    // Pill and filter tabs fill the selected tab instead: no underline.
+    .fl-tabs-indicator--none {
+        display: none;
+    }
+
+    .fl-tabs-panel {
+        outline: none;
+
+        @include fl.focus-visible {
+            outline: var(--fl-focus-width) solid var(--fl-focus-color);
+            outline-offset: var(--fl-focus-offset);
+            border-radius: var(--fl-radius-sm);
+        }
+    }
+
+    // Variants: `line` is the default look above.
+
+    .fl-tabs-tab--pill {
+        --_fl-tabs-tab-padding-inline: var(--fl-spacing-5);
+        --_fl-tabs-tab-gap: var(--fl-spacing-4);
+        --_fl-tabs-tab-radius: var(--fl-radius-full);
+        --_fl-tabs-tab-bg-hover: var(--fl-color-bg-2-hover);
+        --_fl-tabs-tab-bg-active: var(--fl-color-bg-2);
+        --_fl-tabs-tab-bg-selected: var(--fl-color-bg-2);
+        --_fl-focus-ring-width: var(--fl-border-width-focus);
+        --_fl-focus-ring-offset: calc(var(--fl-border-width-focus) * -1);
+    }
+
+    .fl-tabs-tab--filter {
+        --_fl-tabs-tab-height: var(--fl-size-medium);
+        --_fl-tabs-tab-padding-inline: var(--fl-spacing-4);
+        --_fl-tabs-tab-gap: var(--fl-spacing-2);
+        --_fl-tabs-tab-radius: var(--fl-radius-full);
+        --_fl-tabs-tab-color: var(--fl-color-text-4);
+        --_fl-tabs-tab-bg-hover: var(--fl-color-bg-3);
+        --_fl-tabs-tab-bg-active: var(--fl-color-bg-2);
+        --_fl-tabs-tab-bg-selected: var(--fl-color-bg-3);
+        --_fl-tabs-icon-size: var(--fl-spacing-5);
+    }
+
+    // A vertical filter tab: the icon above the label.
+    .fl-tabs-tab--stacked {
+        --_fl-tabs-tab-height: auto;
+        --_fl-tabs-tab-gap: var(--fl-spacing-0-5);
+        --_fl-tabs-tab-radius: var(--fl-radius-md);
+        --_fl-tabs-tab-direction: column;
+        --_fl-tabs-tab-padding-block: var(--fl-spacing-1-5);
+        --_fl-tabs-tab-padding-inline: var(--fl-spacing-3);
+    }
+
+    .fl-tabs-tab--medium {
+        --_fl-tabs-tab-height: var(--fl-size-medium);
+    }
+}

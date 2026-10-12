@@ -1,0 +1,12 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-skeleton { display: block; position: relative; overflow: hidden; background-color: var(--fl-skeleton-bg, var(--_fl-skeleton-bg, var(--fl-color-bg-3))); border-radius: var(--fl-skeleton-radius, var(--_fl-skeleton-radius, var(--fl-radius-card))); background-image: var(--fl-skeleton-image, var(--_fl-skeleton-image, none)); background-size: var(--fl-skeleton-background-size, var(--_fl-skeleton-background-size, auto)); animation: var(--fl-skeleton-animation, var(--_fl-skeleton-animation, none)) var(--fl-skeleton-duration, var(--_fl-skeleton-duration, 1.5s)) ease-in-out infinite; }
+    .fl-skeleton--pulse { --_fl-skeleton-animation: fl-skeleton-pulse; }
+    .fl-skeleton--shimmer { --_fl-skeleton-animation: fl-skeleton-shimmer; --_fl-skeleton-image: linear-gradient(90deg, transparent, var(--fl-color-bg-3-alt), transparent); --_fl-skeleton-background-size: 200% 100%; }
+    .fl-skeleton--none { --_fl-skeleton-animation: none; }
+    .fl-skeleton--circle { --_fl-skeleton-radius: var(--fl-radius-full); }
+    @keyframes fl-skeleton-pulse { 50% { opacity: 0.4; } }
+    @keyframes fl-skeleton-shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+    @media (prefers-reduced-motion: reduce) { .fl-skeleton { animation: none; } }
+}

@@ -1,0 +1,29 @@
+# The Flippo UI kits: the shared styles and the two kits built on them. Each package is published on its own.
+packages:
+    - packages/*
+
+# One version of the shared tools for every package: `"typescript": "catalog:"` in a package.json.
+catalog:
+    '@biomejs/biome': 2.5.15
+    '@flippo-software/biome': 1.1.1
+    '@flippo-software/tsconfig': 1.0.0
+    '@storybook/addon-essentials': 8.6.14
+    '@types/node': 24.19.1
+    '@types/react': 19.3.0
+    '@types/react-dom': 19.3.0
+    happy-dom: 20.14.5
+    react: 19.3.0
+    react-dom: 19.3.0
+    sass: ^1.105.1
+    storybook: 8.6.14
+    tsdown: 0.23.0
+    typescript: 7.0.2
+    vitest: 5.0.3
+
+allowBuilds:
+    '@parcel/watcher': false
+    esbuild: true
+
+minimumReleaseAgeExclude:
+    - '@lynstack/class-recipe@1.7.3'
+    - '@lynstack/recipe@1.9.0'

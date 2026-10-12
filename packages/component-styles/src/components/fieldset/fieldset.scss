@@ -1,0 +1,25 @@
+// Fieldset: a titled group of fields.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-fieldset-root {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-fieldset-gap, var(--_fl-fieldset-gap, var(--fl-spacing-4)));
+        min-inline-size: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    .fl-fieldset-legend {
+        padding: 0;
+        margin-block-end: var(--fl-spacing-1);
+        color: var(--fl-fieldset-legend-color, var(--_fl-fieldset-legend-color, var(--fl-color-text-primary)));
+
+        @include fl.disabled {
+            color: var(--fl-color-text-disabled);
+        }
+    }
+}

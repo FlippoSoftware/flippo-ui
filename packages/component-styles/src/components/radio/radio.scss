@@ -1,0 +1,35 @@
+// Radio: the root is a round box (composes `.fl-check`, `.fl-interactive`, `.fl-focus-ring`), the indicator is
+// the dot shown when checked.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-radio-root {
+        --_fl-check-radius: 50%;
+
+        position: relative;
+    }
+
+    .fl-radio-indicator {
+        display: block;
+        inline-size: var(--fl-radio-dot-size, var(--_fl-radio-dot-size, var(--fl-spacing-2)));
+        block-size: var(--fl-radio-dot-size, var(--_fl-radio-dot-size, var(--fl-spacing-2)));
+        overflow: hidden;
+        border-radius: 50%;
+        font-size: 0;
+        background-color: var(--fl-radio-dot-color, var(--_fl-radio-dot-color, var(--fl-color-text-white)));
+
+        &:where([data-unchecked]) {
+            visibility: hidden;
+        }
+    }
+
+    .fl-radio-root--small {
+        --_fl-check-size: var(--fl-spacing-4);
+        --_fl-radio-dot-size: var(--fl-spacing-1-5);
+    }
+
+    .fl-radio-root--large {
+        --_fl-check-size: var(--fl-spacing-6);
+        --_fl-radio-dot-size: var(--fl-spacing-2-5);
+    }
+}

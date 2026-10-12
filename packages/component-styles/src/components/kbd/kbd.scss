@@ -1,0 +1,18 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-kbd { box-sizing: border-box; font-size: var(--fl-kbd-font-size, var(--_fl-kbd-font-size, 0.875em)); line-height: var(--fl-kbd-line-height, var(--_fl-kbd-line-height, 1.5)); color: var(--fl-kbd-color, var(--_fl-kbd-color, var(--fl-color-text-primary))); font-family: var(--fl-font-family-mono); padding: var(--fl-kbd-padding, var(--_fl-kbd-padding, 0.125em 0.4em)); border-radius: var(--fl-kbd-radius, var(--_fl-kbd-radius, var(--fl-radius-xs))); background-color: var(--fl-kbd-bg, var(--_fl-kbd-bg, var(--fl-color-bg-3))); box-shadow: var(--fl-kbd-shadow, var(--_fl-kbd-shadow, none)); }
+    .fl-kbd--size-1 { --_fl-kbd-font-size: var(--fl-text-label-size); --_fl-kbd-line-height: var(--fl-text-label-line-height); }
+    .fl-kbd--size-2 { --_fl-kbd-font-size: var(--fl-text-body-minus-size); --_fl-kbd-line-height: var(--fl-text-body-minus-line-height); }
+    .fl-kbd--size-3 { --_fl-kbd-font-size: var(--fl-text-body-size); --_fl-kbd-line-height: var(--fl-text-body-line-height); }
+    .fl-kbd--size-4 { --_fl-kbd-font-size: var(--fl-text-body-plus-size); --_fl-kbd-line-height: var(--fl-text-body-plus-line-height); }
+    .fl-kbd--size-5 { --_fl-kbd-font-size: var(--fl-text-heading-3-size); --_fl-kbd-line-height: var(--fl-text-heading-3-line-height); }
+    .fl-kbd--size-6 { --_fl-kbd-font-size: var(--fl-text-heading-2-size); --_fl-kbd-line-height: var(--fl-text-heading-2-line-height); }
+    .fl-kbd--size-7 { --_fl-kbd-font-size: var(--fl-text-heading-1-size); --_fl-kbd-line-height: var(--fl-text-heading-1-line-height); }
+    .fl-kbd--size-8 { --_fl-kbd-font-size: var(--fl-text-title-3-size); --_fl-kbd-line-height: var(--fl-text-title-3-line-height); }
+    .fl-kbd--size-9 { --_fl-kbd-font-size: var(--fl-text-title-2-size); --_fl-kbd-line-height: var(--fl-text-title-2-line-height); }
+    .fl-kbd--ghost { --_fl-kbd-bg: transparent; --_fl-kbd-padding: 0; }
+    .fl-kbd--soft { --_fl-kbd-bg: var(--fl-color-bg-3); }
+    .fl-kbd--outline { --_fl-kbd-bg: transparent; --_fl-kbd-shadow: inset 0 0 0 var(--fl-border-width-thin) var(--fl-color-stroke-subtle); }
+
+}

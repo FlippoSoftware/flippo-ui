@@ -1,0 +1,43 @@
+// Field: label, control, description and error laid out in a column. The control composes `.fl-control` (an
+// `<input>` styled as the Figma "Input Field"); its state comes from the field's `data-*` attributes.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-field-root {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--fl-field-gap, var(--_fl-field-gap, var(--fl-spacing-1-5)));
+        min-inline-size: 0;
+    }
+
+    .fl-field-label {
+        color: var(--fl-field-label-color, var(--_fl-field-label-color, var(--fl-color-text-2)));
+
+        @include fl.disabled {
+            color: var(--fl-color-text-disabled);
+        }
+    }
+
+    .fl-field-control {
+        inline-size: 100%;
+        outline: none;
+        appearance: none;
+    }
+
+    .fl-field-description {
+        color: var(--fl-field-description-color, var(--_fl-field-description-color, var(--fl-color-text-4)));
+    }
+
+    .fl-field-error {
+        color: var(--fl-field-error-color, var(--_fl-field-error-color, var(--fl-color-error)));
+    }
+
+    // A row inside a field: a checkbox or a radio with its label.
+    .fl-field-item {
+        display: flex;
+        align-items: center;
+        gap: var(--fl-spacing-3);
+    }
+}

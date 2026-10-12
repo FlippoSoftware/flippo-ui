@@ -1,0 +1,153 @@
+// Shared classes, built once from the public mixins. Components compose them in their recipes instead of
+// repeating the declarations (`button()` returns `fl-button fl-interactive fl-focus-ring fl-text-body-stronger…`).
+@use 'sass:map';
+@use 'layers';
+@use '../../scss' as fl;
+
+@layer fl.shared {
+    // The `hidden` attribute must win over the `display` of component classes: the web components "unmount" a
+    // part by hiding it.
+    :where([hidden]:not([hidden='until-found'])) {
+        display: none !important;
+    }
+
+    // Text styles: `.fl-text-<style>-<weight>`, e.g. `.fl-text-body-stronger` (Figma `Body/Stronger`).
+    @each $style in map.keys(fl.$text-styles) {
+        @each $weight in fl.$text-weights {
+            .fl-text-#{$style}-#{$weight} {
+                @include fl.text($style, $weight);
+            }
+        }
+    }
+
+    // Every Flippo icon (`data-icon`, from `component-styles/icons`) and every `.fl-icon` wrapper: sized by the
+    // closest component (see the `icon` mixin). Components that size their `<svg>` children themselves win.
+    :where(svg[data-icon], .fl-icon) {
+        @include fl.icon;
+    }
+
+    .fl-mono {
+        @include fl.mono;
+    }
+
+    .fl-truncate {
+        @include fl.truncate;
+    }
+
+    .fl-visually-hidden {
+        @include fl.visually-hidden;
+    }
+
+    .fl-interactive {
+        @include fl.interactive;
+    }
+
+    .fl-focus-ring {
+        @include fl.focus-ring;
+    }
+
+    .fl-popup {
+        @include fl.popup;
+    }
+
+    .fl-backdrop {
+        @include fl.backdrop;
+    }
+
+    .fl-arrow {
+        @include fl.arrow;
+    }
+
+    .fl-item {
+        @include fl.item;
+    }
+
+    .fl-item--destructive {
+        @include fl.item-destructive;
+    }
+
+    .fl-check {
+        @include fl.check;
+    }
+
+    .fl-choice-label {
+        @include fl.choice-label;
+    }
+
+    .fl-choice-group {
+        @include fl.choice-group;
+    }
+
+    .fl-choice-group--horizontal {
+        --_fl-choice-group-direction: row;
+        --_fl-choice-group-gap: var(--fl-spacing-5);
+    }
+
+    .fl-choice-card {
+        @include fl.choice-card;
+    }
+
+    .fl-control {
+        @include fl.control;
+    }
+
+    .fl-control-button {
+        @include fl.control-button;
+    }
+
+    // Control sizes (Figma Input Field: Large 56px, Regular 48px; Small 40px as for buttons).
+    .fl-control--large {
+        --_fl-icon-size: var(--fl-spacing-6);
+        --_fl-control-height: var(--fl-size-large);
+        --_fl-control-padding-inline: var(--fl-spacing-5);
+    }
+
+    .fl-control--medium {
+        --_fl-icon-size: var(--fl-spacing-5);
+        --_fl-control-height: var(--fl-size-medium);
+        --_fl-control-padding-inline: var(--fl-spacing-5);
+        --_fl-control-button-size: var(--fl-spacing-8);
+        --_fl-control-button-icon-size: var(--fl-spacing-5);
+    }
+
+    .fl-control--small {
+        --_fl-icon-size: var(--fl-spacing-4-5);
+        --_fl-control-height: var(--fl-size-small);
+        --_fl-control-padding-inline: var(--fl-spacing-4-5);
+        --_fl-control-gap: var(--fl-spacing-2);
+        --_fl-control-button-size: var(--fl-spacing-7);
+        --_fl-control-button-icon-size: var(--fl-spacing-5);
+    }
+
+    // Control appearances. `light` sits on the page (Figma "Input Field light"), `inverted` on a raised surface
+    // such as a card, `underline` / `underline-invisible` edit text in place (Figma "Underline").
+    .fl-control--light {
+        --_fl-control-bg: var(--fl-color-bg-1);
+        --_fl-control-bg-hover: var(--fl-color-bg-area-subtle);
+        --_fl-control-bg-disabled: var(--fl-color-bg-1);
+    }
+
+    .fl-control--inverted {
+        --_fl-control-bg: var(--fl-color-bg-area-muted);
+        --_fl-control-bg-hover: var(--fl-color-bg-area-subtle);
+        --_fl-control-bg-disabled: var(--fl-color-bg-area-muted);
+        --_fl-control-border-color-hover: var(--fl-color-stroke);
+    }
+
+    .fl-control--underline,
+    .fl-control--underline-invisible {
+        --_fl-control-height: auto;
+        --_fl-control-padding-inline: 0;
+        --_fl-control-radius: 0;
+        --_fl-control-border-width: 0 0 var(--fl-border-width-default);
+        --_fl-control-bg: transparent;
+        --_fl-control-bg-hover: transparent;
+        --_fl-control-bg-focus: transparent;
+        --_fl-control-bg-disabled: transparent;
+        --_fl-control-placeholder-color: var(--fl-color-text-6);
+    }
+
+    .fl-control--underline {
+        --_fl-control-border-color: var(--fl-color-stroke);
+    }
+}

@@ -1,0 +1,23 @@
+// Typography tokens: Vela Sans and the text styles of the Figma file (`Display 1` … `Label`).
+// Every style has three weights: `weaker`, `default` and `stronger` (`Body/Stronger`, `Body–/Weaker`…).
+
+$font-family: ('Vela Sans', system-ui, -apple-system, 'Segoe UI', sans-serif);
+$font-family-mono: (ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas, monospace);
+
+// `--fl-text-<style>-size`, `-line-height`, `-letter-spacing`, `-weight-weaker|default|stronger`.
+$text-styles: (
+    'display-1': (size: 6.5625rem, line-height: 1, letter-spacing: 0, weights: (300, 600, 800)),
+    'display-2': (size: 4.125rem, line-height: 1.1, letter-spacing: 0, weights: (500, 600, 700)),
+    'title-1': (size: 2.875rem, line-height: 1.1, letter-spacing: 0, weights: (500, 600, 700)),
+    'title-2': (size: 2.25rem, line-height: 1.25, letter-spacing: -0.02em, weights: (500, 600, 700)),
+    'title-3': (size: 1.8125rem, line-height: 1.35, letter-spacing: -0.01em, weights: (500, 600, 800)),
+    'heading-1': (size: 1.625rem, line-height: 1.4, letter-spacing: -0.01em, weights: (500, 600, 700)),
+    'heading-2': (size: 1.4375rem, line-height: 1.4, letter-spacing: 0, weights: (400, 600, 700)),
+    'heading-3': (size: 1.25rem, line-height: 1.5, letter-spacing: 0, weights: (500, 600, 700)),
+    'body-plus': (size: 1.125rem, line-height: 1.7, letter-spacing: 0, weights: (400, 500, 700)),
+    'body': (size: 1rem, line-height: 1.75, letter-spacing: 0, weights: (500, 600, 700)),
+    'body-minus': (size: 0.875rem, line-height: 1.6, letter-spacing: 0, weights: (400, 500, 700)),
+    'label': (size: 0.8125rem, line-height: 1.5, letter-spacing: 0, weights: (500, 600, 800))
+);
+
+$text-weights: ('weaker', 'default', 'stronger');

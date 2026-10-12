@@ -1,0 +1,50 @@
+// Card: a surface (`bg-1`) with a thin border, holding a `content` block (title, description, any content) and a
+// `footer` with actions. The border lightens on hover, so a card that is a link or holds one shows it is alive.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-card-root {
+        box-sizing: border-box;
+        display: var(--fl-card-display, var(--_fl-card-display, flex));
+        flex-direction: column;
+        overflow: hidden;
+        border: var(--fl-border-width-thin) solid var(--fl-card-border-color, var(--_fl-card-border-color, var(--fl-color-stroke-subtle)));
+        border-radius: var(--fl-card-radius, var(--_fl-card-radius, var(--fl-radius-card)));
+        background-color: var(--fl-card-bg, var(--_fl-card-bg, var(--fl-color-bg-1)));
+        transition: border-color var(--fl-duration-normal) var(--fl-ease-standard);
+
+        @include fl.hover {
+            --_fl-card-border-color: var(--fl-color-stroke-hover);
+        }
+    }
+
+    .fl-card-content {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        gap: var(--fl-card-gap, var(--_fl-card-gap, var(--fl-spacing-3)));
+        padding: var(--fl-card-padding, var(--_fl-card-padding, var(--fl-spacing-6)));
+    }
+
+    .fl-card-footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--fl-card-footer-gap, var(--_fl-card-footer-gap, var(--fl-spacing-3)));
+        padding: var(--fl-card-padding, var(--_fl-card-padding, var(--fl-spacing-6)));
+        padding-block-start: 0;
+    }
+
+    .fl-card-title {
+        display: block;
+        margin: 0;
+        color: var(--fl-card-title-color, var(--_fl-card-title-color, var(--fl-color-text-primary)));
+    }
+
+    .fl-card-description {
+        display: block;
+        margin: 0;
+        color: var(--fl-card-description-color, var(--_fl-card-description-color, var(--fl-color-text-3)));
+    }
+}

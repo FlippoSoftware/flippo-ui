@@ -1,0 +1,176 @@
+// Combobox and autocomplete: an input group (composes `.fl-control`) with the input, chips, a clear and a trigger
+// button (compose `.fl-control-button`), and a popup (composes `.fl-popup`) of options (compose `.fl-item`).
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-combobox-input-group {
+        flex-wrap: wrap;
+        cursor: text;
+    }
+
+    // The group of a chips combobox grows with its chips.
+    .fl-combobox-input-group--chips {
+        --_fl-control-height: auto;
+
+        min-block-size: var(--fl-size-medium);
+        padding-block: var(--fl-spacing-1-5);
+    }
+
+    .fl-combobox-input {
+        flex: 1 1 4rem;
+        min-inline-size: 0;
+        block-size: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+        outline: none;
+        text-overflow: ellipsis;
+    }
+
+    .fl-combobox-icon {
+        color: var(--fl-color-text-6);
+    }
+
+    .fl-combobox-trigger {
+        & :where(svg) {
+            transition: rotate var(--fl-duration-fast) var(--fl-ease-standard);
+        }
+
+        @include fl.open {
+            & :where(svg) {
+                rotate: 180deg;
+            }
+        }
+    }
+
+    .fl-combobox-value {
+        min-inline-size: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .fl-combobox-chips {
+        display: contents;
+    }
+
+    .fl-combobox-chip {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        gap: var(--fl-spacing-1);
+        block-size: var(--fl-spacing-7);
+        padding-inline: var(--fl-spacing-2-5) var(--fl-spacing-1);
+        border-radius: var(--fl-radius-full);
+        background-color: var(--fl-combobox-chip-bg, var(--_fl-combobox-chip-bg, var(--fl-color-bg-3)));
+        color: var(--fl-combobox-chip-color, var(--_fl-combobox-chip-color, var(--fl-color-text-2)));
+        outline: none;
+
+        @include fl.highlighted {
+            background-color: var(--fl-color-bg-3-hover);
+            color: var(--fl-color-text-strong);
+        }
+
+        @include fl.focus-visible {
+            box-shadow: 0 0 0 var(--fl-focus-width) var(--fl-focus-color);
+        }
+    }
+
+    .fl-combobox-chip-label {
+        max-inline-size: 12rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .fl-combobox-chip-remove {
+        --_fl-control-button-size: var(--fl-spacing-5);
+        --_fl-control-button-icon-size: var(--fl-spacing-3-5);
+    }
+
+    .fl-combobox-positioner {
+        z-index: var(--fl-z-dropdown);
+        outline: none;
+    }
+
+    .fl-combobox-popup {
+        --_fl-popup-max-height: min(var(--available-height), 24rem);
+        --_fl-popup-overflow: auto;
+
+        inline-size: var(--anchor-width);
+        min-inline-size: var(--fl-combobox-min-width, var(--_fl-combobox-min-width, 12rem));
+    }
+
+    .fl-combobox-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-spacing-0-5);
+        outline: none;
+
+        &:where(:empty) {
+            display: none;
+        }
+    }
+
+    .fl-combobox-row {
+        display: flex;
+        gap: var(--fl-spacing-0-5);
+    }
+
+    .fl-combobox-item {
+        flex-shrink: 0;
+    }
+
+    .fl-combobox-item-indicator {
+        display: inline-flex;
+        flex-shrink: 0;
+        order: 1;
+        margin-inline-start: auto;
+        color: var(--fl-color-brand-light);
+
+        & :where(svg) {
+            inline-size: var(--fl-spacing-5);
+            block-size: var(--fl-spacing-5);
+        }
+    }
+
+    .fl-combobox-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fl-spacing-0-5);
+    }
+
+    .fl-combobox-group-label {
+        display: flex;
+        align-items: center;
+        min-block-size: var(--fl-spacing-7);
+        padding-inline: var(--fl-spacing-5);
+        color: var(--fl-color-text-5);
+        user-select: none;
+    }
+
+    .fl-combobox-empty,
+    .fl-combobox-status {
+        padding: var(--fl-spacing-3) var(--fl-spacing-5);
+        color: var(--fl-color-text-5);
+
+        &:where(:empty) {
+            display: none;
+        }
+    }
+
+    .fl-combobox-separator {
+        flex-shrink: 0;
+        block-size: var(--fl-border-width-thin);
+        margin: var(--fl-spacing-1) var(--fl-spacing-2);
+        background-color: var(--fl-color-stroke-subtle);
+    }
+
+    .fl-combobox-backdrop {
+        --_fl-backdrop-bg: transparent;
+    }
+}

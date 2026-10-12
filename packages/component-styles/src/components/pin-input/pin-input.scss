@@ -1,0 +1,46 @@
+// Pin input (Figma "Numeric"): a row of 64×80 cells, each a control box (composes `.fl-control`) with one
+// centred digit.
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-pin-input-root,
+    .fl-pin-input-group {
+        display: flex;
+        align-items: center;
+        gap: var(--fl-pin-input-gap, var(--_fl-pin-input-gap, var(--fl-spacing-3)));
+    }
+
+    .fl-pin-input-pin {
+        --_fl-control-height-hook: var(--fl-pin-input-height);
+        --_fl-control-height: var(--_fl-pin-input-height, var(--fl-size-small));
+        --_fl-control-padding-inline: 0;
+        --_fl-control-radius-hook: var(--fl-pin-input-radius);
+        --_fl-control-radius: var(--_fl-pin-input-radius, var(--fl-radius-lg));
+
+        flex: 0 0 auto;
+        inline-size: var(--fl-pin-input-width, var(--_fl-pin-input-width, var(--fl-spacing-16)));
+        justify-content: center;
+        font-variant-numeric: tabular-nums;
+        text-align: center;
+        outline: none;
+    }
+
+    .fl-pin-input-pin--medium {
+        --_fl-pin-input-width: var(--fl-spacing-12);
+        --_fl-pin-input-height: var(--fl-spacing-14);
+        --_fl-pin-input-radius: var(--fl-radius-md);
+    }
+
+    .fl-pin-input-pin--large {
+        --_fl-pin-input-width: var(--fl-spacing-16);
+        --_fl-pin-input-height: var(--fl-spacing-20);
+        --_fl-pin-input-radius: var(--fl-radius-lg);
+    }
+
+    .fl-pin-input-focus-funnel {
+        display: flex;
+        align-items: center;
+        gap: var(--fl-pin-input-gap, var(--_fl-pin-input-gap, var(--fl-spacing-3)));
+        outline: none;
+    }
+}

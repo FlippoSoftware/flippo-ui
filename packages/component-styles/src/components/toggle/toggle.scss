@@ -1,0 +1,101 @@
+// Toggle (Figma "Toggle"): an icon toggle 40×40 or a labeled pill. `data-pressed` is the "on" state.
+// Composes `.fl-interactive` and `.fl-focus-ring`.
+@use '../../styles/layers';
+@use '../../../scss' as fl;
+
+@layer fl.components {
+    .fl-toggle {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        gap: var(--fl-toggle-gap, var(--_fl-toggle-gap, var(--fl-spacing-1-5)));
+        block-size: var(--fl-toggle-height, var(--_fl-toggle-height, var(--fl-size-small)));
+        min-inline-size: var(--fl-toggle-height, var(--_fl-toggle-height, var(--fl-size-small)));
+        padding-block: 0;
+        // An icon toggle stays square (the padding is half the space around the icon); text gets the same breathing room.
+        padding-inline: var(
+            --fl-toggle-padding-inline,
+            var(
+                --_fl-toggle-padding-inline,
+                calc(
+                    (
+                            var(--fl-toggle-height, var(--_fl-toggle-height, var(--fl-size-small))) -
+                                var(--fl-toggle-icon-size, var(--_fl-toggle-icon-size, var(--fl-spacing-6)))
+                        ) / 2
+                )
+            )
+        );
+        border-radius: var(--fl-toggle-radius, var(--_fl-toggle-radius, var(--fl-radius-md)));
+        background-color: var(--fl-toggle-bg, var(--_fl-toggle-bg, transparent));
+        box-shadow: inset 0 0 0 var(--fl-border-width-default)
+            var(--fl-toggle-border-color, var(--_fl-toggle-border-color, transparent));
+        color: var(--fl-toggle-color, var(--_fl-toggle-color, var(--fl-color-text-4)));
+
+        & :where(svg) {
+            flex-shrink: 0;
+            inline-size: var(--fl-toggle-icon-size, var(--_fl-toggle-icon-size, var(--fl-spacing-6)));
+            block-size: var(--fl-toggle-icon-size, var(--_fl-toggle-icon-size, var(--fl-spacing-6)));
+        }
+
+        @include fl.hover {
+            background-color: var(--fl-toggle-bg-hover, var(--_fl-toggle-bg-hover, var(--fl-color-bg-2-hover)));
+            color: var(--fl-toggle-color-hover, var(--_fl-toggle-color-hover, var(--fl-color-text-strong)));
+        }
+
+        @include fl.active {
+            background-color: var(--fl-toggle-bg-active, var(--_fl-toggle-bg-active, var(--fl-color-bg-2)));
+        }
+
+        @include fl.pressed {
+            background-color: var(--fl-toggle-bg-pressed, var(--_fl-toggle-bg-pressed, transparent));
+            box-shadow: inset 0 0 0 var(--fl-border-width-default)
+                var(--fl-toggle-border-color-pressed, var(--_fl-toggle-border-color-pressed, transparent));
+            color: var(--fl-toggle-color-pressed, var(--_fl-toggle-color-pressed, var(--fl-color-brand-light)));
+        }
+
+        @include fl.pressed {
+            @include fl.hover {
+                background-color: var(--fl-toggle-bg-pressed-hover, var(--_fl-toggle-bg-pressed-hover, var(--fl-color-bg-2-hover)));
+                color: var(--fl-toggle-color-pressed-hover, var(--_fl-toggle-color-pressed-hover, var(--fl-color-brand-light-hover)));
+            }
+        }
+
+        @include fl.disabled {
+            background-color: transparent;
+            color: var(--fl-toggle-color-disabled, var(--_fl-toggle-color-disabled, var(--fl-color-text-disabled)));
+        }
+
+        @include fl.disabled {
+            @include fl.pressed {
+                color: var(--fl-toggle-color-pressed-disabled, var(--_fl-toggle-color-pressed-disabled, var(--fl-color-brand-disabled)));
+            }
+        }
+    }
+
+    // Labeled toggle: a pill with an icon and a label; "on" is outlined in the brand colour.
+    .fl-toggle--labeled {
+        --_fl-toggle-padding-inline: var(--fl-spacing-3-5);
+        --_fl-toggle-radius: var(--fl-radius-full);
+        --_fl-toggle-icon-size: var(--fl-spacing-5);
+        --_fl-toggle-bg: var(--fl-color-bg-3);
+        --_fl-toggle-bg-hover: var(--fl-color-bg-3-hover);
+        --_fl-toggle-bg-active: var(--fl-color-bg-3);
+        --_fl-toggle-color: var(--fl-color-text-2);
+        --_fl-toggle-border-color-pressed: var(--fl-color-brand-light);
+        --_fl-toggle-bg-pressed-hover: transparent;
+    }
+
+    .fl-toggle--small {
+        --_fl-toggle-height: var(--fl-spacing-8);
+        --_fl-toggle-icon-size: var(--fl-spacing-5);
+    }
+
+    .fl-toggle--medium {
+        --_fl-toggle-height: var(--fl-size-small);
+    }
+
+    .fl-toggle--large {
+        --_fl-toggle-height: var(--fl-size-medium);
+    }
+}

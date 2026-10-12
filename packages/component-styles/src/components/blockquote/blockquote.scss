@@ -1,0 +1,15 @@
+@use '../../styles/layers';
+
+@layer fl.components {
+    .fl-blockquote { box-sizing: border-box; font-size: var(--fl-blockquote-font-size, var(--_fl-blockquote-font-size, 0.875em)); line-height: var(--fl-blockquote-line-height, var(--_fl-blockquote-line-height, 1.5)); color: var(--fl-blockquote-color, var(--_fl-blockquote-color, var(--fl-color-text-primary))); display: block; margin: 0; padding: var(--fl-blockquote-padding, var(--_fl-blockquote-padding, var(--fl-spacing-3) var(--fl-spacing-5))); border-inline-start: var(--fl-border-width-thick) solid var(--fl-blockquote-border-color, var(--_fl-blockquote-border-color, var(--fl-color-brand-light))); font-style: italic; }
+    .fl-blockquote--size-1 { --_fl-blockquote-font-size: var(--fl-text-label-size); --_fl-blockquote-line-height: var(--fl-text-label-line-height); }
+    .fl-blockquote--size-2 { --_fl-blockquote-font-size: var(--fl-text-body-minus-size); --_fl-blockquote-line-height: var(--fl-text-body-minus-line-height); }
+    .fl-blockquote--size-3 { --_fl-blockquote-font-size: var(--fl-text-body-size); --_fl-blockquote-line-height: var(--fl-text-body-line-height); }
+    .fl-blockquote--primary { --_fl-blockquote-border-color: var(--fl-color-text-primary); }
+    .fl-blockquote--brand { --_fl-blockquote-border-color: var(--fl-color-brand-light); }
+    .fl-blockquote--success { --_fl-blockquote-border-color: var(--fl-color-success); }
+    .fl-blockquote--warning { --_fl-blockquote-border-color: var(--fl-color-warning); }
+    .fl-blockquote--error { --_fl-blockquote-border-color: var(--fl-color-error); }
+    .fl-blockquote cite { display: block; margin-block-start: var(--fl-spacing-2); font-style: normal; color: var(--fl-color-text-3); }
+
+}
