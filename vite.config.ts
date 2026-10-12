@@ -61,7 +61,7 @@ export default defineConfig({
         },
         rollupOptions: {
             external: (id: string) =>
-                ['react', 'react-dom', 'tabbable', 'reselect'].includes(id) ||
+                ['react', 'react-dom', 'tabbable', '@flippo-software/store'].includes(id) ||
                 id.startsWith('use-sync-external-store'),
             plugins: [stripSrcPrefix()],
             output: {

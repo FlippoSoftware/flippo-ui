@@ -1,25 +1,25 @@
 // We need to import the shim because React 17 does not support the `useSyncExternalStore` API.
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector';
 
-import type { Store } from './Store';
+import type { ReadableStore } from '@flippo-software/store';
 
 export function useStore<State, Value>(
-    store: Store<State>,
+    store: ReadableStore<State>,
     selector: (state: State) => Value,
 ): Value;
 export function useStore<State, Value, A1>(
-    store: Store<State>,
+    store: ReadableStore<State>,
     selector: (state: State, a1: A1) => Value,
     a1: A1,
 ): Value;
 export function useStore<State, Value, A1, A2>(
-    store: Store<State>,
+    store: ReadableStore<State>,
     selector: (state: State, a1: A1, a2: A2) => Value,
     a1: A1,
     a2: A2,
 ): Value;
 export function useStore<State, Value, A1, A2, A3>(
-    store: Store<State>,
+    store: ReadableStore<State>,
     selector: (state: State, a1: A1, a2: A2, a3: A3) => Value,
     a1: A1,
     a2: A2,
@@ -36,7 +36,7 @@ export function useStore<State, Value, A1, A2, A3>(
  * @param a3 Optional third argument for the selector function.
  */
 export function useStore(
-    store: Store<unknown>,
+    store: ReadableStore<unknown>,
 
     selector: Function,
     a1?: unknown,

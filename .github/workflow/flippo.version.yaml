@@ -1,0 +1,41 @@
+name: Flippo Version
+
+run-name: "Changing version"
+
+on: 
+  push:
+    branches:
+      - main
+
+concurrency: 
+  group: ${{github.workflow}} - ${{github.ref}}
+  cancel-in-progress: false
+  
+jobs:
+  version:
+    name: "New version: "
+
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "Checout: "
+        uses: action/checkout@v4
+
+      - name: "Install pnpm: "
+        uses: pnpm/action-setup@v4
+        with:
+         version: latest
+         run_install: false
+    
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Create Version Pull Request
+        uses: changesets/action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

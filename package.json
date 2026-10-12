@@ -363,14 +363,14 @@
     "react-dom": "^19.1.1"
   },
   "dependencies": {
-    "reselect": "^5.1.1",
+    "@flippo-software/store": "link:../store",
     "tabbable": "^6.2.0",
     "use-sync-external-store": "^1.5.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.11",
-    "@flippo/biome": "^1.0.0",
-    "@flippo/tsconfig": "^1.0.0",
+    "@flippo-software/biome": "^1.1.1",
+    "@flippo-software/tsconfig": "^1.0.0",
     "@types/node": "^22.18.0",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",

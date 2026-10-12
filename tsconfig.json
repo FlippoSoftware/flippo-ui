@@ -1,5 +1,5 @@
 {
-  "extends": "@flippo/tsconfig",
+  "extends": "@flippo-software/tsconfig",
   "compilerOptions": {
     "jsx": "react",
 
