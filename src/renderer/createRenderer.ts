@@ -70,7 +70,12 @@ export function createRenderer(options: RendererOptions = {}) {
 
     // Create user event instance
     const user = userEvent.setup({
-      advanceTimers: vi.advanceTimersByTime,
+      // Only advance fake timers; with real timers `vi.advanceTimersByTime` throws.
+      advanceTimers: (delay) => {
+        if (vi.isFakeTimers()) {
+          vi.advanceTimersByTime(delay);
+        }
+      },
       pointerEventsCheck: 0, // Disable pointer events check for headless components
     });
 
