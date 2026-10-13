@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { getTabsIndicatorGeometry } from '@flippo-software/core-components/tabs';
-import { useForcedRerendering, useOnMount } from '@flippo-software/hooks';
+import { useForcedRerendering, useOnMount } from '@flippo-software/react-hooks';
 
 import { useRenderElement } from '~@lib/hooks';
 

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ToastRootMachine, toastRootStateAttributesMapping } from '@flippo-software/core-components/toast';
 
-import type { TransitionStatus } from '@flippo-software/hooks';
+import type { TransitionStatus } from '@flippo-software/react-hooks';
 
 import { toReactProps, useMachine, useMachineState, useStoreState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

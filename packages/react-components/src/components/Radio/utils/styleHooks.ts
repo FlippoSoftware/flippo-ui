@@ -1,4 +1,4 @@
-import type { TransitionStatus } from '@flippo-software/hooks';
+import type { TransitionStatus } from '@flippo-software/react-hooks';
 
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 

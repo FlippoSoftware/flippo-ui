@@ -1,4 +1,4 @@
-# @flippo-software/hooks — notes for agents
+# @flippo-software/react-hooks — notes for agents
 
 Generic React hooks used by `@flippo-software/react-components` and apps, plus the React adapter of
 `@flippo-software/store` (`useStore`, `ReactStore`). Peer dependencies: React 19. No README yet (the file `REASME.md`
@@ -7,7 +7,7 @@ is empty) — this file is the map.
 ## Layout
 
 ```
-src/hooks/<useName>/index.ts + <useName>.ts   one folder per hook; each is an entry point `@flippo-software/hooks/use-name`
+src/hooks/<useName>/index.ts + <useName>.ts   one folder per hook; each is an entry point `@flippo-software/react-hooks/use-name`
 src/hooks/index.ts                            re-exports every hook
 src/hooks/useStore/                           React adapter of the store:
   useStore.ts                                 useStore(store, selector, ...args) on useSyncExternalStore
@@ -32,5 +32,5 @@ window event, window scroll.
 - Build: `pnpm build` = Vite + `scripts/generate-exports.js` (exports use kebab-case names). No test script yet.
 - `ReactStore` adds hooks only; store logic belongs in `@flippo-software/store` (`link:` dependency). Keep the
   re-exports so apps get one copy of the store.
-- The package is consumed by headless via `link:../hooks` and is not published in its current form: never commit,
-  push or publish unless asked.
+- react-components consumes the package from the workspace (`workspace:^`) and its built `dist/`. Never commit, push or
+  publish unless asked.

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { mergedRef } from '@flippo-software/hooks';
+import { mergedRef } from '@flippo-software/react-hooks';
 
 import { mergeProps } from './merge';
 

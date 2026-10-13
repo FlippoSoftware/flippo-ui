@@ -318,8 +318,8 @@
         "react-dom": "^19.1.1"
     },
     "dependencies": {
-        "@flippo-software/core-components": "workspace:*",
-        "@flippo-software/hooks": "workspace:*",
+        "@flippo-software/core-components": "workspace:^",
+        "@flippo-software/react-hooks": "workspace:^",
         "@floating-ui/dom": "^1.8.0",
         "@vitejs/plugin-react": "^4.3.4",
         "qr-code-styling": "^1.9.2",

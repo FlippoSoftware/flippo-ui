@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ToastViewportMachine } from '@flippo-software/core-components/toast';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import { toReactProps, useMachineState, useTracker } from '~@lib/core';
 import { FocusGuard } from '~@lib/FocusGuard';

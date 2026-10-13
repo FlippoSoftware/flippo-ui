@@ -7,3 +7,6 @@ coverage/
 .idea
 .env*
 .pnpm-store
+
+# Personal Claude Code settings; the agent docs and skills (.claude/skills) are versioned.
+.claude/settings.local.json

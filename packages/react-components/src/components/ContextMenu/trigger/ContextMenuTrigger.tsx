@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ContextMenuTriggerMachine } from '@flippo-software/core-components/context-menu';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import { toReactProps, useStoreSelector } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

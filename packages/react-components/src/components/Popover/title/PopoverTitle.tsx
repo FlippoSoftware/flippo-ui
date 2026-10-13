@@ -1,4 +1,4 @@
-import { useIsoLayoutEffect } from '@flippo-software/hooks/use-iso-layout-effect';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks/use-iso-layout-effect';
 
 import { useHeadlessUiId } from '~@lib/hooks/useHeadlessUiId';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';

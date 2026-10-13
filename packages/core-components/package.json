@@ -44,14 +44,14 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
-        "directory": "packages/core"
+        "directory": "packages/core-components"
     },
-    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/core#readme",
+    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/core-components#readme",
     "bugs": {
         "url": "https://github.com/FlippoSoftware/flippo-components/issues"
     },
     "dependencies": {
-        "@flippo-software/store": "workspace:*",
+        "@flippo-software/store": "workspace:^",
         "@floating-ui/core": "^1.8.0",
         "@floating-ui/dom": "^1.8.0",
         "@floating-ui/utils": "^0.2.12",

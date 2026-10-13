@@ -2,7 +2,7 @@ import React from 'react';
 
 import { MenuBackdrop as MenuBackdropCore } from '@flippo-software/core-components/menu';
 
-import type { TransitionStatus } from '@flippo-software/hooks/use-transition-status';
+import type { TransitionStatus } from '@flippo-software/react-hooks/use-transition-status';
 
 import { toReactProps, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

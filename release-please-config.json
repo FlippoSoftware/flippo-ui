@@ -1,0 +1,35 @@
+{
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+    "release-type": "node",
+    "bootstrap-sha": "abdbb9151f6a0851911b65a970dd08c42346a55f",
+    "bump-minor-pre-major": true,
+    "include-component-in-tag": true,
+    "separate-pull-requests": false,
+    "group-pull-request-title-pattern": "chore: release",
+    "packages": {
+        "packages/component-styles": {
+            "component": "component-styles"
+        },
+        "packages/core-components": {
+            "component": "core-components"
+        },
+        "packages/react-components": {
+            "component": "react-components"
+        },
+        "packages/react-hooks": {
+            "component": "react-hooks"
+        },
+        "packages/store": {
+            "component": "store"
+        },
+        "packages/ui-kit-react": {
+            "component": "ui-kit-react"
+        },
+        "packages/ui-kit-web": {
+            "component": "ui-kit-web"
+        },
+        "packages/web-components": {
+            "component": "web-components"
+        }
+    }
+}

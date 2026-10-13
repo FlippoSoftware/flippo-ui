@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useId, useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useId, useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import { useRenderElement } from '~@lib/hooks';
 

@@ -1,7 +1,7 @@
 # @flippo-software/store — notes for agents
 
 The reactive layer under the Flippo UI stack: observable stores, derived values and effects, with one notification
-queue shared by all stores. Used by `@flippo-software/core-components` (state machines), `@flippo-software/hooks` (React
+queue shared by all stores. Used by `@flippo-software/core-components` (state machines), `@flippo-software/react-hooks` (React
 adapter `ReactStore`/`useStore`) and `@flippo-software/web-components`. No dependencies, no DOM, no framework.
 
 `README.md` is the user documentation and the spec of the behaviour: read the relevant section before changing
@@ -40,7 +40,7 @@ anything, and update it with every behaviour change.
 
 ## Commands
 
-`pnpm test`, `pnpm typecheck`, `pnpm lint:check`, `pnpm build`. Consumers use the built `dist/` through
-`link:../store`: rebuild after changes, then run the tests of `core`, `headless-components` and `web-components`.
+`pnpm test`, `pnpm typecheck`, `pnpm lint:check`, `pnpm build`. Consumers use the built `dist/` (workspace
+dependency): rebuild after changes, then run the tests of `core-components`, `react-components` and `web-components`.
 
 The repo is not on GitHub/npm yet. Never commit, push or publish unless asked.

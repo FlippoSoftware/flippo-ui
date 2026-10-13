@@ -1,4 +1,4 @@
-import { useId } from '@flippo-software/hooks';
+import { useId } from '@flippo-software/react-hooks';
 
 /**
  * Wraps `useId` and prefixes generated `id`s with `base-ui-`

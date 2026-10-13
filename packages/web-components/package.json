@@ -28,8 +28,8 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@flippo-software/core-components": "workspace:*",
-        "@flippo-software/store": "workspace:*"
+        "@flippo-software/core-components": "workspace:^",
+        "@flippo-software/store": "workspace:^"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",

@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { useOpenChangeComplete, useStatusTransition } from '@flippo-software/hooks';
+import { useOpenChangeComplete, useStatusTransition } from '@flippo-software/react-hooks';
 
-import type { StatusTransition } from '@flippo-software/hooks';
+import type { StatusTransition } from '@flippo-software/react-hooks';
 
 import { useRenderElement } from '~@lib/hooks';
 

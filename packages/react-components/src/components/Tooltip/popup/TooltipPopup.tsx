@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { TooltipPopupMachine } from '@flippo-software/core-components/tooltip';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
-import type { TransitionStatus } from '@flippo-software/hooks';
+import type { TransitionStatus } from '@flippo-software/react-hooks';
 
 import { toReactProps, useMachineState, useTracker } from '~@lib/core';
 import { useFloatingTree } from '~@lib/floating';

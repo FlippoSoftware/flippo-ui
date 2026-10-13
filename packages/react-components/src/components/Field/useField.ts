@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { FieldRootMachine } from '@flippo-software/core-components/field';
-import { useEventCallback, useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useEventCallback, useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import { useFormContext } from '../Form/FormContext';
 

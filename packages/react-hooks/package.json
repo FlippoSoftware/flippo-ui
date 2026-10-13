@@ -1,5 +1,5 @@
 {
-    "name": "@flippo-software/hooks",
+    "name": "@flippo-software/react-hooks",
     "type": "module",
     "version": "1.0.0",
     "source": "./src/index.ts",
@@ -362,7 +362,7 @@
         "react-dom": "^19.1.1"
     },
     "dependencies": {
-        "@flippo-software/store": "workspace:*",
+        "@flippo-software/store": "workspace:^",
         "tabbable": "^6.2.0",
         "use-sync-external-store": "^1.5.0"
     },
@@ -387,9 +387,9 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
-        "directory": "packages/hooks"
+        "directory": "packages/react-hooks"
     },
-    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/hooks#readme",
+    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/react-hooks#readme",
     "bugs": {
         "url": "https://github.com/FlippoSoftware/flippo-components/issues"
     },

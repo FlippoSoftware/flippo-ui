@@ -1,16 +1,21 @@
 # Flippo UI — notes for agents
 
-pnpm workspace of the whole component system: `packages/store`, `core`, `hooks`, `react-components`,
+pnpm workspace of the whole component system: `packages/store`, `core-components`, `react-hooks`, `react-components`,
 `web-components`, `component-styles`, `ui-kit-react`, `ui-kit-web`, `internal-test-utils` (see README). Packages with
-their own `AGENTS.md` (core, react-components, web-components, component-styles…): read it before working there.
+their own `AGENTS.md` (core-components, react-components, web-components, component-styles…): read it before working there.
 
 - Run commands from the root: `pnpm check` (build → lint → typecheck → test), `pnpm --filter <package> <script>`.
 - The kits read component-styles from its sources (`source` export condition, `tools/workspace.ts`): no rebuild is
   needed for their Storybook, tests and typecheck. Lint (Biome resolution) and builds need `pnpm build` first.
-- Dependencies between workspace packages: `workspace:*` (dev) / `workspace:^` (peer). Shared tool versions: the
+- Dependencies between workspace packages: `workspace:^` (dependencies, peers), `workspace:*` (dev). Shared tool versions: the
   `catalog` in `pnpm-workspace.yaml` (`"catalog:"` in package.json).
-- The behaviour packages (store, core, hooks, react-components, web-components) are consumed from `dist`: rebuild
+- The behaviour packages (store, core-components, react-hooks, react-components, web-components) are consumed from `dist`: rebuild
   them after a change (`pnpm build`, or keep `pnpm dev` running). Their internal imports use tsconfig `paths`
   aliases (`~@lib/*`), so their sources cannot be read by other packages.
-- hooks and internal-test-utils build their types with TypeScript 5 (vite-plugin-dts, tsup); the rest use TypeScript 7.
+- react-hooks and internal-test-utils build their types with TypeScript 5 (vite-plugin-dts, tsup); the rest use TypeScript 7.
+- Releases: release-please from conventional commits (`fix(core-components): …`, `feat(ui-kit-react): …`); the package is the
+  folder a commit changes. Write commit messages accordingly; never edit versions or CHANGELOGs by hand.
+- Imports inside a package: tsconfig `paths` aliases with the `~@` prefix (`~@lib/*`, `~@components/*`; in the kits also
+  `~@src`, `~@stories`), never `../..`. Vite/Vitest get the same aliases from the package's `aliases.ts`.
+- UI kits: stories in `src/components/<name>/__stories__/`, tests in `__tests__/` next to the code.
 - Never commit, push or publish unless asked.

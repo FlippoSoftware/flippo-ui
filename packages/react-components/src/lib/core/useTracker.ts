@@ -2,7 +2,7 @@ import React from 'react';
 
 import { isOptionsStore } from '@flippo-software/core-components/lib';
 import { ReadTracker } from '@flippo-software/core-components/store';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import { SourceSubscriptions } from './SourceSubscriptions';
 

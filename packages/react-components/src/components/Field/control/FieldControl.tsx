@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useControlledState, useEventCallback, useIsoLayoutEffect, useMergedRef } from '@flippo-software/hooks';
+import { useControlledState, useEventCallback, useIsoLayoutEffect, useMergedRef } from '@flippo-software/react-hooks';
 
 import { createChangeEventDetails } from '~@lib/createHeadlessUIEventDetails';
 import { mergeProps } from '~@lib/merge';

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { getTarget } from '@flippo-software/core-components/floating';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
 

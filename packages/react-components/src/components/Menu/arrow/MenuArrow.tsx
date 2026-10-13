@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { TransitionStatus } from '@flippo-software/hooks/use-transition-status';
+import type { TransitionStatus } from '@flippo-software/react-hooks/use-transition-status';
 
 import { toReactProps, useMachineState } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ComboboxClearMachine } from '@flippo-software/core-components/combobox';
 
-import type { TransitionStatus } from '@flippo-software/hooks';
+import type { TransitionStatus } from '@flippo-software/react-hooks';
 
 import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';

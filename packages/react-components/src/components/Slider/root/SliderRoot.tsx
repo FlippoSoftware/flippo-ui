@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SliderMachine } from '@flippo-software/core-components/slider';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import type { SliderOptions } from '@flippo-software/core-components/slider';
 

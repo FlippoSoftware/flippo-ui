@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useMergedRef } from '@flippo-software/hooks';
+import { useMergedRef } from '@flippo-software/react-hooks';
 
 import { createSlot } from '~@lib/createSlot';
 

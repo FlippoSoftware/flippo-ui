@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { PinInputMachine } from '@flippo-software/core-components/pin-input';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import type { PinInputOptions } from '@flippo-software/core-components/pin-input';
 

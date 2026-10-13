@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { PopupViewportController, popupViewportStateAttributesMapping } from '@flippo-software/core-components/popup';
-import { useIsoLayoutEffect } from '@flippo-software/hooks/use-iso-layout-effect';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks/use-iso-layout-effect';
 
 import { toReactProps, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

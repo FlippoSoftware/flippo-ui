@@ -49,9 +49,9 @@ without DOM) and reconnect where relevant. Coverage threshold is a ratchet.
 
 ## Commands and consumers
 
-`pnpm lint:check`, `pnpm typecheck`, `pnpm test`, `pnpm build`. `headless-components` and `web-components` use the
-built `dist/` via `link:../core`: run `pnpm build` after every change, then their tests (`pnpm test` there).
-Depends on `../store` via `link:`. Pitfall: the shared tsconfig enables `incremental`; if `tsc` looks stale, run
+`pnpm lint:check`, `pnpm typecheck`, `pnpm test`, `pnpm build`. `react-components` and `web-components` use the
+built `dist/` (workspace dependency): run `pnpm build` after every change, then their tests (`pnpm test` there).
+Depends on `../store` (workspace). Pitfall: the shared tsconfig enables `incremental`; if `tsc` looks stale, run
 `tsc --noEmit --incremental false --composite false`.
 
 Never commit, push or publish unless asked.

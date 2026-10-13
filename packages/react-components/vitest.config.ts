@@ -27,7 +27,7 @@ export default defineConfig({
     plugins: [react()],
     test,
     resolve: {
-        // The linked packages (`link:../core`, `link:../hooks`, `link:../internal-test-utils`) have their own node_modules:
+        // The workspace packages (core-components, react-hooks, internal-test-utils) have their own node_modules:
         // use one copy of React, Testing Library and Vitest.
         dedupe: ['react', 'react-dom', '@testing-library/react', '@testing-library/dom', '@testing-library/user-event', 'vitest'],
         alias: [

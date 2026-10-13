@@ -1,7 +1,7 @@
 # @flippo-software/react-components — notes for agents
 
 Unstyled, accessible React components with the Base UI API (`Dialog.Root`, `Dialog.Trigger`, …). Every component is
-a thin React adapter over the state machines of `@flippo-software/core-components` (`../core`): the machine owns the
+a thin React adapter over the state machines of `@flippo-software/core-components` (`../core-components`): the machine owns the
 behaviour; the component creates it, pushes props, renders and subscribes. No README yet — this file is the map.
 
 ## Layout
@@ -49,7 +49,7 @@ return useRenderElement('button', componentProps, {
   Write the test against the expected Base UI behaviour first.
 - Build is Vite (+ `tsc -p tsconfig.build.json` and `scripts/rewrite-dts-aliases.mjs` for types); do not move it to
   tsdown. TypeScript 7.
-- `@flippo-software/hooks` and `@flippo-software/internal-test-utils` are `link:` dependencies (not on npm): replace them with
+- `@flippo-software/react-hooks` and `@flippo-software/internal-test-utils` are `link:` dependencies (not on npm): replace them with
   published versions before a release. CI checks them out as siblings.
 
 ## Commands

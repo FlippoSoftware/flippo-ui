@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { ListRegistry } from '@flippo-software/core-components/composite';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
-import { useStableCallback } from '@flippo-software/hooks/use-stable-callback';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
+import { useStableCallback } from '@flippo-software/react-hooks/use-stable-callback';
 
 import { CompositeListContext } from './CompositeListContext';
 

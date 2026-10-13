@@ -2,7 +2,7 @@ import React from 'react';
 
 import { comboboxSelectors as selectors } from '@flippo-software/core-components/combobox';
 
-import type { TransitionStatus } from '@flippo-software/hooks/use-transition-status';
+import type { TransitionStatus } from '@flippo-software/react-hooks/use-transition-status';
 
 import { useSelector as useStore } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';

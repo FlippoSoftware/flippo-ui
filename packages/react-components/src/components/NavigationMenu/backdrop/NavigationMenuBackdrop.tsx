@@ -2,7 +2,7 @@ import React from 'react';
 
 import { NavigationMenuParts } from '@flippo-software/core-components/navigation-menu';
 
-import type { TransitionStatus } from '@flippo-software/hooks';
+import type { TransitionStatus } from '@flippo-software/react-hooks';
 
 import { toReactProps, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

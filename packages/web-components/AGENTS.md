@@ -1,6 +1,6 @@
 # @flippo-software/web-components — notes for agents
 
-Headless, accessible custom elements for every component of `@flippo-software/core-components` (`../core`). No Lit,
+Headless, accessible custom elements for every component of `@flippo-software/core-components` (`../core-components`). No Lit,
 no runtime dependencies besides store and core; elements render no markup and no styles: the page's markup gets the
 behaviour (ARIA, keyboard, pointer, state as `data-*`). Must work in plain HTML, React 19 and Vue 3.
 `README.md` is the user documentation (usage, catalog of tags, differences from the React version).

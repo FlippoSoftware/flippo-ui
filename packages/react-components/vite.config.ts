@@ -44,7 +44,7 @@ export default defineConfig({
                 'react',
                 'react-dom',
                 'react/jsx-runtime',
-                '@flippo-software/hooks',
+                '@flippo-software/react-hooks',
                 /^@flippo-ui\/hooks\//,
                 /^@flippo-software\/core-components(\/|$)/
             ],

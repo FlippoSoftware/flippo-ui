@@ -5,7 +5,7 @@ description: Use when adding or changing a React component or part in @flippo-so
 
 # Adding or changing a headless React component
 
-1. **Behaviour lives in core.** If the machine lacks something, change `../core` first (skill `core-machine` there),
+1. **Behaviour lives in core.** If the machine lacks something, change `../core-components` first (skill `core-machine` there),
    `pnpm build:core`, then come back.
 2. **Copy the closest sibling.** Simple part: `src/components/Toggle/Toggle.tsx`; popup family: `Popover/`; list:
    `Select/`, `Menu/`; form control: `Checkbox/` (Field/Labelable contexts). Keep the Base UI prop names, defaults

@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { SelectScrollArrowMachine } from '@flippo-software/core-components/select';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
-import type { TransitionStatus } from '@flippo-software/hooks';
+import type { TransitionStatus } from '@flippo-software/react-hooks';
 
 import { toReactProps, useMachineState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';

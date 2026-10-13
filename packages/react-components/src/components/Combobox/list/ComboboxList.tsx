@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ComboboxListMachine } from '@flippo-software/core-components/combobox';
-import { useIsoLayoutEffect } from '@flippo-software/hooks';
+import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import { toReactProps, useMachineState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks/useRenderElement';
