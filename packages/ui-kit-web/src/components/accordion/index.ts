@@ -2,11 +2,11 @@ import { accordion as recipe } from '@flippo-software/component-styles/accordion
 import { iconMarkup } from '@flippo-software/component-styles/icons';
 import * as Primitive from '@flippo-software/web-components/accordion';
 
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const AccordionElement: StyledConstructor<typeof Primitive.AccordionElement, typeof recipe> = styled(
     Primitive.AccordionElement,
     recipe,

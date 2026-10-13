@@ -2,11 +2,11 @@ import { iconMarkup } from '@flippo-software/component-styles/icons';
 import { navigationMenu as recipe } from '@flippo-software/component-styles/navigation-menu';
 import * as Primitive from '@flippo-software/web-components/navigation-menu';
 
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const NavigationMenuElement: StyledConstructor<typeof Primitive.NavigationMenuElement, typeof recipe> = styled(
     Primitive.NavigationMenuElement,
     recipe,

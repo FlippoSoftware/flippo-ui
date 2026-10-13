@@ -2,11 +2,11 @@ import { drawer as recipe } from '@flippo-software/component-styles/drawer';
 import { iconMarkup } from '@flippo-software/component-styles/icons';
 import * as Primitive from '@flippo-software/web-components/drawer';
 
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const DrawerElement: StyledConstructor<typeof Primitive.DrawerElement, typeof recipe> = styled(
     Primitive.DrawerElement,
     recipe,

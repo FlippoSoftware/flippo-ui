@@ -2,9 +2,9 @@
 import { field as recipe } from '@flippo-software/component-styles/field';
 import { Field as Primitive } from '@flippo-software/react-components/field';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 import { FieldControl } from './FieldControl';
 

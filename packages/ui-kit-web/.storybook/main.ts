@@ -2,9 +2,11 @@ import type { StorybookConfig } from '@storybook/web-components-vite';
 
 import { clientConditions, stylesAliases } from '@flippo-software/workspace-tools';
 
+import { alias } from '../aliases';
+
 const config: StorybookConfig = {
     framework: '@storybook/web-components-vite',
-    stories: ['../stories/**/*.stories.ts'],
+    stories: ['../src/**/__stories__/*.stories.ts'],
     addons: ['@storybook/addon-essentials'],
     core: { disableTelemetry: true },
     async viteFinal(config) {
@@ -12,7 +14,7 @@ const config: StorybookConfig = {
         const aliases = Array.isArray(config.resolve?.alias) ? config.resolve.alias : Object.entries(config.resolve?.alias ?? {}).map(([find, replacement]) => ({ find, replacement }));
         return {
             ...config,
-            resolve: { ...config.resolve, dedupe: ['react', 'react-dom'], conditions: clientConditions, alias: [...stylesAliases, ...aliases] }
+            resolve: { ...config.resolve, dedupe: ['react', 'react-dom'], conditions: clientConditions, alias: [...stylesAliases, ...alias, ...aliases] }
         };
     }
 };

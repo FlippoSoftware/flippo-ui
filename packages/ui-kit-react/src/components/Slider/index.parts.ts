@@ -2,9 +2,9 @@
 import { slider as recipe } from '@flippo-software/component-styles/slider';
 import { Slider as Primitive } from '@flippo-software/react-components/slider';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'slider');
 export type Variants = RecipeVariants<typeof recipe>;

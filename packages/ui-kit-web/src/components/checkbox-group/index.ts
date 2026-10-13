@@ -1,11 +1,11 @@
 import { checkboxGroup as recipe } from '@flippo-software/component-styles/checkbox-group';
 import * as Primitive from '@flippo-software/web-components/checkbox-group';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const CheckboxGroupElement: StyledConstructor<typeof Primitive.CheckboxGroupElement, typeof recipe> = styled(
     Primitive.CheckboxGroupElement,
     recipe,

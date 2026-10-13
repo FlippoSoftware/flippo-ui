@@ -2,9 +2,9 @@
 import { tabs as recipe } from '@flippo-software/component-styles/tabs';
 import { Tabs as Primitive } from '@flippo-software/react-components/tabs';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'tabs');
 export type Variants = RecipeVariants<typeof recipe>;

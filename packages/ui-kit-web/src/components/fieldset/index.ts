@@ -1,11 +1,11 @@
 import { fieldset as recipe } from '@flippo-software/component-styles/fieldset';
 import * as Primitive from '@flippo-software/web-components/fieldset';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const FieldsetElement: StyledConstructor<typeof Primitive.FieldsetElement, typeof recipe> = styled(
     Primitive.FieldsetElement,
     recipe,

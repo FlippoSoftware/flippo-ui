@@ -2,9 +2,9 @@
 import { toolbar as recipe } from '@flippo-software/component-styles/toolbar';
 import { Toolbar as Primitive } from '@flippo-software/react-components/toolbar';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'toolbar');
 export type Variants = RecipeVariants<typeof recipe>;

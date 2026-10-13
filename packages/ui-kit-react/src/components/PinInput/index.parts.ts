@@ -2,9 +2,9 @@
 import { pinInput as recipe } from '@flippo-software/component-styles/pin-input';
 import { PinInput as Primitive } from '@flippo-software/react-components/pin-input';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'pinInput');
 export type Variants = RecipeVariants<typeof recipe>;

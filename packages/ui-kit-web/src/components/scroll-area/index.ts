@@ -1,11 +1,11 @@
 import { scrollArea as recipe } from '@flippo-software/component-styles/scroll-area';
 import * as Primitive from '@flippo-software/web-components/scroll-area';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const ScrollAreaElement: StyledConstructor<typeof Primitive.ScrollAreaElement, typeof recipe> = styled(
     Primitive.ScrollAreaElement,
     recipe,

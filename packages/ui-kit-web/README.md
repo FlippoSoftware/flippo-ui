@@ -99,12 +99,19 @@ This package is part of the `ui-kit` pnpm workspace (see the root README): insta
 The behaviour packages it uses (web-components, core, store) come from the workspace and their `dist`: rebuild
 them after a change (`pnpm build`, or keep `pnpm dev` running at the root).
 
+## Stories and tests
+
+Stories live in `src/components/<name>/__stories__/`, tests in `__tests__/` folders next to the code they test
+(`src/__tests__/` for the kit as a whole). Both import the kit from `~@src`, the stories their helpers from `~@stories`
+(tsconfig `paths`, `aliases.ts` for Vite).
+
 ## Storybook
 
-`stories/` contains one CSF page for each of the 63 public component families, in Russian, with the same
+Each component keeps its stories next to it, in `src/components/<name>/__stories__/` (one CSF page for each of the 63
+public component families), in Russian, with the same
 catalog groups and content in both packages. Each page has a `Default` story with Controls for the recipe variants,
 and a `Gallery` (some also `Examples`) laid out like the Figma component sheets: sections of labelled rows with the
-sizes, variants and states, and realistic compositions from the Flippo screens. The gallery layout (`stories/kit`)
+sizes, variants and states, and realistic compositions from the Flippo screens. The gallery layout (`src/__stories__`, imported as `~@stories`)
 and its CSS (`.storybook/preview.css`, `.sb-*` classes) are shared by both packages. The toolbar switches light/dark
 themes (dark by default), including overlays in the top layer.
 

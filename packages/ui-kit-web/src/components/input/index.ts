@@ -2,12 +2,12 @@ import { iconMarkup } from '@flippo-software/component-styles/icons';
 import { input as recipe } from '@flippo-software/component-styles/input';
 import { FieldControlElement } from '@flippo-software/web-components/field';
 
-import { InputClearBaseElement } from '../../lib/InputClearElement';
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { InputClearBaseElement } from '~@lib/InputClearElement';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const InputElement: StyledConstructor<typeof PresentationElement, typeof recipe> = styled(
     PresentationElement,
     recipe,

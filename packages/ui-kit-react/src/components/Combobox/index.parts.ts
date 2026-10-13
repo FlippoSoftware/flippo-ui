@@ -2,11 +2,11 @@
 import { combobox as recipe } from '@flippo-software/component-styles/combobox';
 import { Combobox as Primitive } from '@flippo-software/react-components/combobox';
 
-import { icon } from '../../lib/Icon';
-import { withAnchor, withAnchorRoot, withAnchorTarget } from '../../lib/InputGroupAnchor';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { withAnchor, withAnchorRoot, withAnchorTarget } from '~@lib/InputGroupAnchor';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'combobox');
 export type Variants = RecipeVariants<typeof recipe>;

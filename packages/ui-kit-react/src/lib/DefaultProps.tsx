@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 
-import type * as Kit from '../index';
+import type * as Kit from '~@src';
 
 import type { StyledPart } from './Styled';
 

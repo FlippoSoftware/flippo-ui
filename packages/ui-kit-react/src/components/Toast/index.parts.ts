@@ -2,10 +2,10 @@
 import { toast as recipe } from '@flippo-software/component-styles/toast';
 import { Toast as Primitive } from '@flippo-software/react-components/toast';
 
-import { icon } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'toast');
 export type Variants = RecipeVariants<typeof recipe>;

@@ -6,9 +6,6 @@
             "!**/dist",
             "!**/.git",
             "!**/.storybook",
-            "!**/story",
-            "!**/StoryCombine",
-            "!**/src/examples",
             "!**/scripts",
             "!**/vite.config.ts",
             "!**/src/vite-env.d.ts",
@@ -26,7 +23,7 @@
     },
     "overrides": [
         {
-            "includes": ["test/**", "*.config.ts"],
+            "includes": ["**/__tests__/**", "*.config.ts"],
             "linter": {
                 "rules": {
                     "style": {
@@ -43,7 +40,7 @@
             }
         },
         {
-            "includes": ["stories/**"],
+            "includes": ["**/__stories__/**"],
             "linter": {
                 "rules": {
                     "style": {

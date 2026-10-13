@@ -1,10 +1,10 @@
 import { card as recipe } from '@flippo-software/component-styles/card';
 
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const CardElement: StyledConstructor<typeof PresentationElement, typeof recipe, 'card'> = styled(
     PresentationElement,
     recipe,

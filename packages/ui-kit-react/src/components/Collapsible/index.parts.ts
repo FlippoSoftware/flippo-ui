@@ -2,10 +2,10 @@
 import { collapsible as recipe } from '@flippo-software/component-styles/collapsible';
 import { Collapsible as Primitive } from '@flippo-software/react-components/collapsible';
 
-import { icon } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'collapsible');
 export type Variants = RecipeVariants<typeof recipe>;

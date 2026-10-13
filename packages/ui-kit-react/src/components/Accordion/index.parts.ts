@@ -2,10 +2,10 @@
 import { accordion as recipe } from '@flippo-software/component-styles/accordion';
 import { Accordion as Primitive } from '@flippo-software/react-components/accordion';
 
-import { icon } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'accordion');
 export type Variants = RecipeVariants<typeof recipe>;

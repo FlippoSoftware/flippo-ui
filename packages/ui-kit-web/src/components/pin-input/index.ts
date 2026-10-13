@@ -1,11 +1,11 @@
 import { pinInput as recipe } from '@flippo-software/component-styles/pin-input';
 import * as Primitive from '@flippo-software/web-components/pin-input';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const PinInputElement: StyledConstructor<typeof Primitive.PinInputElement, typeof recipe> = styled(
     Primitive.PinInputElement,
     recipe,

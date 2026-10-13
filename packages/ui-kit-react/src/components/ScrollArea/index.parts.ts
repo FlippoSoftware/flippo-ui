@@ -2,9 +2,9 @@
 import { scrollArea as recipe } from '@flippo-software/component-styles/scroll-area';
 import { ScrollArea as Primitive } from '@flippo-software/react-components/scroll-area';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'scrollArea');
 export type Variants = RecipeVariants<typeof recipe>;

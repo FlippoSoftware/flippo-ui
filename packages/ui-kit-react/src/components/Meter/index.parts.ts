@@ -2,9 +2,9 @@
 import { meter as recipe } from '@flippo-software/component-styles/meter';
 import { Meter as Primitive } from '@flippo-software/react-components/meter';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'meter');
 export type Variants = RecipeVariants<typeof recipe>;

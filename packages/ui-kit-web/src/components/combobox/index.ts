@@ -2,12 +2,12 @@ import { combobox as recipe } from '@flippo-software/component-styles/combobox';
 import { iconMarkup } from '@flippo-software/component-styles/icons';
 import * as Primitive from '@flippo-software/web-components/combobox';
 
-import { inputGroupAnchor } from '../../lib/inputGroupAnchor';
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { inputGroupAnchor } from '~@lib/inputGroupAnchor';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const ComboboxElement: StyledConstructor<typeof Primitive.ComboboxElement, typeof recipe> = styled(
     Primitive.ComboboxElement,
     recipe,

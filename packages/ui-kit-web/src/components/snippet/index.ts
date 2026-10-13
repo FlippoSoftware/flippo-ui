@@ -2,11 +2,11 @@ import { iconMarkup } from '@flippo-software/component-styles/icons';
 import { snippet as recipe } from '@flippo-software/component-styles/snippet';
 import * as Primitive from '@flippo-software/web-components/snippet';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const SnippetElement: StyledConstructor<typeof Primitive.SnippetElement, typeof recipe> = styled(
     Primitive.SnippetElement,
     recipe,

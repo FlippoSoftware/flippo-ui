@@ -21,8 +21,8 @@
         "build-storybook": "storybook build"
     },
     "dependencies": {
-        "@flippo-software/store": "workspace:*",
-        "@flippo-software/web-components": "workspace:*"
+        "@flippo-software/store": "workspace:^",
+        "@flippo-software/web-components": "workspace:^"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",

@@ -2,11 +2,11 @@ import { iconMarkup } from '@flippo-software/component-styles/icons';
 import { toast as recipe } from '@flippo-software/component-styles/toast';
 import * as Primitive from '@flippo-software/web-components/toast';
 
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const ToastProviderElement: StyledConstructor<typeof Primitive.ToastProviderElement, typeof recipe> = styled(
     Primitive.ToastProviderElement,
     recipe,

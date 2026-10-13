@@ -2,11 +2,11 @@ import { collapsible as recipe } from '@flippo-software/component-styles/collaps
 import { iconMarkup } from '@flippo-software/component-styles/icons';
 import * as Primitive from '@flippo-software/web-components/collapsible';
 
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const CollapsibleElement: StyledConstructor<typeof Primitive.CollapsibleElement, typeof recipe> = styled(
     Primitive.CollapsibleElement,
     recipe,

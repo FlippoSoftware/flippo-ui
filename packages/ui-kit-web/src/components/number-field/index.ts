@@ -2,11 +2,11 @@ import { iconMarkup } from '@flippo-software/component-styles/icons';
 import { numberField as recipe } from '@flippo-software/component-styles/number-field';
 import * as Primitive from '@flippo-software/web-components/number-field';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const NumberFieldElement: StyledConstructor<typeof Primitive.NumberFieldElement, typeof recipe> = styled(
     Primitive.NumberFieldElement,
     recipe,

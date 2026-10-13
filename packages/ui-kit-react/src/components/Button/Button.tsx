@@ -4,10 +4,10 @@ import * as React from 'react';
 import { button as recipe } from '@flippo-software/component-styles/button';
 import { Button as Primitive } from '@flippo-software/react-components/button';
 
-import { createStyler } from '../../lib/Styled';
-import { Spinner } from '../Spinner';
+import { Spinner } from '~@components/Spinner';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledProps } from '../../lib/Styled';
+import type { RecipeVariants, StyledProps } from '~@lib/Styled';
 
 const StyledButton = createStyler(recipe, 'button')(Primitive, undefined, true);
 type Variants = RecipeVariants<typeof recipe>;

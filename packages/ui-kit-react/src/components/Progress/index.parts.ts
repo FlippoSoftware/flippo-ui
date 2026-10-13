@@ -2,9 +2,9 @@
 import { progress as recipe } from '@flippo-software/component-styles/progress';
 import { Progress as Primitive } from '@flippo-software/react-components/progress';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'progress');
 export type Variants = RecipeVariants<typeof recipe>;

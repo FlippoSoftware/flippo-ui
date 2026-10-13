@@ -3,7 +3,7 @@ import type * as React from 'react';
 
 import { skeletonText } from '@flippo-software/component-styles/skeleton-text';
 
-import type { RecipeVariants } from '../../lib/Styled';
+import type { RecipeVariants } from '~@lib/Styled';
 
 export type SkeletonTextProps = React.ComponentPropsWithRef<'span'> &
     RecipeVariants<typeof skeletonText> & {

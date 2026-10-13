@@ -1,11 +1,11 @@
 import { switchRecipe as recipe } from '@flippo-software/component-styles/switch';
 import * as Primitive from '@flippo-software/web-components/switch';
 
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const SwitchElement: StyledConstructor<typeof Primitive.SwitchElement, typeof recipe> = styled(
     Primitive.SwitchElement,
     recipe,

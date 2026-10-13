@@ -1,11 +1,11 @@
 import { progress as recipe } from '@flippo-software/component-styles/progress';
 import * as Primitive from '@flippo-software/web-components/progress';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const ProgressElement: StyledConstructor<typeof Primitive.ProgressElement, typeof recipe> = styled(
     Primitive.ProgressElement,
     recipe,

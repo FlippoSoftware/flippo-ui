@@ -8,18 +8,21 @@
         "customConditions": ["source"],
         "incremental": false,
         "paths": {
-            "~@lib/*": ["./src/lib/*"]
+            "~@src": ["./src/index.ts"],
+            "~@src/*": ["./src/*"],
+            "~@lib/*": ["./src/lib/*"],
+            "~@components/*": ["./src/components/*"],
+            "~@stories": ["./src/__stories__/index.ts"]
         }
     },
     "include": [
         "src",
-        "test",
         "tsdown.config.ts",
+        "aliases.ts",
         "vitest.config.ts",
-        "stories",
         ".storybook/main.ts",
         ".storybook/preview.tsx",
         ".storybook/env.d.ts"
     ],
-    "exclude": ["node_modules", "dist", "src/**/*.stories.tsx", "src/components/**/story/**", "src/components/StoryCombine/**"]
+    "exclude": ["node_modules", "dist"]
 }

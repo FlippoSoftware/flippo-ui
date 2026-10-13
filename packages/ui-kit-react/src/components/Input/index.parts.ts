@@ -2,11 +2,11 @@
 import { input as recipe } from '@flippo-software/component-styles/input';
 import { Input as Primitive } from '@flippo-software/react-components/input';
 
-import { icon } from '../../lib/Icon';
-import { InputBody, InputClear } from '../../lib/Input';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { InputBody, InputClear } from '~@lib/Input';
+import { createStyler } from '~@lib/Styled';
 
-import type { StyledComponent } from '../../lib/Styled';
+import type { StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'input');
 export const Root: StyledComponent<typeof Primitive, typeof recipe> = styled(Primitive, undefined, true);

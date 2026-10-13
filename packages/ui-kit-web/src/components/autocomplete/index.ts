@@ -3,13 +3,13 @@ import { iconMarkup } from '@flippo-software/component-styles/icons';
 import * as Primitive from '@flippo-software/web-components/autocomplete';
 import * as Dependency from '@flippo-software/web-components/combobox';
 
-import { inputGroupAnchor } from '../../lib/inputGroupAnchor';
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
-import { define as defineDependency } from '../combobox';
+import { define as defineDependency } from '~@components/combobox';
+import { inputGroupAnchor } from '~@lib/inputGroupAnchor';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const AutocompleteElement: StyledConstructor<typeof Primitive.elements, typeof recipe> = styled(
     Primitive.elements,
     recipe,

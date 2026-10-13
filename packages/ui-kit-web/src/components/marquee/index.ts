@@ -1,11 +1,11 @@
 import { marquee as recipe } from '@flippo-software/component-styles/marquee';
 import * as Primitive from '@flippo-software/web-components/marquee';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const MarqueeElement: StyledConstructor<typeof Primitive.MarqueeElement, typeof recipe> = styled(
     Primitive.MarqueeElement,
     recipe,

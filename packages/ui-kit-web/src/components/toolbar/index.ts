@@ -1,11 +1,11 @@
 import { toolbar as recipe } from '@flippo-software/component-styles/toolbar';
 import * as Primitive from '@flippo-software/web-components/toolbar';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const ToolbarElement: StyledConstructor<typeof Primitive.ToolbarElement, typeof recipe> = styled(
     Primitive.ToolbarElement,
     recipe,

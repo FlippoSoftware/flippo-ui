@@ -2,9 +2,9 @@
 import { segmentedControl as recipe } from '@flippo-software/component-styles/segmented-control';
 import { SegmentedControl as Primitive } from '@flippo-software/react-components/segmented-control';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'segmentedControl');
 export type Variants = RecipeVariants<typeof recipe>;

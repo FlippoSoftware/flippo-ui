@@ -3,9 +3,9 @@ import { menubar as recipe } from '@flippo-software/component-styles/menubar';
 import { Menu } from '@flippo-software/react-components/menu';
 import { Menubar as Primitive } from '@flippo-software/react-components/menubar';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { StyledComponent } from '../../lib/Styled';
+import type { StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'menubar');
 const Root: StyledComponent<typeof Primitive, typeof recipe> = styled(Primitive, 'root', true);

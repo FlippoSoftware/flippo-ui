@@ -1,11 +1,11 @@
 import { avatar as recipe } from '@flippo-software/component-styles/avatar';
 import * as Primitive from '@flippo-software/web-components/avatar';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const AvatarElement: StyledConstructor<typeof Primitive.AvatarElement, typeof recipe> = styled(
     Primitive.AvatarElement,
     recipe,

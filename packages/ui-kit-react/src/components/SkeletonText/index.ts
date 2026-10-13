@@ -1,3 +1,3 @@
-export { SkeletonText } from '../Skeleton/SkeletonText';
+export { SkeletonText } from '~@components/Skeleton/SkeletonText';
 
-export type { SkeletonTextProps } from '../Skeleton/SkeletonText';
+export type { SkeletonTextProps } from '~@components/Skeleton/SkeletonText';

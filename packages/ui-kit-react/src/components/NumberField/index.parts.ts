@@ -2,10 +2,10 @@
 import { numberField as recipe } from '@flippo-software/component-styles/number-field';
 import { NumberField as Primitive } from '@flippo-software/react-components/number-field';
 
-import { icon } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'numberField');
 export type Variants = RecipeVariants<typeof recipe>;

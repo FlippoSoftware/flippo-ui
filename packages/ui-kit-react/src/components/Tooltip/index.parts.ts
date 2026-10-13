@@ -2,9 +2,9 @@
 import { tooltip as recipe } from '@flippo-software/component-styles/tooltip';
 import { Tooltip as Primitive } from '@flippo-software/react-components/tooltip';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'tooltip');
 export type Variants = RecipeVariants<typeof recipe>;

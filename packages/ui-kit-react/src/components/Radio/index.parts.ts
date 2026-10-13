@@ -2,9 +2,9 @@
 import { radio as recipe } from '@flippo-software/component-styles/radio';
 import { Radio as Primitive } from '@flippo-software/react-components/radio';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'radio');
 export type Variants = RecipeVariants<typeof recipe>;

@@ -2,10 +2,10 @@
 import { dialog as recipe } from '@flippo-software/component-styles/dialog';
 import { Dialog as Primitive } from '@flippo-software/react-components/dialog';
 
-import { icon } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'dialog');
 export type Variants = RecipeVariants<typeof recipe>;

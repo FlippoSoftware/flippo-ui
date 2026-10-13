@@ -2,11 +2,11 @@
 import { autocomplete as recipe } from '@flippo-software/component-styles/autocomplete';
 import { Autocomplete as Primitive } from '@flippo-software/react-components/autocomplete';
 
-import { icon } from '../../lib/Icon';
-import { withAnchor, withAnchorRoot, withAnchorTarget } from '../../lib/InputGroupAnchor';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { withAnchor, withAnchorRoot, withAnchorTarget } from '~@lib/InputGroupAnchor';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'autocomplete');
 export type Variants = RecipeVariants<typeof recipe>;

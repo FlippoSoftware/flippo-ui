@@ -2,10 +2,10 @@
 import { select as recipe } from '@flippo-software/component-styles/select';
 import { Select as Primitive } from '@flippo-software/react-components/select';
 
-import { icon } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'select');
 export type Variants = RecipeVariants<typeof recipe>;

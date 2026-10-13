@@ -108,7 +108,8 @@ All 43 original recipe families are included, including Autocomplete, Combobox, 
 - Import React components directly: `import { Button } from '…'`, then `<Button />`. Compound components use `<Dialog.Root />`, `<Grid.Root />`, etc.
 - Variants follow `component-styles` recipes. Button's `iconOnly` replaces `icon` (the alias is retained); `href`, `loading` and `loader` are retained. Old `corners` and unrelated Radix token overrides are not part of the new recipe API.
 - Typography and feedback components now use Flippo tokens, including Code/Kbd, which previously referenced undefined tokens from a different theme.
-- The active Storybook catalog is in `stories/` and uses the migrated API. Legacy files under `src/**/story/` are not loaded.
+- Stories live in `src/components/<Name>/__stories__/`, tests in `__tests__/` folders next to the code they test
+  (`src/__tests__/` for the kit as a whole). Both import the kit from `~@src` (tsconfig `paths`, `aliases.ts` for Vite).
 
 ## Local development
 
@@ -120,10 +121,11 @@ rebuild them after a change (`pnpm build`, or keep `pnpm dev` running at the roo
 
 ## Storybook
 
-`stories/` contains one CSF page for each of the 63 public component families, in Russian, with the same
+Each component keeps its stories next to it, in `src/components/<name>/__stories__/` (one CSF page for each of the 63
+public component families), in Russian, with the same
 catalog groups and content in both packages. Each page has a `Default` story with Controls for the recipe variants,
 and a `Gallery` (some also `Examples`) laid out like the Figma component sheets: sections of labelled rows with the
-sizes, variants and states, and realistic compositions from the Flippo screens. The gallery layout (`stories/kit`)
+sizes, variants and states, and realistic compositions from the Flippo screens. The gallery layout (`src/__stories__`, imported as `~@stories`)
 and its CSS (`.storybook/preview.css`, `.sb-*` classes) are shared by both packages. The toolbar switches light/dark
 themes (dark by default), including overlays in the top layer.
 

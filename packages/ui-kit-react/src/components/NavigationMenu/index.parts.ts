@@ -2,10 +2,10 @@
 import { navigationMenu as recipe } from '@flippo-software/component-styles/navigation-menu';
 import { NavigationMenu as Primitive } from '@flippo-software/react-components/navigation-menu';
 
-import { icon } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'navigationMenu');
 export type Variants = RecipeVariants<typeof recipe>;

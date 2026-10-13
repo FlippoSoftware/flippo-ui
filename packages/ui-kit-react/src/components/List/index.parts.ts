@@ -2,9 +2,9 @@
 import { list } from '@flippo-software/component-styles/list';
 import { List as Primitive } from '@flippo-software/react-components/list';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { StyledComponent } from '../../lib/Styled';
+import type { StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(list, 'list');
 export const Root: StyledComponent<typeof Primitive.Root, typeof list> = styled(Primitive.Root, 'root');

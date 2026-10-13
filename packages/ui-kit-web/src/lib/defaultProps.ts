@@ -1,6 +1,6 @@
 import { Store } from '@flippo-software/store';
 
-import type { components } from '../define';
+import type { components } from '~@src/define';
 
 /**
  * Default props of the families, by family (`button`, `select`, `navigationMenu`): the family's own properties (its

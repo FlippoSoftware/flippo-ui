@@ -1,11 +1,11 @@
 import { radioCard as recipe } from '@flippo-software/component-styles/radio-card';
 import * as Primitive from '@flippo-software/web-components/radio-card';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const RadioCardElement: StyledConstructor<typeof Primitive.RadioCardElement, typeof recipe> = styled(
     Primitive.RadioCardElement,
     recipe,

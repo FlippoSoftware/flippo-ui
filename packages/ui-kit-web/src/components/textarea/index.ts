@@ -1,11 +1,11 @@
 import { textarea as recipe } from '@flippo-software/component-styles/textarea';
 import { FieldControlElement } from '@flippo-software/web-components/field';
 
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const TextareaElement: StyledConstructor<typeof PresentationElement, typeof recipe> = styled(
     PresentationElement,
     recipe,

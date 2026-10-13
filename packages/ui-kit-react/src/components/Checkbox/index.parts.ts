@@ -2,10 +2,10 @@
 import { checkbox as recipe } from '@flippo-software/component-styles/checkbox';
 import { Checkbox as Primitive } from '@flippo-software/react-components/checkbox';
 
-import { CHECK_ICONS } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { CHECK_ICONS } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'checkbox');
 export type Variants = RecipeVariants<typeof recipe>;

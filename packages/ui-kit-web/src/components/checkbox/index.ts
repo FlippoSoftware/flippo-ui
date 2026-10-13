@@ -1,12 +1,12 @@
 import { checkbox as recipe } from '@flippo-software/component-styles/checkbox';
 import * as Primitive from '@flippo-software/web-components/checkbox';
 
-import { CHECK_MARKUP } from '../../lib/icons';
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { CHECK_MARKUP } from '~@lib/icons';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const CheckboxElement: StyledConstructor<typeof Primitive.CheckboxElement, typeof recipe> = styled(
     Primitive.CheckboxElement,
     recipe,

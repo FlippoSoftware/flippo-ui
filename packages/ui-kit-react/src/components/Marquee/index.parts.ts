@@ -2,9 +2,9 @@
 import { marquee as recipe } from '@flippo-software/component-styles/marquee';
 import { Marquee as Primitive } from '@flippo-software/react-components/marquee';
 
-import { createStyler } from '../../lib/Styled';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'marquee');
 export type Variants = RecipeVariants<typeof recipe>;

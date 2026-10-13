@@ -2,10 +2,10 @@
 import { snippet as recipe } from '@flippo-software/component-styles/snippet';
 import { Snippet as Primitive } from '@flippo-software/react-components/snippet';
 
-import { icon } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'snippet');
 export type Variants = RecipeVariants<typeof recipe>;

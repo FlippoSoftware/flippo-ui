@@ -2,11 +2,11 @@ import { iconMarkup } from '@flippo-software/component-styles/icons';
 import { popover as recipe } from '@flippo-software/component-styles/popover';
 import * as Primitive from '@flippo-software/web-components/popover';
 
-import { registerElements } from '../../lib/register';
-import { PresentationElement, styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { PresentationElement, styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const PopoverElement: StyledConstructor<typeof Primitive.PopoverElement, typeof recipe> = styled(
     Primitive.PopoverElement,
     recipe,

@@ -1,11 +1,11 @@
 import { tooltip as recipe } from '@flippo-software/component-styles/tooltip';
 import * as Primitive from '@flippo-software/web-components/tooltip';
 
-import { registerElements } from '../../lib/register';
-import { styled } from '../../lib/styled';
+import { registerElements } from '~@lib/register';
+import { styled } from '~@lib/styled';
 
-import type { DefineOptions } from '../../lib/register';
-import type { StyledConstructor } from '../../lib/styled';
+import type { DefineOptions } from '~@lib/register';
+import type { StyledConstructor } from '~@lib/styled';
 export const TooltipProviderElement: StyledConstructor<typeof Primitive.TooltipProviderElement, typeof recipe> = styled(
     Primitive.TooltipProviderElement,
     recipe,

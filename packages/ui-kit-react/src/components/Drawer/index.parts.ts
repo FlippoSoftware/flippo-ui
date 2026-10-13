@@ -2,10 +2,10 @@
 import { drawer as recipe } from '@flippo-software/component-styles/drawer';
 import { Drawer as Primitive } from '@flippo-software/react-components/drawer';
 
-import { icon } from '../../lib/Icon';
-import { createStyler } from '../../lib/Styled';
+import { icon } from '~@lib/Icon';
+import { createStyler } from '~@lib/Styled';
 
-import type { RecipeVariants, StyledComponent } from '../../lib/Styled';
+import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
 
 const styled = createStyler(recipe, 'drawer');
 export type Variants = RecipeVariants<typeof recipe>;
