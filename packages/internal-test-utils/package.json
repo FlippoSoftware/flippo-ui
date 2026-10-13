@@ -63,12 +63,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-ui.git",
         "directory": "packages/internal-test-utils"
     },
-    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/internal-test-utils#readme",
+    "homepage": "https://github.com/FlippoSoftware/flippo-ui/tree/main/packages/internal-test-utils#readme",
     "bugs": {
-        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
+        "url": "https://github.com/FlippoSoftware/flippo-ui/issues"
     },
     "sideEffects": false
 }

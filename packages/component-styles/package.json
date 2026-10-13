@@ -31,7 +31,8 @@
         "lint:check": "biome check",
         "lint:fix": "biome lint --fix && biome format --fix",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "prepublishOnly": "pnpm --workspace-root run publish-guard && pnpm build"
     },
     "dependencies": {
         "@lynstack/class-recipe": "^1.7.3",
@@ -325,7 +326,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-ui.git",
         "directory": "packages/component-styles"
     },
     "main": "./dist/index.cjs",
@@ -670,8 +671,8 @@
         },
         "./fonts/*": "./fonts/*"
     },
-    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/component-styles#readme",
+    "homepage": "https://github.com/FlippoSoftware/flippo-ui/tree/main/packages/component-styles#readme",
     "bugs": {
-        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
+        "url": "https://github.com/FlippoSoftware/flippo-ui/issues"
     }
 }

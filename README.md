@@ -66,6 +66,13 @@ from [conventional commits](https://www.conventionalcommits.org) (`.github/workf
 3. Merging that pull request tags the released packages (`core-components-v0.2.0`), creates their GitHub releases
    and publishes exactly these packages to npm.
 
+Publishing is done by the Release workflow only: the `prepublishOnly` script of every package
+(`tools/publish-guard.mjs`) refuses `pnpm publish` anywhere else. The one exception is the first publication of a new
+package, before npm trusted publishing can be set up for it: build, then
+`FLIPPO_FIRST_PUBLISH=1 pnpm --filter <package> publish --access public` (always `pnpm publish`, never `npm publish`:
+pnpm replaces the `workspace:` and `catalog:` versions). Afterwards, in the package settings on npmjs.com: trusted
+publisher `FlippoSoftware/flippo-ui`, workflow `release.yaml`, and disallow publishing with tokens.
+
 Versions live in `.release-please-manifest.json`, the packages in `release-please-config.json`. Private packages
 (`internal-test-utils`, `workspace-tools`) are not in it and are never released.
 

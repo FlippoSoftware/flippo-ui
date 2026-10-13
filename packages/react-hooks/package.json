@@ -355,7 +355,8 @@
     "scripts": {
         "build": "vite build && node scripts/generate-exports.js",
         "dev": "vite build --watch",
-        "build:exports": "node scripts/generate-exports.js"
+        "build:exports": "node scripts/generate-exports.js",
+        "prepublishOnly": "pnpm --workspace-root run publish-guard && pnpm build"
     },
     "peerDependencies": {
         "react": "^19.1.1",
@@ -386,12 +387,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-ui.git",
         "directory": "packages/react-hooks"
     },
-    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/react-hooks#readme",
+    "homepage": "https://github.com/FlippoSoftware/flippo-ui/tree/main/packages/react-hooks#readme",
     "bugs": {
-        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
+        "url": "https://github.com/FlippoSoftware/flippo-ui/issues"
     },
     "files": [
         "dist"

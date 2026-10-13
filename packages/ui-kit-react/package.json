@@ -18,7 +18,8 @@
         "lint:check": "biome check",
         "test": "vitest run",
         "storybook": "storybook dev -p 6006",
-        "build-storybook": "storybook build"
+        "build-storybook": "storybook build",
+        "prepublishOnly": "pnpm --workspace-root run publish-guard && pnpm build"
     },
     "dependencies": {
         "@flippo-software/react-components": "workspace:^"
@@ -319,11 +320,11 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-ui.git",
         "directory": "packages/ui-kit-react"
     },
-    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/ui-kit-react#readme",
+    "homepage": "https://github.com/FlippoSoftware/flippo-ui/tree/main/packages/ui-kit-react#readme",
     "bugs": {
-        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
+        "url": "https://github.com/FlippoSoftware/flippo-ui/issues"
     }
 }

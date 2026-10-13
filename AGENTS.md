@@ -18,4 +18,6 @@ their own `AGENTS.md` (core-components, react-components, web-components, compon
 - Imports inside a package: tsconfig `paths` aliases with the `~@` prefix (`~@lib/*`, `~@components/*`; in the kits also
   `~@src`, `~@stories`), never `../..`. Vite/Vitest get the same aliases from the package's `aliases.ts`.
 - UI kits: stories in `src/components/<name>/__stories__/`, tests in `__tests__/` next to the code.
+- Packages are published by the Release workflow only (`prepublishOnly` runs `tools/publish-guard.mjs`); never
+  publish by hand, never `npm publish` (it would ship `workspace:`/`catalog:` versions).
 - Never commit, push or publish unless asked.

@@ -26,7 +26,8 @@
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
         "test:watch": "vitest",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "prepublishOnly": "pnpm --workspace-root run publish-guard && pnpm build"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
@@ -42,12 +43,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-ui.git",
         "directory": "packages/store"
     },
-    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/store#readme",
+    "homepage": "https://github.com/FlippoSoftware/flippo-ui/tree/main/packages/store#readme",
     "bugs": {
-        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
+        "url": "https://github.com/FlippoSoftware/flippo-ui/issues"
     },
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",

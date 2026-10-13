@@ -311,7 +311,8 @@
         "test:watch": "vitest",
         "lint:check": "biome check",
         "lint:fix": "biome lint --fix && biome format --fix",
-        "lint:changed": "biome ci --changed"
+        "lint:changed": "biome ci --changed",
+        "prepublishOnly": "pnpm --workspace-root run publish-guard && pnpm build"
     },
     "peerDependencies": {
         "react": "^19.1.1",
@@ -352,12 +353,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/FlippoSoftware/flippo-components.git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-ui.git",
         "directory": "packages/react-components"
     },
-    "homepage": "https://github.com/FlippoSoftware/flippo-components/tree/main/packages/react-components#readme",
+    "homepage": "https://github.com/FlippoSoftware/flippo-ui/tree/main/packages/react-components#readme",
     "bugs": {
-        "url": "https://github.com/FlippoSoftware/flippo-components/issues"
+        "url": "https://github.com/FlippoSoftware/flippo-ui/issues"
     },
     "sideEffects": false
 }

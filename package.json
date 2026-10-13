@@ -1,5 +1,5 @@
 {
-    "name": "@flippo-software/ui-kit-workspace",
+    "name": "@flippo-software/flippo-ui",
     "private": true,
     "type": "module",
     "packageManager": "pnpm@11.24.0",
@@ -11,6 +11,7 @@
         "test": "pnpm --recursive test",
         "check": "pnpm build && pnpm lint:check && pnpm typecheck && pnpm test",
         "storybook:react": "pnpm --filter @flippo-software/ui-kit-react storybook",
-        "storybook:web": "pnpm --filter @flippo-software/ui-kit-web storybook"
+        "storybook:web": "pnpm --filter @flippo-software/ui-kit-web storybook",
+        "publish-guard": "node tools/publish-guard.mjs"
     }
 }
