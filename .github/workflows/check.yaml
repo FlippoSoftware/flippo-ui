@@ -1,36 +1,54 @@
 name: Check
 
+# Builds the workspace once, then lints, typechecks and tests it in parallel against that build. Pull requests run it;
+# the release workflow calls it (`workflow_call`) and publishes only when it passes.
+
 on:
     pull_request:
-    push:
-        branches:
-            - main
+    workflow_call:
+
+permissions:
+    contents: read
 
 jobs:
-    check:
+    build:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
 
-            - uses: pnpm/action-setup@v4
+            - uses: ./.github/actions/setup
 
-            - uses: actions/setup-node@v4
-              with:
-                  node-version-file: .nvmrc
-                  cache: pnpm
-
-            - name: Install
-              run: pnpm install --frozen-lockfile
-
-            # Dependencies first: the packages lint and typecheck against the built workspace packages.
+            # Dependencies first: the packages are linted, typechecked and tested against the built workspace packages.
             - name: Build
               run: pnpm build
 
-            - name: Lint
-              run: pnpm lint:check
+            - name: Keep the build
+              uses: actions/upload-artifact@v4
+              with:
+                  name: dist
+                  path: packages/*/dist
+                  if-no-files-found: error
+                  retention-days: 1
 
-            - name: Typecheck
-              run: pnpm typecheck
+    verify:
+        needs: build
+        runs-on: ubuntu-latest
+        strategy:
+            # Every check reports, even when another one fails.
+            fail-fast: false
+            matrix:
+                task: [lint:check, typecheck, test]
+        name: ${{ matrix.task }}
+        steps:
+            - uses: actions/checkout@v4
 
-            - name: Test
-              run: pnpm test
+            - uses: ./.github/actions/setup
+
+            - name: Get the build
+              uses: actions/download-artifact@v4
+              with:
+                  name: dist
+                  path: packages
+
+            - name: Run ${{ matrix.task }}
+              run: pnpm ${{ matrix.task }}
