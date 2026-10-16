@@ -108,16 +108,20 @@ All 43 original recipe families are included, including Autocomplete, Combobox, 
 - Import React components directly: `import { Button } from '…'`, then `<Button />`. Compound components use `<Dialog.Root />`, `<Grid.Root />`, etc.
 - Variants follow `component-styles` recipes. Button's `iconOnly` replaces `icon` (the alias is retained); `href`, `loading` and `loader` are retained. Old `corners` and unrelated Radix token overrides are not part of the new recipe API.
 - Typography and feedback components now use Flippo tokens, including Code/Kbd, which previously referenced undefined tokens from a different theme.
-- Stories live in `src/components/<Name>/__stories__/`, tests in `__tests__/` folders next to the code they test
-  (`src/__tests__/` for the kit as a whole). Both import the kit from `~@src` (tsconfig `paths`, `aliases.ts` for Vite).
 
 ## Local development
 
 This package is part of the `flippo-ui` pnpm workspace (see the root README): install and run the checks from the root
 (`pnpm install`, `pnpm check`), or one package with `pnpm --filter @flippo-software/ui-kit-react <script>`. It reads
 `component-styles` from its sources in Storybook, tests and typecheck, so style changes show up without a build.
-The behaviour packages it uses (react-components, core, hooks, store) come from the workspace and their `dist`:
+The behaviour packages it uses (react-components, core-components, react-hooks, store) come from the workspace and their `dist`:
 rebuild them after a change (`pnpm build`, or keep `pnpm dev` running at the root).
+
+## Stories and tests
+
+Stories live in `src/components/<name>/__stories__/`, tests in `__tests__/` folders next to the code they test
+(`src/__tests__/` for the kit as a whole). Both import the kit from `~@src`, the stories their helpers from `~@stories`
+(tsconfig `paths`, `aliases.ts` for Vite).
 
 ## Storybook
 
@@ -130,10 +134,10 @@ and its CSS (`.storybook/preview.css`, `.sb-*` classes) are shared by both packa
 themes (dark by default), including overlays in the top layer.
 
 ```sh
-pnpm install
-pnpm storybook
-# Static output in storybook-static/
-pnpm build-storybook
+# From the workspace root
+pnpm storybook:react
+# Static output in packages/ui-kit-react/storybook-static/
+pnpm --filter @flippo-software/ui-kit-react build-storybook
 ```
 
 React runs on port **6006**. The Storybook Vite config is separate from the library build.

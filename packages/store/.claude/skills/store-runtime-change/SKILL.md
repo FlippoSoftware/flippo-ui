@@ -26,7 +26,7 @@ away. Work in this order.
    ```sh
    pnpm lint:check && pnpm typecheck && pnpm test && pnpm build
    (cd ../core-components && pnpm test && pnpm build)
-   (cd ../headless-components && pnpm test)
+   (cd ../react-components && pnpm test)
    (cd ../web-components && pnpm test)
    ```
    An infinite update loop shows as `Flippo store: more than 100000 notifications in one flush …` naming the effect:

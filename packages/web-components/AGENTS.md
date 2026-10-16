@@ -42,5 +42,5 @@ test/                             *.test.ts(x) per family; stubPopoverApi.ts, st
 
 ## Commands
 
-`pnpm lint:check`, `pnpm typecheck`, `pnpm test`, `pnpm build`. Core and store come from the workspace (`workspace:*`)
+`pnpm lint:check`, `pnpm typecheck`, `pnpm test`, `pnpm build`. Core and store come from the workspace (`workspace:^`)
 and their built `dist/`: after changing core, build it first (`pnpm build` at the root, or `pnpm dev`). Never commit, push or publish unless asked.

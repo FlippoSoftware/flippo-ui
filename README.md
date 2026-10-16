@@ -47,10 +47,19 @@ open story updates without building `component-styles`. Builds, lint and publish
 
 ## Continuous integration
 
-`.github/workflows/check.yaml` builds the workspace once, then runs lint, typecheck and tests in parallel against that
-build (the packages use each other's `dist`). It runs on pull requests, and the release workflow calls it first:
-nothing is released or published unless it passes. `.github/actions/setup` installs pnpm, Node and the dependencies
-for every job.
+`.github/workflows/check.yaml` builds once, then runs lint, typecheck and tests in parallel against that build (the
+packages use each other's `dist`). `.github/actions/setup` installs pnpm, Node and the dependencies for every job.
+
+- On a pull request it checks the packages the pull request changes **and the packages that depend on them**
+  (`tools/affected.mjs`): a change of an API in `core-components` is typechecked and tested in `react-components`,
+  `web-components` and the kits too. A change outside `packages/` (lockfile, workspace config, `tools/`, workflows)
+  checks everything; a change of Markdown only checks nothing.
+- The release workflow calls it first on the whole workspace: nothing is released or published unless it passes.
+- In the branch rules of `main`, require the `checks` job only: it sums up the others, and a check skipped by the
+  selection still lets the pull request merge.
+
+Locally, the same selection: `pnpm --recursive --filter "...{packages/core-components}" test` (the package and its
+dependents), or `pnpm --recursive --filter "...[origin/main]" test` (whatever changed since `main`).
 
 ## Versions and releases
 
@@ -61,10 +70,35 @@ from [conventional commits](https://www.conventionalcommits.org) (`.github/workf
    `BREAKING CHANGE:` footer → major (a minor while the version is `0.x`). The package is the folder the commit
    changes, not the scope: a commit that changes `packages/core-components` and `packages/react-components` releases both.
    `chore`, `docs`, `test`, `refactor`… do not release anything. Pull requests check the messages (commitlint).
-2. On each push to `main`, release-please updates one release pull request: the next version and the CHANGELOG of
-   every package with releasable commits since its last release. Nothing else is bumped.
-3. Merging that pull request tags the released packages (`core-components-v0.2.0`), creates their GitHub releases
-   and publishes exactly these packages to npm.
+2. On each push to `main`, release-please keeps **one release pull request per package** with releasable commits
+   since its last release (`chore(main): release core-components 0.2.0`): its next version and its CHANGELOG.
+   Nothing else is bumped.
+3. Merging one of them tags that package (`core-components-v0.2.0`), creates its GitHub release and publishes it to
+   npm. The other release pull requests stay open and keep collecting commits until you merge them.
+
+Release a dependency before the packages that need its new version: when `react-components` uses a new API of
+`core-components`, merge the `core-components` release first. `pnpm publish` writes the workspace version of a
+dependency into the published package (`workspace:^` → `^0.2.0`), so the other order would publish a dependent that
+requires a version not on npm. The publish step checks this (`tools/release-order.mjs`): it publishes the dependencies
+of a run first, and stops when a dependency is neither on npm nor in the run (merge its release pull request, then
+re-run the failed workflow).
+
+### Changing a package without changing its dependents
+
+In the workspace the dependents use the current code of a package, so a breaking change in `core-components` fails
+the checks of `react-components` until it is adapted. That is the point of the monorepo, and the usual ways are:
+
+1. **Adapt the dependents in the same pull request** (the default). Each package still gets its own release pull
+   request; release `core-components` first.
+2. **Make the change additive.** Add the new API next to the old one and mark the old one `@deprecated`; release
+   `core-components`; move the dependents later, at their own pace; remove the old API in a later breaking release.
+3. **Pin the dependent to the published version** for a while: in its package.json replace
+   `"@flippo-software/core-components": "workspace:^"` with the version from npm (`"^0.1.2"`), then `pnpm install`.
+   pnpm links workspace packages only for `workspace:` ranges, so this dependent gets the old `core-components` from
+   npm, while the rest of the workspace uses the new one. Return to `workspace:^` when you adapt it. Mind that the
+   package from npm brings its own dependencies from npm too (`@flippo-software/store`): two copies of the store
+   do not share the notification queue, so keep such a pin short, or force the workspace copy with `overrides` in
+   `pnpm-workspace.yaml`.
 
 Publishing is done by the Release workflow only: the `prepublishOnly` script of every package
 (`tools/publish-guard.mjs`) refuses `pnpm publish` anywhere else. The one exception is the first publication of a new
@@ -73,10 +107,50 @@ package, before npm trusted publishing can be set up for it: build, then
 pnpm replaces the `workspace:` and `catalog:` versions). Afterwards, in the package settings on npmjs.com: trusted
 publisher `FlippoSoftware/flippo-ui`, workflow `release.yaml`, and disallow publishing with tokens.
 
+### Prereleases (alpha, beta, rc)
+
+A prerelease is a version like `2.0.0-beta.1`: `^` ranges skip it, and it is published under its identifier as the
+npm dist-tag (`beta`), so `pnpm add <package>` keeps installing `latest`; users opt in with `pnpm add <package>@beta`.
+To start one, set the package's entry in `release-please-config.json`:
+
+```json
+"packages/react-components": {
+    "component": "react-components",
+    "prerelease": true,
+    "versioning": "prerelease",
+    "prerelease-type": "beta",
+    "release-as": "2.0.0-beta.1"
+}
+```
+
+- Merge the release pull request, then remove `release-as` (it would propose the same version again). Later
+  commits, `feat!` included, only bump the number: `2.0.0-beta.2`, `2.0.0-beta.3`.
+- Alpha to beta: `"release-as": "2.0.0-beta.1"` (and `"prerelease-type": "beta"`).
+- Stable: `"release-as": "2.0.0"` and remove `prerelease`, `versioning` and `prerelease-type`; remove `release-as`
+  after the release.
+
+### Fixes for a previous major
+
+When `2.x` is out and `1.x` still gets fixes, keep a maintenance branch: Actions → **Maintenance branch** → Run
+workflow, with the package and the major (`react-components`, `1`). It creates `maintenance/react-components-v1` from
+the tag of the last `1.x` release (`react-components-v1.4.2`) and brings into it, in one `ci:` commit, the workflows and
+release scripts of `main`: GitHub runs the workflows of the pushed branch, and those of an older tag may not know
+maintenance branches yet (`tools/maintenance-branch.mjs`, `--dry-run` to see the plan locally). It pushes with
+`RELEASE_PLEASE_TOKEN`, which needs the permission to change workflows.
+
+Fix on `main` first (`fix(react-components): …`), then bring the commit to the branch with
+`git cherry-pick -x <sha>` (or a pull request into the branch). The Release workflow runs on `maintenance/**` as on
+`main`: release-please opens a release pull request into the branch (its manifest still says `1.4.2`), and merging it
+tags `react-components-v1.4.3` and publishes it under the dist-tag `v1`, so `latest` stays on `2.x`
+(`pnpm add @flippo-software/react-components@v1`). The branch name must start with `maintenance/`; the dist-tag is
+chosen by `tools/dist-tag.mjs`.
+
+A dist-tag set by mistake is fixed without republishing: `npm dist-tag add <package>@<version> latest`.
+
 Versions live in `.release-please-manifest.json`, the packages in `release-please-config.json`. Private packages
 (`internal-test-utils`, `workspace-tools`) are not in it and are never released.
 
 Dependencies between packages: `workspace:^` (published as `^<version>`, so a new version of a dependency reaches the
 dependents' users without re-releasing them, as long as it stays in range), `workspace:*` for dev dependencies. Shared tool versions are in the
 `catalog` of `pnpm-workspace.yaml` (`"typescript": "catalog:"`); a package that needs another version writes it
-explicitly (`hooks` keeps `"typescript": "^5.9.2"`).
+explicitly (`react-hooks` keeps `"typescript": "^5.9.2"`).

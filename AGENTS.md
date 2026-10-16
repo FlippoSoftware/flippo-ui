@@ -18,6 +18,11 @@ their own `AGENTS.md` (core-components, react-components, web-components, compon
 - Imports inside a package: tsconfig `paths` aliases with the `~@` prefix (`~@lib/*`, `~@components/*`; in the kits also
   `~@src`, `~@stories`), never `../..`. Vite/Vitest get the same aliases from the package's `aliases.ts`.
 - UI kits: stories in `src/components/<name>/__stories__/`, tests in `__tests__/` next to the code.
+- One release pull request per package: release a dependency before its dependents (`tools/release-order.mjs` stops
+  the publication otherwise). Pull requests check the changed packages and their dependents (`tools/affected.mjs`).
+- Prereleases (`release-as` + `prerelease-type` in `release-please-config.json`) and fixes of an old major (branches
+  `maintenance/<component>-v<major>`, created by the Maintenance branch workflow, cherry-picked from `main`): see README «Versions and releases». The npm
+  dist-tag comes from `tools/dist-tag.mjs`; never publish a prerelease or an old major under `latest`.
 - Packages are published by the Release workflow only (`prepublishOnly` runs `tools/publish-guard.mjs`); never
   publish by hand, never `npm publish` (it would ship `workspace:`/`catalog:` versions).
 - Never commit, push or publish unless asked.

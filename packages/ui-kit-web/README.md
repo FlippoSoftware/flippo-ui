@@ -96,7 +96,7 @@ The JS entry points require a browser/custom-element environment. Import the sty
 This package is part of the `flippo-ui` pnpm workspace (see the root README): install and run the checks from the root
 (`pnpm install`, `pnpm check`), or one package with `pnpm --filter @flippo-software/ui-kit-web <script>`. It reads
 `component-styles` from its sources in Storybook, tests and typecheck, so style changes show up without a build.
-The behaviour packages it uses (web-components, core, store) come from the workspace and their `dist`: rebuild
+The behaviour packages it uses (web-components, core-components, store) come from the workspace and their `dist`: rebuild
 them after a change (`pnpm build`, or keep `pnpm dev` running at the root).
 
 ## Stories and tests
@@ -116,10 +116,10 @@ and its CSS (`.storybook/preview.css`, `.sb-*` classes) are shared by both packa
 themes (dark by default), including overlays in the top layer.
 
 ```sh
-pnpm install
-pnpm storybook
-# Static output in storybook-static/
-pnpm build-storybook
+# From the workspace root
+pnpm storybook:web
+# Static output in packages/ui-kit-web/storybook-static/
+pnpm --filter @flippo-software/ui-kit-web build-storybook
 ```
 
 Web Components runs on port **6007** and registers the `demo` prefix. Stories render native custom elements;

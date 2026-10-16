@@ -650,3 +650,6 @@ not hold back the stores of the other. Deduplicate the dependency (`pnpm dedupe`
 | `pnpm test` | Run the tests |
 | `pnpm typecheck` | Type-check with TypeScript |
 | `pnpm lint:check` | Lint and check formatting with Biome |
+
+Run them from the [`flippo-ui`](../../README.md) workspace root: `pnpm --filter @flippo-software/store <script>` (or
+`pnpm check` for the whole workspace).

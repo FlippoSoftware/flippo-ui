@@ -1,14 +1,19 @@
 name: Release
 
 # On each push to main: the checks first (build, then lint, typecheck and tests in parallel). When they pass,
-# release-please keeps one release pull request up to date (the next version of every package with releasable
-# conventional commits under its folder, and its CHANGELOG). Merging that pull request tags the released packages,
-# creates their GitHub releases and publishes them, from the build the checks verified.
+# release-please keeps one release pull request per package up to date (its next version, from the releasable
+# conventional commits under its folder, and its CHANGELOG). Merging one tags that package, creates its GitHub release
+# and publishes it, from the build the checks verified; the other packages wait for their own pull requests.
+#
+# Maintenance branches (`maintenance/<component>-v<major>`, created from the tag of the last release of an old major)
+# work the same way: the release pull request targets the branch and the fixes are published under `v<major>`, not
+# `latest`. Prereleases (`2.0.0-beta.1`) are published under their identifier (`beta`), see `tools/dist-tag.mjs`.
 
 on:
     push:
         branches:
             - main
+            - maintenance/**
 
 permissions:
     contents: read
@@ -35,6 +40,8 @@ jobs:
                   token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
                   config-file: release-please-config.json
                   manifest-file: .release-please-manifest.json
+                  # The pushed branch: `main`, or a maintenance branch with its own release pull request.
+                  target-branch: ${{ github.ref_name }}
 
     publish:
         needs: release-please
@@ -58,12 +65,19 @@ jobs:
                   name: dist
                   path: packages
 
-            # Only the released packages; `workspace:^` ranges become the versions of their dependencies.
+            # Only the released packages; `workspace:^` ranges become the versions of their dependencies. Dependencies
+            # first; a dependency that is neither on npm nor released by this run stops the publication
+            # (`tools/release-order.mjs`). The dist-tag comes from the version and the branch: `latest`, a prerelease
+            # identifier (`beta`) or `v<major>`.
             - name: Publish the released packages
               env:
                   PATHS: ${{ needs.release-please.outputs.paths_released }}
+                  BRANCH: ${{ github.ref_name }}
               run: |
-                  for path in $(echo "$PATHS" | jq -r '.[]'); do
-                      echo "Publishing $path"
-                      pnpm --filter "./$path" publish --no-git-checks --access public
+                  order=$(node tools/release-order.mjs "$PATHS")
+                  for path in $order; do
+                      version=$(jq -r .version "$path/package.json")
+                      tag=$(node tools/dist-tag.mjs "$version" "$BRANCH")
+                      echo "Publishing $path@$version under $tag"
+                      pnpm --filter "./$path" publish --no-git-checks --access public --tag "$tag"
                   done

@@ -1,8 +1,8 @@
 # @flippo-software/react-hooks — notes for agents
 
 Generic React hooks used by `@flippo-software/react-components` and apps, plus the React adapter of
-`@flippo-software/store` (`useStore`, `ReactStore`). Peer dependencies: React 19. No README yet (the file `REASME.md`
-is empty) — this file is the map.
+`@flippo-software/store` (`useStore`, `ReactStore`). Peer dependencies: React 19. `README.md` is the user documentation; this file is the
+map.
 
 ## Layout
 
@@ -30,7 +30,7 @@ window event, window scroll.
 ## Rules
 
 - Build: `pnpm build` = Vite + `scripts/generate-exports.js` (exports use kebab-case names). No test script yet.
-- `ReactStore` adds hooks only; store logic belongs in `@flippo-software/store` (`link:` dependency). Keep the
+- `ReactStore` adds hooks only; store logic belongs in `@flippo-software/store` (workspace dependency). Keep the
   re-exports so apps get one copy of the store.
 - react-components consumes the package from the workspace (`workspace:^`) and its built `dist/`. Never commit, push or
   publish unless asked.

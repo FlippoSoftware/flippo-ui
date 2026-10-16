@@ -10,7 +10,7 @@ description: Use when adding or changing a state machine in @flippo-software/cor
 Read a machine of the same kind before writing one: a simple part (`toggle/root/ToggleMachine.ts`), a popup family
 (`popover/` — root, trigger, positioner, popup, arrow), a list (`select/`, `menu/`), a form control (`checkbox/`, with
 `field` and `labelable`). Base UI's React implementation is the behavioural reference; the React adapter in
-`../headless-components/src/components/<Name>/` shows how the parts are wired.
+`../react-components/src/components/<Name>/` shows how the parts are wired.
 
 ## 2. Template
 
@@ -81,7 +81,7 @@ Add SSR safety (construct + `setOptions` without connecting) and reconnect cases
 
 ```sh
 pnpm lint:check && pnpm typecheck && pnpm test && pnpm build
-(cd ../headless-components && pnpm test)   # React adapter
+(cd ../react-components && pnpm test)   # React adapter
 (cd ../web-components && pnpm test)        # custom elements
 ```
 If the change alters a machine's API, update both adapters in the same task.

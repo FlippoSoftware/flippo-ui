@@ -155,3 +155,10 @@ Two more entry points serve the adapters, and you can use them in your own compo
 
 The `qr-code` recipe module also exports `qrCodeOptions`, the renderer options of the styled QR code: an SVG in
 `currentColor` on a transparent background, so the code takes `--fl-qr-code-color` and follows the theme.
+
+## Development
+
+This package is part of the [`flippo-ui`](../../README.md) pnpm workspace: run the commands from the root
+(`pnpm check`, or `pnpm --filter @flippo-software/component-styles <script>`). The UI kits read its sources (the
+`source` export condition), so their Storybook and tests show style changes without a build. Component SCSS uses the
+shared mixins and the `--fl-*` tokens; [`AGENTS.md`](./AGENTS.md) lists the conventions.

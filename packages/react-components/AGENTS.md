@@ -2,7 +2,8 @@
 
 Unstyled, accessible React components with the Base UI API (`Dialog.Root`, `Dialog.Trigger`, …). Every component is
 a thin React adapter over the state machines of `@flippo-software/core-components` (`../core-components`): the machine owns the
-behaviour; the component creates it, pushes props, renders and subscribes. No README yet — this file is the map.
+behaviour; the component creates it, pushes props, renders and subscribes. `README.md` is the user documentation;
+this file is the map.
 
 ## Layout
 
@@ -44,15 +45,16 @@ return useRenderElement('button', componentProps, {
 ## Rules
 
 - Behaviour changes go to core, then the adapter. Rebuild core (`pnpm --filter @flippo-software/core-components build`,
-  or `pnpm dev` at the workspace root) — this package uses core's `dist/` (`workspace:*`).
+  or `pnpm dev` at the workspace root) — this package uses core's `dist/` (`workspace:^`).
 - Tests: `@flippo-software/internal-test-utils` (`createRenderer`, `screen`, user events), `describe.each(RENDER_MODES)`.
   Write the test against the expected Base UI behaviour first.
 - Build is Vite (+ `tsc -p tsconfig.build.json` and `scripts/rewrite-dts-aliases.mjs` for types); do not move it to
   tsdown. TypeScript 7.
-- `@flippo-software/react-hooks` and `@flippo-software/internal-test-utils` are `link:` dependencies (not on npm): replace them with
-  published versions before a release. CI checks them out as siblings.
+- `@flippo-software/react-hooks` and `@flippo-software/internal-test-utils` come from the workspace (`workspace:^`,
+  `workspace:*`); react-hooks is published with this package, internal-test-utils is private (tests only).
 
 ## Commands
 
-`pnpm lint:check` (or `pnpm lint:changed`), `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm build:core`.
+`pnpm lint:check` (or `pnpm lint:changed`), `pnpm typecheck`, `pnpm test`, `pnpm build` (from the workspace root:
+`pnpm --filter @flippo-software/react-components <script>`).
 Never commit, push or publish unless asked.

@@ -43,4 +43,4 @@ anything, and update it with every behaviour change.
 `pnpm test`, `pnpm typecheck`, `pnpm lint:check`, `pnpm build`. Consumers use the built `dist/` (workspace
 dependency): rebuild after changes, then run the tests of `core-components`, `react-components` and `web-components`.
 
-The repo is not on GitHub/npm yet. Never commit, push or publish unless asked.
+Never commit, push or publish unless asked.

@@ -1,0 +1,53 @@
+name: Maintenance branch
+
+# Run by hand (Actions → Maintenance branch → Run workflow) when an old major of a package needs fixes: creates
+# `maintenance/<component>-v<major>` from the tag of its last release, with the release tooling of main
+# (`tools/maintenance-branch.mjs`). Fixes are then cherry-picked into it, and the Release workflow releases them there
+# and publishes them under the npm dist-tag `v<major>` (README «Fixes for a previous major»).
+
+on:
+    workflow_dispatch:
+        inputs:
+            component:
+                description: Package
+                type: choice
+                # The components of release-please-config.json.
+                options:
+                    - store
+                    - core-components
+                    - react-hooks
+                    - react-components
+                    - web-components
+                    - component-styles
+                    - ui-kit-react
+                    - ui-kit-web
+            major:
+                description: Old major to maintain (for example 1)
+                type: string
+                required: true
+
+permissions:
+    contents: read
+
+jobs:
+    branch:
+        # The tooling is taken from main: run it from main only.
+        if: github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  # The tags and origin/main.
+                  fetch-depth: 0
+                  # A personal token: the branch gets the workflows of main, which GITHUB_TOKEN may not push, and its
+                  # push has to start the Release workflow there (pushes with GITHUB_TOKEN start no workflow).
+                  token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+            - name: Create the branch
+              env:
+                  COMPONENT: ${{ inputs.component }}
+                  MAJOR: ${{ inputs.major }}
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  node tools/maintenance-branch.mjs "$COMPONENT" "$MAJOR"

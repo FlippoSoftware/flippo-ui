@@ -2,7 +2,7 @@
 
 Framework-agnostic state machines for every Flippo UI component: state, transitions, ARIA/props, keyboard and pointer
 interactions, focus management, dismissal, positioning (on `@floating-ui/dom`). Adapters render: React in
-`../headless-components`, custom elements in `../web-components`. Behaviour belongs here, not in an adapter.
+`../react-components`, custom elements in `../web-components`. Behaviour belongs here, not in an adapter.
 
 `README.md` documents the entry points, the machine shape and the adapter contract; keep it current.
 

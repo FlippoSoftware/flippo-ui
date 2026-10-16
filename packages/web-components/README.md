@@ -6,7 +6,7 @@ keyboard and pointer handling, state) and expose their state as `data-*` attribu
 
 They have no dependencies besides the Flippo packages, and work in plain HTML and in any framework.
 
-> **Status: complete, not yet released.** Every component of the core is implemented (see the catalog below).
+> **Status: complete, not yet released (0.x).** Every component of the core is implemented (see the catalog below).
 
 ## Install
 
@@ -431,3 +431,6 @@ also when the root is defined after its parts.
 | `pnpm test` | Run the tests (DOM, React 19 and Vue 3) |
 | `pnpm typecheck` | Type-check with TypeScript |
 | `pnpm lint:check` | Lint and check formatting with Biome |
+
+Run them from the [`flippo-ui`](../../README.md) workspace root: `pnpm --filter @flippo-software/web-components <script>` (or
+`pnpm check` for the whole workspace).

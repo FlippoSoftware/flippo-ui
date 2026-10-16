@@ -1,7 +1,8 @@
 name: Check
 
-# Builds the workspace once, then lints, typechecks and tests it in parallel against that build. Pull requests run it;
-# the release workflow calls it (`workflow_call`) and publishes only when it passes.
+# Builds the workspace once, then lints, typechecks and tests it in parallel against that build. Pull requests run it
+# on the packages they change and their dependents (`tools/affected.mjs`); the release workflow calls it
+# (`workflow_call`) on the whole workspace and publishes only when it passes.
 
 on:
     pull_request:
@@ -13,16 +14,37 @@ permissions:
 jobs:
     build:
         runs-on: ubuntu-latest
+        outputs:
+            any: ${{ steps.scope.outputs.any }}
+            verify: ${{ steps.scope.outputs.verify }}
         steps:
             - uses: actions/checkout@v4
+              with:
+                  # The history up to the base branch, to compare a pull request with it; elsewhere the commit alone.
+                  # Strings on purpose: `cond && 0 || 1` is always 1, as 0 is falsy.
+                  fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
+
+            # Pull requests only; empty outputs (the release workflow) mean the whole workspace.
+            - name: Select the packages to check
+              id: scope
+              if: github.event_name == 'pull_request'
+              env:
+                  BASE_REF: ${{ github.base_ref }}
+              run: node tools/affected.mjs "$(git merge-base "origin/$BASE_REF" HEAD)" >> "$GITHUB_OUTPUT"
 
             - uses: ./.github/actions/setup
+              if: steps.scope.outputs.any != 'false'
 
             # Dependencies first: the packages are linted, typechecked and tested against the built workspace packages.
             - name: Build
-              run: pnpm build
+              if: steps.scope.outputs.any != 'false'
+              env:
+                  FILTERS: ${{ steps.scope.outputs.build }}
+              # Unquoted on purpose: one argument per filter.
+              run: pnpm --recursive $FILTERS build
 
             - name: Keep the build
+              if: steps.scope.outputs.any != 'false'
               uses: actions/upload-artifact@v4
               with:
                   name: dist
@@ -32,6 +54,8 @@ jobs:
 
     verify:
         needs: build
+        # Nothing to check: only Markdown changed.
+        if: needs.build.outputs.any != 'false'
         runs-on: ubuntu-latest
         strategy:
             # Every check reports, even when another one fails.
@@ -51,4 +75,24 @@ jobs:
                   path: packages
 
             - name: Run ${{ matrix.task }}
-              run: pnpm ${{ matrix.task }}
+              env:
+                  FILTERS: ${{ needs.build.outputs.verify }}
+                  TASK: ${{ matrix.task }}
+              run: pnpm --recursive $FILTERS "$TASK"
+
+    # The one check to require in the branch rules. Skipped jobs (a pull request that changes only Markdown) report
+    # under names a rule cannot expect (`${{ matrix.task }}`), so the rule waits for this job instead: it always runs
+    # and fails when a check failed or was cancelled.
+    checks:
+        needs: [build, verify]
+        if: always()
+        runs-on: ubuntu-latest
+        steps:
+            - name: All checks passed or were skipped
+              env:
+                  RESULTS: ${{ toJSON(needs.*.result) }}
+              run: |
+                  echo "$RESULTS"
+                  if echo "$RESULTS" | grep -qE '"(failure|cancelled)"'; then
+                      exit 1
+                  fi

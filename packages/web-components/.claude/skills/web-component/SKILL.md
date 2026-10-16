@@ -8,7 +8,7 @@ description: Use when adding or changing a custom element in @flippo-software/we
 ## 1. Map the parts
 
 Read the core machines (`../core-components/src/components/<name>/`) and the React adapter
-(`../headless-components/src/components/<Name>/`): the React part is the wiring reference (which machine, which setup,
+(`../react-components/src/components/<Name>/`): the React part is the wiring reference (which machine, which setup,
 which props getter, which element setter). Pick a sibling to copy: simple `toggle/`, compound `collapsible/`, popup
 `popover/` or `dialog/`, list `menu/` or `select/`, form control `checkbox/` or `switch/`.
 

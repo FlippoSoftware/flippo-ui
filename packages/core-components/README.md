@@ -1,6 +1,6 @@
 # @flippo-software/core-components
 
-Framework-agnostic state machines for [`@flippo-software/react-components`](../react-components).
+Framework-agnostic state machines for [`@flippo-software/react-components`](../react-components), [`@flippo-software/web-components`](../web-components).
 
 The core holds component state, selectors and transitions without React. Framework packages are thin adapters:
 they subscribe to stores, pass DOM elements in and render.
@@ -39,7 +39,7 @@ import each other relatively.
 
 | Entry | Contents |
 | --- | --- |
-| `@flippo-software/core-components/store` | Re-export of [`@flippo-software/store`](https://github.com/FlippoSoftware/store): `Store`, `ComponentStore`, `createSelector`, `createSelectorMemoized`, `deferNotifications`, `flushNotifications` |
+| `@flippo-software/core-components/store` | Re-export of [`@flippo-software/store`](../store): `Store`, `ComponentStore`, `createSelector`, `createSelectorMemoized`, `deferNotifications`, `flushNotifications` |
 | `@flippo-software/core-components/events` | `REASONS`, `createChangeEventDetails`, `createGenericEventDetails`, `EventEmitter`, `createEventEmitter` |
 | `@flippo-software/core-components/timers` | `Timeout`, `AnimationFrame` |
 | `@flippo-software/core-components/dom` | `whenConnected`, `runOnceAnimationsFinish`, `OpenChangeComplete`, `TransitionStatusController`, `PopupAutoResize`, `acquireScrollLock`, `getInternalBackdropProps` |
@@ -159,3 +159,6 @@ Rules for adapters:
 | `pnpm typecheck` | `tsc --noEmit` |
 | `pnpm lint:check` / `pnpm lint:fix` | Biome check / fix (`@flippo-software/biome`) |
 | `pnpm test` / `pnpm test:coverage` | Vitest (happy-dom); the line coverage threshold is a ratchet (currently 50%, target 85%) |
+
+Run them from the [`flippo-ui`](../../README.md) workspace root: `pnpm --filter @flippo-software/core-components <script>`.
+`react-components` and `web-components` use the built `dist/`: rebuild after a change (`pnpm build`, or `pnpm dev`).
