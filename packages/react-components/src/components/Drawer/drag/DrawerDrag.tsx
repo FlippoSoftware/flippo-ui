@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DrawerDragMachine } from '@flippo-software/core-components/drawer';
+import { DrawerDragDataAttributes, DrawerDragMachine } from '@flippo-software/core-components/drawer';
 
 import type { DrawerDragOptions } from '@flippo-software/core-components/drawer';
 
@@ -13,8 +13,6 @@ import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useDialogRootContext } from '../../Dialog/root/DialogRootContext';
 import { useDrawerRootContext } from '../root/DrawerRootContext';
-
-import { DrawerDragDataAttributes } from './DrawerDragDataAttributes';
 
 const customStyleHookMapping: StateAttributesMapping<DrawerDrag.State> = {
     ...popupStateMapping,

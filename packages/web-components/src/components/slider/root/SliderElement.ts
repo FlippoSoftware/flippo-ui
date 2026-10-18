@@ -42,19 +42,80 @@ function parseSliderValue(value: string | undefined): SliderValue | undefined {
  * State attributes: `data-dragging`, `data-orientation`, `data-disabled`, and those of the field.
  */
 export class SliderElement extends ControlElement.withAttributes({
+    /**
+     * The uncontrolled value of the slider when it’s initially rendered.
+     *
+     * To render a controlled slider, use the `value` attribute instead.
+     */
     'default-value': 'string',
+    /**
+     * The minimum allowed value of the slider.
+     * Should not be equal to max.
+     * @default 0
+     */
     min: 'number',
+    /**
+     * The maximum allowed value of the slider.
+     * Should not be equal to min.
+     * @default 100
+     */
     max: 'number',
+    /**
+     * The granularity with which the slider can step through values. (A "discrete" slider.)
+     * The `min` attribute serves as the origin for the valid values.
+     * We recommend (max - min) to be evenly divisible by the step.
+     * @default 1
+     */
     step: 'number',
+    /**
+     * The granularity with which the slider can step through values when using Page Up/Page Down or Shift + Arrow Up/Arrow Down.
+     * @default 10
+     */
     'large-step': 'number',
+    /**
+     * The minimum steps between values in a range slider.
+     * @default 0
+     */
     'min-steps-between-values': 'number',
+    /** Identifies the field when a form is submitted. */
     name: 'string',
+    /**
+     * Whether the slider should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * The component orientation.
+     * @default 'horizontal'
+     */
     orientation: ['horizontal', 'vertical'],
+    /**
+     * Controls how thumbs behave when they collide during pointer interactions.
+     *
+     * - `'push'` (default): Thumbs push each other without restoring their previous positions when dragged back.
+     * - `'swap'`: Thumbs swap places when dragged past each other.
+     * - `'none'`: Thumbs cannot move past each other; excess movement is ignored.
+     * @default 'push'
+     */
     'thumb-collision-behavior': ['push', 'swap', 'none'],
+    /**
+     * How the thumb(s) are aligned relative to `<prefix>-slider-control` when the value is at `min` or `max`:
+     * - `center`: The center of the thumb is aligned with the control edge
+     * - `edge`: The thumb is inset within the control such that its edge is aligned with the control edge
+     * @default 'center'
+     */
     'thumb-alignment': ['center', 'edge'],
+    /**
+     * The locale used by `Intl.NumberFormat` when formatting the value.
+     * Defaults to the user's runtime locale.
+     */
     locale: 'string',
+    /**
+     * The value of the slider.
+     * For ranged sliders, provide an array with two values.
+     */
     value: property<SliderValue>(),
+    /** Options to format the input value. */
     format: property<Intl.NumberFormatOptions>()
 }) {
     private slider!: SliderMachine;

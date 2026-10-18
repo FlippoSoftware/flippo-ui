@@ -24,16 +24,65 @@ import { NavigationMenuContext, type NavigationMenuValueChangeDetail } from './N
  * State attributes: `data-open`/`data-closed`.
  */
 export class NavigationMenuElement extends MachineElement.withAttributes({
+    /**
+     * The controlled value of the navigation menu item that should be currently open.
+     * When non-nullish, the menu will be open. When nullish, the menu will be closed.
+     *
+     * To render an uncontrolled navigation menu, use the `default-value` attribute instead.
+     * @default null
+     */
     value: 'string',
+    /**
+     * The uncontrolled value of the item that should be initially selected.
+     *
+     * To render a controlled navigation menu, use the `value` attribute instead.
+     * @default null
+     */
     'default-value': 'string',
+    /**
+     * How long to wait before opening the navigation menu. Specified in milliseconds.
+     * @default 50
+     */
     delay: 'number',
+    /**
+     * How long to wait before closing the navigation menu. Specified in milliseconds.
+     * @default 50
+     */
     'close-delay': 'number',
+    /**
+     * The orientation of the navigation menu.
+     * @default 'horizontal'
+     */
     orientation: ['horizontal', 'vertical'],
+    /**
+     * Which side of the trigger to place the content against.
+     * @default 'bottom'
+     */
     side: ['top', 'bottom', 'left', 'right', 'inline-start', 'inline-end'],
+    /**
+     * How to align the content relative to the trigger’s side.
+     * @default 'center'
+     */
     align: ['start', 'center', 'end'],
+    /**
+     * The distance between the trigger and the content, in pixels.
+     * @default 0
+     */
     'side-offset': 'number',
+    /**
+     * An offset along the alignment axis, in pixels.
+     * @default 0
+     */
     'align-offset': 'number',
+    /**
+     * The space to keep between the content and the edges of the viewport, in pixels.
+     * @default 5
+     */
     'collision-padding': 'number',
+    /**
+     * Which CSS `position` the positioner uses.
+     * @default 'fixed'
+     */
     'position-method': ['fixed', 'absolute']
 }) {
     private root!: NavigationMenuRootMachine;

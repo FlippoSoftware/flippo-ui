@@ -5,7 +5,7 @@ import { form as recipe } from '@flippo-software/component-styles/form';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Field, Form, Icon, Switch } from '~@src';
-import { Card, Page, Section, variantControls } from '~@stories';
+import { Card, Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -23,32 +23,34 @@ function NewSet(props: Props): React.JSX.Element {
             }}
         >
             <Field.Root name='title'>
-                <Field.Label>Название</Field.Label>
-                <Field.Control control='input' required={true} placeholder='Например, Законы UX' />
-                <Field.Error match='valueMissing'>Введите название набора</Field.Error>
+                <Field.Label>{t('common.name')}</Field.Label>
+                <Field.Control control='input' required={true} placeholder={t('form.placeholders.uxLawsSay')} />
+                <Field.Error match='valueMissing'>{t('form.content.enterTheNameOf')}</Field.Error>
             </Field.Root>
             <Field.Root name='description'>
-                <Field.Label>Описание</Field.Label>
-                <Field.Control control='input' placeholder='О чём этот набор' />
-                <Field.Description>Необязательно</Field.Description>
+                <Field.Label>{t('form.content.description')}</Field.Label>
+                <Field.Control control='input' placeholder={t('form.placeholders.whatThisSetIs')} />
+                <Field.Description>{t('form.content.optional')}</Field.Description>
             </Field.Root>
             <Switch.Label>
                 <Switch.Root name='public' defaultChecked={true}>
                     <Switch.Thumb />
                 </Switch.Root>
-                Виден в сообществе
+
+                {t('form.content.visibleInTheCommunity')}
             </Switch.Label>
             <div className='sb-items'>
                 <Button type='submit'>
                     <Icon name='plus' />
-                    Создать набор
+
+                    {t('common.createASet')}
                 </Button>
                 <Button type='reset' variant='label'>
-                    Сбросить
+                    {t('form.content.reset')}
                 </Button>
             </div>
             <output aria-live='polite' className='sb-caption'>
-                {created ? `Создан набор «${created}»` : ''}
+                {created ? `${t('form.content.createdTheSet')}${created}»` : ''}
             </output>
         </Form>
     );
@@ -70,7 +72,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component: 'Форма: колонка полей с отступом 24px; проверка полей показывается через Field.Error после отправки.'
+                component: 'form.description'
             }
         }
     }
@@ -83,7 +85,7 @@ export const Default: Story = {};
 export const Examples: Story = {
     render: () => (
         <Page>
-            <Section title='Новый набор' description='Отправьте пустую форму, чтобы увидеть ошибку обязательного поля.'>
+            <Section title={t('form.sections.newSet.title')} description={t('form.sections.newSet.description')}>
                 <div className='sb-medium'>
                     <Card>
                         <NewSet />

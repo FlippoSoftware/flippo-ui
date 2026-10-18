@@ -2,6 +2,7 @@
 packages:
     - packages/*
     - tools
+    - docs
 
 # One version of the shared tools for every package: `"typescript": "catalog:"` in a package.json.
 catalog:
@@ -23,8 +24,15 @@ catalog:
 
 allowBuilds:
     '@parcel/watcher': false
+    core-js: false
     esbuild: true
+    rs-module-lexer: false
 
 minimumReleaseAgeExclude:
     - '@lynstack/class-recipe@1.7.3'
     - '@lynstack/recipe@1.9.0'
+
+# Until its first release, @flippo-software/react-hooks (its own repository, ../hooks) is linked from the sibling
+# checkout: build it there first (`pnpm build`). Remove this override once 1.x is on npm (CI has no sibling checkout).
+overrides:
+    '@flippo-software/react-hooks': link:../hooks

@@ -6,25 +6,25 @@ import type { IconName } from '@flippo-software/component-styles/icons';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Icon, Tabs } from '~@src';
-import { Page, Section, variantControls } from '~@stories';
+import { Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe>;
 
-const FILTERS: [string, string, number, IconName][] = [
-    ['all', 'Все', 7, 'set'],
-    ['mine', 'Мои', 1, 'person-add'],
-    ['free', 'Свободные', 4, 'star'],
-    ['done', 'Готовые', 0, 'check']
+const FILTERS = (): [string, string, number, IconName][] => [
+    ['all', t('tabs.content.all'), 7, 'set'],
+    ['mine', t('common.mine'), 1, 'person-add'],
+    ['free', t('common.free'), 4, 'star'],
+    ['done', t('common.completed'), 0, 'check']
 ];
 
 function Filters(props: Props & { withIcons?: boolean; withPanels?: boolean }): React.JSX.Element {
     const { withIcons = false, withPanels = false, ...rest } = props;
     return (
         <Tabs.Root {...rest} defaultValue='all'>
-            <Tabs.List aria-label='Карточки'>
-                {FILTERS.map(([value, label, count, icon]) => (
+            <Tabs.List aria-label={t('common.cards')}>
+                {FILTERS().map(([value, label, count, icon]) => (
                     <Tabs.Tab key={value} value={value} disabled={value === 'done'}>
                         {withIcons && <Icon name={icon} />}
                         {label}
@@ -34,10 +34,10 @@ function Filters(props: Props & { withIcons?: boolean; withPanels?: boolean }): 
                 <Tabs.Indicator />
             </Tabs.List>
             {withPanels &&
-                FILTERS.map(([value, label, count]) => (
+                FILTERS().map(([value, label, count]) => (
                     <Tabs.Panel key={value} value={value}>
                         <p className='sb-section-text'>
-                            {label}: {count} карточек в наборе «Экзамен Законы UX».
+                            {label}: {count} {t('tabs.content.cardsInTheSet')}
                         </p>
                     </Tabs.Panel>
                 ))}
@@ -61,8 +61,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Вкладки (Figma "Tabs & Menu"): line — с подчёркиванием, которое переезжает к выбранной вкладке; pill — заливка выбранной; filter — чипы со счётчиком.'
+                component: 'tabs.description'
             }
         }
     }
@@ -75,32 +74,35 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Line' description='Figma "Horizontal Tab": разделы страницы с панелями под ними.'>
+            <Section title='Line' description={t('tabs.sections.line.description')}>
                 <Filters withPanels={true} />
             </Section>
-            <Section title='Pill' description='Figma "Vertical Tab": навигация в боковой панели, Large 56 и Medium 48.'>
+            <Section title='Pill' description={t('tabs.sections.pill.description')}>
                 <div className='sb-grid' style={{ ['--sb-min' as string]: '240px' }}>
                     {(['large', 'medium'] as const).map((size) => (
                         <Tabs.Root key={size} variant='pill' size={size} orientation='vertical' defaultValue='home'>
-                            <Tabs.List aria-label='Разделы'>
+                            <Tabs.List aria-label={t('tabs.labels.sections')}>
                                 <Tabs.Tab value='home'>
                                     <Icon name='home' />
-                                    Главная
+
+                                    {t('tabs.content.home')}
                                 </Tabs.Tab>
                                 <Tabs.Tab value='community'>
                                     <Icon name='globe' />
-                                    Сообщество
+
+                                    {t('common.community')}
                                 </Tabs.Tab>
                                 <Tabs.Tab value='collection'>
                                     <Icon name='folder' />
-                                    Коллекция
+
+                                    {t('common.collection')}
                                 </Tabs.Tab>
                             </Tabs.List>
                         </Tabs.Root>
                     ))}
                 </div>
             </Section>
-            <Section title='Filter' description='Figma "Filter Tab": фильтры списка со счётчиком; stacked — иконка над подписью.'>
+            <Section title='Filter' description={t('tabs.sections.filter.description')}>
                 <Filters variant='filter' withIcons={true} />
                 <Filters variant='filter' withIcons={true} stacked={true} />
             </Section>

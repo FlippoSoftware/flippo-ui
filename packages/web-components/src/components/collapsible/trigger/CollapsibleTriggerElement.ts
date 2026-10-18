@@ -13,6 +13,7 @@ import { CollapsiblePart } from '../root/CollapsibleRootContext';
  * State attributes: `data-panel-open`, `data-disabled`.
  */
 export class CollapsibleTriggerElement extends CollapsiblePart.withAttributes({
+    /** Whether the trigger ignores user interaction (the collapsible’s `disabled` by default). */
     disabled: 'boolean'
 }) {
     private button!: ButtonMachine;

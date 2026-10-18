@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ToggleGroupMachine } from '@flippo-software/core-components/toggle-group';
+import { ToggleGroupDataAttributes, ToggleGroupMachine } from '@flippo-software/core-components/toggle-group';
 
 import type { ToggleGroupOptions } from '@flippo-software/core-components/toggle-group';
 
@@ -15,7 +15,6 @@ import { CompositeMachineProvider } from '../Composite/root/CompositeMachineProv
 import { useToolbarRootContext } from '../Toolbar/root/ToolbarRootContext';
 
 import { ToggleGroupContext } from './ToggleGroupContext';
-import { ToggleGroupDataAttributes } from './ToggleGroupDataAttributes';
 
 import type { ToggleGroupContextValue } from './ToggleGroupContext';
 

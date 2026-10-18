@@ -14,7 +14,19 @@ import { CollapsiblePart } from '../root/CollapsibleRootContext';
  * CSS variables: `--collapsible-panel-height`, `--collapsible-panel-width`.
  */
 export class CollapsiblePanelElement extends CollapsiblePart.withAttributes({
+    /**
+     * Allows the browser’s built-in page search to find and expand the panel contents.
+     *
+     * Overrides the `keep-mounted` attribute and uses `hidden="until-found"`
+     * to hide the element without removing it from the DOM.
+     * @default false
+     */
     'hidden-until-found': 'boolean',
+    /**
+     * Whether to keep the element in the DOM while the panel is hidden.
+     * This attribute is ignored when `hidden-until-found` is used.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     protected override createParts() {}

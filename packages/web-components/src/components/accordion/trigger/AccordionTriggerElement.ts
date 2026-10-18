@@ -14,6 +14,7 @@ import { AccordionItemPart } from '../root/AccordionRootContext';
  * State attributes: `data-panel-open`, `data-disabled`, `data-orientation`.
  */
 export class AccordionTriggerElement extends AccordionItemPart.withAttributes({
+    /** Whether the trigger ignores user interaction (the item’s `disabled` by default). */
     disabled: 'boolean'
 }) {
     private button!: ButtonMachine;

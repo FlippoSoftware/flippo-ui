@@ -1,0 +1,25 @@
+{
+    "name": "@flippo-software/docs",
+    "private": true,
+    "type": "module",
+    "description": "The documentation of Flippo UI: hand-written guides (markdown, one file per language) and the API reference generated from the sources, laid out for Fumadocs (content/docs).",
+    "scripts": {
+        "generate": "node scripts/generate.ts",
+        "check": "node scripts/check.ts",
+        "lint:check": "biome check",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@flippo-software/biome": "catalog:",
+        "@flippo-software/workspace-tools": "workspace:*",
+        "@mdx-js/mdx": "^3.1.1",
+        "@types/node": "catalog:",
+        "remark-gfm": "^4.0.1",
+        "sass": "catalog:",
+        "sassdoc": "^2.7.4",
+        "typedoc": "^0.28.0",
+        "typedoc-plugin-markdown": "^4.6.0",
+        "typescript": "~5.9.3"
+    }
+}

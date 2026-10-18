@@ -10,6 +10,10 @@ import { PopoverPart } from '../root/PopoverRootContext';
  * Attributes: `disabled`.
  */
 export class PopoverCloseElement extends PopoverPart.withAttributes({
+    /**
+     * Whether the button ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private close!: PopoverCloseMachine;

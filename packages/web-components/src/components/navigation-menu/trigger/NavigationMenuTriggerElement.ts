@@ -13,6 +13,10 @@ import { CompositeItem, findCompositeProvider, NavigationMenuItemPart } from '..
  * State attributes: `data-popup-open`, `data-pressed`.
  */
 export class NavigationMenuTriggerElement extends NavigationMenuItemPart.withAttributes({
+    /**
+     * Whether the trigger ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private trigger!: NavigationMenuTriggerMachine;

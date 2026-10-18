@@ -5,7 +5,7 @@ import { checkboxCard as recipe } from '@flippo-software/component-styles/checkb
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { CheckboxCard, CheckboxGroup } from '~@src';
-import { Grid, Page, Section, variantControls } from '~@stories';
+import { Grid, Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -27,7 +27,7 @@ function Option(props: Props & { title: string; text: string; value?: string; de
 function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example'>
-            <Option {...args} title='Подсказки' text='Показывать подсказку под вопросом' />
+            <Option {...args} title={t('common.hints')} text={t('checkboxCard.content.showAHintUnder')} />
         </div>
     );
 }
@@ -40,8 +40,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Карточка-чекбокс: вся карточка переключает выбор. Индикатор всегда на месте (`keepMounted`), меняется только галочка — раскладка не прыгает.'
+                component: 'checkboxCard.description'
             }
         }
     }
@@ -54,26 +53,43 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Положение индикатора' description='В начале карточки или в конце, как переключатель настройки.'>
+            <Section
+                title={t('checkboxCard.sections.indicatorPosition.title')}
+                description={t('checkboxCard.sections.indicatorPosition.description')}
+            >
                 <Grid min={300}>
-                    <Option title='Подсказки' text='Показывать подсказку под вопросом' defaultChecked={true} />
-                    <Option title='Подробности' text='Блок с объяснением после ответа' />
-                    <Option title='Подсказки' text='Показывать подсказку под вопросом' indicatorPosition='end' defaultChecked={true} />
-                    <Option title='Подробности' text='Блок с объяснением после ответа' indicatorPosition='end' />
+                    <Option title={t('common.hints')} text={t('checkboxCard.content.showAHintUnder')} defaultChecked={true} />
+                    <Option title={t('checkboxCard.labels.details')} text={t('checkboxCard.content.anExplanationBlockAfter')} />
+                    <Option
+                        title={t('common.hints')}
+                        text={t('checkboxCard.content.showAHintUnder')}
+                        indicatorPosition='end'
+                        defaultChecked={true}
+                    />
+                    <Option
+                        title={t('checkboxCard.labels.details')}
+                        text={t('checkboxCard.content.anExplanationBlockAfter')}
+                        indicatorPosition='end'
+                    />
                 </Grid>
             </Section>
-            <Section title='Недоступна' description='Выбор виден, но не меняется.'>
+            <Section title={t('checkboxCard.sections.disabled.title')} description={t('checkboxCard.sections.disabled.description')}>
                 <Grid min={300}>
-                    <Option title='Озвучка' text='Скоро будет доступно' disabled={true} />
-                    <Option title='Синхронизация' text='Включена администратором' disabled={true} defaultChecked={true} />
+                    <Option title={t('checkboxCard.labels.voiceOver')} text={t('checkboxCard.content.comingSoon')} disabled={true} />
+                    <Option
+                        title={t('checkboxCard.labels.sync')}
+                        text={t('checkboxCard.content.turnedOnByThe')}
+                        disabled={true}
+                        defaultChecked={true}
+                    />
                 </Grid>
             </Section>
-            <Section title='Группа' description='Несколько карточек в CheckboxGroup: значение — массив выбранных.'>
-                <CheckboxGroup defaultValue={['hints']} aria-label='Блоки карточки'>
+            <Section title={t('checkboxCard.sections.group.title')} description={t('checkboxCard.sections.group.description')}>
+                <CheckboxGroup defaultValue={['hints']} aria-label={t('checkboxCard.labels.cardBlocks')}>
                     <Grid min={240}>
-                        <Option value='hints' title='Подсказки' text='Под вопросом' />
-                        <Option value='details' title='Подробности' text='После ответа' />
-                        <Option value='image' title='Изображение' text='Над вопросом' />
+                        <Option value='hints' title={t('common.hints')} text={t('checkboxCard.content.belowTheQuestion')} />
+                        <Option value='details' title={t('checkboxCard.labels.details')} text={t('checkboxCard.content.afterTheAnswer')} />
+                        <Option value='image' title={t('checkboxCard.labels.image')} text={t('checkboxCard.content.aboveTheQuestion')} />
                     </Grid>
                 </CheckboxGroup>
             </Section>

@@ -1,6 +1,7 @@
-// Layout helpers.
+//// Layout helpers.
+//// @group layout
 
-// Hides an element visually and keeps it for assistive technologies.
+/// Hides an element visually and keeps it for assistive technologies.
 @mixin visually-hidden {
     position: absolute;
     inline-size: 1px;
@@ -13,14 +14,15 @@
     white-space: nowrap;
 }
 
-// One line of text with an ellipsis.
+/// One line of text with an ellipsis.
 @mixin truncate {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-// Up to `$lines` lines of text with an ellipsis.
+/// Up to `$lines` lines of text with an ellipsis.
+/// @param {Number} $lines - The number of lines.
 @mixin line-clamp($lines) {
     display: -webkit-box;
     overflow: hidden;

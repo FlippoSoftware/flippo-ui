@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { DialogViewportDataAttributes } from '@flippo-software/core-components/dialog';
+
 import type { TransitionStatus } from '@flippo-software/react-hooks/use-transition-status';
 
 import { useStoreSelector } from '~@lib/core';
@@ -12,8 +14,6 @@ import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useDialogPortalContext } from '../portal/DialogPortalContext';
 import { useDialogRootContext } from '../root/DialogRootContext';
-
-import { DialogViewportDataAttributes } from './DialogViewportDataAttributes';
 
 const stateAttributesMapping: StateAttributesMapping<DialogViewport.State> = {
     ...baseMapping,

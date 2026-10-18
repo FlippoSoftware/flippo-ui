@@ -5,7 +5,7 @@ import { snippet as recipe } from '@flippo-software/component-styles/snippet';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Snippet } from '~@src';
-import { Page, Section, variantControls } from '~@stories';
+import { Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -19,7 +19,7 @@ function Example(args: Props): React.JSX.Element {
                     <Snippet.Symbol />
                     pnpm add @flippo-software/ui-kit-react
                 </Snippet.Line>
-                <Snippet.CopyButton aria-label='Скопировать команду' />
+                <Snippet.CopyButton aria-label={t('snippet.labels.copyTheCommand')} />
             </Snippet.Root>
         </div>
     );
@@ -33,8 +33,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Блок команд: строки с символом приглашения и кнопка копирования в углу. Символ не копируется и не выделяется; после копирования кнопка на секунду зеленеет.'
+                component: 'snippet.description'
             }
         }
     }
@@ -47,7 +46,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Несколько строк' description='Каждая строка — `Snippet.Line`; копируется весь текст без символов.'>
+            <Section title={t('snippet.sections.severalLines.title')} description={t('snippet.sections.severalLines.description')}>
                 <div className='sb-medium'>
                     <Snippet.Root>
                         <Snippet.Line>
@@ -58,18 +57,18 @@ export const Gallery: Story = {
                             <Snippet.Symbol />
                             pnpm add @flippo-software/component-styles
                         </Snippet.Line>
-                        <Snippet.CopyButton aria-label='Скопировать команды' />
+                        <Snippet.CopyButton aria-label={t('snippet.labels.copyTheCommands')} />
                     </Snippet.Root>
                 </div>
             </Section>
-            <Section title='Свой символ' description='`symbol` на корне: например «>» для REPL.'>
+            <Section title={t('snippet.sections.customSymbol.title')} description={t('snippet.sections.customSymbol.description')}>
                 <div className='sb-medium'>
                     <Snippet.Root symbol='>'>
                         <Snippet.Line>
                             <Snippet.Symbol />
                             {"flippo.study('ux-laws-exam')"}
                         </Snippet.Line>
-                        <Snippet.CopyButton aria-label='Скопировать' />
+                        <Snippet.CopyButton aria-label={t('snippet.labels.copy')} />
                     </Snippet.Root>
                 </div>
             </Section>

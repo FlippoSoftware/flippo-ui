@@ -24,20 +24,82 @@ import { SelectContext, type SelectOpenChangeDetail, type SelectValueChangeDetai
  * reason }`), `open-change-complete` (`detail: { open }`).
  */
 export class SelectElement extends ControlElement.withAttributes({
+    /**
+     * The uncontrolled value of the select when it’s initially rendered.
+     *
+     * To render a controlled select, use the `value` attribute instead.
+     */
     'default-value': 'string',
+    /** Whether the select popup is currently open. */
     open: 'boolean',
+    /**
+     * Whether the select popup is initially open.
+     *
+     * To render a controlled select popup, use the `open` attribute instead.
+     * @default false
+     */
     'default-open': 'boolean',
+    /** Identifies the field when a form is submitted. */
     name: 'string',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the user should be unable to choose a different option from the select popup.
+     * @default false
+     */
     'read-only': 'boolean',
+    /**
+     * Whether the user must choose a value before submitting a form.
+     * @default false
+     */
     required: 'boolean',
+    /**
+     * Whether multiple items can be selected.
+     * @default false
+     */
     multiple: 'boolean',
+    /**
+     * Determines if the select enters a modal state when open.
+     * - `true`: user interaction is limited to the select: document page scroll is locked and pointer interactions on outside elements are disabled.
+     * - `false`: user interaction with the rest of the document is allowed.
+     * @default true
+     */
     modal: 'boolean',
+    /**
+     * Whether moving the pointer over items should highlight them.
+     * Disabling this attribute allows CSS `:hover` to be differentiated from the `:focus` (`data-highlighted`) state.
+     * @default true
+     */
     'highlight-item-on-hover': 'boolean',
+    /** The value of the select. Use when controlled. */
     value: property<unknown>(),
+    /**
+     * Data structure of the items rendered in the select popup.
+     * When specified, `<prefix>-select-value` renders the label of the selected item instead of the raw value.
+     */
     items: property<SelectRootOptions['items']>(),
+    /**
+     * When the item values are objects (the `value` property of the items), this function converts
+     *  the object value to a string representation for display in the trigger.
+     * If the shape of the object is `{ value, label }`, the label will be used automatically
+     * without needing to specify this attribute.
+     */
     itemToStringLabel: property<SelectRootOptions['itemToStringLabel']>(),
+    /**
+     * When the item values are objects (the `value` property of the items), this function converts
+     *  the object value to a string representation for form submission.
+     * If the shape of the object is `{ value, label }`, the value will be used automatically
+     *  without needing to specify this attribute.
+     */
     itemToStringValue: property<SelectRootOptions['itemToStringValue']>(),
+    /**
+     * Custom comparison logic used to determine if a select item value matches the current
+     * selected value. Useful when item values are objects without matching referentially.
+     * Defaults to `Object.is` comparison.
+     */
     isItemEqualToValue: property<SelectRootOptions['isItemEqualToValue']>()
 }) {
     /**

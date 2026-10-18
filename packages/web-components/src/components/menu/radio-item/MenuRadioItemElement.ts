@@ -16,7 +16,15 @@ import type { MenuRadioGroupElement } from '../radio-group/MenuRadioGroupElement
  * State attributes: `data-checked`/`data-unchecked`, `data-highlighted`, `data-disabled`.
  */
 export class MenuRadioItemElement extends MenuItemPart.withAttributes({
+    /**
+     * Value of the radio item.
+     * This is the value that will be set in the MenuRadioGroup when the item is selected.
+     */
     value: 'string',
+    /**
+     * Whether to close the menu when the item is clicked.
+     * @default false
+     */
     'close-on-click': 'boolean'
 }) {
     protected item!: MenuRadioItemMachine;

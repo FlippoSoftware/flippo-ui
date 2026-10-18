@@ -14,7 +14,15 @@ import { SnippetPart } from '../root/SnippetRootContext';
  * State attributes: `data-copied`, `data-disabled`.
  */
 export class SnippetCopyButtonElement extends SnippetPart.withAttributes({
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Time in milliseconds before resetting the copy status to idle.
+     * @default 2000
+     */
     'reset-delay': 'number'
 }) {
     private copyButton!: SnippetCopyButtonMachine;

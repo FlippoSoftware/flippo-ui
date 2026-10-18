@@ -4,6 +4,8 @@
 
 @layer fl.components {
     .fl-switch-root {
+        // Its height, for its label (`.fl-choice-label` centres it on the first line of the text).
+        --_fl-choice-control-height: var(--fl-switch-height, var(--_fl-switch-height, var(--fl-spacing-6)));
         --_fl-switch-travel: calc(
             var(--fl-switch-width, var(--_fl-switch-width, var(--fl-spacing-10))) -
                 var(--fl-switch-height, var(--_fl-switch-height, var(--fl-spacing-6)))

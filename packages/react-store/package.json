@@ -1,0 +1,78 @@
+{
+    "name": "@flippo-software/react-store",
+    "type": "module",
+    "version": "0.1.0",
+    "description": "React adapter of @flippo-software/store: useStore and ReactStore, a component store with hooks.",
+    "author": "BlackPoretsky (Egor Gorochkin)",
+    "license": "ISC",
+    "keywords": [
+        "store",
+        "react",
+        "hooks",
+        "selectors",
+        "flippo"
+    ],
+    "sideEffects": false,
+    "files": [
+        "README.md",
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsdown",
+        "dev": "tsdown --watch",
+        "lint:check": "biome check && api-extractor run",
+        "lint:fix": "biome lint --fix && biome format --fix",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit",
+        "prepublishOnly": "pnpm --workspace-root run publish-guard && pnpm build",
+        "api:report": "api-extractor run --local",
+        "api:check": "api-extractor run"
+    },
+    "peerDependencies": {
+        "react": "^19.1.1"
+    },
+    "dependencies": {
+        "@flippo-software/store": "workspace:^",
+        "use-sync-external-store": "^1.5.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@flippo-software/biome": "catalog:",
+        "@flippo-software/tsconfig": "catalog:",
+        "@microsoft/api-extractor": "^7.59.4",
+        "@testing-library/react": "^16.3.0",
+        "@types/node": "catalog:",
+        "@types/react": "catalog:",
+        "@types/react-dom": "catalog:",
+        "@types/use-sync-external-store": "^1.5.0",
+        "happy-dom": "catalog:",
+        "react": "catalog:",
+        "react-dom": "catalog:",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/FlippoSoftware/flippo-ui.git",
+        "directory": "packages/react-store"
+    },
+    "homepage": "https://github.com/FlippoSoftware/flippo-ui/tree/main/packages/react-store#readme",
+    "bugs": {
+        "url": "https://github.com/FlippoSoftware/flippo-ui/issues"
+    },
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.cts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./package.json": "./package.json"
+    }
+}

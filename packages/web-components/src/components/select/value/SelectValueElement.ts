@@ -13,6 +13,10 @@ import { SelectPart } from '../root/SelectRootContext';
  * State attributes: `data-placeholder`.
  */
 export class SelectValueElement extends SelectPart.withAttributes({
+    /**
+     * The placeholder value to display when no value is selected.
+     * This is overridden by `children` if specified, or by a null item's label in `items`.
+     */
     placeholder: 'string'
 }) {
     private readonly text = new FallbackText(this);

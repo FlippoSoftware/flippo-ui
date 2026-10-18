@@ -1,3 +1,5 @@
+import { RadioRootDataAttributes } from '@flippo-software/core-components/radio';
+
 import type { TransitionStatus } from '@flippo-software/react-hooks';
 
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
@@ -5,7 +7,6 @@ import { transitionStatusMapping } from '~@lib/styleHookMapping';
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 
 import { fieldValidityMapping } from '../../Field/utils/constants';
-import { RadioRootDataAttributes } from '../root/RadioRootDataAttributes';
 
 export const radioStyleHookMapping = {
     checked(value): Record<string, string> {

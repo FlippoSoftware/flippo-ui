@@ -23,13 +23,42 @@ import { SegmentedControlContext, type SegmentedControlValueChangeDetail } from 
  * State attributes: `data-disabled`, `data-readonly`, `data-orientation`, and those of the field.
  */
 export class SegmentedControlElement extends ControlElement.withAttributes({
+    /**
+     * The controlled selected value.
+     * Uncontrolled counterpart: `default-value`.
+     */
     value: 'string',
+    /**
+     * The initially selected value (uncontrolled).
+     * @default null
+     */
     'default-value': 'string',
+    /** Identifies the field when a form is submitted. */
     name: 'string',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the selected value can be changed.
+     * @default false
+     */
     'read-only': 'boolean',
+    /**
+     * Whether the user must select a value before submitting a form.
+     * @default false
+     */
     required: 'boolean',
+    /**
+     * The orientation of the component — controls arrow-key navigation direction.
+     * @default 'horizontal'
+     */
     orientation: ['horizontal', 'vertical'],
+    /**
+     * Whether keyboard focus loops back to the first item after the last.
+     * @default true
+     */
     'loop-focus': 'boolean'
 }) {
     private control!: SegmentedControlMachine;

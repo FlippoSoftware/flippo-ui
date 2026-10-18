@@ -1,4 +1,6 @@
-// Mixins that write the design tokens as custom properties.
+//// Mixins that write the design tokens as custom properties.
+//// @group custom-properties
+
 @use 'sass:list';
 @use 'sass:map';
 @use 'sass:meta';
@@ -14,7 +16,7 @@
     @return $value;
 }
 
-// Writes every primitive colour: `--fl-color-neutral-90`, `--fl-color-brand-40`, `--fl-color-misc-red-default`…
+/// Writes every primitive colour: `--fl-color-neutral-90`, `--fl-color-brand-40`, `--fl-color-misc-red-default`…
 @mixin primitive-colors {
     @each $group, $palette in color.$primitives {
         @each $step, $value in $palette {
@@ -23,8 +25,9 @@
     }
 }
 
-// Writes the semantic colours. Without `$scheme` every token is a `light-dark()` pair, so it follows the
-// `color-scheme` of the element that uses it; `'light'` or `'dark'` writes the values of one scheme only.
+/// Writes the semantic colours. Without `$scheme` every token is a `light-dark()` pair, so it follows the
+/// `color-scheme` of the element that uses it; `'light'` or `'dark'` writes the values of one scheme only.
+/// @param {String | Null} $scheme [null] - `light`, `dark`, or `null` for `light-dark()` pairs.
 @mixin semantic-colors($scheme: null) {
     @each $name, $pair in color.$semantic {
         @if $scheme == 'light' {
@@ -38,7 +41,7 @@
     --fl-focus-color: var(--fl-color-brand-light);
 }
 
-// Writes the typography tokens: font families and `--fl-text-<style>-size|line-height|letter-spacing|weight-*`.
+/// Writes the typography tokens: font families and `--fl-text-<style>-size|line-height|letter-spacing|weight-*`.
 @mixin typography-tokens {
     --fl-font-family: #{typography.$font-family};
     --fl-font-family-mono: #{typography.$font-family-mono};
@@ -55,7 +58,7 @@
     }
 }
 
-// Writes spacing, radii, sizes, borders, shadows, motion, z-indices and focus ring tokens.
+/// Writes spacing, radii, sizes, borders, shadows, motion, z-indices and focus ring tokens.
 @mixin scale-tokens {
     @each $name, $value in scale.$spacing {
         --fl-spacing-#{$name}: #{$value};
@@ -86,10 +89,41 @@
     }
 }
 
-// Writes every token. Use it in your own selector to scope the design system to a part of the page.
+/// Writes every token. Use it in your own selector to scope the design system to a part of the page.
 @mixin custom-properties {
     @include primitive-colors;
     @include semantic-colors;
     @include typography-tokens;
     @include scale-tokens;
+}
+
+/// A theme of the application's own, selected with `data-theme='<name>'` like the built-in ones. `$scheme` (`light` or
+/// `dark`) is the colour scheme it is built on: the semantic colours take its values. `$primitives` overrides primitive
+/// colours (`'brand-40': #7c5cff` → `--fl-color-brand-40`), `$colors` semantic ones (`'bg-1': #f4ecd8`, or a primitive's
+/// name: `'bg-1': 'neutral-95'`). Register the name with its scheme in the providers too (`themes={{ sepia: 'light' }}`).
+/// @param {String} $name - The name: `data-theme='<name>'`.
+/// @param {String} $scheme - `light` or `dark`.
+/// @param {Map} $colors [()] - Semantic colours: a colour, or the name of a primitive.
+/// @param {Map} $primitives [()] - Primitive colours.
+/// @example scss
+///   @include fl.theme('sepia', light, $colors: ('bg-1': #f4ecd8, 'text-primary': #3b2f1e));
+@mixin theme($name, $scheme, $colors: (), $primitives: ()) {
+    [data-theme='#{$name}'] {
+        color-scheme: $scheme;
+
+        @each $key, $value in $primitives {
+            --fl-color-#{$key}: #{$value};
+        }
+
+        // A custom property resolves its `var()` where it is declared: the semantic colours, the focus colour and the
+        // shadows are declared again here, so they read this theme's primitives (and each other's overrides).
+        @include semantic-colors($scheme);
+
+        @each $key, $value in $colors {
+            --fl-color-#{$key}: #{-color-ref($value)};
+        }
+        @each $key, $value in scale.$shadow {
+            --fl-shadow-#{$key}: #{$value};
+        }
+    }
 }

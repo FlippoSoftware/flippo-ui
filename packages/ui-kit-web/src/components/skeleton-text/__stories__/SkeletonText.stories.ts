@@ -2,7 +2,7 @@ import { skeletonText as recipe } from '@flippo-software/component-styles/skelet
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { page, renderExample, row, section, variantControls } from '~@stories';
+import { page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -10,11 +10,12 @@ type Props = VariantProps<typeof recipe> & { lines?: number };
 
 const markup = '<demo-skeleton-text data-story-target lines="3"></demo-skeleton-text>';
 
-const STYLES = [
-    ['fl-text-heading-3-default', 'Экзамен Законы UX', 1],
-    ['fl-text-body-default', 'Закон Хика: время принятия решения растёт с числом и сложностью вариантов выбора.', 3],
-    ['fl-text-body-minus-default', 'Создано 12 октября · 32 карточки', 1]
-] as const;
+const STYLES = () =>
+    [
+        ['fl-text-heading-3-default', t('common.uxLawsExam'), 1],
+        ['fl-text-body-default', t('skeletonText.content.hickSLawThe'), 3],
+        ['fl-text-body-minus-default', t('skeletonText.content.createdOnOctober12'), 1]
+    ] as const;
 
 const meta: Meta<Props> = {
     title: 'Feedback/SkeletonText',
@@ -25,8 +26,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component:
-                    'Заглушка абзаца. Строки занимают ровно высоту строки текущего шрифта (`1lh`), а полоса — 0.7em: подставьте заглушку в любой стиль текста, и при загрузке макет не сдвинется. Последняя строка короче.'
+                component: 'skeletonText.description'
             }
         }
     }
@@ -40,17 +40,19 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Подстраивается под шрифт',
-                'Слева — заглушка в стиле текста, справа — сам текст. Высота блоков совпадает.',
-                STYLES.map(([className, text, lines]) =>
-                    row(
-                        className.replace('fl-text-', ''),
-                        `<div class="${className}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; inline-size: 100%; align-items: start"><demo-skeleton-text lines="${lines}"></demo-skeleton-text><span>${text}</span></div>`
+                t('skeletonText.sections.followsTheFont.title'),
+                t('skeletonText.sections.followsTheFont.description'),
+                STYLES()
+                    .map(([className, text, lines]) =>
+                        row(
+                            className.replace('fl-text-', ''),
+                            `<div class="${className}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; inline-size: 100%; align-items: start"><demo-skeleton-text lines="${lines}"></demo-skeleton-text><span>${text}</span></div>`
+                        )
                     )
-                ).join('')
+                    .join('')
             ) +
                 section(
-                    'Анимация',
+                    t('skeletonText.sections.animation.title'),
                     '',
                     ['pulse', 'shimmer', 'none']
                         .map((animation) =>

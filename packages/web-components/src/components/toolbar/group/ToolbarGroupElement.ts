@@ -13,6 +13,10 @@ import { ToolbarGroupContext, ToolbarPart } from '../root/ToolbarRootContext';
  * State attributes: `data-disabled`, `data-orientation`.
  */
 export class ToolbarGroupElement extends ToolbarPart.withAttributes({
+    /**
+     * When `true` all toolbar items in the group are disabled.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private group!: ToolbarGroupMachine;

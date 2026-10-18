@@ -12,6 +12,10 @@ import { ToastPart } from '../root/ToastRootContext';
  * Attributes: `disabled`.
  */
 export class ToastCloseElement extends ToastPart.withAttributes({
+    /**
+     * Whether the button ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private button!: ButtonMachine;

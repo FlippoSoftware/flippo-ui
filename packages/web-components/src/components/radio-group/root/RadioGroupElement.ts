@@ -21,11 +21,34 @@ import { RadioGroupContext, type RadioGroupValueChangeDetail } from '../../radio
  * State attributes: `data-disabled`, `data-readonly`, `data-required`, and those of the field.
  */
 export class RadioGroupElement extends ControlElement.withAttributes({
+    /**
+     * The controlled value of the radio item that should be currently selected.
+     *
+     * To render an uncontrolled radio group, use the `default-value` attribute instead.
+     */
     value: 'string',
+    /**
+     * The uncontrolled value of the radio button that should be initially selected.
+     *
+     * To render a controlled radio group, use the `value` attribute instead.
+     */
     'default-value': 'string',
+    /** Identifies the field when a form is submitted. */
     name: 'string',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the user should be unable to select a different radio button in the group.
+     * @default false
+     */
     'read-only': 'boolean',
+    /**
+     * Whether the user must choose a value before submitting a form.
+     * @default false
+     */
     required: 'boolean'
 }) {
     private group!: RadioGroupMachine;

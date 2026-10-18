@@ -15,12 +15,14 @@
     "sideEffects": false,
     "files": [
         "README.md",
+        "custom-elements.json",
         "dist",
         "skills"
     ],
     "scripts": {
-        "build": "tsdown",
+        "build": "tsdown && cem analyze",
         "dev": "tsdown --watch",
+        "manifest": "cem analyze",
         "lint:check": "biome check",
         "lint:fix": "biome lint --fix && biome format --fix",
         "test": "vitest run",
@@ -34,6 +36,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
+        "@custom-elements-manifest/analyzer": "^0.11.0",
         "@flippo-software/biome": "catalog:",
         "@flippo-software/tsconfig": "catalog:",
         "@types/react": "catalog:",
@@ -57,6 +60,7 @@
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
     "types": "./dist/index.d.cts",
+    "customElements": "custom-elements.json",
     "exports": {
         ".": {
             "import": "./dist/index.js",

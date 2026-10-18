@@ -1,0 +1,44 @@
+---
+title: Flippo UI
+description: The component system of Flippo — accessible behaviour for React and web components, and the styles of the design system.
+---
+
+Flippo UI is built in layers. The behaviour of every component is written once, without a framework, and connected to
+React and to custom elements by thin adapters. The look of the design system is a separate package of tokens, themes
+and CSS that both adapters share. Take the layer you need: styled components ready to use, or unstyled ones to style
+yourself.
+
+| Package | What it is | For |
+| --- | --- | --- |
+| [`@flippo-software/ui-kit-react`](./ui-kit-react/index.mdx) | Styled React components | A React application with the Flippo look |
+| [`@flippo-software/ui-kit-web`](./ui-kit-web/index.mdx) | Styled custom elements | Plain HTML or any framework, with the Flippo look |
+| [`@flippo-software/react-components`](./react-components/index.mdx) | Unstyled React components with the API of Base UI | Your own design system in React |
+| [`@flippo-software/web-components`](./web-components/index.mdx) | Unstyled custom elements | Your own design system without a framework |
+| [`@flippo-software/component-styles`](./component-styles/index.mdx) | Tokens, themes, component CSS and class recipes | The Flippo look on your own markup |
+| [`@flippo-software/core-components`](./core-components/index.mdx) | The state machines of the components | Writing an adapter for another framework |
+| [`@flippo-software/store`](./store/index.mdx) | Reactive stores | State of the machines, or of your own code |
+| [`@flippo-software/react-store`](./react-store/index.mdx) | The store in React: `useStore`, `ReactStore` | React applications with the store |
+
+## How the layers fit
+
+```text
+ui-kit-react ─┬─ react-components ── core-components ── store
+              └─ component-styles
+ui-kit-web ───┬─ web-components ──── core-components ── store
+              └─ component-styles
+react-store ──── store
+```
+
+- **The same behaviour everywhere.** A dialog, a select or a slider behaves the same in React and as a custom element:
+  keyboard, pointer, focus, ARIA and positioning come from the same machine of `core-components`.
+- **The state is in the markup.** Components expose their state as `data-*` attributes (`data-open`, `data-checked`,
+  `data-highlighted`…) and CSS variables (`--available-height`, `--transform-origin`…): style them with any CSS.
+- **One look for both kits.** `component-styles` holds the tokens (`--fl-color-*`, `--fl-spacing-*`…), the light and
+  dark themes and the classes of every component; the kits only apply them.
+
+## Where to start
+
+- [Installation](./installation.mdx): which packages to install for your case.
+- [Themes and sizes](./ui-kit-react/theming.mdx): the theme of the application, your own themes, the size of the
+  controls.
+- The **API reference** of each package: generated from the sources, so it always matches the published code.

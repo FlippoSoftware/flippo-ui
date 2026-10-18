@@ -5,18 +5,23 @@ import { field as recipe } from '@flippo-software/component-styles/field';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Field } from '~@src';
-import { Grid, Page, Section, variantControls } from '~@stories';
+import { Grid, Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe> & { disabled?: boolean; invalid?: boolean };
 
 function TitleField(props: Props & { defaultValue?: string; description?: string; error?: string }): React.JSX.Element {
-    const { description = 'Видно всем участникам набора', error = 'Название не может быть пустым', defaultValue, ...rest } = props;
+    const {
+        description = t('field.content.visibleToEveryMember'),
+        error = t('field.content.theNameCannotBe'),
+        defaultValue,
+        ...rest
+    } = props;
     return (
         <Field.Root {...rest} name='title'>
-            <Field.Label>Название набора</Field.Label>
-            <Field.Control control='input' placeholder='Например, Законы UX' defaultValue={defaultValue} />
+            <Field.Label>{t('common.setName')}</Field.Label>
+            <Field.Control control='input' placeholder={t('field.placeholders.uxLawsSay')} defaultValue={defaultValue} />
             <Field.Description>{description}</Field.Description>
             <Field.Error match={rest.invalid ? true : undefined}>{error}</Field.Error>
         </Field.Root>
@@ -43,8 +48,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Поле формы: подпись, контрол, описание и ошибка. Состояния (`data-invalid`, `data-disabled`, `data-focused`) приходят от Field и окрашивают все части.'
+                component: 'field.description'
             }
         }
     }
@@ -58,21 +62,21 @@ export const Invalid: Story = { args: { invalid: true } };
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Состояния' description='Обычное, с ошибкой и недоступное.'>
+            <Section title={t('field.sections.states.title')} description={t('field.sections.states.description')}>
                 <Grid min={300}>
-                    <TitleField defaultValue='Экзамен Законы UX' />
+                    <TitleField defaultValue={t('common.uxLawsExam')} />
                     <TitleField invalid={true} />
-                    <TitleField disabled={true} defaultValue='Экзамен Законы UX' description='Изменить может только владелец' />
+                    <TitleField disabled={true} defaultValue={t('common.uxLawsExam')} description={t('field.content.onlyTheOwnerCan')} />
                 </Grid>
             </Section>
-            <Section title='Размеры' description='Контрол поля принимает размеры и оформление Input.'>
+            <Section title={t('field.sections.sizes.title')} description={t('field.sections.sizes.description')}>
                 <Grid min={300}>
                     <TitleField size='large' defaultValue='Large' />
                     <TitleField size='medium' defaultValue='Medium' />
                     <TitleField size='small' defaultValue='Small' />
                 </Grid>
             </Section>
-            <Section title='На карточке' description='Inverted — для полей на поверхности bg-1.' raised={true}>
+            <Section title={t('field.sections.onACard.title')} description={t('field.sections.onACard.description')} raised={true}>
                 <Grid min={300}>
                     <TitleField appearance='inverted' />
                     <TitleField appearance='inverted' invalid={true} />

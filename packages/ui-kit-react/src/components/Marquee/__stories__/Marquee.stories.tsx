@@ -6,19 +6,19 @@ import type { IconName } from '@flippo-software/component-styles/icons';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Icon, Marquee } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe> & { speed?: number; direction?: 'normal' | 'reverse'; pauseOnHover?: boolean };
 
-const TOPICS: [IconName, string][] = [
-    ['learn', 'Законы UX'],
-    ['globe', 'Английский B2'],
+const TOPICS = (): [IconName, string][] => [
+    ['learn', t('common.uxLaws')],
+    ['globe', t('common.englishB2')],
     ['set', 'JavaScript'],
-    ['star', 'История искусства'],
-    ['bookmark', 'Анатомия'],
-    ['hint', 'Психология']
+    ['star', t('marquee.content.artHistory')],
+    ['bookmark', t('marquee.content.anatomy')],
+    ['hint', t('common.psychology')]
 ];
 
 function Chip({ icon, text }: { icon: IconName; text: string }): React.JSX.Element {
@@ -48,7 +48,7 @@ function Ticker(props: Props): React.JSX.Element {
     return (
         <Marquee.Root {...props}>
             <Marquee.Track>
-                {TOPICS.map(([icon, text]) => (
+                {TOPICS().map(([icon, text]) => (
                     <Chip key={text} icon={icon} text={text} />
                 ))}
             </Marquee.Track>
@@ -75,7 +75,7 @@ const meta = {
         pauseOnHover: { control: 'boolean', table: { category: 'Behaviour' } }
     },
     parameters: {
-        docs: { description: { component: 'Бегущая строка: содержимое повторяется и прокручивается бесконечно; `fade` растворяет края.' } }
+        docs: { description: { component: 'marquee.description' } }
     }
 } satisfies Meta<typeof Example>;
 export default meta;
@@ -86,7 +86,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Края' description='Без растворения и с `fade`.'>
+            <Section title={t('marquee.sections.edges.title')} description={t('marquee.sections.edges.description')}>
                 <Row label='plain' fill={true}>
                     <Ticker />
                 </Row>
@@ -94,7 +94,10 @@ export const Gallery: Story = {
                     <Ticker fade={true} />
                 </Row>
             </Section>
-            <Section title='Направление и скорость' description='Навстречу друг другу; пауза при наведении.'>
+            <Section
+                title={t('marquee.sections.directionAndSpeed.title')}
+                description={t('marquee.sections.directionAndSpeed.description')}
+            >
                 <Row label='normal' fill={true}>
                     <Ticker fade={true} direction='normal' speed={40} pauseOnHover={true} />
                 </Row>

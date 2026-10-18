@@ -3,7 +3,7 @@ import { toast as recipe } from '@flippo-software/component-styles/toast';
 import type { IconName } from '@flippo-software/component-styles/icons';
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { button, icon, page, renderExample, row, section, variantControls } from '~@stories';
+import { button, icon, page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { ToastProviderElement } from '~@src';
 import type { VariantProps } from '~@stories';
@@ -23,7 +23,7 @@ function stage(triggers: string, toastAttributes = ''): string {
     return `<demo-toast-provider>
 ${triggers}
 <demo-toast-viewport><template>
-<demo-toast ${toastAttributes}><demo-toast-icon></demo-toast-icon><demo-toast-content><demo-toast-title></demo-toast-title><demo-toast-description></demo-toast-description></demo-toast-content><demo-toast-action></demo-toast-action><demo-toast-close aria-label="Закрыть уведомление"></demo-toast-close></demo-toast>
+<demo-toast ${toastAttributes}><demo-toast-icon></demo-toast-icon><demo-toast-content><demo-toast-title></demo-toast-title><demo-toast-description></demo-toast-description></demo-toast-content><demo-toast-action></demo-toast-action><demo-toast-close aria-label="${t('toast.labels.closeTheNotification')}"></demo-toast-close></demo-toast>
 </template></demo-toast-viewport>
 </demo-toast-provider>`;
 }
@@ -50,23 +50,25 @@ function wire(root: HTMLElement): void {
     const provider = root.querySelector<ToastProviderElement>('demo-toast-provider');
     if (!provider) return;
     const actions: Record<string, () => void> = {
-        default: () => provider.add({ type: 'success', title: 'Изменения сохранены', description: 'Набор обновлён у всех участников.' }),
-        success: () => provider.add({ type: 'success', title: 'Набор сохранён' }),
-        info: () => provider.add({ type: 'info', title: 'Ссылка скопирована' }),
-        warning: () => provider.add({ type: 'warning', title: 'Нет сети', description: 'Изменения сохранятся позже.' }),
-        error: () => provider.add({ type: 'error', title: 'Не удалось удалить', description: 'Попробуйте ещё раз.' }),
-        like: () => provider.add({ type: 'like', title: 'Добавлено в избранное' }),
+        default: () =>
+            provider.add({ type: 'success', title: t('toast.content.changesSaved'), description: t('toast.content.theSetIsUpdated') }),
+        success: () => provider.add({ type: 'success', title: t('toast.content.setSaved') }),
+        info: () => provider.add({ type: 'info', title: t('common.linkCopied') }),
+        warning: () =>
+            provider.add({ type: 'warning', title: t('toast.content.noConnection'), description: t('toast.content.yourChangesWillBe') }),
+        error: () => provider.add({ type: 'error', title: t('toast.content.couldNotDelete'), description: t('toast.content.tryAgain') }),
+        like: () => provider.add({ type: 'like', title: t('toast.content.addedToFavourites') }),
         undo: () => {
             const id = provider.add({
-                title: 'Карточка удалена',
-                actionProps: { children: 'Отменить', onClick: () => provider.close(id) }
+                title: t('toast.content.cardDeleted'),
+                actionProps: { children: t('toast.content.undo'), onClick: () => provider.close(id) }
             });
         },
         promise: () => {
             provider.promise(new Promise((resolve) => setTimeout(resolve, 1600)), {
-                loading: { title: 'Публикуем набор…' },
-                success: { title: 'Набор опубликован' },
-                error: { title: 'Ошибка публикации' }
+                loading: { title: t('toast.content.publishingTheSet') },
+                success: { title: t('toast.content.setPublished') },
+                error: { title: t('toast.content.publishingFailed') }
             });
         }
     };
@@ -76,34 +78,33 @@ function wire(root: HTMLElement): void {
     });
 }
 
-const markup = stage(button('Показать уведомление', 'data-toast="default"'), 'data-story-target');
+const markup = () => stage(button(t('toast.content.showANotification'), 'data-toast="default"'), 'data-story-target');
 
 const trigger = (kind: string, content: string, variant = 'secondary') =>
     `<demo-button variant="${variant}" as-child><button type="button" data-toast="${kind}">${content}</button></demo-button>`;
 
-const triggers =
+const triggers = () =>
     row(
         'types',
-        trigger('success', 'Успех') +
-            trigger('info', 'Инфо') +
-            trigger('warning', 'Предупреждение') +
-            trigger('error', 'Ошибка') +
-            trigger('like', 'Лайк')
+        trigger('success', t('toast.content.success')) +
+            trigger('info', t('toast.content.info')) +
+            trigger('warning', t('toast.content.warning')) +
+            trigger('error', t('toast.content.error')) +
+            trigger('like', t('toast.content.like'))
     ) +
-    row('action', trigger('undo', `${icon('delete')}Удалить с отменой`, 'danger')) +
-    row('promise', trigger('promise', 'Опубликовать', 'primary'));
+    row('action', trigger('undo', `${icon('delete')}${t('toast.content.deleteWithUndo')}`, 'danger')) +
+    row('promise', trigger('promise', t('toast.content.publish'), 'primary'));
 
 const meta: Meta<Props> = {
     title: 'Feedback/Toast',
     args: {},
     argTypes: variantControls(recipe),
-    render: (args: Props) => renderExample(markup, args, wire),
+    render: (args: Props) => renderExample(markup(), args, wire),
     parameters: {
         docs: {
-            source: { code: markup, language: 'html' },
+            source: { code: markup(), language: 'html' },
             description: {
-                component:
-                    'Уведомления (Figma "Toast") внизу экрана: `provider.add({ type, title, description, actionProps })` и `provider.promise()`. `type` красит иконку, warning и error — ещё и текст. Тосты складываются стопкой и раскрываются при наведении; смахиваются жестом.'
+                component: 'toast.descriptionWeb'
             }
         }
     }
@@ -115,5 +116,12 @@ export const Default: Story = {};
 
 export const Gallery: Story = {
     render: () =>
-        page(section('Типы, действие и промис', 'Нажмите несколько кнопок подряд — тосты сложатся в стопку.', stage(triggers)), wire)
+        page(
+            section(
+                t('toast.sections.typesActionAndPromise.title'),
+                t('toast.sections.typesActionAndPromise.description'),
+                stage(triggers())
+            ),
+            wire
+        )
 };

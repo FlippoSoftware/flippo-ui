@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { CheckboxCardRootDataAttributes } from '@flippo-software/core-components/checkbox-card';
 import { useOpenChangeComplete, useTransitionStatus } from '@flippo-software/react-hooks';
 
 import type { TransitionStatus } from '@flippo-software/react-hooks';
@@ -9,7 +10,6 @@ import { useRenderElement } from '~@lib/hooks';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useCheckboxCardRootContext } from '../root/CheckboxCardRootContext';
-import { CheckboxCardRootDataAttributes } from '../root/CheckboxCardRootDataAttributes';
 
 import type { CheckboxCardRoot } from '../root/CheckboxCardRoot';
 

@@ -5,7 +5,7 @@ import { quote as recipe } from '@flippo-software/component-styles/quote';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Quote, Text } from '~@src';
-import { variantControls } from '~@stories';
+import { t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -15,7 +15,7 @@ function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example'>
             <Text>
-                Внутри абзаца: <Quote {...args}>выделенный фрагмент</Quote> и обычный текст.
+                {t('common.insideAParagraph')} <Quote {...args}>{t('common.aHighlightedFragment')}</Quote> {t('common.andPlainText')}
             </Text>
         </div>
     );
@@ -26,7 +26,7 @@ const meta = {
     component: Example,
     args: {},
     argTypes: variantControls(recipe),
-    parameters: { docs: { description: { component: 'Короткая цитата внутри текста: кавычки ставит браузер по языку страницы.' } } }
+    parameters: { docs: { description: { component: 'quote.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -37,7 +37,7 @@ export const InText: Story = {
     render: () => (
         <div className='story-example sb-medium'>
             <Text>
-                Миллер писал о <Quote>магическом числе семь плюс-минус два</Quote>.
+                {t('quote.content.millerWroteAbout')} <Quote>{t('quote.content.theMagicalNumberSeven')}</Quote>.
             </Text>
         </div>
     )

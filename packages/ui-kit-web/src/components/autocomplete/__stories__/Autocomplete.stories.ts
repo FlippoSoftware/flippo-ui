@@ -2,24 +2,33 @@ import { autocomplete as recipe } from '@flippo-software/component-styles/autoco
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { icon, page, renderExample, row, section, variantControls } from '~@stories';
+import { icon, page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
 type Props = VariantProps<typeof recipe> & { disabled?: boolean };
 
-const SETS = ['Экзамен Законы UX', 'Новый набор', 'C++', 'Английский B2', 'История искусств', 'Психология восприятия'];
+const SETS = () => [
+    t('common.uxLawsExam'),
+    t('common.newSet'),
+    'C++',
+    t('common.englishB2'),
+    t('autocomplete.content.historyOfArt'),
+    t('autocomplete.content.psychologyOfPerception')
+];
 
 function search(attributes = '', inputAttributes = ''): string {
     return `<demo-autocomplete ${attributes}>
 <demo-autocomplete-input-group>
 ${icon('magnifier').replace('<svg', '<svg class="fl-combobox-icon"')}
-<demo-autocomplete-input as-child><input aria-label="Поиск наборов" placeholder="Поиск наборов" ${inputAttributes}/></demo-autocomplete-input>
-<demo-autocomplete-clear aria-label="Очистить"></demo-autocomplete-clear>
+<demo-autocomplete-input as-child><input aria-label="${t('common.searchSets')}" placeholder="${t('common.searchSets')}" ${inputAttributes}/></demo-autocomplete-input>
+<demo-autocomplete-clear aria-label="${t('common.clear')}"></demo-autocomplete-clear>
 </demo-autocomplete-input-group>
 <demo-autocomplete-positioner><demo-autocomplete-popup>
-<demo-autocomplete-empty>Наборов не найдено</demo-autocomplete-empty>
-<demo-autocomplete-list>${SETS.map((set) => `<demo-autocomplete-item value="${set}">${icon('set')}${set}</demo-autocomplete-item>`).join('')}</demo-autocomplete-list>
+<demo-autocomplete-empty>${t('autocomplete.content.noSetsFound')}</demo-autocomplete-empty>
+<demo-autocomplete-list>${SETS()
+        .map((set) => `<demo-autocomplete-item value="${set}">${icon('set')}${set}</demo-autocomplete-item>`)
+        .join('')}</demo-autocomplete-list>
 </demo-autocomplete-popup></demo-autocomplete-positioner>
 </demo-autocomplete>`;
 }
@@ -35,8 +44,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component:
-                    'Поиск с подсказками: значение поля — свободный текст, список предлагает варианты. Открывается при нажатии на поле и при вводе.'
+                component: 'autocomplete.description'
             }
         }
     }
@@ -52,13 +60,13 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Строка поиска',
-                'Figma "Searchbar": лупа слева, крестик очистки появляется с текстом.',
+                t('autocomplete.sections.searchBar.title'),
+                t('autocomplete.sections.searchBar.description'),
                 (['large', 'medium', 'small'] as const).map((size) => row(size, medium(search(`size="${size}"`)))).join('')
             ) +
                 section(
-                    'На карточке',
-                    'Inverted и недоступное поле.',
+                    t('autocomplete.sections.onACard.title'),
+                    t('autocomplete.sections.onACard.description'),
                     row('inverted', medium(search('appearance="inverted"'))) +
                         row('disabled', medium(search('appearance="inverted" disabled', 'disabled'))),
                     { raised: true }

@@ -5,7 +5,7 @@ import { dialog as recipe } from '@flippo-software/component-styles/dialog';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Dialog, Field, Icon } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -16,20 +16,19 @@ function DeleteSet(props: Props): React.JSX.Element {
         <Dialog.Root {...props}>
             <Dialog.Trigger render={<Button variant='danger' />}>
                 <Icon name='delete' />
-                Удалить набор
+
+                {t('common.deleteTheSet')}
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Backdrop />
                 <Dialog.Popup>
-                    <Dialog.Title>Удалить набор?</Dialog.Title>
-                    <Dialog.Description>
-                        «Экзамен Законы UX» и 7 карточек исчезнут у всех участников. Это действие нельзя отменить.
-                    </Dialog.Description>
+                    <Dialog.Title>{t('dialog.content.deleteTheSet')}</Dialog.Title>
+                    <Dialog.Description>{t('dialog.content.uxLawsExamAnd')}</Dialog.Description>
                     <Dialog.Actions>
-                        <Dialog.Close render={<Button variant='label' />}>Отмена</Dialog.Close>
-                        <Dialog.Close render={<Button variant='danger' />}>Удалить</Dialog.Close>
+                        <Dialog.Close render={<Button variant='label' />}>{t('common.cancel')}</Dialog.Close>
+                        <Dialog.Close render={<Button variant='danger' />}>{t('common.delete')}</Dialog.Close>
                     </Dialog.Actions>
-                    <Dialog.Close aria-label='Закрыть' />
+                    <Dialog.Close aria-label={t('common.close')} />
                 </Dialog.Popup>
             </Dialog.Portal>
         </Dialog.Root>
@@ -41,21 +40,22 @@ function RenameSet(props: Props): React.JSX.Element {
         <Dialog.Root {...props}>
             <Dialog.Trigger render={<Button variant='secondary' />}>
                 <Icon name='pencil' />
-                Переименовать
+
+                {t('common.rename')}
             </Dialog.Trigger>
             <Dialog.Portal>
                 <Dialog.Backdrop />
                 <Dialog.Popup>
-                    <Dialog.Title>Новое название</Dialog.Title>
+                    <Dialog.Title>{t('dialog.content.newName')}</Dialog.Title>
                     <Field.Root name='title'>
-                        <Field.Label>Название набора</Field.Label>
-                        <Field.Control control='input' defaultValue='Экзамен Законы UX' appearance='inverted' />
+                        <Field.Label>{t('common.setName')}</Field.Label>
+                        <Field.Control control='input' defaultValue={t('common.uxLawsExam')} appearance='inverted' />
                     </Field.Root>
                     <Dialog.Actions>
-                        <Dialog.Close render={<Button variant='label' />}>Отмена</Dialog.Close>
-                        <Dialog.Close render={<Button />}>Сохранить</Dialog.Close>
+                        <Dialog.Close render={<Button variant='label' />}>{t('common.cancel')}</Dialog.Close>
+                        <Dialog.Close render={<Button />}>{t('common.save')}</Dialog.Close>
                     </Dialog.Actions>
-                    <Dialog.Close aria-label='Закрыть' />
+                    <Dialog.Close aria-label={t('common.close')} />
                 </Dialog.Popup>
             </Dialog.Portal>
         </Dialog.Root>
@@ -78,8 +78,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Модальный диалог: подложка затемняет страницу и перехватывает нажатия — нажатие на неё закрывает диалог. Закрывается и по Escape; крестик — `Dialog.Close` без `render`.'
+                component: 'dialog.description'
             }
         }
     }
@@ -92,7 +91,10 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Подтверждение и форма' description='Опасное действие с подтверждением; короткая форма в диалоге.'>
+            <Section
+                title={t('dialog.sections.confirmationAndForm.title')}
+                description={t('dialog.sections.confirmationAndForm.description')}
+            >
                 <Row label='confirm'>
                     <DeleteSet />
                 </Row>
@@ -100,7 +102,7 @@ export const Gallery: Story = {
                     <RenameSet />
                 </Row>
             </Section>
-            <Section title='Размеры' description='Small 420, Medium 732, Large 1064 (по ширине окна на узких экранах).'>
+            <Section title={t('dialog.sections.sizes.title')} description={t('dialog.sections.sizes.description')}>
                 <Row label='sizes'>
                     <RenameSet size='small' />
                     <RenameSet size='medium' />

@@ -8,7 +8,8 @@ this file is the map.
 ## Layout
 
 ```
-src/components/<Name>/            one folder per part: root/, trigger/, popup/, …  <Name><Part>.tsx (+ DataAttributes, CssVars)
+src/components/<Name>/            one folder per part: root/, trigger/, popup/, …  <Name><Part>.tsx (the DataAttributes and
+                                  CssVars enums are core's: import them from `@flippo-software/core-components/<name>`)
 src/components/<Name>/index.ts    `export * as <Name> from './index.parts'` + `export type *`
 src/components/<Name>/index.parts.ts   `export { DialogRoot as Root } …` — the public part names
 src/components/<Name>/<Name>.test.tsx  behaviour tests (default + StrictMode)
@@ -50,8 +51,9 @@ return useRenderElement('button', componentProps, {
   Write the test against the expected Base UI behaviour first.
 - Build is Vite (+ `tsc -p tsconfig.build.json` and `scripts/rewrite-dts-aliases.mjs` for types); do not move it to
   tsdown. TypeScript 7.
-- `@flippo-software/react-hooks` and `@flippo-software/internal-test-utils` come from the workspace (`workspace:^`,
-  `workspace:*`); react-hooks is published with this package, internal-test-utils is private (tests only).
+- `@flippo-software/react-hooks` is its own repository (`../../../hooks`, a published dependency; linked from the
+  sibling checkout until its first release, see the root `pnpm-workspace.yaml`); `@flippo-software/internal-test-utils`
+  comes from the workspace (`workspace:*`, private, tests only).
 
 ## Commands
 

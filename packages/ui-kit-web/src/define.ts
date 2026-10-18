@@ -1,3 +1,6 @@
+import type { ControlSize } from '@flippo-software/component-styles/sizes';
+import type { ThemeSetting, Themes } from '@flippo-software/component-styles/theme';
+
 import { elements as accordion } from './components/accordion';
 import { elements as autocomplete } from './components/autocomplete';
 import { elements as avatar } from './components/avatar';
@@ -62,6 +65,7 @@ import { elements as toggleGroup } from './components/toggle-group';
 import { elements as toolbar } from './components/toolbar';
 import { elements as tooltip } from './components/tooltip';
 import { DefaultPropsElement, setDefaultProps } from './lib/defaultProps';
+import { ProviderElement, persistTheme, registerThemes, setControlSize, setTheme } from './lib/provider';
 import { registerElements } from './lib/register';
 
 import type { DefaultProps } from './lib/defaultProps';
@@ -200,9 +204,24 @@ export type DefineOptions = RegisterOptions & {
     components?: readonly ComponentName[];
     /** Default props of the families (see `DefaultProps`); `<prefix>-default-props` overrides them in its subtree. */
     defaults?: DefaultProps;
+    /** The application's own themes with their colour schemes (`{ sepia: 'light' }`), see `registerThemes`. */
+    themes?: Themes;
+    /** The theme of the page (`setTheme`); `<prefix>-provider theme` sets a part's own. */
+    theme?: ThemeSetting;
+    /**
+     * Keeps the page's theme in `localStorage` under this key and starts from it (else from `theme`); inline
+     * `themeScript({ storageKey })` in the `<head>` with the same key.
+     */
+    storageKey?: string;
+    /** The control size of the page (`setControlSize`); `<prefix>-provider size` sets a part's own. */
+    size?: ControlSize;
 };
 export function define(options: DefineOptions) {
     if (options.defaults) setDefaultProps(options.defaults);
+    if (options.themes) registerThemes(options.themes);
+    if (options.storageKey !== undefined) persistTheme(options.storageKey, options.theme);
+    else if (options.theme) setTheme(options.theme);
+    if (options.size !== undefined) setControlSize(options.size);
     const selected = new Set(options.components ?? (Object.keys(components) as ComponentName[]));
     if (selected.has('autocomplete')) selected.add('combobox');
     if (selected.has('contextMenu') || selected.has('menubar')) selected.add('menu');
@@ -214,6 +233,8 @@ export function define(options: DefineOptions) {
         );
     }
     const registry = options.registry ?? customElements;
-    const providerTag = `${options.prefix}-default-props`;
-    if (!registry.get(providerTag)) registry.define(providerTag, class extends DefaultPropsElement {});
+    const defaultPropsTag = `${options.prefix}-default-props`;
+    if (!registry.get(defaultPropsTag)) registry.define(defaultPropsTag, class extends DefaultPropsElement {});
+    const providerTag = `${options.prefix}-provider`;
+    if (!registry.get(providerTag)) registry.define(providerTag, class extends ProviderElement {});
 }

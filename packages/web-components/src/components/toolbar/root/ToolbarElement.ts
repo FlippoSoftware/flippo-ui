@@ -19,9 +19,26 @@ import { ToolbarContext } from './ToolbarRootContext';
  * State attributes: `data-disabled`, `data-orientation`.
  */
 export class ToolbarElement extends MachineElement.withAttributes({
+    /**
+     * Whether every item of the toolbar ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * The orientation of the toolbar.
+     * @default 'horizontal'
+     */
     orientation: ['horizontal', 'vertical'],
+    /**
+     * If `true`, using keyboard navigation will wrap focus to the other end of the toolbar once the end is reached.
+     * @default true
+     */
     'loop-focus': 'boolean',
+    /**
+     * The number of columns. When greater than 1, the toolbar is arranged into
+     * a grid.
+     * @default 1
+     */
     cols: 'number'
 }) {
     private toolbar!: ToolbarMachine;

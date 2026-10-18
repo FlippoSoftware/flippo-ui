@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { CheckboxCardMachine } from '@flippo-software/core-components/checkbox-card';
+import { CheckboxCardMachine, CheckboxCardRootDataAttributes } from '@flippo-software/core-components/checkbox-card';
 import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import type { CheckboxCardOptions } from '@flippo-software/core-components/checkbox-card';
@@ -21,7 +21,6 @@ import { useLabelableContext } from '../../LabelableProvider';
 import type { FieldRoot } from '../../Field/root/FieldRoot';
 
 import { CheckboxCardRootContext } from './CheckboxCardRootContext';
-import { CheckboxCardRootDataAttributes } from './CheckboxCardRootDataAttributes';
 
 const stateAttributesMapping = {
     checked(value: boolean): Record<string, string> {

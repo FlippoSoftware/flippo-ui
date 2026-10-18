@@ -12,8 +12,21 @@ import { NumberFieldPart, NumberFieldScrubAreaContext } from '../root/NumberFiel
  * Attributes: `direction` (`horizontal` by default, `vertical`), `pixel-sensitivity` (2), `teleport-distance`.
  */
 export class NumberFieldScrubAreaElement extends NumberFieldPart.withAttributes({
+    /**
+     * Cursor movement direction in the scrub area.
+     * @default 'horizontal'
+     */
     direction: ['horizontal', 'vertical'],
+    /**
+     * Determines how many pixels the cursor must move before the value changes.
+     * A higher value will make scrubbing less sensitive.
+     * @default 2
+     */
     'pixel-sensitivity': 'number',
+    /**
+     * If specified, determines the distance that the cursor may move from the center
+     * of the scrub area before it will loop back around.
+     */
     'teleport-distance': 'number'
 }) {
     private scrubArea!: NumberFieldScrubAreaMachine;

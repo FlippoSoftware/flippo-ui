@@ -22,7 +22,7 @@ export class Store<State> implements ReadableStore<State>, Notifiable, ReactiveN
 
     /**
      * The current state of the store.
-     * This property is updated immediately when the state changes as a result of calling {@link setState}, {@link update}, or {@link set}.
+     * This property is updated immediately when the state changes as a result of calling {@link Store.setState}, {@link Store.update}, or {@link Store.set}.
      * Reading it inside a computed value makes the computed value depend on this store.
      *
      * Do not modify properties in state directly. Instead, use the provided methods to ensure proper state management
@@ -35,7 +35,7 @@ export class Store<State> implements ReadableStore<State>, Notifiable, ReactiveN
     /**
      * Registers a listener that will be called whenever the store's state changes.
      *
-     * @param fn The listener function to be called on state changes.
+     * @param fn - The listener function to be called on state changes.
      * @returns A function to unsubscribe the listener.
      */
     public subscribe = (fn: Listener<State>) => {
@@ -58,14 +58,14 @@ export class Store<State> implements ReadableStore<State>, Notifiable, ReactiveN
      *
      * Subclasses may override it to restrict what can be written (`ComponentStore` keeps controlled values).
      *
-     * @param newState The new state to set for the store.
+     * @param newState - The new state to set for the store.
      */
     public setState(newState: State) {
         this.replaceState(newState);
     }
 
     /**
-     * Writes `newState` as is, bypassing the restrictions of {@link setState} overrides, and notifies the listeners.
+     * Writes `newState` as is, bypassing the restrictions of {@link Store.setState} overrides, and notifies the listeners.
      * The other setters (`update`, `set`, `notifyAll`) use it after building the new state themselves.
      */
     protected replaceState(newState: State) {
@@ -124,7 +124,7 @@ export class Store<State> implements ReadableStore<State>, Notifiable, ReactiveN
     /**
      * Merges the provided changes into the current state and notifies listeners if there are changes.
      *
-     * @param changes An object containing the changes to apply to the current state.
+     * @param changes - An object containing the changes to apply to the current state.
      */
     public update(changes: Partial<State>) {
         for (const key in changes) {
@@ -138,8 +138,8 @@ export class Store<State> implements ReadableStore<State>, Notifiable, ReactiveN
     /**
      * Sets a specific key in the store's state to a new value and notifies listeners if the value has changed.
      *
-     * @param key The key in the store's state to update.
-     * @param value The new value to set for the specified key.
+     * @param key - The key in the store's state to update.
+     * @param value - The new value to set for the specified key.
      */
     public set<Key extends keyof State>(key: Key, value: State[Key]) {
         if (!Object.is(this.currentState[key], value)) {

@@ -1,7 +1,7 @@
 # @flippo-software/store — notes for agents
 
 The reactive layer under the Flippo UI stack: observable stores, derived values and effects, with one notification
-queue shared by all stores. Used by `@flippo-software/core-components` (state machines), `@flippo-software/react-hooks` (React
+queue shared by all stores. Used by `@flippo-software/core-components` (state machines), `@flippo-software/react-store` (React
 adapter `ReactStore`/`useStore`) and `@flippo-software/web-components`. No dependencies, no DOM, no framework.
 
 `README.md` is the user documentation and the spec of the behaviour: read the relevant section before changing

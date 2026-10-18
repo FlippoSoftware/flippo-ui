@@ -12,6 +12,10 @@ import { ComboboxPart } from '../root/ComboboxRootContext';
  * State attributes: `data-popup-open`, `data-disabled`, and those of the field.
  */
 export class ComboboxTriggerElement extends ComboboxPart.withAttributes({
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private trigger!: ComboboxTriggerMachine;

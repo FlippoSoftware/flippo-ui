@@ -18,6 +18,10 @@ abstract class MenuCheckablePart extends ContextPart<typeof MENU_CHECKABLE_ITEM>
  * State attributes: `data-checked`/`data-unchecked`, `data-highlighted`, `data-disabled`, transition attributes.
  */
 export class MenuItemIndicatorElement extends MenuCheckablePart.withAttributes({
+    /**
+     * Whether to keep the indicator in the DOM while the item is unchecked.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     private indicator!: MenuItemIndicatorMachine;

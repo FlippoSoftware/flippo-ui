@@ -17,10 +17,29 @@ import { TooltipContext, type TooltipOpenChangeDetail } from './TooltipRootConte
  * Events: `open-change` (cancelable; `detail: { open, reason }`), `open-change-complete` (`detail: { open }`).
  */
 export class TooltipElement extends MachineElement.withAttributes({
+    /** Whether the tooltip is currently open. */
     open: 'boolean',
+    /**
+     * Whether the tooltip is initially open.
+     *
+     * To render a controlled tooltip, use the `open` attribute instead.
+     * @default false
+     */
     'default-open': 'boolean',
+    /**
+     * Whether the tooltip is disabled.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the tooltip contents can be hovered without closing the tooltip.
+     * @default false
+     */
     'disable-hoverable-popup': 'boolean',
+    /**
+     * Determines which axis the tooltip should track the cursor on.
+     * @default 'none'
+     */
     'track-cursor-axis': ['none', 'x', 'y', 'both']
 }) {
     private rootMachine!: TooltipRootMachine;

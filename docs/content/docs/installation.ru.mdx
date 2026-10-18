@@ -1,0 +1,79 @@
+---
+title: Установка
+description: Какие пакеты ставить и как подключить их к приложению.
+---
+
+Каждый пакет публикуется отдельно под `@flippo-software/*`; ставьте пакет своего слоя — его зависимости придут вместе
+с ним. Все пакеты — ESM со сборкой CommonJS и своими декларациями TypeScript.
+
+## Стилизованные React-компоненты
+
+```sh
+pnpm add @flippo-software/ui-kit-react @flippo-software/component-styles react react-dom
+```
+
+`component-styles` и React 19 — peer-зависимости: в приложении по одной копии каждого. Подключите таблицу стилей один
+раз в точке входа и оберните приложение в `FlippoProvider` (тема, размер контролов):
+
+```tsx
+import '@flippo-software/ui-kit-react/styles.css';
+import { Button, FlippoProvider } from '@flippo-software/ui-kit-react';
+
+export function App() {
+    return (
+        <FlippoProvider storageKey="flippo-theme">
+            <Button>Создать набор</Button>
+        </FlippoProvider>
+    );
+}
+```
+
+## Стилизованные custom elements
+
+```sh
+pnpm add @flippo-software/ui-kit-web @flippo-software/component-styles
+```
+
+Зарегистрируйте элементы один раз со своим префиксом: с него начинается имя каждого тега.
+
+```ts
+import '@flippo-software/ui-kit-web/styles.css';
+import { define } from '@flippo-software/ui-kit-web';
+
+define({ prefix: 'ui' }); // <ui-button>, <ui-dialog>, <ui-dialog-trigger>…
+```
+
+## Нестилизованные компоненты
+
+```sh
+pnpm add @flippo-software/react-components react react-dom   # React
+pnpm add @flippo-software/web-components                     # custom elements
+```
+
+Они не добавляют стилей: оформляйте их части своим CSS по data-атрибутам состояний. Импортируйте компонент из его
+точки входа, чтобы загружать только используемое:
+
+```tsx
+import { Dialog } from '@flippo-software/react-components/dialog';
+```
+
+```ts
+import { define } from '@flippo-software/web-components/dialog';
+
+define({ prefix: 'ui' });
+```
+
+## Только стили
+
+```sh
+pnpm add @flippo-software/component-styles
+```
+
+Токены, темы и CSS компонентов для своей разметки: рецепты классов возвращают классы каждой части
+(`button({ variant: 'secondary' })`), SCSS API даёт токены и миксины.
+
+## Требования
+
+- Браузеры с Popover API, `light-dark()` и каскадными слоями CSS (актуальные Chrome, Edge, Firefox и Safari).
+- React 19 для React-пакетов.
+- Серверный рендеринг: пакеты импортируются без DOM, React-компоненты рендерятся на сервере.

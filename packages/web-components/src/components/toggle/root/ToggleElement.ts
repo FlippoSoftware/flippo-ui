@@ -22,9 +22,26 @@ import type { TogglePressedChangeDetail } from './ToggleRootContext';
  * State attributes: `data-pressed`, `data-disabled`.
  */
 export class ToggleElement extends MachineElement.withAttributes({
+    /**
+     * Whether the toggle button is currently pressed.
+     * This is the controlled counterpart of `default-pressed`.
+     */
     pressed: 'boolean',
+    /**
+     * Whether the toggle button is currently pressed.
+     * This is the uncontrolled counterpart of `pressed`.
+     * @default false
+     */
     'default-pressed': 'boolean',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * A unique string that identifies the toggle when used
+     * inside a toggle group.
+     */
     value: 'string'
 }) {
     private toggle!: ToggleMachine;

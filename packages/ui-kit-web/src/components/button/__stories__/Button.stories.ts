@@ -2,7 +2,7 @@ import { button as recipe } from '@flippo-software/component-styles/button';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { button, card, grid, icon, page, renderExample, row, section, variantControls } from '~@stories';
+import { button, card, grid, icon, page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -11,21 +11,20 @@ type Props = VariantProps<typeof recipe> & { disabled?: boolean };
 const VARIANTS = ['primary', 'secondary', 'outlined', 'label', 'danger'] as const;
 const SIZES = ['large', 'medium', 'small', 'x-small'] as const;
 
-const markup = `<demo-button data-story-target as-child>
-<button type="button">${icon('plus')}Создать набор</button>
+const markup = () => `<demo-button data-story-target as-child>
+<button type="button">${icon('plus')}${t('common.createASet')}</button>
 </demo-button>`;
 
 const meta: Meta<Props> = {
     title: 'Actions/Button',
     args: {},
     argTypes: { ...variantControls(recipe), disabled: { control: 'boolean', table: { category: 'Behaviour' } } },
-    render: (args: Props) => renderExample(markup, args),
+    render: (args: Props) => renderExample(markup(), args),
     parameters: {
         docs: {
-            source: { code: markup, language: 'html' },
+            source: { code: markup(), language: 'html' },
             description: {
-                component:
-                    'Кнопка (Figma "Button", "Icon Button"): CTA, Secondary, Outlined, Label и Danger; размеры 56 / 48 / 40 / 24. Нативный `<button>` или `<a>` — через `as-child`; иконки — дочерние `<svg>`.'
+                component: 'button.descriptionWeb'
             }
         }
     }
@@ -41,42 +40,42 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Варианты',
-                'Основное действие экрана — primary; остальные варианты — по убыванию акцента.',
+                t('button.sections.variants.title'),
+                t('button.sections.variants.description'),
                 VARIANTS.map((variant) =>
                     row(
                         variant,
-                        button(`${icon('plus')}Кнопка`, `variant="${variant}"`) +
-                            button(`Далее${icon('chevron-right')}`, `variant="${variant}"`) +
-                            `<demo-button variant="${variant}" icon-only as-child><button type="button" aria-label="Добавить">${icon('plus')}</button></demo-button>` +
-                            `<demo-button variant="${variant}" as-child><button type="button" disabled>Недоступно</button></demo-button>`
+                        button(`${icon('plus')}${t('button.content.button')}`, `variant="${variant}"`) +
+                            button(`${t('button.content.next')}${icon('chevron-right')}`, `variant="${variant}"`) +
+                            `<demo-button variant="${variant}" icon-only as-child><button type="button" aria-label="${t('button.labels.add')}">${icon('plus')}</button></demo-button>` +
+                            `<demo-button variant="${variant}" as-child><button type="button" disabled>${t('common.disabled')}</button></demo-button>`
                     )
                 ).join('')
             ) +
                 section(
-                    'Размеры',
-                    'Large 56, Medium 48, Small 40, X-Small 24. Иконка-кнопка остаётся кругом того же размера.',
+                    t('button.sections.sizes.title'),
+                    t('button.sections.sizes.description'),
                     SIZES.map((size) =>
                         row(
                             size,
-                            button(`${icon('plus')}Создать набор`, `size="${size}"`) +
-                                button('Отмена', `size="${size}" variant="secondary"`) +
-                                `<demo-button size="${size}" variant="secondary" icon-only as-child><button type="button" aria-label="Настройки">${icon('settings')}</button></demo-button>` +
-                                `<demo-button size="${size}" variant="label" icon-only as-child><button type="button" aria-label="Ещё">${icon('dots-vertical')}</button></demo-button>`
+                            button(`${icon('plus')}${t('common.createASet')}`, `size="${size}"`) +
+                                button(t('common.cancel'), `size="${size}" variant="secondary"`) +
+                                `<demo-button size="${size}" variant="secondary" icon-only as-child><button type="button" aria-label="${t('button.labels.settings')}">${icon('settings')}</button></demo-button>` +
+                                `<demo-button size="${size}" variant="label" icon-only as-child><button type="button" aria-label="${t('button.labels.more')}">${icon('dots-vertical')}</button></demo-button>`
                         )
                     ).join('')
                 ) +
                 section(
-                    'Состояния',
-                    'Загрузка: `aria-busy` и спиннер цвета текста, кнопка недоступна. Ссылка выглядит как кнопка через `as-child`.',
+                    t('button.sections.states.title'),
+                    t('button.sections.states.descriptionWeb'),
                     row(
                         'loading',
-                        `<demo-button as-child><button type="button" aria-busy="true" disabled>${loading}Сохраняю…</button></demo-button>` +
-                            `<demo-button variant="secondary" as-child><button type="button" aria-busy="true" disabled>${loading}Загрузка</button></demo-button>`
+                        `<demo-button as-child><button type="button" aria-busy="true" disabled>${loading}${t('button.content.saving')}</button></demo-button>` +
+                            `<demo-button variant="secondary" as-child><button type="button" aria-busy="true" disabled>${loading}${t('common.loading')}</button></demo-button>`
                     ) +
                         row(
                             'link',
-                            `<demo-button variant="outlined" as-child><a href="#set">Открыть набор${icon('arrow-outward')}</a></demo-button>`
+                            `<demo-button variant="outlined" as-child><a href="#set">${t('common.openTheSet')}${icon('arrow-outward')}</a></demo-button>`
                         )
                 )
         )
@@ -86,20 +85,20 @@ export const Examples: Story = {
     render: () =>
         page(
             section(
-                'В интерфейсе',
-                'Типичные сочетания кнопок из экранов Flippo.',
+                t('button.sections.inAnInterface.title'),
+                t('button.sections.inAnInterface.description'),
                 grid(
                     card(
-                        `<p class="sb-section-text">У вас пока нет наборов. Создайте первый или загрузите из файла.</p><div class="sb-items">${button(`${icon('plus')}Создать набор`)}${button('Загрузить', 'variant="outlined"')}</div>`,
-                        'Пустая коллекция'
+                        `<p class="sb-section-text">${t('button.content.youHaveNoSets')}</p><div class="sb-items">${button(`${icon('plus')}${t('common.createASet')}`)}${button(t('button.content.upload'), 'variant="outlined"')}</div>`,
+                        t('button.content.emptyCollection')
                     ) +
                         card(
-                            `<p class="sb-section-text">Удалить «Экзамен Законы UX» и 7 карточек?</p><div class="sb-items">${button('Отмена', 'variant="label"')}${button(`${icon('delete')}Удалить`, 'variant="danger"')}</div>`,
-                            'Подтверждение'
+                            `<p class="sb-section-text">${t('button.content.deleteUxLawsExam')}</p><div class="sb-items">${button(t('common.cancel'), 'variant="label"')}${button(`${icon('delete')}${t('common.delete')}`, 'variant="danger"')}</div>`,
+                            t('button.content.confirmation')
                         ) +
                         card(
-                            `<div class="sb-items">${button(`${icon('hint')}Доб. подсказку`, 'size="small" variant="secondary"')}${button(`${icon('bookmark')}В готовые`, 'size="small" variant="secondary"')}<demo-button size="small" variant="label" icon-only as-child><button type="button" aria-label="Ещё">${icon('dots-horizontal')}</button></demo-button></div>`,
-                            'Панель карточки'
+                            `<div class="sb-items">${button(`${icon('hint')}${t('button.content.addAHint')}`, 'size="small" variant="secondary"')}${button(`${icon('bookmark')}${t('common.markAsDone')}`, 'size="small" variant="secondary"')}<demo-button size="small" variant="label" icon-only as-child><button type="button" aria-label="${t('button.labels.more')}">${icon('dots-horizontal')}</button></demo-button></div>`,
+                            t('button.content.cardToolbar')
                         ),
                     300
                 )

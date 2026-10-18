@@ -1,0 +1,47 @@
+---
+title: "Темы и размеры"
+description: "define() и <prefix>-provider: тема страницы, свои темы и сетка размеров контролов."
+---
+
+Тема и размер контролов страницы — `define()` и функции, части страницы — `<ui-provider>`.
+
+```ts
+define({ prefix: 'ui', themes: { sepia: 'light' }, storageKey: 'flippo-theme', size: 'medium' });
+
+setTheme('dark');
+const { theme, resolvedTheme, colorScheme } = getTheme();
+subscribeTheme((state) => …);
+setControlSize('small');
+getControlSize(element); // { size: 'small', height: 40 }
+```
+
+```html
+<ui-provider theme="sepia" size="large">…</ui-provider>
+```
+
+## Темы
+
+- `system` (по умолчанию), `light`, `dark` или своя. `setTheme` ставит `data-theme` на `<html>`, `<ui-provider theme>` —
+  на себя (`display: contents`); всплывающие окна в top layer остаются внутри и сохраняют тему.
+- Своя тема — CSS-правило `[data-theme='sepia']`, SCSS-миксином:
+
+```scss
+@use '@flippo-software/component-styles/scss' as fl;
+
+@include fl.theme('sepia', light, $colors: ('bg-1': #f6edd9, 'text-primary': #3b2f1e));
+```
+
+  и регистрация: `registerThemes({ sepia: 'light' })` или `define({ themes })`.
+- Без мигания при загрузке: `storageKey` сохраняет выбор, `<script>${themeScript({ storageKey })}</script>` в `<head>`
+  ставит его на `<html>` до первой отрисовки.
+
+## Сетка размеров
+
+| Размер | Высота строки | Контролы |
+| --- | --- | --- |
+| `small` | 40 | инпуты, селекты, кнопки — эта высота; чекбокс, радио, свитч с подписью, toggle и segmented control добирают её отступами |
+| `medium` | 48 | по умолчанию |
+| `large` | 56 | |
+
+Ряд разных контролов, выровненный по верху, выглядит выровненным по центру. `compact` убирает отступы. В коде:
+`CONTROL_HEIGHTS`, `getControlSize(element)`.

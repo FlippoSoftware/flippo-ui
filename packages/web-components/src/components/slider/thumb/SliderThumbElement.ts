@@ -19,10 +19,24 @@ import { SliderPart } from '../root/SliderRootContext';
  * State attributes: `data-index`, `data-dragging`, `data-orientation`, `data-disabled`.
  */
 export class SliderThumbElement extends SliderPart.withAttributes({
+    /**
+     * The index of the thumb in a range slider: the index of its value in the slider's `value`. Without it, the
+     * position of the thumb among the thumbs.
+     */
     index: 'number',
+    /**
+     * Whether the thumb should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /** The accessible name of the thumb. */
     label: 'string',
+    /** A function which returns a string value for the [`aria-label`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label) attribute of the `input`. */
     getAriaLabel: property<SliderThumbOptions['getAriaLabel']>(),
+    /**
+     * A function which returns a string value for the [`aria-valuetext`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-valuetext) attribute of the `input`.
+     * This is important for screen reader users.
+     */
     getAriaValueText: property<SliderThumbOptions['getAriaValueText']>()
 }) {
     private thumb!: SliderThumbMachine;

@@ -12,7 +12,7 @@ export function mergeObjects<A extends object | undefined, B extends object | un
     if (a || b) {
         return { ...a, ...b };
     }
-    return undefined;
+    return;
 }
 
 type ElementType = React.ElementType;

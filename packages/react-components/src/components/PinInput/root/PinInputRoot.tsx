@@ -181,15 +181,15 @@ export namespace PinInputRoot {
          */
         name?: string;
         /**
-         * The controlled value of the radio item that should be currently selected.
+         * The controlled value of the pin input: the characters entered.
          *
-         * To render an uncontrolled radio group, use the `defaultValue` prop instead.
+         * To render an uncontrolled pin input, use the `defaultValue` prop instead.
          */
         value?: string;
         /**
-         * The uncontrolled value of the radio button that should be initially selected.
+         * The initial value of an uncontrolled pin input.
          *
-         * To render a controlled radio group, use the `value` prop instead.
+         * To render a controlled pin input, use the `value` prop instead.
          */
         defaultValue?: string;
         /**

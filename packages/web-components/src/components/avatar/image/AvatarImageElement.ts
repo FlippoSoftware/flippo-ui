@@ -14,9 +14,13 @@ import { AvatarPart } from '../root/AvatarRootContext';
  * Events: `loading-status-change` (`detail: { status }`: `loading`, `loaded`, `error`).
  */
 export class AvatarImageElement extends AvatarPart.withAttributes({
+    /** The URL of the image. */
     src: 'string',
+    /** The text alternative of the image. */
     alt: 'string',
+    /** The referrer policy of the image request (`referrerpolicy` of an `<img>`). */
     'referrer-policy': 'string',
+    /** The CORS mode of the image request (`crossorigin` of an `<img>`). */
     'cross-origin': ['anonymous', 'use-credentials', '']
 }) {
     private loader!: AvatarImageLoader;

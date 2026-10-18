@@ -22,12 +22,37 @@ import { type CheckboxCardCheckedChangeDetail, CheckboxCardContext } from './Che
  * those of the field.
  */
 export class CheckboxCardElement extends ControlElement.withAttributes({
+    /**
+     * The controlled checked state.
+     * Uncontrolled counterpart: `default-checked`.
+     */
     checked: 'boolean',
+    /**
+     * The initial checked state (uncontrolled).
+     * @default false
+     */
     'default-checked': 'boolean',
+    /**
+     * Whether the checkbox is in an indeterminate (neither checked nor unchecked) state.
+     * @default false
+     */
     indeterminate: 'boolean',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the user must check this before submitting a form.
+     * @default false
+     */
     required: 'boolean',
+    /** Identifies the field when a form is submitted (standalone mode). */
     name: 'string',
+    /**
+     * The value submitted in a CheckboxGroup or form.
+     * Required when used inside CheckboxGroup.
+     */
     value: 'string'
 }) {
     private card!: CheckboxCardMachine;

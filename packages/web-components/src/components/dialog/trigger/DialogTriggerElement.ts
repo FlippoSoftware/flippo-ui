@@ -13,6 +13,10 @@ import { DialogPart } from '../root/DialogRootContext';
  * State attributes: `data-popup-open`, `data-disabled`.
  */
 export class DialogTriggerElement extends DialogPart.withAttributes({
+    /**
+     * Whether the trigger ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private trigger!: DialogTriggerMachine;

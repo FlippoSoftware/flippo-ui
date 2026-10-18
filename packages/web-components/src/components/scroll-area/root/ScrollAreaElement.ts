@@ -18,6 +18,11 @@ import { ScrollAreaContext } from './ScrollAreaRootContext';
  * `data-overflow-y-start`/`-end`.
  */
 export class ScrollAreaElement extends MachineElement.withAttributes({
+    /**
+     * The threshold in pixels that must be passed before the overflow edge attributes are applied.
+     * Accepts a single number for all edges or an object to configure them individually.
+     * @default 0
+     */
     'overflow-edge-threshold': 'number'
 }) {
     private scrollArea!: ScrollAreaMachine;

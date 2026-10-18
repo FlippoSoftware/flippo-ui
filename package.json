@@ -4,7 +4,7 @@
     "type": "module",
     "packageManager": "pnpm@11.24.0",
     "scripts": {
-        "dev": "pnpm --recursive --parallel --filter \"./packages/{store,core-components,react-hooks,react-components,web-components}\" dev",
+        "dev": "pnpm --recursive --parallel --filter \"./packages/{store,react-store,core-components,react-components,web-components}\" dev",
         "build": "pnpm --recursive build",
         "typecheck": "pnpm --recursive typecheck",
         "lint:check": "pnpm --recursive lint:check",
@@ -12,6 +12,7 @@
         "check": "pnpm build && pnpm lint:check && pnpm typecheck && pnpm test",
         "storybook:react": "pnpm --filter @flippo-software/ui-kit-react storybook",
         "storybook:web": "pnpm --filter @flippo-software/ui-kit-web storybook",
+        "docs:build": "pnpm --filter @flippo-software/docs generate && pnpm --filter @flippo-software/docs check",
         "publish-guard": "node tools/publish-guard.mjs"
     }
 }

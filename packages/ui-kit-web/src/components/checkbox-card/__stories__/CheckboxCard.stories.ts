@@ -2,7 +2,7 @@ import { checkboxCard as recipe } from '@flippo-software/component-styles/checkb
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { cardText, grid, page, renderExample, section, variantControls } from '~@stories';
+import { cardText, grid, page, renderExample, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -12,7 +12,7 @@ function option(title: string, text: string, attributes = ''): string {
     return `<demo-checkbox-card ${attributes}><demo-checkbox-card-indicator></demo-checkbox-card-indicator>${cardText(title, text)}</demo-checkbox-card>`;
 }
 
-const markup = option('Подсказки', 'Показывать подсказку под вопросом', 'data-story-target');
+const markup = () => option(t('common.hints'), t('checkboxCard.content.showAHintUnder'), 'data-story-target');
 
 const meta: Meta<Props> = {
     title: 'Forms/CheckboxCard',
@@ -22,13 +22,12 @@ const meta: Meta<Props> = {
         disabled: { control: 'boolean', table: { category: 'Behaviour' } },
         defaultChecked: { control: 'boolean', table: { category: 'Behaviour' } }
     },
-    render: (args: Props) => renderExample(markup, args),
+    render: (args: Props) => renderExample(markup(), args),
     parameters: {
         docs: {
-            source: { code: markup, language: 'html' },
+            source: { code: markup(), language: 'html' },
             description: {
-                component:
-                    'Карточка-чекбокс: вся карточка переключает выбор. Индикатор всегда на месте (`keep-mounted`), меняется только галочка — раскладка не прыгает.'
+                component: 'checkboxCard.descriptionWeb'
             }
         }
     }
@@ -48,32 +47,36 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Положение индикатора',
-                'В начале карточки или в конце, как переключатель настройки.',
+                t('checkboxCard.sections.indicatorPosition.title'),
+                t('checkboxCard.sections.indicatorPosition.description'),
                 grid(
-                    option('Подсказки', 'Показывать подсказку под вопросом', 'default-checked') +
-                        option('Подробности', 'Блок с объяснением после ответа') +
-                        option('Подсказки', 'Показывать подсказку под вопросом', 'indicator-position="end" default-checked') +
-                        option('Подробности', 'Блок с объяснением после ответа', 'indicator-position="end"'),
+                    option(t('common.hints'), t('checkboxCard.content.showAHintUnder'), 'default-checked') +
+                        option(t('checkboxCard.content.details'), t('checkboxCard.content.anExplanationBlockAfter')) +
+                        option(t('common.hints'), t('checkboxCard.content.showAHintUnder'), 'indicator-position="end" default-checked') +
+                        option(
+                            t('checkboxCard.content.details'),
+                            t('checkboxCard.content.anExplanationBlockAfter'),
+                            'indicator-position="end"'
+                        ),
                     300
                 )
             ) +
                 section(
-                    'Недоступна',
-                    'Выбор виден, но не меняется.',
+                    t('checkboxCard.sections.disabled.title'),
+                    t('checkboxCard.sections.disabled.description'),
                     grid(
-                        option('Озвучка', 'Скоро будет доступно', 'disabled') +
-                            option('Синхронизация', 'Включена администратором', 'disabled default-checked'),
+                        option(t('checkboxCard.content.voiceOver'), t('checkboxCard.content.comingSoon'), 'disabled') +
+                            option(t('checkboxCard.content.sync'), t('checkboxCard.content.turnedOnByThe'), 'disabled default-checked'),
                         300
                     )
                 ) +
                 section(
-                    'Группа',
-                    'Несколько карточек в `demo-checkbox-group`: значение — массив выбранных.',
-                    `<demo-checkbox-group aria-label="Блоки карточки">${grid(
-                        option('Подсказки', 'Под вопросом', 'value="hints"') +
-                            option('Подробности', 'После ответа', 'value="details"') +
-                            option('Изображение', 'Над вопросом', 'value="image"'),
+                    t('checkboxCard.sections.group.title'),
+                    t('checkboxCard.sections.group.descriptionWeb'),
+                    `<demo-checkbox-group aria-label="${t('checkboxCard.labels.cardBlocks')}">${grid(
+                        option(t('common.hints'), t('checkboxCard.content.belowTheQuestion'), 'value="hints"') +
+                            option(t('checkboxCard.content.details'), t('checkboxCard.content.afterTheAnswer'), 'value="details"') +
+                            option(t('checkboxCard.content.image'), t('checkboxCard.content.aboveTheQuestion'), 'value="image"'),
                         240
                     )}</demo-checkbox-group>`
                 ),

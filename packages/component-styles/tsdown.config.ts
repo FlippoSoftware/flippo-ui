@@ -14,6 +14,8 @@ export default defineConfig({
         layouts: 'src/layouts/index.ts',
         icons: 'src/icons/index.ts',
         dom: 'src/dom/index.ts',
+        theme: 'src/theme/index.ts',
+        sizes: 'src/sizes/index.ts',
         ...Object.fromEntries(COMPONENTS.map((name) => [name, `src/components/${name}/index.ts`]))
     },
     format: ['esm', 'cjs'],

@@ -2,13 +2,13 @@ import { text as recipe } from '@flippo-software/component-styles/text';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { page, renderExample, row, section, variantControls } from '~@stories';
+import { page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
 type Props = VariantProps<typeof recipe>;
 
-const markup = '<demo-text data-story-target as-child><p>Закон Хика: время решения растёт с числом вариантов.</p></demo-text>';
+const markup = () => `<demo-text data-story-target as-child><p>${t('text.content.hickSLawDecision')}</p></demo-text>`;
 
 const SIZES = [
     'display-1',
@@ -32,13 +32,12 @@ const meta: Meta<Props> = {
     title: 'Typography/Text',
     args: {},
     argTypes: variantControls(recipe),
-    render: (args: Props) => renderExample(markup, args),
+    render: (args: Props) => renderExample(markup(), args),
     parameters: {
         docs: {
-            source: { code: markup, language: 'html' },
+            source: { code: markup(), language: 'html' },
             description: {
-                component:
-                    'Текст по типографической шкале Figma: `size` × `weight` дают класс `fl-text-<size>-<weight>`; цвет, выравнивание, регистр и обрезка — отдельными атрибутами. Нужный тег (`<p>`, `<h2>`) — через `as-child`.'
+                component: 'text.descriptionWeb'
             }
         }
     }
@@ -52,22 +51,26 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Шкала',
-                'Все размеры в весе default.',
-                SIZES.map((size) => row(size, text(`size="${size}" truncate`, 'Экзамен Законы UX'))).join('')
+                t('text.sections.scale.title'),
+                t('text.sections.scale.description'),
+                SIZES.map((size) => row(size, text(`size="${size}" truncate`, t('common.uxLawsExam')))).join('')
             ) +
                 section(
-                    'Насыщенность',
+                    t('text.sections.weight.title'),
                     '',
                     ['weaker', 'default', 'stronger']
-                        .map((weight) => row(weight, text(`size="body-plus" weight="${weight}"`, 'Повторяйте сложные карточки чаще')))
+                        .map((weight) => row(weight, text(`size="body-plus" weight="${weight}"`, t('text.content.reviewHardCardsMore'))))
                         .join('')
                 ) +
-                section('Цвета', '', row('color', COLORS.map((color) => text(`color="${color}"`, color)).join(''))) +
                 section(
-                    'Обрезка',
-                    '`truncate` — одна строка с многоточием.',
-                    `<div class="sb-narrow">${text('truncate style="display: block"', 'JavaScript: замыкания, контекст выполнения, прототипы и цепочка областей видимости')}</div>`
+                    t('text.sections.colours.title'),
+                    '',
+                    row('color', COLORS.map((color) => text(`color="${color}"`, color)).join(''))
+                ) +
+                section(
+                    t('text.sections.truncation.title'),
+                    t('text.sections.truncation.description'),
+                    `<div class="sb-narrow">${text('truncate style="display: block"', t('text.content.javascriptClosuresExecutionContext'))}</div>`
                 )
         )
 };

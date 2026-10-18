@@ -5,7 +5,7 @@ import { kbd as recipe } from '@flippo-software/component-styles/kbd';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Kbd, Text } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -24,7 +24,7 @@ const meta = {
     component: Example,
     args: {},
     argTypes: variantControls(recipe),
-    parameters: { docs: { description: { component: 'Клавиша или сочетание клавиш в подсказках и меню.' } } }
+    parameters: { docs: { description: { component: 'kbd.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -34,7 +34,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Варианты'>
+            <Section title={t('kbd.sections.variants.title')}>
                 {(['outline', 'soft', 'ghost'] as const).map((variant) => (
                     <Row key={variant} label={variant}>
                         <Kbd variant={variant}>Space</Kbd>
@@ -43,7 +43,7 @@ export const Gallery: Story = {
                     </Row>
                 ))}
             </Section>
-            <Section title='Размеры'>
+            <Section title={t('kbd.sections.sizes.title')}>
                 <Row label='size'>
                     {(['1', '2', '3', '4', '5'] as const).map((size) => (
                         <Kbd key={size} size={size}>
@@ -52,9 +52,10 @@ export const Gallery: Story = {
                     ))}
                 </Row>
             </Section>
-            <Section title='Подсказка к повторению'>
+            <Section title={t('kbd.sections.reviewHint.title')}>
                 <Text color='tertiary'>
-                    <Kbd>Space</Kbd> — перевернуть карточку, <Kbd>←</Kbd> — не помню, <Kbd>→</Kbd> — помню.
+                    <Kbd>Space</Kbd> {t('kbd.content.toFlipTheCard')} <Kbd>←</Kbd> {t('kbd.content.iDonTRemember')} <Kbd>→</Kbd>{' '}
+                    {t('kbd.content.iRemember')}
                 </Text>
             </Section>
         </Page>

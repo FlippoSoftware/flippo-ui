@@ -1,6 +1,10 @@
 export { iconMarkup } from '@flippo-software/component-styles/icons';
+export { CONTROL_HEIGHTS, CONTROL_SIZES } from '@flippo-software/component-styles/sizes';
+export { themeScript } from '@flippo-software/component-styles/theme';
 
 export type { IconName } from '@flippo-software/component-styles/icons';
+export type { ControlSize } from '@flippo-software/component-styles/sizes';
+export type { ColorScheme, ThemeName, ThemeSetting, Themes } from '@flippo-software/component-styles/theme';
 
 export {
     AccordionContentElement,
@@ -298,5 +302,16 @@ export {
 } from './components/tooltip';
 export * from './define';
 export { DefaultPropsElement, setDefaultProps } from './lib/defaultProps';
+export {
+    getControlSize,
+    getTheme,
+    ProviderElement,
+    persistTheme,
+    registerThemes,
+    setControlSize,
+    setTheme,
+    subscribeTheme
+} from './lib/provider';
 
 export type { DefaultProps } from './lib/defaultProps';
+export type { ControlSizeState, ThemeState } from './lib/provider';

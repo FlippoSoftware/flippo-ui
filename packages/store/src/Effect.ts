@@ -41,6 +41,7 @@ export type EffectScope = {
  *   wrapped in `scope.run(…)` (`scope` is the argument of `run`).
  *
  * @example
+ * ```ts
  * effect(async (scope) => {
  *     const id = selection.state.id;          // tracked
  *     const item = await load(id);
@@ -48,12 +49,15 @@ export type EffectScope = {
  *         render(item, settings.state.locale); // tracked too
  *     });
  * });
+ * ```
  *
  * @example
+ * ```ts
  * const dispose = effect(() => {
  *     element.hidden = !popup.state.open;
  * });
  * dispose(); // stops re-running
+ * ```
  *
  * @returns A function that stops the effect and runs the last cleanup.
  */

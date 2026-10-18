@@ -9,7 +9,7 @@ import type { MutableRef, Style } from '~@lib/types';
 import { getDrawerDataAttributes } from '../utils/getDrawerDataAttributes';
 import { parseSnapPoint } from '../utils/parseSnapPoint';
 
-import type { DrawerDirection, DrawerPopupDataAttributes, SnapPoint } from '../store/DrawerStore';
+import type { DrawerDirection, DrawerPopupDataAttributeValues, SnapPoint } from '../store/DrawerStore';
 
 import { DrawerGestureCssVars } from './DrawerGestureCssVars';
 
@@ -207,7 +207,7 @@ export class DrawerGesture extends Connectable {
         return this.store.state.isSwiping;
     }
 
-    getDataAttributes(): DrawerPopupDataAttributes {
+    getDataAttributes(): DrawerPopupDataAttributeValues {
         const { snapPoints = [], swipeDirection } = this.options;
         return getDrawerDataAttributes(snapPoints.length > 0, swipeDirection);
     }

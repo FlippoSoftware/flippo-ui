@@ -1,7 +1,6 @@
-import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import { QrCodeOverlayDataAttributes, QrCodeRootDataAttributes } from '@flippo-software/core-components/qr-code';
 
-import { QrCodeOverlayDataAttributes } from '../overlay/QrCodeOverlayDataAttributes';
-import { QrCodeRootDataAttributes } from '../root/QrCodeRootDataAttributes';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 
 import type { QrCodeOverlay } from '../overlay/QrCodeOverlay';
 import type { QrCodeRoot } from '../root/QrCodeRoot';

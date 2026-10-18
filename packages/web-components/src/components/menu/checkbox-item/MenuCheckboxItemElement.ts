@@ -15,8 +15,23 @@ import { MenuCheckableItemContext, type MenuCheckedChangeDetail, MenuItemPart } 
  * State attributes: `data-checked`/`data-unchecked`, `data-highlighted`, `data-disabled`.
  */
 export class MenuCheckboxItemElement extends MenuItemPart.withAttributes({
+    /**
+     * Whether the checkbox item is currently ticked.
+     *
+     * To render an uncontrolled checkbox item, use the `default-checked` attribute instead.
+     */
     checked: 'boolean',
+    /**
+     * Whether the checkbox item is initially ticked.
+     *
+     * To render a controlled checkbox item, use the `checked` attribute instead.
+     * @default false
+     */
     'default-checked': 'boolean',
+    /**
+     * Whether to close the menu when the item is clicked.
+     * @default false
+     */
     'close-on-click': 'boolean'
 }) {
     protected item!: MenuCheckboxItemMachine;

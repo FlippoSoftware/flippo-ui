@@ -1,8 +1,8 @@
 import React from 'react';
 
-import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import { CheckboxRootDataAttributes } from '@flippo-software/core-components/checkbox';
 
-import { CheckboxRootDataAttributes } from '../root/CheckboxRootDataAttributes';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 
 import type { CheckboxRoot } from '../root/CheckboxRoot';
 

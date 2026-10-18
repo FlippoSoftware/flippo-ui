@@ -2,7 +2,7 @@ import { menubar as recipe } from '@flippo-software/component-styles/menubar';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { menuCheckbox, menuItem, menuPopup, page, renderExample, section, separator, variantControls } from '~@stories';
+import { menuCheckbox, menuItem, menuPopup, page, renderExample, section, separator, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -13,16 +13,16 @@ function menu(label: string, items: string): string {
 }
 
 function editorMenus(attributes = ''): string {
-    return `<demo-menubar ${attributes} aria-label="Редактор набора">
+    return `<demo-menubar ${attributes} aria-label="${t('menubar.labels.setEditor')}">
 ${menu(
-    'Набор',
-    menuItem('Новая карточка', { icon: 'plus', end: '⌘N' }) +
-        menuItem('Дублировать набор', { icon: 'copy' }) +
+    t('common.set'),
+    menuItem(t('menubar.content.newCard'), { icon: 'plus', end: '⌘N' }) +
+        menuItem(t('menubar.content.duplicateTheSet'), { icon: 'copy' }) +
         separator +
-        menuItem('Удалить набор', { icon: 'delete', attributes: 'tone="destructive"' })
+        menuItem(t('common.deleteTheSet'), { icon: 'delete', attributes: 'tone="destructive"' })
 )}
-${menu('Вид', menuCheckbox('Показывать подсказки', 'default-checked') + menuCheckbox('Компактные карточки'))}
-${menu('Справка', menuItem('Горячие клавиши') + menuItem('Что нового', { attributes: 'disabled' }))}
+${menu(t('common.view'), menuCheckbox(t('common.showHints'), 'default-checked') + menuCheckbox(t('menubar.content.compactCards')))}
+${menu(t('common.help'), menuItem(t('menubar.content.keyboardShortcuts')) + menuItem(t('menubar.content.whatSNew'), { attributes: 'disabled' }))}
 </demo-menubar>`;
 }
 
@@ -36,7 +36,7 @@ const meta: Meta<Props> = {
     parameters: {
         docs: {
             source: { code: markup, language: 'html' },
-            description: { component: 'Строка меню: открыв одно меню, можно переходить по соседним наведением или стрелками.' }
+            description: { component: 'menubar.description' }
         }
     }
 };
@@ -46,5 +46,5 @@ type Story = StoryObj<Props>;
 export const Default: Story = {};
 
 export const Gallery: Story = {
-    render: () => page(section('Меню редактора', 'Пункты с иконками, сочетаниями клавиш, флажками и опасным действием.', editorMenus()))
+    render: () => page(section(t('menubar.sections.editorMenu.title'), t('menubar.sections.editorMenu.description'), editorMenus()))
 };

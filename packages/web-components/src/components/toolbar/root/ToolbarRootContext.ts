@@ -25,7 +25,15 @@ export abstract class ToolbarPart extends ContextPart<typeof TOOLBAR> {
  * Base of the items: an item of the toolbar's navigation, in the toolbar group around it, if any.
  */
 export abstract class ToolbarItemPart extends ToolbarPart.withAttributes({
+    /**
+     * Whether the item ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the item stays focusable while disabled, so the arrow keys still reach it.
+     * @default true
+     */
     'focusable-when-disabled': 'boolean'
 }) {
     protected group: ToolbarGroupElement | undefined;

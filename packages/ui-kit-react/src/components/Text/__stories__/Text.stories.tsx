@@ -5,7 +5,7 @@ import { text as recipe } from '@flippo-software/component-styles/text';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Text } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -14,7 +14,7 @@ type Props = RecipeVariants<typeof recipe>;
 function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example'>
-            <Text {...args}>Закон Хика: время решения растёт с числом вариантов.</Text>
+            <Text {...args}>{t('text.content.hickSLawDecision')}</Text>
         </div>
     );
 }
@@ -27,8 +27,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Текст по типографической шкале Figma: `size` × `weight` дают класс `fl-text-<size>-<weight>`; цвет, выравнивание, регистр и обрезка — отдельными вариантами.'
+                component: 'text.description'
             }
         }
     }
@@ -57,25 +56,25 @@ const COLORS = ['primary', 'secondary', 'tertiary', 'quaternary', 'disabled', 'b
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Шкала' description='Все размеры в весе default.'>
+            <Section title={t('text.sections.scale.title')} description={t('text.sections.scale.description')}>
                 {SIZES.map((size) => (
                     <Row key={size} label={size}>
                         <Text size={size} truncate={true}>
-                            Экзамен Законы UX
+                            {t('common.uxLawsExam')}
                         </Text>
                     </Row>
                 ))}
             </Section>
-            <Section title='Насыщенность'>
+            <Section title={t('text.sections.weight.title')}>
                 {(['weaker', 'default', 'stronger'] as const).map((weight) => (
                     <Row key={weight} label={weight}>
                         <Text size='body-plus' weight={weight}>
-                            Повторяйте сложные карточки чаще
+                            {t('text.content.reviewHardCardsMore')}
                         </Text>
                     </Row>
                 ))}
             </Section>
-            <Section title='Цвета'>
+            <Section title={t('text.sections.colours.title')}>
                 <Row label='color'>
                     {COLORS.map((color) => (
                         <Text key={color} color={color}>
@@ -84,9 +83,9 @@ export const Gallery: Story = {
                     ))}
                 </Row>
             </Section>
-            <Section title='Обрезка' description='`truncate` — одна строка с многоточием.'>
+            <Section title={t('text.sections.truncation.title')} description={t('text.sections.truncation.description')}>
                 <div className='sb-narrow'>
-                    <Text truncate={true}>JavaScript: замыкания, контекст выполнения, прототипы и цепочка областей видимости</Text>
+                    <Text truncate={true}>{t('text.content.javascriptClosuresExecutionContext')}</Text>
                 </div>
             </Section>
         </Page>

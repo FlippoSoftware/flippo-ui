@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { SegmentedControlMachine } from '@flippo-software/core-components/segmented-control';
+import { SegmentedControlMachine, SegmentedControlRootDataAttributes } from '@flippo-software/core-components/segmented-control';
 import { useIsoLayoutEffect } from '@flippo-software/react-hooks';
 
 import type { SegmentedControlOptions } from '@flippo-software/core-components/segmented-control';
@@ -21,7 +21,6 @@ import { useLabelableContext } from '../../LabelableProvider';
 import type { FieldRoot } from '../../Field/root/FieldRoot';
 
 import { SegmentedControlContext } from './SegmentedControlRootContext';
-import { SegmentedControlRootDataAttributes } from './SegmentedControlRootDataAttributes';
 
 import type { SegmentedControlContextValue } from './SegmentedControlRootContext';
 

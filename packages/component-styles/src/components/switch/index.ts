@@ -6,19 +6,25 @@ import type { VariantsOf } from '@lynstack/class-recipe';
 export const switchRecipe = sva({
     slots: ['root', 'thumb', 'label'],
     base: {
-        root: 'fl-switch-root fl-focus-ring',
+        root: 'fl-switch-root fl-choice-control fl-focus-ring',
         thumb: 'fl-switch-thumb',
         label: 'fl-choice-label fl-text-body-minus-default'
     },
     variants: {
         size: {
-            small: { root: 'fl-switch-root--small' },
+            small: { root: 'fl-switch-root--small', label: 'fl-choice-label--small' },
             medium: {},
-            large: { root: 'fl-switch-root--large' }
+            large: { root: 'fl-switch-root--large', label: 'fl-choice-label--large' }
+        },
+        /** The label is as high as its text, not as a control row (a dense table, a list of options). */
+        compact: {
+            true: { label: 'fl-choice-label--compact' },
+            false: {}
         }
     },
     defaultVariants: {
-        size: 'medium'
+        size: 'medium',
+        compact: false
     }
 });
 

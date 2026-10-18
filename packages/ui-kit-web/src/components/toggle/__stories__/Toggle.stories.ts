@@ -2,7 +2,7 @@ import { toggle as recipe } from '@flippo-software/component-styles/toggle';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { icon, page, renderExample, row, section, variantControls } from '~@stories';
+import { icon, page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -12,8 +12,8 @@ function toggle(content: string, attributes = '', label = ''): string {
     return `<demo-toggle ${attributes} as-child><button type="button"${label ? ` aria-label="${label}"` : ''}>${content}</button></demo-toggle>`;
 }
 
-const markup = `<demo-toggle data-story-target as-child>
-<button type="button" aria-label="Перемешать">${icon('shuffle')}</button>
+const markup = () => `<demo-toggle data-story-target as-child>
+<button type="button" aria-label="${t('common.shuffle')}">${icon('shuffle')}</button>
 </demo-toggle>`;
 
 const meta: Meta<Props> = {
@@ -24,13 +24,12 @@ const meta: Meta<Props> = {
         disabled: { control: 'boolean', table: { category: 'Behaviour' } },
         defaultPressed: { control: 'boolean', table: { category: 'Behaviour' } }
     },
-    render: (args: Props) => renderExample(markup, args),
+    render: (args: Props) => renderExample(markup(), args),
     parameters: {
         docs: {
-            source: { code: markup, language: 'html' },
+            source: { code: markup(), language: 'html' },
             description: {
-                component:
-                    'Переключатель (Figma "Toggle"): иконка 40×40 или пилюля с подписью. Включённое состояние — `data-pressed`: иконка и контур в цвете бренда.'
+                component: 'toggle.description'
             }
         }
     }
@@ -44,29 +43,29 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Иконка',
-                'Выключен, включён и недоступен; размеры 32 / 40 / 48.',
+                t('toggle.sections.icon.title'),
+                t('toggle.sections.icon.description'),
                 (['small', 'medium', 'large'] as const)
                     .map((size) =>
                         row(
                             size,
-                            toggle(icon('shuffle'), `size="${size}"`, 'Перемешать') +
-                                toggle(icon('shuffle'), `size="${size}" default-pressed`, 'Перемешать') +
-                                toggle(icon('favorite'), `size="${size}"`, 'В избранное') +
-                                toggle(icon('shuffle'), `size="${size}" disabled`, 'Перемешать') +
-                                toggle(icon('shuffle'), `size="${size}" disabled default-pressed`, 'Перемешать')
+                            toggle(icon('shuffle'), `size="${size}"`, t('common.shuffle')) +
+                                toggle(icon('shuffle'), `size="${size}" default-pressed`, t('common.shuffle')) +
+                                toggle(icon('favorite'), `size="${size}"`, t('toggle.content.addToFavourites')) +
+                                toggle(icon('shuffle'), `size="${size}" disabled`, t('common.shuffle')) +
+                                toggle(icon('shuffle'), `size="${size}" disabled default-pressed`, t('common.shuffle'))
                         )
                     )
                     .join('')
             ) +
                 section(
-                    'С подписью',
-                    'Пилюля: выключенная — заливка, включённая — контур в цвете бренда.',
+                    t('toggle.sections.labeled.title'),
+                    t('toggle.sections.labeled.description'),
                     row(
                         'off / on',
                         toggle(`${icon('shuffle')}Off`, 'variant="labeled"') +
                             toggle(`${icon('shuffle')}On`, 'variant="labeled" default-pressed') +
-                            toggle(`${icon('hint')}Подсказки`, 'variant="labeled" default-pressed')
+                            toggle(`${icon('hint')}${t('common.hints')}`, 'variant="labeled" default-pressed')
                     ) +
                         row(
                             'disabled',

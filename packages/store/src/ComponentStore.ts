@@ -33,9 +33,9 @@ export class ComponentStore<
     private readonly selectors: Selectors | undefined;
 
     /**
-     * @param state Initial state of the store.
-     * @param context Non-reactive context values.
-     * @param selectors Optional named selectors.
+     * @param state - Initial state of the store.
+     * @param context - Non-reactive context values.
+     * @param selectors - Optional named selectors.
      */
     constructor(
         state: State,
@@ -63,7 +63,7 @@ export class ComponentStore<
     /**
      * Gets the current value from the store using a selector with the provided key.
      *
-     * @param key Key of the selector to use.
+     * @param key - Key of the selector to use.
      */
     public select = ((key: keyof Selectors, ...args: unknown[]) => {
         return this.getSelector(key)(this.state, ...args);
@@ -187,8 +187,8 @@ export class ComponentStore<
      * Observes changes of a value derived from the store and calls the listener when it changes.
      * The listener is called immediately with the current value.
      *
-     * @param selector Key of a registered selector or a selector function.
-     * @param listener Listener called with the new and the previous value.
+     * @param selector - Key of a registered selector or a selector function.
+     * @param listener - Listener called with the new and the previous value.
      * @returns A function to stop observing.
      */
     public observe<Key extends keyof Selectors>(

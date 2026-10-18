@@ -2,7 +2,7 @@ import { toggleGroup as recipe } from '@flippo-software/component-styles/toggle-
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { icon, page, renderExample, row, section, variantControls } from '~@stories';
+import { icon, page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -13,11 +13,11 @@ function item(value: string, content: string, attributes = '', label = ''): stri
 }
 
 function formatting(attributes = ''): string {
-    return `<demo-toggle-group ${attributes} multiple default-value="bold" aria-label="Форматирование текста">
-${item('bold', icon('format-bold'), '', 'Жирный')}
-${item('italic', icon('format-italic'), '', 'Курсив')}
-${item('underline', icon('format-underline'), '', 'Подчёркнутый')}
-${item('list', icon('format-list-ul'), '', 'Список')}
+    return `<demo-toggle-group ${attributes} multiple default-value="bold" aria-label="${t('toggleGroup.labels.textFormatting')}">
+${item('bold', icon('format-bold'), '', t('common.bold'))}
+${item('italic', icon('format-italic'), '', t('common.italic'))}
+${item('underline', icon('format-underline'), '', t('common.underlined'))}
+${item('list', icon('format-list-ul'), '', t('common.list'))}
 </demo-toggle-group>`;
 }
 
@@ -32,8 +32,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component:
-                    'Группа переключателей: несколько независимых (`multiple`) или один из нескольких; `contained` добавляет подложку. `default-value` — значения через пробел.'
+                component: 'toggleGroup.descriptionWeb'
             }
         }
     }
@@ -47,16 +46,16 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Оформление',
-                'Без подложки — в панелях инструментов; с подложкой — отдельно стоящая группа.',
+                t('toggleGroup.sections.look.title'),
+                t('toggleGroup.sections.look.description'),
                 row('plain', formatting()) + row('contained', formatting('contained')) + row('disabled', formatting('contained disabled'))
             ) +
                 section(
-                    'Один из нескольких',
-                    'Без `multiple` нажатие выбирает один вариант, как переключатель вида.',
+                    t('toggleGroup.sections.oneOfSeveral.title'),
+                    t('toggleGroup.sections.oneOfSeveral.description'),
                     row(
                         'single',
-                        `<demo-toggle-group contained default-value="list" aria-label="Вид коллекции">${item('list', `${icon('format-list-ul')}Список`, 'variant="labeled"')}${item('cards', `${icon('set')}Карточки`, 'variant="labeled"')}</demo-toggle-group>`
+                        `<demo-toggle-group contained default-value="list" aria-label="${t('toggleGroup.labels.collectionView')}">${item('list', `${icon('format-list-ul')}${t('common.list')}`, 'variant="labeled"')}${item('cards', `${icon('set')}${t('common.cards')}`, 'variant="labeled"')}</demo-toggle-group>`
                     )
                 )
         )

@@ -17,8 +17,22 @@ import { MenuRadioGroupContext, type MenuValueChangeDetail } from '../root/MenuR
  * State attributes: `data-disabled`.
  */
 export class MenuRadioGroupElement extends MachineElement.withAttributes({
+    /**
+     * The controlled value of the radio item that should be currently selected.
+     *
+     * To render an uncontrolled radio group, use the `default-value` attribute instead.
+     */
     value: 'string',
+    /**
+     * The uncontrolled value of the radio item that should be initially selected.
+     *
+     * To render a controlled radio group, use the `value` attribute instead.
+     */
     'default-value': 'string',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private group!: MenuRadioGroupMachine;

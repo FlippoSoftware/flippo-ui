@@ -21,18 +21,21 @@
     "scripts": {
         "build": "tsdown",
         "dev": "tsdown --watch",
-        "lint:check": "biome check",
+        "lint:check": "biome check && api-extractor run",
         "lint:fix": "biome lint --fix && biome format --fix",
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit",
-        "prepublishOnly": "pnpm --workspace-root run publish-guard && pnpm build"
+        "prepublishOnly": "pnpm --workspace-root run publish-guard && pnpm build",
+        "api:report": "api-extractor run --local",
+        "api:check": "api-extractor run"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@flippo-software/biome": "catalog:",
         "@flippo-software/tsconfig": "catalog:",
+        "@microsoft/api-extractor": "^7.59.4",
         "@vitest/coverage-v8": "^5.0.3",
         "tsdown": "catalog:",
         "typescript": "catalog:",

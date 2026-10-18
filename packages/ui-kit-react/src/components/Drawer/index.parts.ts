@@ -3,6 +3,7 @@ import { drawer as recipe } from '@flippo-software/component-styles/drawer';
 import { Drawer as Primitive } from '@flippo-software/react-components/drawer';
 
 import { icon } from '~@lib/Icon';
+import { themedPortal } from '~@lib/Provider';
 import { createStyler } from '~@lib/Styled';
 
 import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
@@ -21,7 +22,7 @@ export const Description: StyledComponent<typeof Primitive.Description, typeof r
 );
 export const Drag: StyledComponent<typeof Primitive.Drag, typeof recipe> = styled(Primitive.Drag, 'drag', false);
 export const Popup: StyledComponent<typeof Primitive.Popup, typeof recipe> = styled(Primitive.Popup, 'popup', false);
-export const Portal: typeof Primitive.Portal = Primitive.Portal;
+export const Portal: typeof Primitive.Portal = themedPortal(Primitive.Portal) as typeof Primitive.Portal;
 export const Root: StyledComponent<typeof Primitive.Root, typeof recipe> = styled(Primitive.Root, 'root', true);
 export const Title: StyledComponent<typeof Primitive.Title, typeof recipe> = styled(Primitive.Title, 'title', false);
 export const Trigger: typeof Primitive.Trigger = Primitive.Trigger;

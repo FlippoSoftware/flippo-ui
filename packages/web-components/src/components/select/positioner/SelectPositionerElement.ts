@@ -23,15 +23,60 @@ import { SelectPart, SelectPositionerContext } from '../root/SelectRootContext';
  * `data-anchor-hidden`.
  */
 export class SelectPositionerElement extends SelectPart.withAttributes({
+    /**
+     * Whether the positioner overlaps the trigger so the selected item's text is aligned with the trigger's value text.
+     * This only applies to mouse input and is automatically disabled if there is not enough space.
+     * @default true
+     */
     'align-item-with-trigger': 'boolean',
+    /**
+     * Which side of the anchor element to align the popup against.
+     * May automatically change to avoid collisions.
+     * @default 'bottom'
+     */
     side: ['top', 'bottom', 'left', 'right', 'inline-start', 'inline-end'],
+    /**
+     * How to align the popup relative to the specified side.
+     * @default 'center'
+     */
     align: ['start', 'center', 'end'],
+    /**
+     * Distance between the anchor and the popup in pixels.
+     * @default 0
+     */
     'side-offset': 'number',
+    /**
+     * Additional offset along the alignment axis in pixels.
+     * @default 0
+     */
     'align-offset': 'number',
+    /**
+     * Additional space to maintain from the edge of the collision boundary.
+     * @default 5
+     */
     'collision-padding': 'number',
+    /**
+     * Minimum distance to maintain between the arrow and the edges of the popup.
+     *
+     * Use it to prevent the arrow element from hanging out of the rounded corners of a popup.
+     * @default 5
+     */
     'arrow-padding': 'number',
+    /**
+     * Whether to maintain the popup in the viewport after
+     * the anchor element was scrolled out of view.
+     * @default false
+     */
     sticky: 'boolean',
+    /**
+     * Determines which CSS `position` property to use.
+     * @default 'fixed'
+     */
     'position-method': ['fixed', 'absolute'],
+    /**
+     * Whether to disable the popup from tracking any layout shift of its positioning anchor.
+     * @default false
+     */
     'disable-anchor-tracking': 'boolean'
 }) {
     private positionerMachine!: SelectPositionerMachine;

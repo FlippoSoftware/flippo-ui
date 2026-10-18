@@ -6,7 +6,7 @@ import type { IconName } from '@flippo-software/component-styles/icons';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Icon, Tooltip } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -35,7 +35,7 @@ function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example'>
             <Tooltip.Provider>
-                <Hint {...args} icon='shuffle' text='Перемешать карточки' />
+                <Hint {...args} icon='shuffle' text={t('tooltip.content.shuffleCards')} />
             </Tooltip.Provider>
         </div>
     );
@@ -49,8 +49,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Подсказка (Figma "Tooltip") при наведении и фокусе. Внутри `Tooltip.Provider` соседние подсказки открываются сразу, без повторной задержки.'
+                component: 'tooltip.description'
             }
         }
     }
@@ -63,26 +62,23 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section
-                title='Панель действий'
-                description='Проведите курсором по кнопкам: после первой подсказки остальные появляются без задержки.'
-            >
+            <Section title={t('tooltip.sections.actionBar.title')} description={t('tooltip.sections.actionBar.description')}>
                 <Tooltip.Provider>
                     <Row label='toolbar'>
-                        <Hint icon='shuffle' text='Перемешать' />
-                        <Hint icon='hint' text='Подсказка' />
-                        <Hint icon='bookmark' text='В готовые' />
-                        <Hint icon='delete' text='Удалить' />
+                        <Hint icon='shuffle' text={t('common.shuffle')} />
+                        <Hint icon='hint' text={t('common.hint')} />
+                        <Hint icon='bookmark' text={t('common.markAsDone')} />
+                        <Hint icon='delete' text={t('common.delete')} />
                     </Row>
                 </Tooltip.Provider>
             </Section>
-            <Section title='Стороны' description='Сверху, снизу, слева и справа от триггера.'>
+            <Section title={t('tooltip.sections.sides.title')} description={t('tooltip.sections.sides.description')}>
                 <Tooltip.Provider>
                     <Row label='side'>
-                        <Hint icon='chevron-up' text='Сверху' side='top' />
-                        <Hint icon='chevron-down' text='Снизу' side='bottom' />
-                        <Hint icon='chevron-left' text='Слева' side='left' />
-                        <Hint icon='chevron-right' text='Справа' side='right' />
+                        <Hint icon='chevron-up' text={t('common.top')} side='top' />
+                        <Hint icon='chevron-down' text={t('common.bottom')} side='bottom' />
+                        <Hint icon='chevron-left' text={t('common.left')} side='left' />
+                        <Hint icon='chevron-right' text={t('common.right')} side='right' />
                     </Row>
                 </Tooltip.Provider>
             </Section>

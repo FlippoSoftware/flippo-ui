@@ -2,7 +2,7 @@ import { contextMenu as recipe } from '@flippo-software/component-styles/context
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { icon, page, renderExample, section, variantControls } from '~@stories';
+import { icon, page, renderExample, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -15,14 +15,14 @@ function item(label: string, name: Parameters<typeof icon>[0], attributes = ''):
 function setCard(attributes = ''): string {
     return `<demo-context-menu ${attributes}>
 <demo-context-menu-trigger class="sb-card" style="cursor: context-menu">
-<span class="sb-caption" style="display: flex; align-items: center; gap: 6px; color: var(--fl-color-set)">${icon('set')}32 карточки</span>
-<strong>Экзамен Законы UX</strong>
-<span class="sb-caption">Нажмите правой кнопкой мыши или долго удерживайте</span>
+<span class="sb-caption" style="display: flex; align-items: center; gap: 6px; color: var(--fl-color-set)">${icon('set')}${t('contextMenu.content.32Cards')}</span>
+<strong>${t('common.uxLawsExam')}</strong>
+<span class="sb-caption">${t('contextMenu.content.rightClickOrLong')}</span>
 </demo-context-menu-trigger>
 <demo-context-menu-positioner><demo-context-menu-popup>
-${item('Открыть', 'preview')}${item('Переименовать', 'pencil')}${item('Скопировать ссылку', 'link')}
+${item(t('contextMenu.content.open'), 'preview')}${item(t('common.rename'), 'pencil')}${item(t('contextMenu.content.copyTheLink'), 'link')}
 <demo-context-menu-separator></demo-context-menu-separator>
-${item('Удалить набор', 'delete', 'tone="destructive"')}
+${item(t('common.deleteTheSet'), 'delete', 'tone="destructive"')}
 </demo-context-menu-popup></demo-context-menu-positioner>
 </demo-context-menu>`;
 }
@@ -37,7 +37,7 @@ const meta: Meta<Props> = {
     parameters: {
         docs: {
             source: { code: markup, language: 'html' },
-            description: { component: 'Контекстное меню: открывается у курсора по правой кнопке мыши или долгому касанию.' }
+            description: { component: 'contextMenu.description' }
         }
     }
 };
@@ -48,5 +48,11 @@ export const Default: Story = {};
 
 export const Gallery: Story = {
     render: () =>
-        page(section('Карточка набора', 'Меню действий набора на правой кнопке мыши.', `<div class="sb-narrow">${setCard()}</div>`))
+        page(
+            section(
+                t('contextMenu.sections.setCard.title'),
+                t('contextMenu.sections.setCard.description'),
+                `<div class="sb-narrow">${setCard()}</div>`
+            )
+        )
 };

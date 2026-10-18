@@ -1,3 +1,4 @@
+import { t } from '@flippo-software/workspace-tools/storybook/i18n';
 /**
  * Markup of the choice controls shared by their stories: a `<label>` (the styled label part, `as-child`) around the
  * control and its text, so a press on the text toggles the control.
@@ -28,10 +29,10 @@ export function textInput(
     inputAttributes = '',
     options: { icon?: boolean; clear?: boolean; control?: string } = {}
 ): string {
-    return `<demo-input ${attributes}>${options.icon ? '<demo-input-icon aria-hidden="true"></demo-input-icon>' : ''}<demo-input-control ${options.control ?? ''} as-child><input ${inputAttributes}/></demo-input-control>${options.clear ? '<demo-input-clear aria-label="Очистить"></demo-input-clear>' : ''}</demo-input>`;
+    return `<demo-input ${attributes}>${options.icon ? '<demo-input-icon aria-hidden="true"></demo-input-icon>' : ''}<demo-input-control ${options.control ?? ''} as-child><input ${inputAttributes}/></demo-input-control>${options.clear ? `<demo-input-clear aria-label="${t('common.clear')}"></demo-input-clear>` : ''}</demo-input>`;
 }
 
 /** A search box: icon, input and clear button. */
 export function search(attributes = '', control = '', inputAttributes = ''): string {
-    return textInput(attributes, `aria-label="Поиск" placeholder="Поиск" ${inputAttributes}`, { icon: true, clear: true, control });
+    return textInput(attributes, `${t('storyKit.content.searchSearch')} ${inputAttributes}`, { icon: true, clear: true, control });
 }

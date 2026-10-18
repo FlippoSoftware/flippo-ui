@@ -5,7 +5,7 @@ import { card as recipe } from '@flippo-software/component-styles/card';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Avatar, Button, Card, Icon, Progress } from '~@src';
-import { Grid, Page, Section, variantControls } from '~@stories';
+import { Grid, Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -18,10 +18,10 @@ function SetCard(props: Props & { title: string; count: number; learned: number 
             <Card.Content>
                 <span className='sb-caption' style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--fl-color-set)' }}>
                     <Icon name='set' />
-                    {count} карточек
+                    {count} {t('card.content.cards')}
                 </span>
                 <Card.Title>{title}</Card.Title>
-                <Progress.Root value={Math.round((learned / count) * 100)} aria-label='Выучено'>
+                <Progress.Root value={Math.round((learned / count) * 100)} aria-label={t('card.labels.learned')}>
                     <Progress.Track>
                         <Progress.Indicator />
                     </Progress.Track>
@@ -29,12 +29,12 @@ function SetCard(props: Props & { title: string; count: number; learned: number 
             </Card.Content>
             <Card.Footer>
                 <Avatar.Root size='x-small'>
-                    <Avatar.Fallback>ЕГ</Avatar.Fallback>
+                    <Avatar.Fallback>{t('common.eg')}</Avatar.Fallback>
                 </Avatar.Root>
                 <span className='sb-caption' style={{ flex: 1 }}>
-                    {learned} из {count} выучено
+                    {learned} {t('card.content.of')} {count} {t('card.content.learned')}
                 </span>
-                <Button size='small'>Учить</Button>
+                <Button size='small'>{t('card.content.study')}</Button>
             </Card.Footer>
         </Card.Root>
     );
@@ -45,15 +45,16 @@ function Example(args: Props): React.JSX.Element {
         <div className='story-example sb-narrow'>
             <Card.Root {...args}>
                 <Card.Content>
-                    <Card.Title>Совместная работа</Card.Title>
-                    <Card.Description>Пригласите друзей в набор: каждый добавит свои карточки, а повторять будете вместе.</Card.Description>
+                    <Card.Title>{t('card.content.collaboration')}</Card.Title>
+                    <Card.Description>{t('card.content.inviteFriendsToThe')}</Card.Description>
                 </Card.Content>
                 <Card.Footer>
                     <Button>
                         <Icon name='person-add' />
-                        Пригласить
+
+                        {t('common.invite')}
                     </Button>
-                    <Button variant='label'>Позже</Button>
+                    <Button variant='label'>{t('card.content.later')}</Button>
                 </Card.Footer>
             </Card.Root>
         </div>
@@ -68,8 +69,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Карточка: поверхность `bg-1` с тонкой рамкой; блок содержимого и подвал с действиями. Рамка светлеет при наведении.'
+                component: 'card.description'
             }
         }
     }
@@ -82,14 +82,14 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Призыв к действию' description='Заголовок, описание и кнопки в подвале.'>
+            <Section title={t('card.sections.callToAction.title')} description={t('card.sections.callToAction.description')}>
                 <Example />
             </Section>
-            <Section title='Сетка наборов' description='Одинаковые отступы и подвал прижат к низу при разной высоте заголовков.'>
+            <Section title={t('card.sections.gridOfSets.title')} description={t('card.sections.gridOfSets.description')}>
                 <Grid min={240}>
-                    <SetCard title='Экзамен Законы UX' count={32} learned={20} />
-                    <SetCard title='JavaScript: замыкания, контекст и прототипы' count={18} learned={4} />
-                    <SetCard title='Английский B2' count={120} learned={120} />
+                    <SetCard title={t('common.uxLawsExam')} count={32} learned={20} />
+                    <SetCard title={t('card.labels.javascriptClosuresContextAnd')} count={18} learned={4} />
+                    <SetCard title={t('common.englishB2')} count={120} learned={120} />
                 </Grid>
             </Section>
         </Page>

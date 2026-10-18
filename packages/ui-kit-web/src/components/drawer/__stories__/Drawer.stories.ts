@@ -2,22 +2,22 @@ import { drawer as recipe } from '@flippo-software/component-styles/drawer';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { icon, page, renderExample, row, section, toggleSwitch, triggerButton, variantControls } from '~@stories';
+import { icon, page, renderExample, row, section, t, toggleSwitch, triggerButton, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
 type Props = VariantProps<typeof recipe> & { direction?: 'down' | 'up' | 'left' | 'right' };
 
-function settings(attributes = '', label = 'Настройки повторения'): string {
+function settings(attributes = '', label = t('drawer.content.reviewSettings')): string {
     return `<demo-drawer ${attributes}>
 <demo-drawer-trigger as-child>${triggerButton(`${icon('settings')}${label}`, { variant: 'secondary' })}</demo-drawer-trigger>
 <demo-drawer-backdrop></demo-drawer-backdrop>
 <demo-drawer-popup>
 <demo-drawer-drag></demo-drawer-drag>
-<demo-drawer-title>Настройки повторения</demo-drawer-title>
-<demo-drawer-description>Потяните или нажмите Escape, чтобы закрыть.</demo-drawer-description>
-<div class="sb-items sb-items--column">${toggleSwitch('Перемешивать карточки', 'default-checked')}${toggleSwitch('Показывать подсказки')}${toggleSwitch('Повторять сложные чаще', 'default-checked')}</div>
-<demo-drawer-actions><demo-drawer-close as-child>${triggerButton('Готово')}</demo-drawer-close></demo-drawer-actions>
+<demo-drawer-title>${t('drawer.content.reviewSettings')}</demo-drawer-title>
+<demo-drawer-description>${t('drawer.content.pullOrPressEscape')}</demo-drawer-description>
+<div class="sb-items sb-items--column">${toggleSwitch(t('common.shuffleTheCards'), 'default-checked')}${toggleSwitch(t('common.showHints'))}${toggleSwitch(t('drawer.content.reviewHardOnesMore'), 'default-checked')}</div>
+<demo-drawer-actions><demo-drawer-close as-child>${triggerButton(t('drawer.content.done'))}</demo-drawer-close></demo-drawer-actions>
 </demo-drawer-popup>
 </demo-drawer>`;
 }
@@ -36,7 +36,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component: 'Выезжающая панель: снизу на телефоне или сбоку на компьютере; следует за жестом и закрывается свайпом.'
+                component: 'drawer.description'
             }
         }
     }
@@ -50,12 +50,12 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Направления',
-                'С какой стороны выезжает панель и куда её можно смахнуть.',
-                row('down', settings('direction="down"', 'Снизу')) +
-                    row('up', settings('direction="up"', 'Сверху')) +
-                    row('right', settings('direction="right"', 'Справа')) +
-                    row('left', settings('direction="left"', 'Слева'))
+                t('drawer.sections.directions.title'),
+                t('drawer.sections.directions.description'),
+                row('down', settings('direction="down"', t('common.bottom'))) +
+                    row('up', settings('direction="up"', t('common.top'))) +
+                    row('right', settings('direction="right"', t('common.right'))) +
+                    row('left', settings('direction="left"', t('common.left')))
             )
         )
 };

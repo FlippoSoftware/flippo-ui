@@ -1,9 +1,9 @@
+import { AccordionItemDataAttributes } from '@flippo-software/core-components/accordion';
+
 import { collapsibleOpenStateMapping } from '~@lib/collapsibleOpenStateMapping';
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
 import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
-
-import { AccordionItemDataAttributes } from './AccordionItemDataAttributes';
 
 import type { AccordionItem } from './AccordionItem';
 

@@ -51,6 +51,7 @@ export abstract class NumberFieldPart extends ContextPart<typeof NUMBER_FIELD_RO
  * Base of the buttons that step the value; holding them repeats.
  */
 export abstract class NumberFieldButtonPart extends NumberFieldPart.withAttributes({
+    /** Whether the button ignores user interaction (the number field’s `disabled` by default). */
     disabled: 'boolean'
 }) {
     private stepper!: NumberFieldButtonMachine;

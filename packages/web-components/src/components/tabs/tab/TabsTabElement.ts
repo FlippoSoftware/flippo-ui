@@ -14,7 +14,15 @@ import { TabsListPart } from '../root/TabsRootContext';
  * State attributes: `data-active`, `data-disabled`, `data-orientation`.
  */
 export class TabsTabElement extends TabsListPart.withAttributes({
+    /**
+     * The value of the Tab.
+     * When not specified, the value is the child position index.
+     */
     value: 'string',
+    /**
+     * Whether the tab ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private tab!: TabsTabMachine;

@@ -1,7 +1,8 @@
-// Size, shape, elevation and motion tokens.
+//// Size, shape, elevation and motion tokens.
+//// @group scale
 
-// `--fl-spacing-<step>`: a 4px grid (`Scale/spacing` in Figma counts in 16px units: 0,75 = 12px = step 3).
-// Half steps are spelled with a dash: `1-5` = 6px.
+/// `--fl-spacing-<step>`: a 4px grid (`Scale/spacing` in Figma counts in 16px units: 0,75 = 12px = step 3).
+/// Half steps are spelled with a dash: `1-5` = 6px.
 $spacing: (
     '24': 96px,
     '0': 0,
@@ -27,7 +28,7 @@ $spacing: (
     '20': 80px
 );
 
-// `--fl-radius-<name>`: the scale, then the radii Figma names by role (`radius/card`, `radius/popup`…).
+/// `--fl-radius-<name>`: the scale, then the radii Figma names by role (`radius/card`, `radius/popup`…).
 $radius: (
     'none': 0,
     'xs': 4px,
@@ -45,7 +46,7 @@ $radius: (
     'control': 1000px
 );
 
-// `--fl-size-<name>`: control heights shared by buttons, inputs and tabs (Large 56, Medium 48, Small 40, X-Small 24).
+/// `--fl-size-<name>`: control heights shared by buttons, inputs and tabs (Large 56, Medium 48, Small 40, X-Small 24).
 $sizes: (
     'x-small': 24px,
     'small': 40px,
@@ -53,7 +54,7 @@ $sizes: (
     'large': 56px
 );
 
-// `--fl-border-width-<name>`.
+/// `--fl-border-width-<name>`.
 $border-width: (
     'thin': 1px,
     'default': 1.5px,
@@ -61,14 +62,14 @@ $border-width: (
     'focus': 3px
 );
 
-// `--fl-shadow-<name>`; the colours come from the `shadow` semantic tokens, so they follow the theme.
+/// `--fl-shadow-<name>`; the colours come from the `shadow` semantic tokens, so they follow the theme.
 $shadow: (
     'popup': (0 10px 40px 14px var(--fl-color-shadow)),
     'modal': (0 40px 104px 14px var(--fl-color-shadow-strong)),
     'raised': (0 2px 8px 0 var(--fl-color-shadow))
 );
 
-// `--fl-duration-<name>` and `--fl-ease-<name>`.
+/// Durations of the transitions: `--fl-duration-<name>`.
 $duration: (
     'instant': 0ms,
     'fast': 150ms,
@@ -77,6 +78,7 @@ $duration: (
     'slower': 500ms
 );
 
+/// Easing curves: `--fl-ease-<name>`.
 $ease: (
     'standard': cubic-bezier(0.2, 0, 0, 1),
     'out': cubic-bezier(0.22, 1, 0.36, 1),
@@ -84,7 +86,7 @@ $ease: (
     'emphasized': cubic-bezier(0.32, 0.72, 0, 1)
 );
 
-// `--fl-z-<layer>` for stacks that do not use the top layer (portals of the React components).
+/// `--fl-z-<layer>` for stacks that do not use the top layer (portals of the React components).
 $z-index: (
     'dropdown': 100,
     'sticky': 200,
@@ -93,7 +95,7 @@ $z-index: (
     'tooltip': 500
 );
 
-// Focus ring defaults: `--fl-focus-width`, `--fl-focus-offset` (the colour is `--fl-focus-color`).
+/// Focus ring defaults: `--fl-focus-width`, `--fl-focus-offset` (the colour is `--fl-focus-color`).
 $focus: (
     'width': 2px,
     'offset': 2px

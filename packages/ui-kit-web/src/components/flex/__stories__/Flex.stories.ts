@@ -2,7 +2,7 @@ import { flex as recipe } from '@flippo-software/component-styles/flex';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { page, renderExample, resizable, resizableSection, row, variantControls } from '~@stories';
+import { page, renderExample, resizable, resizableSection, row, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -21,7 +21,7 @@ const meta: Meta<Props> = {
     parameters: {
         docs: {
             source: { code: markup, language: 'html' },
-            description: { component: 'Флекс-контейнер: `direction`, `gap`, `align`, `justify`, `wrap` атрибутами.' }
+            description: { component: 'flex.descriptionWeb' }
         }
     }
 };
@@ -34,14 +34,14 @@ export const Gallery: Story = {
     render: () =>
         page(
             resizableSection(
-                'Направление',
+                t('flex.sections.direction.title'),
                 '',
                 row('row', `<demo-flex gap="8px">${tiles()}</demo-flex>`) +
                     row('column', `<demo-flex direction="column" gap="8px">${tiles()}</demo-flex>`)
             ) +
                 resizableSection(
-                    'Распределение',
-                    '`justify` вдоль оси на всю ширину.',
+                    t('flex.sections.distribution.title'),
+                    t('flex.sections.distribution.description'),
                     ['flex-start', 'center', 'space-between', 'flex-end']
                         .map((justify) =>
                             row(justify, `<demo-flex justify="${justify}" gap="8px" width="100%">${tiles()}</demo-flex>`, { fill: true })
@@ -49,8 +49,8 @@ export const Gallery: Story = {
                         .join('')
                 ) +
                 resizableSection(
-                    'Перенос',
-                    '`wrap="wrap"` — элементы переходят на новую строку.',
+                    t('flex.sections.wrapping.title'),
+                    t('flex.sections.wrapping.description'),
                     `<demo-flex wrap="wrap" gap="8px" max-width="320px">${tiles(9)}</demo-flex>`
                 )
         )

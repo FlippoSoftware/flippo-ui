@@ -2,7 +2,7 @@ import { toolbar as recipe } from '@flippo-software/component-styles/toolbar';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { icon, page, renderExample, section, variantControls } from '~@stories';
+import { icon, page, renderExample, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -19,12 +19,12 @@ function toggle(value: string, name: 'format-bold' | 'format-italic' | 'format-u
 const separator = '<demo-toolbar-separator></demo-toolbar-separator>';
 
 function editor(attributes = ''): string {
-    return `<demo-toolbar ${attributes} aria-label="Форматирование карточки">
-<demo-toggle-group multiple aria-label="Начертание">${toggle('bold', 'format-bold', 'Жирный')}${toggle('italic', 'format-italic', 'Курсив')}${toggle('underline', 'format-underline', 'Подчёркнутый')}</demo-toggle-group>
+    return `<demo-toolbar ${attributes} aria-label="${t('toolbar.labels.cardFormatting')}">
+<demo-toggle-group multiple aria-label="${t('toolbar.labels.style')}">${toggle('bold', 'format-bold', t('common.bold'))}${toggle('italic', 'format-italic', t('common.italic'))}${toggle('underline', 'format-underline', t('common.underlined'))}</demo-toggle-group>
 ${separator}
-<demo-toolbar-group aria-label="Блоки">${toolButton(`${icon('hint')}Подсказка`)}${toolButton(`${icon('format-list-ul')}Список`)}</demo-toolbar-group>
+<demo-toolbar-group aria-label="${t('toolbar.labels.blocks')}">${toolButton(`${icon('hint')}${t('common.hint')}`)}${toolButton(`${icon('format-list-ul')}${t('common.list')}`)}</demo-toolbar-group>
 ${separator}
-<demo-toolbar-link as-child><a href="#help">Справка</a></demo-toolbar-link>
+<demo-toolbar-link as-child><a href="#help">${t('common.help')}</a></demo-toolbar-link>
 </demo-toolbar>`;
 }
 
@@ -39,8 +39,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component:
-                    'Панель инструментов: один шаг Tab, дальше стрелки; кнопки, переключатели, ссылки и поле в одной строке. `demo-toggle-group` внутри панели встраивается в её навигацию.'
+                component: 'toolbar.descriptionWeb'
             }
         }
     }
@@ -50,12 +49,13 @@ type Story = StoryObj<Props>;
 
 export const Default: Story = {};
 
-const withSearch = `<demo-toolbar aria-label="Набор">${toolButton(`${icon('plus')}Карточка`)}${toolButton(`${icon('shuffle')}Перемешать`)}${separator}<demo-toolbar-input as-child><input aria-label="Поиск по карточкам" placeholder="Поиск по карточкам"/></demo-toolbar-input></demo-toolbar>`;
+const withSearch = () =>
+    `<demo-toolbar aria-label="${t('common.set')}">${toolButton(`${icon('plus')}${t('toolbar.content.card')}`)}${toolButton(`${icon('shuffle')}${t('common.shuffle')}`)}${separator}<demo-toolbar-input as-child><input aria-label="${t('toolbar.labels.searchCards')}" placeholder="${t('toolbar.placeholders.searchCards')}"/></demo-toolbar-input></demo-toolbar>`;
 
 export const Gallery: Story = {
     render: () =>
         page(
-            section('Редактор карточки', 'Переключатели начертания, кнопки блоков и ссылка, разделённые линиями.', editor()) +
-                section('С поиском', 'Поле в панели инструментов — небольшое inverted.', withSearch)
+            section(t('toolbar.sections.cardEditor.title'), t('toolbar.sections.cardEditor.description'), editor()) +
+                section(t('toolbar.sections.withSearch.title'), t('toolbar.sections.withSearch.description'), withSearch())
         )
 };

@@ -5,7 +5,7 @@ import { box as recipe } from '@flippo-software/component-styles/box';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Box, Text } from '~@src';
-import { Page, Resizable, Row, Section, variantControls } from '~@stories';
+import { Page, Resizable, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -16,7 +16,7 @@ function Example(args: Props): React.JSX.Element {
         <div className='story-example' style={{ inlineSize: '100%' }}>
             <Resizable>
                 <Box {...args} className='story-surface'>
-                    Блок с отступами и размерами из пропсов.
+                    {t('box.content.aBlockWithPadding')}
                 </Box>
             </Resizable>
         </div>
@@ -31,7 +31,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component: 'Базовый блок раскладки: отступы (`p`, `px`, `m`…), размеры (`width`, `maxWidth`…), позиция и overflow пропсами.'
+                component: 'box.description'
             }
         }
     }
@@ -44,22 +44,22 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Отступы'>
+            <Section title={t('box.sections.padding.title')}>
                 <Resizable>
                     {['8px', '16px', '32px'].map((p) => (
                         <Row key={p} label={`p ${p}`}>
                             <Box p={p} className='story-surface'>
-                                <Text size='body-minus'>Содержимое</Text>
+                                <Text size='body-minus'>{t('box.content.content')}</Text>
                             </Box>
                         </Row>
                     ))}
                 </Resizable>
             </Section>
-            <Section title='Размеры' description='`maxWidth` ограничивает ширину, `width="100%"` растягивает.'>
+            <Section title={t('box.sections.sizes.title')} description={t('box.sections.sizes.description')}>
                 <Resizable>
                     <Row label='maxWidth 240' fill={true}>
                         <Box p='12px' maxWidth='240px' className='story-surface'>
-                            Не шире 240px, даже если места больше
+                            {t('box.content.noWiderThan240px')}
                         </Box>
                     </Row>
                 </Resizable>

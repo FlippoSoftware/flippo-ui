@@ -10,6 +10,7 @@ import { AvatarPart } from '../root/AvatarRootContext';
  * Attributes: `delay`.
  */
 export class AvatarFallbackElement extends AvatarPart.withAttributes({
+    /** How long to wait before showing the fallback. Specified in milliseconds. */
     delay: 'number'
 }) {
     private fallbackDelay!: AvatarFallbackDelay;

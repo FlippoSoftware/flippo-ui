@@ -14,11 +14,17 @@ export const toggle = cva({
             small: 'fl-toggle--small',
             medium: 'fl-toggle--medium',
             large: 'fl-toggle--large'
+        },
+        /** No row margins: the toggle is only as high as itself (a dense layout, a toolbar). */
+        compact: {
+            true: 'fl-toggle--compact',
+            false: ''
         }
     },
     defaultVariants: {
         variant: 'icon',
-        size: 'medium'
+        size: 'medium',
+        compact: false
     }
 });
 

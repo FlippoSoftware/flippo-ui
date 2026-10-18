@@ -19,6 +19,10 @@ abstract class RadioPart extends ContextPart<typeof RADIO> {
  * State attributes: those of the radio, and transition attributes.
  */
 export class RadioIndicatorElement extends RadioPart.withAttributes({
+    /**
+     * Whether to keep the HTML element in the DOM when the radio button is inactive.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     private indicator!: MenuItemIndicatorMachine;

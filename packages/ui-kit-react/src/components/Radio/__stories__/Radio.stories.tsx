@@ -5,7 +5,7 @@ import { radio as recipe } from '@flippo-software/component-styles/radio';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Radio, RadioGroup } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -14,11 +14,11 @@ type Props = RecipeVariants<typeof recipe> & { disabled?: boolean };
 function Options(props: Props & { defaultValue?: string }): React.JSX.Element {
     const { defaultValue = 'all', ...rest } = props;
     return (
-        <RadioGroup defaultValue={defaultValue} aria-label='Режим повторения' orientation='horizontal'>
+        <RadioGroup defaultValue={defaultValue} aria-label={t('common.reviewMode')} orientation='horizontal'>
             {[
-                ['all', 'Все карточки'],
-                ['new', 'Только новые'],
-                ['hard', 'Сложные']
+                ['all', t('common.allCards')],
+                ['new', t('radio.content.newOnesOnly')],
+                ['hard', t('common.hardOnes')]
             ].map(([value, label]) => (
                 <Radio.Label key={value} size={rest.size}>
                     <Radio.Root {...rest} value={value}>
@@ -47,7 +47,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component: 'Радиокнопка: круг 20px, выбранная заливается цветом бренда с белой точкой. Используется внутри `RadioGroup`.'
+                component: 'radio.description'
             }
         }
     }
@@ -60,14 +60,14 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Размеры' description='16, 20 и 24px.'>
+            <Section title={t('radio.sections.sizes.title')} description={t('radio.sections.sizes.description')}>
                 {(['small', 'medium', 'large'] as const).map((size) => (
                     <Row key={size} label={size}>
                         <Options size={size} />
                     </Row>
                 ))}
             </Section>
-            <Section title='Недоступна' description='Недоступную радиокнопку видно, но выбрать нельзя.'>
+            <Section title={t('radio.sections.disabled.title')} description={t('radio.sections.disabled.description')}>
                 <Row label='disabled'>
                     <Options disabled={true} />
                 </Row>

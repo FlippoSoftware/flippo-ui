@@ -16,8 +16,14 @@ import { ComboboxItemContext, ComboboxListContext, ComboboxPart } from '../root/
  * State attributes: `data-selected`, `data-highlighted`, `data-disabled`.
  */
 export class ComboboxItemElement extends ComboboxPart.withAttributes({
+    /** The value of the item. Required. */
     value: 'string',
+    /** The text matched against the input and filled in it when the item is selected. The text content of the item by default. */
     label: 'string',
+    /**
+     * Whether the item ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private item!: ComboboxItemMachine;

@@ -14,6 +14,10 @@ import { DialogPart } from '../root/DialogRootContext';
  * State attributes: `data-open`/`data-closed`, transition attributes.
  */
 export class DialogBackdropElement extends DialogPart.withAttributes({
+    /**
+     * Whether the backdrop is forced to render even when nested.
+     * @default false
+     */
     'force-render': 'boolean'
 }) {
     protected override createParts() {}

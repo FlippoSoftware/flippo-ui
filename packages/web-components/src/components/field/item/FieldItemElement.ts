@@ -12,6 +12,11 @@ import { FieldItemContext, FieldPart, LabelableContext } from '../root/FieldRoot
  * Attributes: `disabled`.
  */
 export class FieldItemElement extends FieldPart.withAttributes({
+    /**
+     * Whether the wrapped control should ignore user interaction.
+     * The `disabled` attribute on `<prefix>-field` takes precedence over this.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private controller: LabelableController | null = null;

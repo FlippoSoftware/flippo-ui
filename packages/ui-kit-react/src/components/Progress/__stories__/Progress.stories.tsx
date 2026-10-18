@@ -5,14 +5,14 @@ import { progress as recipe } from '@flippo-software/component-styles/progress';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Progress } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe> & { value?: number | null; label?: string };
 
 function Bar(props: Props): React.JSX.Element {
-    const { value = 65, label = 'Загрузка карточек', ...rest } = props;
+    const { value = 65, label = t('progress.content.loadingCards'), ...rest } = props;
     return (
         <Progress.Root {...rest} value={value}>
             <Progress.Label>{label}</Progress.Label>
@@ -43,9 +43,9 @@ function Upload(): React.JSX.Element {
     }, [value]);
     return (
         <div className='sb-items sb-items--column'>
-            <Bar value={value} label={value >= 100 ? 'Набор загружен' : 'Импорт из файла'} />
+            <Bar value={value} label={value >= 100 ? t('progress.content.setLoaded') : t('progress.content.importFromAFile')} />
             <Button size='small' variant='secondary' onClick={() => setValue(1)} disabled={value > 0 && value < 100}>
-                {value >= 100 ? 'Ещё раз' : 'Импортировать'}
+                {value >= 100 ? t('progress.content.tryAgain') : t('progress.content.import')}
             </Button>
         </div>
     );
@@ -59,8 +59,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Ход задачи: подпись, значение и полоса. На 100% полоса становится зелёной (`data-complete`), без значения — бежит (`data-indeterminate`).'
+                component: 'progress.description'
             }
         }
     }
@@ -73,18 +72,18 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Состояния' description='В процессе, завершено и неизвестная длительность.'>
+            <Section title={t('progress.sections.states.title')} description={t('progress.sections.states.description')}>
                 <Row label='65%' fill={true}>
                     <Bar value={65} />
                 </Row>
                 <Row label='complete' fill={true}>
-                    <Bar value={100} label='Набор загружен' />
+                    <Bar value={100} label={t('progress.labels.setLoaded')} />
                 </Row>
                 <Row label='indeterminate' fill={true}>
-                    <Bar value={null} label='Подготовка' />
+                    <Bar value={null} label={t('progress.labels.preparing')} />
                 </Row>
             </Section>
-            <Section title='Размеры' description='Medium — тонкая полоса, large — толще, для заметных операций.'>
+            <Section title={t('progress.sections.sizes.title')} description={t('progress.sections.sizes.description')}>
                 <Row label='medium' fill={true}>
                     <Bar value={40} size='medium' />
                 </Row>
@@ -92,7 +91,7 @@ export const Gallery: Story = {
                     <Bar value={40} size='large' />
                 </Row>
             </Section>
-            <Section title='Живой пример' description='Импорт набора: значение растёт и в конце полоса меняет цвет.'>
+            <Section title={t('progress.sections.liveExample.title')} description={t('progress.sections.liveExample.description')}>
                 <div className='sb-medium'>
                     <Upload />
                 </div>

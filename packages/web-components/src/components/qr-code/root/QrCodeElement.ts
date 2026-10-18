@@ -19,10 +19,21 @@ import { QrCodeContext } from './QrCodeRootContext';
  * CSS variables: `--qr-code-width`, `--qr-code-height`.
  */
 export class QrCodeElement extends MachineElement.withAttributes({
+    /** The text or URL to encode in the QR code. */
     value: 'string',
+    /**
+     * The size (width and height) of the QR code in pixels.
+     * @default 200
+     */
     size: 'number',
+    /**
+     * Whether to generate the QR code on mount.
+     * @default true
+     */
     'generate-on-mount': 'boolean',
+    /** Creates the renderer that draws the code from its options, e.g. `(options) => new QRCodeStyling(options)`. Required: no renderer is bundled. */
     createRenderer: property<QrCodeOptions['createRenderer']>(),
+    /** Advanced styling and customization options. */
     options: property<QrCodeGenerationOptions>()
 }) {
     private qrCode!: QrCodeMachine;

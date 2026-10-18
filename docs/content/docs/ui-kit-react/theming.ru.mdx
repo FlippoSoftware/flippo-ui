@@ -1,0 +1,43 @@
+---
+title: "Темы и размеры"
+description: "FlippoProvider: тема приложения, свои темы и сетка размеров контролов."
+---
+
+`FlippoProvider` задаёт тему и размер контролов приложения (или его части) и default props компонентов.
+
+```tsx
+<FlippoProvider storageKey="flippo-theme" themes={{ sepia: 'light' }} size="small" defaults={{ select: { positioner: { sideOffset: 4 } } }}>
+    <App />
+</FlippoProvider>
+
+const { theme, resolvedTheme, colorScheme, themes, setTheme } = useTheme();
+const { size, height } = useControlSize();          // 'small', 40
+const select = useControlSize('select');             // размер семейства и общий (global)
+```
+
+## Темы
+
+- `system` (по умолчанию), `light`, `dark` или своя. Внешний провайдер ставит `data-theme` на `<html>`, вложенный
+  со своей темой — на обёртку; всплывающие окна в порталах её сохраняют.
+- Своя тема — CSS-правило `[data-theme='sepia']`, SCSS-миксином:
+
+```scss
+@use '@flippo-software/component-styles/scss' as fl;
+
+@include fl.theme('sepia', light, $colors: ('bg-1': #f6edd9, 'text-primary': #3b2f1e));
+```
+
+  и регистрация имени со схемой: `themes={{ sepia: 'light' }}`.
+- Без мигания при загрузке: `storageKey` сохраняет выбор, `<ThemeScript storageKey="flippo-theme" />` в `<head>`
+  ставит его на `<html>` до первой отрисовки.
+
+## Сетка размеров
+
+| Размер | Высота строки | Контролы |
+| --- | --- | --- |
+| `small` | 40 | инпуты, селекты, кнопки — эта высота; чекбокс, радио, свитч с подписью, Toggle и SegmentedControl добирают её отступами |
+| `medium` | 48 | по умолчанию |
+| `large` | 56 | |
+
+Ряд разных контролов, выровненный по верху, выглядит выровненным по центру. `compact` убирает отступы (плотные таблицы,
+списки вариантов). В коде: `CONTROL_HEIGHTS`, `useControlSize()`.

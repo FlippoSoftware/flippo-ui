@@ -11,6 +11,8 @@ interactions, focus management, dismissal, positioning (on `@floating-ui/dom`). 
 ```
 src/components/<name>/        one folder per part: root/, trigger/, popup/, positioner/, item/…, plus store/, utils/
                               <Part>Machine.ts, <Part>DataAttributes.ts, *CssVars.ts, *StateAttributesMapping.ts
+                              (the enums are the documented data attributes and CSS variables of both adapters: every
+                              member has a JSDoc comment, `@type` for a value set)
                               <Name>Machines.test.ts / <Name>Store.test.ts at the component root
 src/components/<name>/index.ts  the component's entry point (explicit exports)
 src/lib/                      shared helpers + attributes/ dom/ events/ patterns/ popup/ positioning/ props/ store/ timers/

@@ -2,7 +2,7 @@ import { field as recipe } from '@flippo-software/component-styles/field';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { grid, page, renderExample, section, textInput, variantControls } from '~@stories';
+import { grid, page, renderExample, section, t, textInput, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -13,12 +13,12 @@ function titleField(
     inputAttributes = '',
     options: { value?: string; description?: string; input?: string } = {}
 ): string {
-    const { value, description = 'Видно всем участникам набора', input = '' } = options;
+    const { value, description = t('field.content.visibleToEveryMember'), input = '' } = options;
     return `<demo-field name="title" ${fieldAttributes}>
-<demo-field-label>Название набора</demo-field-label>
-${textInput(input, 'placeholder="Например, Законы UX"', { control: `${value ? `default-value="${value}"` : ''} ${inputAttributes}` })}
+<demo-field-label>${t('common.setName')}</demo-field-label>
+${textInput(input, `placeholder="${t('field.placeholders.uxLawsSay')}"`, { control: `${value ? `default-value="${value}"` : ''} ${inputAttributes}` })}
 <demo-field-description>${description}</demo-field-description>
-<demo-field-error${fieldAttributes.includes('invalid') ? ' match="true"' : ''}>Название не может быть пустым</demo-field-error>
+<demo-field-error${fieldAttributes.includes('invalid') ? ' match="true"' : ''}>${t('field.content.theNameCannotBe')}</demo-field-error>
 </demo-field>`;
 }
 
@@ -37,8 +37,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component:
-                    'Поле формы: подпись, контрол, описание и ошибка. Состояния (`data-invalid`, `data-disabled`, `data-focused`) приходят от Field и окрашивают все части; ошибка видна, пока поле невалидно.'
+                component: 'field.descriptionWeb'
             }
         }
     }
@@ -52,18 +51,21 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Состояния',
-                'Обычное, с ошибкой и недоступное.',
+                t('field.sections.states.title'),
+                t('field.sections.states.description'),
                 grid(
-                    titleField('', '', { value: 'Экзамен Законы UX' }) +
+                    titleField('', '', { value: t('common.uxLawsExam') }) +
                         titleField('invalid') +
-                        titleField('disabled', 'disabled', { value: 'Экзамен Законы UX', description: 'Изменить может только владелец' }),
+                        titleField('disabled', 'disabled', {
+                            value: t('common.uxLawsExam'),
+                            description: t('field.content.onlyTheOwnerCan')
+                        }),
                     300
                 )
             ) +
                 section(
-                    'Размеры',
-                    'Контрол поля — Input любого размера и оформления.',
+                    t('field.sections.sizes.title'),
+                    t('field.sections.sizes.descriptionWeb'),
                     grid(
                         titleField('', '', { value: 'Large', input: 'size="large"' }) +
                             titleField('', '', { value: 'Medium', input: 'size="medium"' }) +
@@ -72,8 +74,8 @@ export const Gallery: Story = {
                     )
                 ) +
                 section(
-                    'На карточке',
-                    'Inverted — для полей на поверхности bg-1.',
+                    t('field.sections.onACard.title'),
+                    t('field.sections.onACard.description'),
                     grid(
                         titleField('', '', { input: 'appearance="inverted"' }) +
                             titleField('invalid', '', { input: 'appearance="inverted"' }),

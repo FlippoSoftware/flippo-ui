@@ -3,6 +3,7 @@ import { contextMenu as recipe } from '@flippo-software/component-styles/context
 import { ContextMenu as Primitive } from '@flippo-software/react-components/context-menu';
 
 import { icon } from '~@lib/Icon';
+import { themedPortal } from '~@lib/Provider';
 import { createStyler } from '~@lib/Styled';
 
 import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
@@ -26,7 +27,7 @@ export const Group: StyledComponent<typeof Primitive.Group, typeof recipe> = sty
 export const GroupLabel: StyledComponent<typeof Primitive.GroupLabel, typeof recipe> = styled(Primitive.GroupLabel, 'groupLabel', false);
 export const Item: StyledComponent<typeof Primitive.Item, typeof recipe> = styled(Primitive.Item, 'item', false);
 export const Popup: StyledComponent<typeof Primitive.Popup, typeof recipe> = styled(Primitive.Popup, 'popup', false);
-export const Portal: typeof Primitive.Portal = Primitive.Portal;
+export const Portal: typeof Primitive.Portal = themedPortal(Primitive.Portal) as typeof Primitive.Portal;
 export const Positioner: StyledComponent<typeof Primitive.Positioner, typeof recipe> = styled(Primitive.Positioner, 'positioner', false, {
     defaults: { sideOffset: 8 }
 });

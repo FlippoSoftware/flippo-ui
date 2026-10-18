@@ -1,41 +1,45 @@
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { button, icon, page, row, search, section } from '~@stories';
+import { button, icon, page, row, search, section, t } from '~@stories';
 
 import type { DefaultProps, DefaultPropsElement, SelectElement } from '~@src';
 
 type Size = 'small' | 'medium' | 'large';
 type Props = { size: Size; appearance: 'light' | 'inverted'; buttonVariant: 'primary' | 'secondary' | 'outlined' };
 
-const FILTERS = { all: 'Все карточки', mine: 'Мои', done: 'Готовые' };
+const FILTERS = () => ({ all: t('common.allCards'), mine: t('common.mine'), done: t('common.completed') });
 
 /** Elements without size or look attributes: they take them from the provider. */
-const screen = `<div class="sb-items sb-items--column" style="align-items: stretch; max-inline-size: 420px">
+const screen = () => `<div class="sb-items sb-items--column" style="align-items: stretch; max-inline-size: 420px">
 ${search()}
 <demo-select default-value="all">
-<demo-select-trigger as-child><button type="button" aria-label="Фильтр"><demo-select-value></demo-select-value><demo-select-icon></demo-select-icon></button></demo-select-trigger>
-<demo-select-positioner><demo-select-popup><demo-select-list>${Object.entries(FILTERS)
+<demo-select-trigger as-child><button type="button" aria-label="${t('common.filter')}"><demo-select-value></demo-select-value><demo-select-icon></demo-select-icon></button></demo-select-trigger>
+<demo-select-positioner><demo-select-popup><demo-select-list>${Object.entries(FILTERS())
     .map(
         ([value, label]) =>
             `<demo-select-item value="${value}"><demo-select-item-text>${label}</demo-select-item-text><demo-select-item-indicator></demo-select-item-indicator></demo-select-item>`
     )
     .join('')}</demo-select-list></demo-select-popup></demo-select-positioner>
 </demo-select>
-<demo-segmented-control default-value="week" aria-label="Период">${['day:День', 'week:Неделя', 'month:Месяц']
+<demo-segmented-control default-value="week" aria-label="${t('common.period')}">${[
+    t('defaultProps.content.dayDay'),
+    t('defaultProps.content.weekWeek'),
+    t('defaultProps.content.monthMonth')
+]
     .map((entry) => {
         const [value, label] = entry.split(':');
         return `<demo-segmented-control-item value="${value}" as-child><button type="button">${label}</button></demo-segmented-control-item>`;
     })
     .join('')}</demo-segmented-control>
-<div class="sb-items">${button(`${icon('plus')}Создать набор`)}${button('Отмена', 'variant="label"')}</div>
+<div class="sb-items">${button(`${icon('plus')}${t('common.createASet')}`)}${button(t('common.cancel'), 'variant="label"')}</div>
 </div>`;
 
 /** A provider around the screen, with its `defaults` property; `items` gives the select its labels. */
-function provided(defaults: DefaultProps, content = screen): HTMLElement {
+function provided(defaults: DefaultProps, content = screen()): HTMLElement {
     const provider = document.createElement('demo-default-props') as DefaultPropsElement;
     provider.defaults = defaults;
     provider.innerHTML = content;
-    for (const select of provider.querySelectorAll<SelectElement>('demo-select')) select.items = FILTERS;
+    for (const select of provider.querySelectorAll<SelectElement>('demo-select')) select.items = FILTERS();
     return provider;
 }
 
@@ -71,8 +75,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code, language: 'ts' },
             description: {
-                component:
-                    'Атрибуты по умолчанию для семейств кита: глобально через `define({ defaults })` и для области через `<demo-default-props>` (свойство `defaults`; изменения применяются сразу). Ключ семейства — имя в camelCase (`segmentedControl`), ключ части — имя элемента (`positioner`). Порядок: атрибут или свойство элемента → запись части → то, что передаёт корень → запись семейства → встроенные умолчания. Вложенные провайдеры сливаются с внешними.'
+                component: 'defaultProps.descriptionWeb'
             }
         }
     }
@@ -86,13 +89,13 @@ export const Gallery: Story = {
     render: () => {
         const root = page(
             section(
-                'Один экран, разные настройки',
-                'Элементы не задают ни размер, ни вид — их даёт провайдер.',
+                t('defaultProps.sections.oneScreenDifferentSettings.title'),
+                t('defaultProps.sections.oneScreenDifferentSettings.descriptionWeb'),
                 row('small', '<div data-slot="small"></div>') + row('large', '<div data-slot="large"></div>')
             ) +
                 section(
-                    'Вложенный провайдер',
-                    'Внешний задаёт размер, внутренний — вид кнопок только для своей области; атрибут на элементе всё равно главнее.',
+                    t('defaultProps.sections.nestedProvider.title'),
+                    t('defaultProps.sections.nestedProvider.descriptionWeb'),
                     '<div data-slot="nested"></div>'
                 )
         );
@@ -101,10 +104,10 @@ export const Gallery: Story = {
                 provided({ button: { size }, input: { size }, select: { size }, segmentedControl: { size } })
             );
         }
-        const inner = provided({ button: { variant: 'outlined' } }, row('inner', button('Сохранить') + button('Отмена')));
+        const inner = provided({ button: { variant: 'outlined' } }, row('inner', button(t('common.save')) + button(t('common.cancel'))));
         const outer = provided(
             { button: { size: 'small' } },
-            row('outer', button('Сохранить') + button('size="large" на кнопке', 'size="large"'))
+            row('outer', button(t('common.save')) + button(t('defaultProps.content.largeOnTheButton'), 'size="large"'))
         );
         outer.append(inner);
         root.querySelector('[data-slot="nested"]')?.replaceWith(outer);

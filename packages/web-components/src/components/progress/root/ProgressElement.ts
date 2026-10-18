@@ -17,11 +17,32 @@ import { ProgressContext } from './ProgressRootContext';
  * State attributes (on all parts): `data-indeterminate`, `data-progressing`, `data-complete`.
  */
 export class ProgressElement extends MachineElement.withAttributes({
+    /**
+     * The current value. The component is indeterminate when value is `null`.
+     * @default null
+     */
     value: 'number',
+    /**
+     * The minimum value.
+     * @default 0
+     */
     min: 'number',
+    /**
+     * The maximum value.
+     * @default 100
+     */
     max: 'number',
+    /**
+     * The locale used by `Intl.NumberFormat` when formatting the value.
+     * Defaults to the user's runtime locale.
+     */
     locale: 'string',
+    /** Options to format the value. */
     format: property<Intl.NumberFormatOptions>(),
+    /**
+     * Accepts a function which returns a string value that provides a human-readable text alternative for the current
+     * value of the progress bar.
+     */
     getAriaValueText: property<ProgressOptions['getAriaValueText']>()
 }) {
     private progress!: ProgressMachine;

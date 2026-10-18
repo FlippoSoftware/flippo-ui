@@ -5,19 +5,24 @@ import { list as recipe } from '@flippo-software/component-styles/list';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Icon, List } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe> & { type?: 'ordered' | 'unordered' };
 
-const STEPS = ['Создайте набор', 'Добавьте карточки', 'Пригласите участников', 'Начните повторение'];
+const STEPS = () => [
+    t('list.content.createYourSet'),
+    t('list.content.addCards'),
+    t('list.content.inviteMembers'),
+    t('list.content.startReviewing')
+];
 
 function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example'>
             <List.Root {...args}>
-                {STEPS.map((step) => (
+                {STEPS().map((step) => (
                     <List.Item key={step}>
                         <List.Marker />
                         {step}
@@ -39,8 +44,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Список: маркеры (номера или точки) ставит сам компонент. Вложенный `List.Root` кладётся внутрь `List.Item`, а `List.Subheader` в том же пункте становится его подписью (`aria-labelledby`). `interactive` делает пункты кнопками.'
+                component: 'list.description'
             }
         }
     }
@@ -53,10 +57,10 @@ export const Default: Story = {};
 function Folders(): React.JSX.Element {
     const [selected, setSelected] = React.useState('ux');
     const folders = [
-        ['ux', 'Законы UX', '32'],
+        ['ux', t('common.uxLaws'), '32'],
         ['js', 'JavaScript', '18'],
-        ['en', 'Английский B2', '120'],
-        ['archive', 'Архив', '0']
+        ['en', t('common.englishB2'), '120'],
+        ['archive', t('list.content.archive'), '0']
     ] as const;
     return (
         <List.Root type='unordered' style={{ inlineSize: '100%' }}>
@@ -80,10 +84,7 @@ function Folders(): React.JSX.Element {
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section
-                title='Нумерованный и маркированный'
-                description='Номера и точки компонент ставит сам — `List.Marker` без содержимого.'
-            >
+            <Section title={t('list.sections.numberedAndBulleted.title')} description={t('list.sections.numberedAndBulleted.description')}>
                 <Row label='ordered'>
                     <Example type='ordered' />
                 </Row>
@@ -91,13 +92,16 @@ export const Gallery: Story = {
                     <Example type='unordered' />
                 </Row>
             </Section>
-            <Section title='Вложенные списки с подзаголовками' description='Нумерация продолжается внутри каждого уровня.'>
+            <Section
+                title={t('list.sections.nestedListsWithSubheaders.title')}
+                description={t('list.sections.nestedListsWithSubheaders.description')}
+            >
                 <List.Root>
                     <List.Item>
                         <List.Marker />
-                        <List.Subheader>Законы UX</List.Subheader>
+                        <List.Subheader>{t('common.uxLaws')}</List.Subheader>
                         <List.Root>
-                            {['Закон Хика', 'Закон Фиттса', 'Закон Миллера'].map((law) => (
+                            {[t('common.hickSLaw'), t('common.fittsSLaw'), t('common.millerSLaw')].map((law) => (
                                 <List.Item key={law}>
                                     <List.Marker />
                                     {law}
@@ -107,9 +111,9 @@ export const Gallery: Story = {
                     </List.Item>
                     <List.Item>
                         <List.Marker />
-                        <List.Subheader>Гештальт</List.Subheader>
+                        <List.Subheader>{t('list.content.gestalt')}</List.Subheader>
                         <List.Root type='unordered'>
-                            {['Близость', 'Сходство', 'Замкнутость'].map((law) => (
+                            {[t('list.content.proximity'), t('list.content.similarity'), t('list.content.closure')].map((law) => (
                                 <List.Item key={law}>
                                     <List.Marker />
                                     {law}
@@ -119,14 +123,14 @@ export const Gallery: Story = {
                     </List.Item>
                 </List.Root>
             </Section>
-            <Section title='Интерактивные пункты' description='Строки-кнопки: наведение, выбранный и недоступный пункт.'>
+            <Section title={t('list.sections.interactiveItems.title')} description={t('list.sections.interactiveItems.description')}>
                 <div className='sb-narrow'>
                     <Folders />
                 </div>
             </Section>
-            <Section title='Горизонтальный' description='`orientation="horizontal"` — пункты в строку с переносом.'>
+            <Section title={t('list.sections.horizontal.title')} description={t('list.sections.horizontal.description')}>
                 <List.Root type='unordered' orientation='horizontal'>
-                    {['Дизайн', 'UX', 'Психология', 'Экзамен'].map((tag) => (
+                    {[t('common.design'), 'UX', t('common.psychology'), t('list.content.exam')].map((tag) => (
                         <List.Item key={tag}>
                             <List.Marker />
                             {tag}

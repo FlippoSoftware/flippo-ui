@@ -19,6 +19,10 @@ abstract class RadioCardPart extends ContextPart<typeof RADIO_CARD> {
  * State attributes: those of the card, and transition attributes.
  */
 export class RadioCardIndicatorElement extends RadioCardPart.withAttributes({
+    /**
+     * Whether to keep the element in the DOM when the card is not selected.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     private indicator!: MenuItemIndicatorMachine;

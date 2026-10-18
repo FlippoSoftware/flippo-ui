@@ -21,23 +21,23 @@ export enum SliderControlDataAttributes {
      */
     required = 'data-required',
     /**
-     * Present when the slider is in valid state (when wrapped in Field.Root).
+     * Present when the slider is in valid state (inside a field).
      */
     valid = 'data-valid',
     /**
-     * Present when the slider is in invalid state (when wrapped in Field.Root).
+     * Present when the slider is in invalid state (inside a field).
      */
     invalid = 'data-invalid',
     /**
-     * Present when the slider has been touched (when wrapped in Field.Root).
+     * Present when the slider has been touched (inside a field).
      */
     touched = 'data-touched',
     /**
-     * Present when the slider's value has changed (when wrapped in Field.Root).
+     * Present when the slider's value has changed (inside a field).
      */
     dirty = 'data-dirty',
     /**
-     * Present when the slider is focused (when wrapped in Field.Root).
+     * Present when the slider is focused (inside a field).
      */
     focused = 'data-focused'
 }

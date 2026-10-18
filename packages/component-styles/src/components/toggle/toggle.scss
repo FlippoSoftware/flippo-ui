@@ -1,5 +1,6 @@
 // Toggle (Figma "Toggle"): an icon toggle 40×40 or a labeled pill. `data-pressed` is the "on" state.
-// Composes `.fl-interactive` and `.fl-focus-ring`.
+// Composes `.fl-interactive` and `.fl-focus-ring`. Its block margins make it as high as a control row of its size
+// (40, 48, 56: the size grid), so it lines up with inputs and buttons in a row aligned at the top.
 @use '../../styles/layers';
 @use '../../../scss' as fl;
 
@@ -12,6 +13,10 @@
         gap: var(--fl-toggle-gap, var(--_fl-toggle-gap, var(--fl-spacing-1-5)));
         block-size: var(--fl-toggle-height, var(--_fl-toggle-height, var(--fl-size-small)));
         min-inline-size: var(--fl-toggle-height, var(--_fl-toggle-height, var(--fl-size-small)));
+        margin-block: var(
+            --fl-toggle-margin-block,
+            var(--_fl-toggle-margin-block, max(0px, calc((var(--_fl-toggle-row-height, var(--fl-size-medium)) - var(--fl-toggle-height, var(--_fl-toggle-height, var(--fl-size-small)))) / 2)))
+        );
         padding-block: 0;
         // An icon toggle stays square (the padding is half the space around the icon); text gets the same breathing room.
         padding-inline: var(
@@ -88,6 +93,7 @@
 
     .fl-toggle--small {
         --_fl-toggle-height: var(--fl-spacing-8);
+        --_fl-toggle-row-height: var(--fl-size-small);
         --_fl-toggle-icon-size: var(--fl-spacing-5);
     }
 
@@ -97,5 +103,11 @@
 
     .fl-toggle--large {
         --_fl-toggle-height: var(--fl-size-medium);
+        --_fl-toggle-row-height: var(--fl-size-large);
+    }
+
+    // No row margins: a dense layout, a toolbar.
+    .fl-toggle--compact {
+        --_fl-toggle-margin-block: 0px;
     }
 }

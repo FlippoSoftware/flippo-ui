@@ -5,7 +5,7 @@ import { link as recipe } from '@flippo-software/component-styles/link';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Icon, Link } from '~@src';
-import { Card, Grid, Page, Row, Section, variantControls } from '~@stories';
+import { Card, Grid, Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -16,7 +16,8 @@ function Example(args: Props): React.JSX.Element {
         <div className='story-example'>
             <Link {...args} href='#set'>
                 <Icon name='plus' />
-                Ссылка
+
+                {t('link.content.link')}
                 <Icon name='arrow-outward' />
             </Link>
         </div>
@@ -31,8 +32,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Ссылка (Figma "Link"): нейтральная и брендовая, с иконками до и после текста. Иконки — дочерние `<svg>` размером с текст.'
+                component: 'link.description'
             }
         }
     }
@@ -45,45 +45,47 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Варианты' description='Neutral — для второстепенных переходов, Branded — когда ссылка должна быть заметна.'>
+            <Section title={t('link.sections.variants.title')} description={t('link.sections.variants.description')}>
                 {(['neutral', 'branded'] as const).map((variant) => (
                     <Row key={variant} label={variant}>
                         <Link variant={variant} href='#set'>
-                            Ссылка
+                            {t('link.content.link')}
                         </Link>
                         <Link variant={variant} href='#set'>
                             <Icon name='plus' />
-                            Ссылка
+
+                            {t('link.content.link')}
                             <Icon name='arrow-outward' />
                         </Link>
                         <Link variant={variant} href='#set'>
                             <Icon name='arrow-back' />
-                            Назад к коллекции
+
+                            {t('link.content.backToTheCollection')}
                         </Link>
                         <Link variant={variant} underline={true} href='#set'>
-                            С подчёркиванием
+                            {t('link.content.withAnUnderline')}
                         </Link>
                     </Row>
                 ))}
             </Section>
-            <Section title='Размеры' description='Small (Body–) и Medium (Body); inherit берёт шрифт окружающего текста.'>
+            <Section title={t('link.sections.sizes.title')} description={t('link.sections.sizes.description')}>
                 <Row label='small'>
                     <Link size='small' href='#set'>
-                        Открыть набор
+                        {t('common.openTheSet')}
                         <Icon name='arrow-outward' />
                     </Link>
                 </Row>
                 <Row label='medium'>
                     <Link size='medium' href='#set'>
-                        Открыть набор
+                        {t('common.openTheSet')}
                         <Icon name='arrow-outward' />
                     </Link>
                 </Row>
                 <Row label='inherit'>
                     <p className='sb-section-text'>
-                        Подробнее о законах UX читайте в{' '}
+                        {t('link.content.readMoreAboutThe')}{' '}
                         <Link size='inherit' variant='branded' underline={true} href='#guide'>
-                            руководстве
+                            {t('link.content.guide')}
                         </Link>
                         .
                     </p>
@@ -96,19 +98,21 @@ export const Gallery: Story = {
 export const Examples: Story = {
     render: () => (
         <Page>
-            <Section title='В интерфейсе' description='Ссылки в навигации и в карточках.'>
+            <Section title={t('link.sections.inAnInterface.title')} description={t('link.sections.inAnInterface.description')}>
                 <Grid min={280}>
-                    <Card caption='Навигация назад'>
+                    <Card caption={t('link.content.backNavigation')}>
                         <Link href='#collection'>
                             <Icon name='arrow-back' />
-                            Коллекция
+
+                            {t('common.collection')}
                         </Link>
                     </Card>
-                    <Card caption='Внешний ресурс'>
-                        <p className='sb-section-text'>Материалы курса доступны в открытом доступе.</p>
+                    <Card caption={t('link.content.externalResource')}>
+                        <p className='sb-section-text'>{t('link.content.theCourseMaterialsAre')}</p>
                         <Link variant='branded' href='#course'>
                             <Icon name='learn' />
-                            Перейти к курсу
+
+                            {t('link.content.goToTheCourse')}
                             <Icon name='arrow-outward' />
                         </Link>
                     </Card>

@@ -15,9 +15,27 @@ import { MenuPart } from '../root/MenuRootContext';
  * State attributes: `data-popup-open` (`data-pressed` when opened by a press), `data-disabled`.
  */
 export class MenuTriggerElement extends MenuPart.withAttributes({
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /** Whether the menu should also open when the trigger is hovered. */
     'open-on-hover': 'boolean',
+    /**
+     * How long to wait before the menu may be opened on hover. Specified in milliseconds.
+     *
+     * Requires the `open-on-hover` attribute.
+     * @default 100
+     */
     delay: 'number',
+    /**
+     * How long to wait before closing the menu that was opened on hover.
+     * Specified in milliseconds.
+     *
+     * Requires the `open-on-hover` attribute.
+     * @default 0
+     */
     'close-delay': 'number'
 }) {
     private trigger!: MenuTriggerMachine;

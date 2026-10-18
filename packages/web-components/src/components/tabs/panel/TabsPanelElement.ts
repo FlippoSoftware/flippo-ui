@@ -13,6 +13,10 @@ import { TabsPart } from '../root/TabsRootContext';
  * State attributes: `data-hidden`, `data-orientation`, `data-activation-direction`, `data-index`.
  */
 export class TabsPanelElement extends TabsPart.withAttributes({
+    /**
+     * The value of the panel: it is shown while the tab with the same value is selected. Without it, the index of the
+     * panel.
+     */
     value: 'string'
 }) {
     private panel!: TabsPanelMachine;

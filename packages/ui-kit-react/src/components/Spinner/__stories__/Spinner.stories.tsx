@@ -5,7 +5,7 @@ import { spinner as recipe } from '@flippo-software/component-styles/spinner';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Spinner } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -14,7 +14,7 @@ type Props = RecipeVariants<typeof recipe>;
 function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example'>
-            <Spinner {...args} aria-label='Загрузка' />
+            <Spinner {...args} aria-label={t('common.loading')} />
         </div>
     );
 }
@@ -25,7 +25,7 @@ const meta = {
     args: {},
     argTypes: variantControls(recipe),
     parameters: {
-        docs: { description: { component: 'Индикатор ожидания. `color="current"` берёт цвет текста — так спиннер встраивается в кнопки.' } }
+        docs: { description: { component: 'spinner.description' } }
     }
 } satisfies Meta<typeof Example>;
 export default meta;
@@ -39,29 +39,31 @@ const COLORS = ['brand', 'success', 'info', 'warning', 'danger', 'current'] as c
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Размеры'>
+            <Section title={t('spinner.sections.sizes.title')}>
                 <Row label='size'>
                     {SIZES.map((size) => (
                         <Spinner key={size} size={size} aria-label={size} />
                     ))}
                 </Row>
             </Section>
-            <Section title='Цвета'>
+            <Section title={t('spinner.sections.colours.title')}>
                 <Row label='color'>
                     {COLORS.map((color) => (
                         <Spinner key={color} color={color} aria-label={color} />
                     ))}
                 </Row>
             </Section>
-            <Section title='В кнопке' description='Кнопка в состоянии загрузки: спиннер цвета текста вместо иконки.'>
+            <Section title={t('spinner.sections.inAButton.title')} description={t('spinner.sections.inAButton.description')}>
                 <Row label='loading'>
                     <Button disabled={true}>
                         <Spinner size='x-small' color='current' aria-hidden={true} />
-                        Сохраняем
+
+                        {t('spinner.content.saving')}
                     </Button>
                     <Button variant='secondary' disabled={true}>
                         <Spinner size='x-small' color='current' aria-hidden={true} />
-                        Загрузка
+
+                        {t('common.loading')}
                     </Button>
                 </Row>
             </Section>

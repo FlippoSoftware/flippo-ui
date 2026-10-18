@@ -6,7 +6,7 @@ import type { IconName } from '@flippo-software/component-styles/icons';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Icon, Spinner, Toast } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -38,7 +38,7 @@ function ToastList(args: Props): React.JSX.Element {
                         <Toast.Description />
                     </Toast.Content>
                     {toast.actionProps && <Toast.Action {...toast.actionProps} />}
-                    <Toast.Close aria-label='Закрыть уведомление' />
+                    <Toast.Close aria-label={t('toast.labels.closeTheNotification')} />
                 </Toast.Root>
             ))}
         </>
@@ -63,26 +63,34 @@ function Triggers(): React.JSX.Element {
     return (
         <>
             <Row label='types'>
-                <Button variant='secondary' onClick={() => manager.add({ type: 'success', title: 'Набор сохранён' })}>
-                    Успех
+                <Button variant='secondary' onClick={() => manager.add({ type: 'success', title: t('toast.content.setSaved') })}>
+                    {t('toast.content.success')}
                 </Button>
-                <Button variant='secondary' onClick={() => manager.add({ type: 'info', title: 'Ссылка скопирована' })}>
-                    Инфо
-                </Button>
-                <Button
-                    variant='secondary'
-                    onClick={() => manager.add({ type: 'warning', title: 'Нет сети', description: 'Изменения сохранятся позже.' })}
-                >
-                    Предупреждение
+                <Button variant='secondary' onClick={() => manager.add({ type: 'info', title: t('common.linkCopied') })}>
+                    {t('toast.content.info')}
                 </Button>
                 <Button
                     variant='secondary'
-                    onClick={() => manager.add({ type: 'error', title: 'Не удалось удалить', description: 'Попробуйте ещё раз.' })}
+                    onClick={() =>
+                        manager.add({
+                            type: 'warning',
+                            title: t('toast.content.noConnection'),
+                            description: t('toast.content.yourChangesWillBe')
+                        })
+                    }
                 >
-                    Ошибка
+                    {t('toast.content.warning')}
                 </Button>
-                <Button variant='secondary' onClick={() => manager.add({ type: 'like', title: 'Добавлено в избранное' })}>
-                    Лайк
+                <Button
+                    variant='secondary'
+                    onClick={() =>
+                        manager.add({ type: 'error', title: t('toast.content.couldNotDelete'), description: t('toast.content.tryAgain') })
+                    }
+                >
+                    {t('toast.content.error')}
+                </Button>
+                <Button variant='secondary' onClick={() => manager.add({ type: 'like', title: t('toast.content.addedToFavourites') })}>
+                    {t('toast.content.like')}
                 </Button>
             </Row>
             <Row label='action'>
@@ -90,26 +98,27 @@ function Triggers(): React.JSX.Element {
                     variant='danger'
                     onClick={() => {
                         const id = manager.add({
-                            title: 'Карточка удалена',
-                            actionProps: { children: 'Отменить', onClick: () => manager.close(id) }
+                            title: t('toast.content.cardDeleted'),
+                            actionProps: { children: t('toast.content.undo'), onClick: () => manager.close(id) }
                         });
                     }}
                 >
                     <Icon name='delete' />
-                    Удалить с отменой
+
+                    {t('toast.content.deleteWithUndo')}
                 </Button>
             </Row>
             <Row label='promise'>
                 <Button
                     onClick={() =>
                         manager.promise(new Promise((resolve) => setTimeout(resolve, 1600)), {
-                            loading: { title: 'Публикуем набор…' },
-                            success: { title: 'Набор опубликован' },
-                            error: { title: 'Ошибка публикации' }
+                            loading: { title: t('toast.content.publishingTheSet') },
+                            success: { title: t('toast.content.setPublished') },
+                            error: { title: t('toast.content.publishingFailed') }
                         })
                     }
                 >
-                    Опубликовать
+                    {t('toast.content.publish')}
                 </Button>
             </Row>
         </>
@@ -120,9 +129,11 @@ function DefaultTrigger(): React.JSX.Element {
     const manager = Toast.useToastManager();
     return (
         <Button
-            onClick={() => manager.add({ type: 'success', title: 'Изменения сохранены', description: 'Набор обновлён у всех участников.' })}
+            onClick={() =>
+                manager.add({ type: 'success', title: t('toast.content.changesSaved'), description: t('toast.content.theSetIsUpdated') })
+            }
         >
-            Показать уведомление
+            {t('toast.content.showANotification')}
         </Button>
     );
 }
@@ -145,8 +156,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Уведомления (Figma "Toast") внизу экрана. `type` красит иконку, warning и error — ещё и текст. Тосты складываются стопкой и раскрываются при наведении; смахиваются жестом.'
+                component: 'toast.description'
             }
         }
     }
@@ -159,7 +169,10 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Типы, действие и промис' description='Нажмите несколько кнопок подряд — тосты сложатся в стопку.'>
+            <Section
+                title={t('toast.sections.typesActionAndPromise.title')}
+                description={t('toast.sections.typesActionAndPromise.description')}
+            >
                 <Stage>
                     <Triggers />
                 </Stage>

@@ -19,6 +19,10 @@ import { ToastProviderPart, ToastRootContext } from './ToastRootContext';
  * CSS variables: `--toast-index`, `--toast-offset-y`, `--toast-swipe-movement-x`/`-y`…
  */
 export class ToastElement extends ToastProviderPart.withAttributes({
+    /**
+     * Direction(s) in which the toast can be swiped to dismiss.
+     * @default ['down', 'right']
+     */
     'swipe-direction': 'string'
 }) {
     private root!: ToastRootMachine;

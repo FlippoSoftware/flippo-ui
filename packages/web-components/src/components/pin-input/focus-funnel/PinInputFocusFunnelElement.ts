@@ -11,6 +11,12 @@ import { PinInputPart } from '../root/PinInputRootContext';
  * Attributes: `focus-mode` (`first-empty` by default, `last-active`, `first`).
  */
 export class PinInputFocusFunnelElement extends PinInputPart.withAttributes({
+    /**
+     * Focus mode for the focus funnel
+     * - 'last-active': Focus on the last active input (default)
+     * - 'first-empty': Focus on the first empty input
+     * - 'first': Always focus on the first input
+     */
     'focus-mode': ['first-empty', 'last-active', 'first']
 }) {
     protected override applyOptions() {

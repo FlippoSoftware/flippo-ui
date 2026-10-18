@@ -5,7 +5,7 @@ import { grid as recipe } from '@flippo-software/component-styles/grid';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Grid } from '~@src';
-import { Page, Resizable, Section, variantControls } from '~@stories';
+import { Page, Resizable, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -39,8 +39,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Сетка: `columns` — число колонок или шаблон, `spacing` — шаг шкалы отступов. `Grid.Item` занимает `colSpan`/`rowSpan` ячеек.'
+                component: 'grid.description'
             }
         }
     }
@@ -53,28 +52,28 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Раскладка страницы' description='Шапка на всю ширину, боковая колонка и содержимое.'>
+            <Section title={t('grid.sections.pageLayout.title')} description={t('grid.sections.pageLayout.description')}>
                 <Resizable>
                     <Grid.Root columns={4} spacing={2} width='100%'>
                         <Grid.Item colSpan={4} className='story-surface' p='12px'>
-                            Шапка · colSpan 4
+                            {t('grid.content.headerColspan4')}
                         </Grid.Item>
                         <Grid.Item rowSpan={2} className='story-surface' p='12px'>
-                            Папки · rowSpan 2
+                            {t('grid.content.foldersRowspan2')}
                         </Grid.Item>
                         <Grid.Item colSpan={3} className='story-surface' p='12px'>
-                            Наборы · colSpan 3
+                            {t('grid.content.setsColspan3')}
                         </Grid.Item>
                         <Grid.Item colSpan={3} className='story-surface' p='12px'>
-                            Активность · colSpan 3
+                            {t('grid.content.activityColspan3')}
                         </Grid.Item>
                     </Grid.Root>
                 </Resizable>
             </Section>
-            <Section title='Адаптивные колонки' description='Шаблон `repeat(auto-fill, minmax(140px, 1fr))` — сколько поместится.'>
+            <Section title={t('grid.sections.responsiveColumns.title')} description={t('grid.sections.responsiveColumns.description')}>
                 <Resizable>
                     <Grid.Root columns='repeat(auto-fill, minmax(140px, 1fr))' spacing={2} width='100%'>
-                        {Array.from({ length: 7 }, (_, index) => `Набор ${index + 1}`).map((label) => (
+                        {Array.from({ length: 7 }, (_, index) => `${t('common.set')} ${index + 1}`).map((label) => (
                             <Grid.Item key={label} className='story-surface' p='12px'>
                                 {label}
                             </Grid.Item>

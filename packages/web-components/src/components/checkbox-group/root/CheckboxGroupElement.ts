@@ -24,9 +24,24 @@ import type { LabelableProvider } from '../../field/root/FieldRootContext';
  * State attributes: `data-disabled`, and those of the field.
  */
 export class CheckboxGroupElement extends MachineElement.withAttributes({
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Names of the checkboxes in the group that should be ticked.
+     *
+     * To render an uncontrolled checkbox group, use the `defaultValue` attribute instead.
+     */
     value: property<string[]>(),
+    /**
+     * Names of the checkboxes in the group that should be initially ticked.
+     *
+     * To render a controlled checkbox group, use the `value` attribute instead.
+     */
     defaultValue: property<string[]>(),
+    /** Names of all checkboxes in the group. Use this when creating a parent checkbox. */
     allValues: property<string[]>()
 }) {
     private group!: CheckboxGroupMachine;

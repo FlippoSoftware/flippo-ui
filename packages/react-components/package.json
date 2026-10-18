@@ -320,7 +320,7 @@
     },
     "dependencies": {
         "@flippo-software/core-components": "workspace:^",
-        "@flippo-software/react-hooks": "workspace:^",
+        "@flippo-software/react-hooks": "^1.0.0",
         "@floating-ui/dom": "^1.8.0",
         "@vitejs/plugin-react": "^4.3.4",
         "qr-code-styling": "^1.9.2",

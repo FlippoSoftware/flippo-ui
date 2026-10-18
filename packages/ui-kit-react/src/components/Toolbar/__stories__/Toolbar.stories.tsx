@@ -5,7 +5,7 @@ import { toolbar as recipe } from '@flippo-software/component-styles/toolbar';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Icon, Toggle, ToggleGroup, Toolbar } from '~@src';
-import { Page, Section, variantControls } from '~@stories';
+import { Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -13,31 +13,33 @@ type Props = RecipeVariants<typeof recipe>;
 
 function Editor(props: Props): React.JSX.Element {
     return (
-        <Toolbar.Root {...props} aria-label='Форматирование карточки'>
-            <ToggleGroup multiple={true} aria-label='Начертание'>
-                <Toolbar.Button render={<Toggle value='bold' aria-label='Жирный' />}>
+        <Toolbar.Root {...props} aria-label={t('toolbar.labels.cardFormatting')}>
+            <ToggleGroup multiple={true} aria-label={t('toolbar.labels.style')}>
+                <Toolbar.Button render={<Toggle value='bold' aria-label={t('common.bold')} />}>
                     <Icon name='format-bold' />
                 </Toolbar.Button>
-                <Toolbar.Button render={<Toggle value='italic' aria-label='Курсив' />}>
+                <Toolbar.Button render={<Toggle value='italic' aria-label={t('common.italic')} />}>
                     <Icon name='format-italic' />
                 </Toolbar.Button>
-                <Toolbar.Button render={<Toggle value='underline' aria-label='Подчёркнутый' />}>
+                <Toolbar.Button render={<Toggle value='underline' aria-label={t('common.underlined')} />}>
                     <Icon name='format-underline' />
                 </Toolbar.Button>
             </ToggleGroup>
             <Toolbar.Separator />
-            <Toolbar.Group aria-label='Блоки'>
+            <Toolbar.Group aria-label={t('toolbar.labels.blocks')}>
                 <Toolbar.Button>
                     <Icon name='hint' />
-                    Подсказка
+
+                    {t('common.hint')}
                 </Toolbar.Button>
                 <Toolbar.Button>
                     <Icon name='format-list-ul' />
-                    Список
+
+                    {t('common.list')}
                 </Toolbar.Button>
             </Toolbar.Group>
             <Toolbar.Separator />
-            <Toolbar.Link href='#help'>Справка</Toolbar.Link>
+            <Toolbar.Link href='#help'>{t('common.help')}</Toolbar.Link>
         </Toolbar.Root>
     );
 }
@@ -58,7 +60,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component: 'Панель инструментов: один шаг Tab, дальше стрелки; кнопки, переключатели, ссылки и поле в одной строке.'
+                component: 'toolbar.description'
             }
         }
     }
@@ -71,21 +73,23 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Редактор карточки' description='Переключатели начертания, кнопки блоков и ссылка, разделённые линиями.'>
+            <Section title={t('toolbar.sections.cardEditor.title')} description={t('toolbar.sections.cardEditor.description')}>
                 <Editor />
             </Section>
-            <Section title='С поиском' description='Поле в панели инструментов — небольшое inverted.'>
-                <Toolbar.Root aria-label='Набор'>
+            <Section title={t('toolbar.sections.withSearch.title')} description={t('toolbar.sections.withSearch.description')}>
+                <Toolbar.Root aria-label={t('common.set')}>
                     <Toolbar.Button>
                         <Icon name='plus' />
-                        Карточка
+
+                        {t('toolbar.content.card')}
                     </Toolbar.Button>
                     <Toolbar.Button>
                         <Icon name='shuffle' />
-                        Перемешать
+
+                        {t('common.shuffle')}
                     </Toolbar.Button>
                     <Toolbar.Separator />
-                    <Toolbar.Input aria-label='Поиск по карточкам' placeholder='Поиск по карточкам' />
+                    <Toolbar.Input aria-label={t('toolbar.labels.searchCards')} placeholder={t('toolbar.placeholders.searchCards')} />
                 </Toolbar.Root>
             </Section>
         </Page>

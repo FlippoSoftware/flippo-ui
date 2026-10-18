@@ -27,20 +27,70 @@ import { NumberFieldContext, type NumberFieldValueChangeDetail, type NumberField
  * State attributes: `data-disabled`, `data-readonly`, `data-required`, `data-scrubbing`, and those of the field.
  */
 export class NumberFieldElement extends ControlElement.withAttributes({
+    /** The raw numeric value of the field. */
     value: 'string',
+    /**
+     * The uncontrolled value of the field when it’s initially rendered.
+     *
+     * To render a controlled number field, use the `value` attribute instead.
+     */
     'default-value': 'number',
+    /** The minimum value of the input element. */
     min: 'number',
+    /** The maximum value of the input element. */
     max: 'number',
+    /**
+     * Amount to increment and decrement with the buttons and arrow keys,
+     * or to scrub with pointer movement in the scrub area.
+     * @default 1
+     */
     step: 'number',
+    /**
+     * The small step value of the input element when incrementing while the meta key is held. Snaps
+     * to multiples of this value.
+     * @default 0.1
+     */
     'small-step': 'number',
+    /**
+     * The large step value of the input element when incrementing while the shift key is held. Snaps
+     * to multiples of this value.
+     * @default 10
+     */
     'large-step': 'number',
+    /** Identifies the field when a form is submitted. */
     name: 'string',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the user should be unable to change the field value.
+     * @default false
+     */
     'read-only': 'boolean',
+    /**
+     * Whether the user must enter a value before submitting a form.
+     * @default false
+     */
     required: 'boolean',
+    /**
+     * Whether to allow the user to scrub the input value with the mouse wheel while focused and
+     * hovering over the input.
+     * @default false
+     */
     'allow-wheel-scrub': 'boolean',
+    /**
+     * Whether the value should snap to the nearest step when incrementing or decrementing.
+     * @default false
+     */
     'snap-on-step': 'boolean',
+    /**
+     * The locale of the input element.
+     * Defaults to the user's runtime locale.
+     */
     locale: 'string',
+    /** Options to format the input value. */
     format: property<Intl.NumberFormatOptions>()
 }) {
     private numberField!: NumberFieldMachine;

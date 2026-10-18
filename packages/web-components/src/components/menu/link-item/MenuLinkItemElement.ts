@@ -10,10 +10,14 @@ import { MenuItemPart } from '../root/MenuRootContext';
 /**
  * A link in the menu: put it on an `<a>` with `as-child`.
  *
- * Attributes: `label`, `close-on-click` (`"false"` keeps the menu open).
+ * Attributes: `label`, `close-on-click`.
  * State attributes: `data-highlighted`.
  */
 export class MenuLinkItemElement extends MenuItemPart.withAttributes({
+    /**
+     * Whether a click on the link closes the menu.
+     * @default false
+     */
     'close-on-click': 'boolean'
 }) {
     protected item!: MenuLinkItemMachine;

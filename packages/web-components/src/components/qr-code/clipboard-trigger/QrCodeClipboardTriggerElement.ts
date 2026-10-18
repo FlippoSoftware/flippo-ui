@@ -13,8 +13,22 @@ import { QrCodePart } from '../root/QrCodeRootContext';
  * State attributes: `data-copying`.
  */
 export class QrCodeClipboardTriggerElement extends QrCodePart.withAttributes({
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * The extension of the QR code to copy.
+     * @default 'svg'
+     */
     extension: ['svg', 'png', 'jpeg', 'webp'],
+    /**
+     * How to copy the QR code to clipboard:
+     * - 'blob': Copy as actual data (image for images, SVG text for SVG)
+     * - 'dataUrl': Copy as data URL (base64 encoded string)
+     * @default 'blob'
+     */
     'copy-as': ['blob', 'dataUrl']
 }) {
     private trigger!: QrCodeClipboardTriggerMachine;

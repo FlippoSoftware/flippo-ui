@@ -20,11 +20,35 @@ import { type SwitchCheckedChangeDetail, SwitchContext } from './SwitchRootConte
  * the field.
  */
 export class SwitchElement extends ControlElement.withAttributes({
+    /**
+     * Whether the switch is currently active.
+     *
+     * To render an uncontrolled switch, use the `default-checked` attribute instead.
+     */
     checked: 'boolean',
+    /**
+     * Whether the switch is initially active.
+     *
+     * To render a controlled switch, use the `checked` attribute instead.
+     * @default false
+     */
     'default-checked': 'boolean',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the user should be unable to activate or deactivate the switch.
+     * @default false
+     */
     'read-only': 'boolean',
+    /**
+     * Whether the user must activate the switch before submitting a form.
+     * @default false
+     */
     required: 'boolean',
+    /** Identifies the field when a form is submitted. */
     name: 'string'
 }) {
     private switchMachine!: SwitchMachine;

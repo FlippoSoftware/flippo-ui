@@ -10,7 +10,7 @@ export type DrawerDirection = 'up' | 'down' | 'left' | 'right';
 
 export type SnapPoint = number | string;
 
-export type DrawerPopupDataAttributes = {
+export type DrawerPopupDataAttributeValues = {
     [DrawerGestureDataAttributes.snapPoints]: string | null;
     [DrawerGestureDataAttributes.swipeDirectionRight]: string | null;
     [DrawerGestureDataAttributes.swipeDirectionLeft]: string | null;
@@ -61,7 +61,7 @@ export type DrawerState<PointerEventType = PointerEventLike> = {
     /**
      * Data attributes for the drawer popup.
      */
-    popupDataAttributes: DrawerPopupDataAttributes;
+    popupDataAttributes: DrawerPopupDataAttributeValues;
 
     onPointerDown?: BivariantEventHandler<PointerEventType> | undefined;
     onPointerMove?: BivariantEventHandler<PointerEventType> | undefined;

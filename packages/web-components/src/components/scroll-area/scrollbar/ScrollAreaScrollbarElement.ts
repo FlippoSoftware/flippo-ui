@@ -14,7 +14,15 @@ import { ScrollAreaPart, ScrollAreaScrollbarContext } from '../root/ScrollAreaRo
  * State attributes: also `data-orientation`, `data-hovering`.
  */
 export class ScrollAreaScrollbarElement extends ScrollAreaPart.withAttributes({
+    /**
+     * Whether the scrollbar controls vertical or horizontal scroll.
+     * @default 'vertical'
+     */
     orientation: ['vertical', 'horizontal'],
+    /**
+     * Whether to keep the HTML element in the DOM when the viewport isn’t scrollable.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     constructor() {

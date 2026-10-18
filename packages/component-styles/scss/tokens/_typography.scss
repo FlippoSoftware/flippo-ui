@@ -1,10 +1,13 @@
-// Typography tokens: Vela Sans and the text styles of the Figma file (`Display 1` … `Label`).
-// Every style has three weights: `weaker`, `default` and `stronger` (`Body/Stronger`, `Body–/Weaker`…).
+//// Typography tokens: Vela Sans and the text styles of the Figma file (`Display 1` … `Label`).
+//// Every style has three weights: `weaker`, `default` and `stronger` (`Body/Stronger`, `Body–/Weaker`…).
+//// @group typography
 
+/// The font family of the text: `--fl-font-family`.
 $font-family: ('Vela Sans', system-ui, -apple-system, 'Segoe UI', sans-serif);
+/// The font family of code: `--fl-font-family-mono`.
 $font-family-mono: (ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas, monospace);
 
-// `--fl-text-<style>-size`, `-line-height`, `-letter-spacing`, `-weight-weaker|default|stronger`.
+/// `--fl-text-<style>-size`, `-line-height`, `-letter-spacing`, `-weight-weaker|default|stronger`.
 $text-styles: (
     'display-1': (size: 6.5625rem, line-height: 1, letter-spacing: 0, weights: (300, 600, 800)),
     'display-2': (size: 4.125rem, line-height: 1.1, letter-spacing: 0, weights: (500, 600, 700)),
@@ -20,4 +23,5 @@ $text-styles: (
     'label': (size: 0.8125rem, line-height: 1.5, letter-spacing: 0, weights: (500, 600, 800))
 );
 
+/// The three weights of every text style.
 $text-weights: ('weaker', 'default', 'stronger');

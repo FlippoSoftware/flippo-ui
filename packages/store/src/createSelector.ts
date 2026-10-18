@@ -7,16 +7,20 @@ import type { AnySelector, CreateSelectorFunction } from './createSelector.types
  * The last parameter is the combiner function that combines the results of the previous selectors.
  *
  * @example
+ * ```ts
  * const selector = createSelector(
  *  (state) => state.disabled
  * );
+ * ```
  *
  * @example
+ * ```ts
  * const selector = createSelector(
  *   (state) => state.disabled,
  *   (state) => state.open,
  *   (disabled, open) => ({ disabled, open })
  * );
+ * ```
  */
 export const createSelector = ((...selectors: AnySelector[]) => {
     const [a, b, c, d, e, f, ...other] = selectors;

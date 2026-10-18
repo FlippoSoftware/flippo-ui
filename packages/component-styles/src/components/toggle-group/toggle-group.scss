@@ -9,6 +9,8 @@
         padding: var(--fl-toggle-group-padding, var(--_fl-toggle-group-padding, 0));
         border-radius: var(--fl-toggle-group-radius, var(--_fl-toggle-group-radius, var(--fl-radius-lg)));
         background-color: var(--fl-toggle-group-bg, var(--_fl-toggle-group-bg, transparent));
+        // The toggles of a group sit tight; the group is laid out as a whole.
+        --_fl-toggle-margin-block: 0px;
 
         &:where([data-orientation='vertical']) {
             flex-direction: column;

@@ -13,7 +13,19 @@ import { AccordionItemPart } from '../root/AccordionRootContext';
  * CSS variables: `--accordion-panel-height`, `--accordion-panel-width`.
  */
 export class AccordionPanelElement extends AccordionItemPart.withAttributes({
+    /**
+     * Allows the browser’s built-in page search to find and expand the panel contents.
+     *
+     * Overrides the `keep-mounted` attribute and uses `hidden="until-found"`
+     * to hide the element without removing it from the DOM.
+     * @default false
+     */
     'hidden-until-found': 'boolean',
+    /**
+     * Whether to keep the element in the DOM while the panel is closed.
+     * This attribute is ignored when `hidden-until-found` is used.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     protected override applyOptions() {

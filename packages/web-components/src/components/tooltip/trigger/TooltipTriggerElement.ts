@@ -16,9 +16,27 @@ import { TooltipPart, TooltipProviderContext } from '../root/TooltipRootContext'
  * State attributes: `data-popup-open`.
  */
 export class TooltipTriggerElement extends TooltipPart.withAttributes({
+    /**
+     * How long to wait before opening the tooltip. Specified in milliseconds.
+     * @default 600
+     */
     delay: 'number',
+    /**
+     * How long to wait before closing the tooltip. Specified in milliseconds.
+     * @default 0
+     */
     'close-delay': 'number',
+    /**
+     * Whether the trigger does not open the tooltip.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Marks this trigger as the primary trigger for positioning.
+     * Used when the tooltip is opened via TooltipMultiple sync.
+     * If multiple triggers are marked as primary, the first one wins.
+     * @default false
+     */
     primary: 'boolean'
 }) {
     private trigger!: TooltipTriggerMachine;

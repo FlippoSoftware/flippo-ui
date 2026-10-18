@@ -1,6 +1,6 @@
-import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
+import { ScrollAreaRootDataAttributes } from '@flippo-software/core-components/scroll-area';
 
-import { ScrollAreaRootDataAttributes } from './ScrollAreaRootDataAttributes';
+import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 
 import type { ScrollAreaRoot } from './ScrollAreaRoot';
 

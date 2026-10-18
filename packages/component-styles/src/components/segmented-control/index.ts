@@ -14,10 +14,16 @@ export const segmentedControl = sva({
             small: { root: 'fl-segmented-control-root--small' },
             medium: {},
             large: { root: 'fl-segmented-control-root--large' }
+        },
+        /** No row margins: the track is only as high as itself (a dense layout). */
+        compact: {
+            true: { root: 'fl-segmented-control-root--compact' },
+            false: {}
         }
     },
     defaultVariants: {
-        size: 'medium'
+        size: 'medium',
+        compact: false
     }
 });
 

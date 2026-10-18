@@ -14,7 +14,17 @@ import { TabsListContext, TabsPart } from '../root/TabsRootContext';
  * State attributes: `data-orientation`, `data-activation-direction`.
  */
 export class TabsListElement extends TabsPart.withAttributes({
+    /**
+     * Whether to automatically change the active tab on arrow key focus.
+     * Otherwise, tabs will be activated using <kbd>Enter</kbd> or <kbd>Space</kbd> key press.
+     * @default false
+     */
     'activate-on-focus': 'boolean',
+    /**
+     * Whether to loop keyboard focus back to the first item
+     * when the end of the list is reached while using the arrow keys.
+     * @default true
+     */
     'loop-focus': 'boolean'
 }) {
     private list!: TabsListMachine;

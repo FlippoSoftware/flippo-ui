@@ -1,7 +1,7 @@
 # @flippo-software/store
 
 A small framework-agnostic observable store used by the Flippo UI state machines
-(`@flippo-software/core-components`) and by the React adapter in `@flippo-software/react-hooks`.
+(`@flippo-software/core-components`) and by the React adapter in `@flippo-software/react-store`.
 
 It works anywhere JavaScript runs (browsers, Node.js, workers) and has no dependencies.
 
@@ -516,10 +516,10 @@ selector can be shared by several stores.
 
 ## Using it with React
 
-`@flippo-software/react-hooks` provides the React adapter:
+`@flippo-software/react-store` provides the React adapter:
 
 ```tsx
-import { ReactStore, useStore } from '@flippo-software/react-hooks';
+import { ReactStore, useStore } from '@flippo-software/react-store';
 
 // Any Store: subscribe to a slice of the state.
 function Counter({ store }: { store: Store<{ count: number }> }) {

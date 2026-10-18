@@ -3,6 +3,7 @@ import { select as recipe } from '@flippo-software/component-styles/select';
 import { Select as Primitive } from '@flippo-software/react-components/select';
 
 import { icon } from '~@lib/Icon';
+import { themedPortal } from '~@lib/Provider';
 import { createStyler } from '~@lib/Styled';
 
 import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
@@ -26,7 +27,7 @@ export const ItemIndicator: StyledComponent<typeof Primitive.ItemIndicator, type
 );
 export const ItemText: StyledComponent<typeof Primitive.ItemText, typeof recipe> = styled(Primitive.ItemText, 'itemText', false);
 export const Popup: StyledComponent<typeof Primitive.Popup, typeof recipe> = styled(Primitive.Popup, 'popup', false);
-export const Portal: typeof Primitive.Portal = Primitive.Portal;
+export const Portal: typeof Primitive.Portal = themedPortal(Primitive.Portal) as typeof Primitive.Portal;
 export const Positioner: StyledComponent<typeof Primitive.Positioner, typeof recipe> = styled(Primitive.Positioner, 'positioner', false, {
     defaults: { sideOffset: 8, alignItemWithTrigger: false }
 });

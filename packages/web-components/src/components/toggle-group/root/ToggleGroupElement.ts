@@ -24,11 +24,40 @@ const WHITESPACE = /\s+/;
  * State attributes: `data-disabled`, `data-multiple`, `data-orientation`.
  */
 export class ToggleGroupElement extends MachineElement.withAttributes({
+    /**
+     * Whether the toggle group should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * When `false` only one item in the group can be pressed. If any item in
+     * the group becomes pressed, the others will become unpressed.
+     * When `true` multiple items can be pressed.
+     * @default false
+     */
     multiple: 'boolean',
+    /**
+     * The visual orientation of the group: which arrow keys move the focus.
+     * @default 'horizontal'
+     */
     orientation: ['horizontal', 'vertical'],
+    /**
+     * Whether to loop keyboard focus back to the first item
+     * when the end of the list is reached while using the arrow keys.
+     * @default true
+     */
     'loop-focus': 'boolean',
+    /**
+     * The open state of the toggle group represented by an array of
+     * the values of all pressed toggle buttons.
+     * This is the uncontrolled counterpart of `value`.
+     */
     'default-value': 'string',
+    /**
+     * The open state of the toggle group represented by an array of
+     * the values of all pressed toggle buttons.
+     * This is the controlled counterpart of `default-value`.
+     */
     value: property<readonly string[]>()
 }) {
     private group!: ToggleGroupMachine;

@@ -100,7 +100,12 @@ export const MenuGroupContext = createContext<MenuGroupElement>('menu-group');
  * Base of the items: an item of the list of the menu around it (through its positioner).
  */
 export abstract class MenuItemPart extends MenuPositionedPart.withAttributes({
+    /** The text matched by typeahead (the text content of the item by default). */
     label: 'string',
+    /**
+     * Whether the item ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     protected abstract readonly item: Pick<MenuItemMachine, 'connect' | 'setElement'>;

@@ -5,33 +5,35 @@ import { popover as recipe } from '@flippo-software/component-styles/popover';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Avatar, Button, Icon, Popover } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe>;
 
-const PEOPLE = [
-    ['ЕГ', 'Егор Горочкин', 'Владелец'],
-    ['НЗ', 'Настя Завалова', '3 карточки'],
-    ['РШ', 'Роберт Шумелов', '1 карточка']
-] as const;
+const PEOPLE = () =>
+    [
+        [t('common.eg'), t('common.egorGorochkin'), t('popover.content.owner')],
+        [t('common.nz'), t('popover.content.nastyaZavalova'), t('popover.content.3Cards')],
+        [t('common.rs'), t('popover.content.robertShumelov'), t('popover.content.1Card')]
+    ] as const;
 
 function Participants(props: Props & { side?: 'top' | 'bottom' | 'left' | 'right' }): React.JSX.Element {
     const { side, ...rest } = props;
     return (
         <Popover.Root {...rest}>
             <Popover.Trigger render={<Button variant='secondary' />}>
-                <Icon name='person-add' />6 участников
+                <Icon name='person-add' />
+                {t('popover.content.6Members')}
             </Popover.Trigger>
             <Popover.Portal>
                 <Popover.Positioner side={side}>
                     <Popover.Popup>
                         <Popover.Arrow />
-                        <Popover.Title>Участники набора</Popover.Title>
-                        <Popover.Description>3 из 7 карточек назначено.</Popover.Description>
+                        <Popover.Title>{t('popover.content.setMembers')}</Popover.Title>
+                        <Popover.Description>{t('popover.content.3Of7Cards')}</Popover.Description>
                         <div className='sb-items sb-items--column' style={{ gap: 10, marginBlock: 6 }}>
-                            {PEOPLE.map(([initials, name, note]) => (
+                            {PEOPLE().map(([initials, name, note]) => (
                                 <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                     <Avatar.Root size='small'>
                                         <Avatar.Fallback>{initials}</Avatar.Fallback>
@@ -45,9 +47,10 @@ function Participants(props: Props & { side?: 'top' | 'bottom' | 'left' | 'right
                         </div>
                         <Button size='small'>
                             <Icon name='person-add' />
-                            Пригласить
+
+                            {t('common.invite')}
                         </Button>
-                        <Popover.Close aria-label='Закрыть' />
+                        <Popover.Close aria-label={t('common.close')} />
                     </Popover.Popup>
                 </Popover.Positioner>
             </Popover.Portal>
@@ -70,7 +73,7 @@ const meta = {
     argTypes: variantControls(recipe),
     parameters: {
         docs: {
-            description: { component: 'Всплывающая карточка у триггера: заголовок, описание, произвольное содержимое и крестик закрытия.' }
+            description: { component: 'popover.description' }
         }
     }
 } satisfies Meta<typeof Example>;
@@ -82,7 +85,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Стороны' description='Попап со стрелкой с любой стороны триггера; у края окна переворачивается.'>
+            <Section title={t('popover.sections.sides.title')} description={t('popover.sections.sides.description')}>
                 <Row label='side'>
                     <Participants side='bottom' />
                     <Participants side='top' />

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { focusControlOnPress } from '@flippo-software/component-styles/dom';
 
 import { registerPart, useConfiguredProps } from './DefaultProps';
+import { useFallbackSize } from './Provider';
 
 // Recipes and adapters have different generic signatures. Erasure stays inside this bridge;
 // every exported part retains its inferred props (and generic roots are declared explicitly).
@@ -21,7 +22,12 @@ export type StyledComponent<C extends React.ElementType, R extends Recipe> = ((
 ) => React.ReactElement) &
     StyledPart;
 
-function extractVariants(recipe: Recipe, forwarded: Record<string, unknown>, inherited: Readonly<Record<string, unknown>>) {
+function extractVariants(
+    recipe: Recipe,
+    forwarded: Record<string, unknown>,
+    inherited: Readonly<Record<string, unknown>>,
+    fallbackSize: string | undefined
+) {
     const selected: Record<string, unknown> = {};
     for (const key of recipe.variantKeys) {
         if (inherited[key] !== undefined) selected[key] = inherited[key];
@@ -29,6 +35,8 @@ function extractVariants(recipe: Recipe, forwarded: Record<string, unknown>, inh
         // Orientation also controls keyboard behaviour in the headless adapter.
         if (key !== 'orientation') delete forwarded[key];
     }
+    // A control takes the control size of the subtree (`FlippoProvider size`) when nothing else sets its size.
+    if (selected.size === undefined && fallbackSize && recipe.variantKeys.includes('size')) selected.size = fallbackSize;
     return selected;
 }
 
@@ -93,8 +101,9 @@ export function createStyler<R extends Recipe>(
         function Styled(props: StyledProps<C, Variants>) {
             const inherited = React.useContext(Context);
             const configured = useConfiguredProps(family, part);
+            const fallbackSize = useFallbackSize(family);
             const forwarded = withDefaults(withDefaults(props as Record<string, unknown>, configured.own), defaults);
-            const selected = extractVariants(recipe, forwarded, root ? {} : (inherited ?? configured.family ?? {}));
+            const selected = extractVariants(recipe, forwarded, root ? {} : (inherited ?? configured.family ?? {}), fallbackSize);
             if (!bareWhenRendered || forwarded.render === undefined) {
                 forwarded.className = mergeClasses(slotClasses(recipe(selected as never), slot), forwarded.className);
             }

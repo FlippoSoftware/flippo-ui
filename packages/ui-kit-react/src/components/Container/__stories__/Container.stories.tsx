@@ -5,7 +5,7 @@ import { container as recipe } from '@flippo-software/component-styles/container
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Container, Text } from '~@src';
-import { Page, Resizable, Row, Section, variantControls } from '~@stories';
+import { Page, Resizable, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -16,7 +16,7 @@ function Example(args: Props): React.JSX.Element {
         <div className='story-example' style={{ inlineSize: '100%' }}>
             <Resizable>
                 <Container {...args} className='story-surface'>
-                    <Text>Контейнер ограничивает ширину содержимого и центрирует его на странице.</Text>
+                    <Text>{t('container.content.aContainerLimitsThe')}</Text>
                 </Container>
             </Resizable>
         </div>
@@ -28,7 +28,7 @@ const meta = {
     component: Example,
     args: {},
     argTypes: variantControls(recipe),
-    parameters: { docs: { description: { component: 'Колонка страницы: максимальная ширина по размеру `size` и боковые поля.' } } }
+    parameters: { docs: { description: { component: 'container.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -38,7 +38,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Размеры' description='Каждая полоса — контейнер своего размера.'>
+            <Section title={t('container.sections.sizes.title')} description={t('container.sections.sizes.description')}>
                 <Resizable>
                     {(['xs', 'sm', 'md', 'lg'] as const).map((size) => (
                         <Row key={size} label={size} fill={true}>

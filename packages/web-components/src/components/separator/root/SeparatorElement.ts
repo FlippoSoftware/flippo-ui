@@ -11,6 +11,10 @@ import { MachineElement } from '../../../lib/MachineElement';
  * State attributes: `data-orientation`.
  */
 export class SeparatorElement extends MachineElement.withAttributes({
+    /**
+     * The orientation of the separator.
+     * @default 'horizontal'
+     */
     orientation: ['horizontal', 'vertical']
 }) {
     protected override createParts() {}

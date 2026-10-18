@@ -20,6 +20,17 @@ import type { AutocompleteValueChangeDetail } from './AutocompleteRootContext';
  * Events: `value-change` (cancelable; `detail: { value, reason }`), `open-change`, `open-change-complete`.
  */
 export class AutocompleteElement extends ComboboxElement.withAttributes({
+    /**
+     * Controls how the autocomplete behaves with respect to list filtering and inline autocompletion.
+     * - `list` (default): items are dynamically filtered based on the input value. The input value does not change
+     *   based on the active item.
+     * - `both`: items are dynamically filtered based on the input value, which will temporarily change based on the
+     *   active item (inline autocompletion).
+     * - `inline`: items are static (not filtered), and the input value will temporarily change based on the active item
+     *   (inline autocompletion).
+     * - `none`: items are static (not filtered), and the input value will not change based on the active item.
+     * @default 'list'
+     */
     mode: ['list', 'both', 'inline', 'none']
 }) {
     private autocomplete!: AutocompleteRootMachine;

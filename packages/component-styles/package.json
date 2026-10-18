@@ -255,6 +255,10 @@
                 "import": "./dist/separator.js",
                 "require": "./dist/separator.cjs"
             },
+            "./sizes": {
+                "import": "./dist/sizes.js",
+                "require": "./dist/sizes.cjs"
+            },
             "./skeleton": {
                 "import": "./dist/skeleton.js",
                 "require": "./dist/skeleton.cjs"
@@ -294,6 +298,10 @@
             "./textarea": {
                 "import": "./dist/textarea.js",
                 "require": "./dist/textarea.cjs"
+            },
+            "./theme": {
+                "import": "./dist/theme.js",
+                "require": "./dist/theme.cjs"
             },
             "./toast": {
                 "import": "./dist/toast.js",
@@ -588,6 +596,11 @@
             "import": "./dist/separator.js",
             "require": "./dist/separator.cjs"
         },
+        "./sizes": {
+            "source": "./src/sizes/index.ts",
+            "import": "./dist/sizes.js",
+            "require": "./dist/sizes.cjs"
+        },
         "./skeleton": {
             "source": "./src/components/skeleton/index.ts",
             "import": "./dist/skeleton.js",
@@ -637,6 +650,11 @@
             "source": "./src/components/textarea/index.ts",
             "import": "./dist/textarea.js",
             "require": "./dist/textarea.cjs"
+        },
+        "./theme": {
+            "source": "./src/theme/index.ts",
+            "import": "./dist/theme.js",
+            "require": "./dist/theme.cjs"
         },
         "./toast": {
             "source": "./src/components/toast/index.ts",

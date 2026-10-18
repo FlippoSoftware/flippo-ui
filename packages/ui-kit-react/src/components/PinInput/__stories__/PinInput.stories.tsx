@@ -5,7 +5,7 @@ import { pinInput as recipe } from '@flippo-software/component-styles/pin-input'
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { PinInput } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -21,13 +21,13 @@ function Code(props: Props & { length?: number }): React.JSX.Element {
                     <PinInput.FocusFunnel>
                         {Array.from({ length }, (_, index) => (
                             // biome-ignore lint/suspicious/noArrayIndexKey: the cells are positions
-                            <PinInput.Pin key={index} aria-label={`Цифра ${index + 1}`} />
+                            <PinInput.Pin key={index} aria-label={t('pinInput.labels.digit', { number: index + 1 })} />
                         ))}
                     </PinInput.FocusFunnel>
                 </PinInput.Group>
             </PinInput.Root>
             <output aria-live='polite' className='sb-caption'>
-                {completed ? 'Код введён' : 'Введите код из письма'}
+                {completed ? t('pinInput.content.codeEntered') : t('pinInput.content.enterTheCodeFrom')}
             </output>
         </div>
     );
@@ -48,7 +48,7 @@ const meta = {
     argTypes: { ...variantControls(recipe), disabled: { control: 'boolean', table: { category: 'Behaviour' } } },
     parameters: {
         docs: {
-            description: { component: 'Ввод кода (Figma "Numeric"): ячейки 64×80 по одной цифре; вставка из буфера заполняет все ячейки.' }
+            description: { component: 'pinInput.description' }
         }
     }
 } satisfies Meta<typeof Example>;
@@ -60,7 +60,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Состояния' description='Пустой, заполненный, с ошибкой и недоступный.'>
+            <Section title={t('pinInput.sections.states.title')} description={t('pinInput.sections.states.description')}>
                 <Row label='blank'>
                     <Code />
                 </Row>
@@ -74,7 +74,7 @@ export const Gallery: Story = {
                     <Code defaultValue='42' disabled={true} />
                 </Row>
             </Section>
-            <Section title='Размеры' description='Large 64×80 (Figma) и Medium 48×56 для форм потеснее.'>
+            <Section title={t('pinInput.sections.sizes.title')} description={t('pinInput.sections.sizes.description')}>
                 <Row label='large'>
                     <Code size='large' length={6} />
                 </Row>
@@ -82,7 +82,7 @@ export const Gallery: Story = {
                     <Code size='medium' length={6} />
                 </Row>
             </Section>
-            <Section title='На карточке' description='Inverted и скрытые символы (mask).' raised={true}>
+            <Section title={t('pinInput.sections.onACard.title')} description={t('pinInput.sections.onACard.description')} raised={true}>
                 <Row label='inverted'>
                     <Code appearance='inverted' defaultValue='4271' mask={true} />
                 </Row>

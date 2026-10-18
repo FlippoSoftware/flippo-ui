@@ -1,6 +1,6 @@
-import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
+import { ProgressRootDataAttributes } from '@flippo-software/core-components/progress';
 
-import { ProgressRootDataAttributes } from './ProgressRootDataAttributes';
+import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
 
 import type { ProgressRoot } from './ProgressRoot';
 

@@ -1,9 +1,11 @@
-// Colour tokens of the Flippo design system.
-//
-// Primitives come from the Figma variables `Color/neutral`, `Color/brand` and `Color/misc` (file "Flippo",
-// page "Components & Foundations"). The intermediate neutral steps (12, 14, 16, 18, 22, 25, 45) are the values the
-// Figma semantic tokens point at; the light steps (95, 98) and `warm-red/subtle` exist for the light theme.
+//// Colour tokens of the Flippo design system.
+////
+//// Primitives come from the Figma variables `Color/neutral`, `Color/brand` and `Color/misc` (file "Flippo",
+//// page "Components & Foundations"). The intermediate neutral steps (12, 14, 16, 18, 22, 25, 45) are the values the
+//// Figma semantic tokens point at; the light steps (95, 98) and `warm-red/subtle` exist for the light theme.
+//// @group colors
 
+/// Neutral greys: `--fl-color-neutral-<step>`.
 $neutral: (
     'white': #ffffff,
     '98': #f8f8fa,
@@ -27,6 +29,7 @@ $neutral: (
     'black': #000000
 );
 
+/// The brand violet: `--fl-color-brand-<step>`.
 $brand: (
     '10': #d2c2f2,
     '20': #b698f3,
@@ -41,6 +44,7 @@ $brand: (
     '90': #302050
 );
 
+/// Accents (reds, greens…): `--fl-color-misc-<name>`.
 $misc: (
     'warm-red-subtle': #fbe4e0,
     'warm-red-lighter': #ff5f4d,
@@ -61,16 +65,16 @@ $misc: (
     'green-darker': #1ba62b
 );
 
-// Primitive palettes by token group: `--fl-color-<group>-<step>`.
+/// Primitive palettes by token group: `--fl-color-<group>-<step>`.
 $primitives: (
     'neutral': $neutral,
     'brand': $brand,
     'misc': $misc
 );
 
-// Semantic tokens: `--fl-color-<name>`, each a `(light, dark)` pair. A string value names a primitive
-// (`'neutral-90'` → `var(--fl-color-neutral-90)`); a colour value is used as is.
-// The dark values are the Figma semantic tokens; the light values mirror the neutral scale.
+/// Semantic tokens: `--fl-color-<name>`, each a `(light, dark)` pair. A string value names a primitive
+/// (`'neutral-90'` → `var(--fl-color-neutral-90)`); a colour value is used as is.
+/// The dark values are the Figma semantic tokens; the light values mirror the neutral scale.
 $semantic: (
     // Brand
     'brand-dark-subtle': ('brand-10', 'brand-50'),

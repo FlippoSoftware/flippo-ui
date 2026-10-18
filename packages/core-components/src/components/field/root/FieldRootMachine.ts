@@ -5,6 +5,7 @@ import { createDefaultForm } from '~@components/form/root/FormController';
 import { Connectable } from '~@lib/Connectable';
 import { EMPTY_OBJECT } from '~@lib/constants';
 import { OptionsStore } from '~@lib/OptionsStore';
+import { warn } from '~@lib/warn';
 import { mergeProps } from '~@props/mergeProps';
 import { Timeout } from '~@timers/Timeout';
 
@@ -498,6 +499,10 @@ export class FieldRootMachine extends Connectable {
             return () => {};
         }
 
+        if (process.env.NODE_ENV !== 'production') {
+            this.warnIfSecondControl(id);
+        }
+
         const flushSync = this.options.flushSync ?? runImmediately;
         const fields = this.form.fields;
 
@@ -521,7 +526,22 @@ export class FieldRootMachine extends Connectable {
 
         return () => {
             fields.delete(id);
+            this.controlIds.delete(id);
         };
+    }
+
+    /** The controls registered in the field (development only): a field holds one control. */
+    private readonly controlIds = new Set<string>();
+
+    private warnIfSecondControl(id: string) {
+        if (this.controlIds.size > 0 && !this.controlIds.has(id)) {
+            warn(
+                'A Field.Root holds one control, but a second one was registered in it: its label points at one control only,',
+                "both controls submit under the field's name, and its validity follows one of them.",
+                'Put each control in its own Field.Root and group them with a Fieldset (Fieldset.Legend for the shared label).'
+            );
+        }
+        this.controlIds.add(id);
     }
 
     /**

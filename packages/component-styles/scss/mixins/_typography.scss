@@ -1,9 +1,18 @@
-// Text styles: `@include fl.text('body', 'stronger')` gives the size, line height, letter spacing and weight of
-// `Body/Stronger`. The font family comes from the root (`--fl-font-family`).
+//// Text styles: the size, line height, letter spacing and weight of a style of the Figma file. The font family
+//// comes from the root (`--fl-font-family`).
+//// @group typography
+
 @use 'sass:list';
 @use 'sass:map';
 @use '../tokens/typography';
 
+/// A text style: `@include fl.text('body', 'stronger')` is `Body/Stronger`.
+/// @param {String} $style - A key of `$text-styles` (`body`, `heading-2`…).
+/// @param {String} $weight ['default'] - `weaker`, `default` or `stronger`.
+/// @example scss
+///   .card-title {
+///       @include fl.text('heading-3', 'stronger');
+///   }
 @mixin text($style, $weight: 'default') {
     @if not map.has-key(typography.$text-styles, $style) {
         @error 'Unknown text style `#{$style}`. Expected one of: #{map.keys(typography.$text-styles)}.';
@@ -18,6 +27,7 @@
     letter-spacing: var(--fl-text-#{$style}-letter-spacing);
 }
 
+/// The monospace font, without ligatures (code, keys).
 @mixin mono {
     font-family: var(--fl-font-family-mono);
     font-variant-ligatures: none;

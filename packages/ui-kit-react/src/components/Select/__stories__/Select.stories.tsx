@@ -6,26 +6,26 @@ import type { IconName } from '@flippo-software/component-styles/icons';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Field, Icon, Select } from '~@src';
-import { Grid, Page, Row, Section, variantControls } from '~@stories';
+import { Grid, Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe> & { disabled?: boolean };
 
-const FILTERS: [string, string][] = [
-    ['all', 'Все карточки'],
-    ['mine', 'Мои'],
-    ['free', 'Свободные'],
-    ['assigned', 'Назначенные'],
-    ['done', 'Готовые'],
-    ['repeat', 'На повторении']
+const FILTERS = (): [string, string][] => [
+    ['all', t('common.allCards')],
+    ['mine', t('common.mine')],
+    ['free', t('common.free')],
+    ['assigned', t('select.content.assigned')],
+    ['done', t('common.completed')],
+    ['repeat', t('select.content.underReview')]
 ];
 
 function Filter(props: Props & { defaultValue?: string | null; placeholder?: string }): React.JSX.Element {
     const { defaultValue = 'all', placeholder, ...rest } = props;
     return (
-        <Select.Root {...rest} defaultValue={defaultValue} items={Object.fromEntries(FILTERS)}>
-            <Select.Trigger aria-label='Фильтр карточек'>
+        <Select.Root {...rest} defaultValue={defaultValue} items={Object.fromEntries(FILTERS())}>
+            <Select.Trigger aria-label={t('select.labels.cardFilter')}>
                 <Select.Value placeholder={placeholder} />
                 <Select.Icon />
             </Select.Trigger>
@@ -33,7 +33,7 @@ function Filter(props: Props & { defaultValue?: string | null; placeholder?: str
                 <Select.Positioner>
                     <Select.Popup>
                         <Select.List>
-                            {FILTERS.map(([value, label]) => (
+                            {FILTERS().map(([value, label]) => (
                                 <Select.Item key={value} value={value} disabled={value === 'done'}>
                                     <Select.ItemText>{label}</Select.ItemText>
                                     <Select.ItemIndicator />
@@ -47,16 +47,16 @@ function Filter(props: Props & { defaultValue?: string | null; placeholder?: str
     );
 }
 
-const FOLDERS: [string, IconName, string][] = [
-    ['self', 'learn', 'Саморазвитие'],
-    ['term', 'folder', '2 семестр'],
-    ['exam', 'set', 'Экзамены']
+const FOLDERS = (): [string, IconName, string][] => [
+    ['self', 'learn', t('common.selfImprovement')],
+    ['term', 'folder', t('common.term2')],
+    ['exam', 'set', t('select.content.exams')]
 ];
 
 function Folder(): React.JSX.Element {
     return (
-        <Select.Root defaultValue='term' items={Object.fromEntries(FOLDERS.map(([value, , label]) => [value, label]))}>
-            <Select.Trigger aria-label='Папка'>
+        <Select.Root defaultValue='term' items={Object.fromEntries(FOLDERS().map(([value, , label]) => [value, label]))}>
+            <Select.Trigger aria-label={t('select.labels.folder')}>
                 <Select.Value />
                 <Select.Icon />
             </Select.Trigger>
@@ -64,8 +64,8 @@ function Folder(): React.JSX.Element {
                 <Select.Positioner>
                     <Select.Popup>
                         <Select.Group>
-                            <Select.GroupLabel>Ваши папки</Select.GroupLabel>
-                            {FOLDERS.map(([value, icon, label]) => (
+                            <Select.GroupLabel>{t('select.content.yourFolders')}</Select.GroupLabel>
+                            {FOLDERS().map(([value, icon, label]) => (
                                 <Select.Item key={value} value={value}>
                                     <Icon name={icon} />
                                     <Select.ItemText>{label}</Select.ItemText>
@@ -96,8 +96,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Выпадающий список: триггер выглядит как поле, список открывается под ним с отступом 8px. После выбора мышью триггер остаётся в фокусе, но подсвечивается только при фокусе с клавиатуры.'
+                component: 'select.description'
             }
         }
     }
@@ -110,7 +109,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Размеры' description='Large, Medium и Small, как у Input.'>
+            <Section title={t('select.sections.sizes.title')} description={t('select.sections.sizes.description')}>
                 {(['large', 'medium', 'small'] as const).map((size) => (
                     <Row key={size} label={size}>
                         <div className='sb-narrow'>
@@ -120,20 +119,20 @@ export const Gallery: Story = {
                 ))}
             </Section>
             <Section
-                title='Оформление и состояния'
-                description='Inverted — на карточке; плейсхолдер, пока ничего не выбрано.'
+                title={t('select.sections.lookAndStates.title')}
+                description={t('select.sections.lookAndStates.description')}
                 raised={true}
             >
                 <Grid min={260}>
                     <Filter appearance='inverted' />
-                    <Filter appearance='inverted' defaultValue={null} placeholder='Выберите фильтр' />
+                    <Filter appearance='inverted' defaultValue={null} placeholder={t('select.placeholders.chooseAFilter')} />
                     <Filter appearance='inverted' disabled={true} />
                 </Grid>
             </Section>
-            <Section title='С группой и иконками' description='Заголовок группы и иконка у каждого пункта.'>
+            <Section title={t('select.sections.withAGroupAnd.title')} description={t('select.sections.withAGroupAnd.description')}>
                 <div className='sb-narrow'>
                     <Field.Root>
-                        <Field.Label>Папка</Field.Label>
+                        <Field.Label>{t('select.content.folder')}</Field.Label>
                         <Folder />
                     </Field.Root>
                 </div>

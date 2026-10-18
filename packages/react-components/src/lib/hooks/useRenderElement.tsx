@@ -131,10 +131,8 @@ function evaluateRenderProp<T extends React.ElementType, S>(
         return renderElementSlot(props, state);
     }
 
-    if (element) {
-        if (typeof element === 'string') {
-            return renderTag(element, props);
-        }
+    if (element && typeof element === 'string') {
+        return renderTag(element, props);
     }
     // Unreachable, but the typings on `useRenderElement` need to be reworked
     // to annotate it correctly.

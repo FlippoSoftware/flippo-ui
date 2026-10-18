@@ -14,6 +14,12 @@ import { FieldPart } from '../root/FieldRootContext';
  * Attributes: `match` (show only for a given validity flag, e.g. `valueMissing`; `true`: always).
  */
 export class FieldErrorElement extends FieldPart.withAttributes({
+    /**
+     * Determines whether to show the error message according to the field’s
+     * [ValidityState](https://developer.mozilla.org/en-US/docs/Web/API/ValidityState).
+     * Specifying `true` will always show the error message, and lets external libraries
+     * control the visibility.
+     */
     match: 'string'
 }) {
     private readonly generatedId = createId('field-error');

@@ -1,0 +1,42 @@
+---
+title: Flippo UI
+description: Система компонентов Flippo — доступное поведение для React и веб-компонентов и стили дизайн-системы.
+---
+
+Flippo UI устроена слоями. Поведение каждого компонента написано один раз, без фреймворка, и подключено к React и к
+custom elements тонкими адаптерами. Оформление дизайн-системы — отдельный пакет токенов, тем и CSS, общий для обоих
+адаптеров. Берите нужный слой: готовые стилизованные компоненты или нестилизованные, чтобы оформить их самим.
+
+| Пакет | Что это | Для чего |
+| --- | --- | --- |
+| [`@flippo-software/ui-kit-react`](./ui-kit-react/index.mdx) | Стилизованные React-компоненты | React-приложение в стиле Flippo |
+| [`@flippo-software/ui-kit-web`](./ui-kit-web/index.mdx) | Стилизованные custom elements | Обычный HTML или любой фреймворк в стиле Flippo |
+| [`@flippo-software/react-components`](./react-components/index.mdx) | Нестилизованные React-компоненты с API Base UI | Своя дизайн-система на React |
+| [`@flippo-software/web-components`](./web-components/index.mdx) | Нестилизованные custom elements | Своя дизайн-система без фреймворка |
+| [`@flippo-software/component-styles`](./component-styles/index.mdx) | Токены, темы, CSS компонентов и рецепты классов | Оформление Flippo на своей разметке |
+| [`@flippo-software/core-components`](./core-components/index.mdx) | Машины состояний компонентов | Адаптер для другого фреймворка |
+| [`@flippo-software/store`](./store/index.mdx) | Реактивные сторы | Состояние машин или вашего кода |
+| [`@flippo-software/react-store`](./react-store/index.mdx) | Стор в React: `useStore`, `ReactStore` | React-приложения со стором |
+
+## Как слои связаны
+
+```text
+ui-kit-react ─┬─ react-components ── core-components ── store
+              └─ component-styles
+ui-kit-web ───┬─ web-components ──── core-components ── store
+              └─ component-styles
+react-store ──── store
+```
+
+- **Одинаковое поведение везде.** Диалог, селект или слайдер ведут себя одинаково в React и как custom element:
+  клавиатура, указатель, фокус, ARIA и позиционирование приходят из одной машины `core-components`.
+- **Состояние — в разметке.** Компоненты выставляют состояние data-атрибутами (`data-open`, `data-checked`,
+  `data-highlighted`…) и CSS-переменными (`--available-height`, `--transform-origin`…): оформляйте их любым CSS.
+- **Одно оформление для обоих китов.** В `component-styles` — токены (`--fl-color-*`, `--fl-spacing-*`…), светлая и
+  тёмная темы и классы всех компонентов; киты только применяют их.
+
+## С чего начать
+
+- [Установка](./installation.mdx): какие пакеты ставить в вашем случае.
+- [Темы и размеры](./ui-kit-react/theming.mdx): тема приложения, свои темы, размер контролов.
+- **Справочник API** каждого пакета: он генерируется из исходников, поэтому всегда совпадает с опубликованным кодом.

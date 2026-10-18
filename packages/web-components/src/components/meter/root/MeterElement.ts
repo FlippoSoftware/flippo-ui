@@ -16,11 +16,29 @@ import { MeterContext } from './MeterRootContext';
  * State attributes (on all parts): `data-indeterminate`, `data-metering`, `data-complete`.
  */
 export class MeterElement extends MachineElement.withAttributes({
+    /** The current value. */
     value: 'number',
+    /**
+     * The minimum value
+     * @default 0
+     */
     min: 'number',
+    /**
+     * The maximum value
+     * @default 100
+     */
     max: 'number',
+    /**
+     * The locale used by `Intl.NumberFormat` when formatting the value.
+     * Defaults to the user's runtime locale.
+     */
     locale: 'string',
+    /** Options to format the value. */
     format: property<Intl.NumberFormatOptions>(),
+    /**
+     * A function that returns a string value that provides a human-readable text alternative for `aria-valuenow`,
+     * the current value of the meter.
+     */
     getAriaValueText: property<MeterOptions['getAriaValueText']>()
 }) {
     private meter!: MeterMachine;

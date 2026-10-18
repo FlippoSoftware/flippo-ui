@@ -2,7 +2,7 @@ import { skeleton as recipe } from '@flippo-software/component-styles/skeleton';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { card, grid, page, renderExample, row, section, variantControls } from '~@stories';
+import { card, grid, page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -30,8 +30,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component:
-                    'Заглушка на время загрузки: прямоугольник или круг (`circle`) нужного размера; анимации pulse, shimmer или без неё.'
+                component: 'skeleton.descriptionWeb'
             }
         }
     }
@@ -45,8 +44,8 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Анимация',
-                'Pulse мерцает целиком, shimmer пробегает бликом, none — статичная заливка.',
+                t('skeleton.sections.animation.title'),
+                t('skeleton.sections.animation.description'),
                 ['pulse', 'shimmer', 'none']
                     .map((animation) =>
                         row(animation, block(`animation="${animation}" circle`, 40, 40) + block(`animation="${animation}"`, 200, 40))
@@ -54,8 +53,8 @@ export const Gallery: Story = {
                     .join('')
             ) +
                 section(
-                    'Карточки при загрузке',
-                    'Сетка наборов, пока данные не пришли.',
+                    t('skeleton.sections.cardsWhileLoading.title'),
+                    t('skeleton.sections.cardsWhileLoading.description'),
                     grid(setCardSkeleton() + setCardSkeleton('shimmer') + setCardSkeleton(), 220)
                 )
         )

@@ -3,7 +3,7 @@ import { tooltip as recipe } from '@flippo-software/component-styles/tooltip';
 import type { IconName } from '@flippo-software/component-styles/icons';
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { icon, page, renderExample, row, section, triggerButton, variantControls } from '~@stories';
+import { icon, page, renderExample, row, section, t, triggerButton, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -18,19 +18,18 @@ function hint(name: IconName, text: string, attributes = '', side = ''): string 
 
 const provider = (content: string) => `<demo-tooltip-provider>${content}</demo-tooltip-provider>`;
 
-const markup = provider(hint('shuffle', 'Перемешать карточки', 'data-story-target'));
+const markup = () => provider(hint('shuffle', t('tooltip.content.shuffleCards'), 'data-story-target'));
 
 const meta: Meta<Props> = {
     title: 'Overlays/Tooltip',
     args: {},
     argTypes: variantControls(recipe),
-    render: (args: Props) => renderExample(markup, args),
+    render: (args: Props) => renderExample(markup(), args),
     parameters: {
         docs: {
-            source: { code: markup, language: 'html' },
+            source: { code: markup(), language: 'html' },
             description: {
-                component:
-                    'Подсказка (Figma "Tooltip") при наведении и фокусе. Внутри `demo-tooltip-provider` соседние подсказки открываются сразу, без повторной задержки.'
+                component: 'tooltip.descriptionWeb'
             }
         }
     }
@@ -44,28 +43,28 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Панель действий',
-                'Проведите курсором по кнопкам: после первой подсказки остальные появляются без задержки.',
+                t('tooltip.sections.actionBar.title'),
+                t('tooltip.sections.actionBar.description'),
                 provider(
                     row(
                         'toolbar',
-                        hint('shuffle', 'Перемешать') +
-                            hint('hint', 'Подсказка') +
-                            hint('bookmark', 'В готовые') +
-                            hint('delete', 'Удалить')
+                        hint('shuffle', t('common.shuffle')) +
+                            hint('hint', t('common.hint')) +
+                            hint('bookmark', t('common.markAsDone')) +
+                            hint('delete', t('common.delete'))
                     )
                 )
             ) +
                 section(
-                    'Стороны',
-                    'Сверху, снизу, слева и справа от триггера.',
+                    t('tooltip.sections.sides.title'),
+                    t('tooltip.sections.sides.description'),
                     provider(
                         row(
                             'side',
-                            hint('chevron-up', 'Сверху', '', 'top') +
-                                hint('chevron-down', 'Снизу', '', 'bottom') +
-                                hint('chevron-left', 'Слева', '', 'left') +
-                                hint('chevron-right', 'Справа', '', 'right')
+                            hint('chevron-up', t('common.top'), '', 'top') +
+                                hint('chevron-down', t('common.bottom'), '', 'bottom') +
+                                hint('chevron-left', t('common.left'), '', 'left') +
+                                hint('chevron-right', t('common.right'), '', 'right')
                         )
                     )
                 )

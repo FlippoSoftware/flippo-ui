@@ -1,0 +1,12 @@
+import { Meta } from '@storybook/blocks';
+
+import { MarkdownPage } from '@flippo-software/workspace-tools/storybook';
+
+import en from './introduction.md?raw';
+import ru from './introduction.ru.md?raw';
+
+<Meta title="Overview/Getting started" />
+
+<img src="./flippo/hero.png" alt="" width="162" />
+
+<MarkdownPage en={en} ru={ru} />

@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { RadioCardRootDataAttributes } from '@flippo-software/core-components/radio-card';
 import { useOpenChangeComplete, useTransitionStatus } from '@flippo-software/react-hooks';
 
 import type { TransitionStatus } from '@flippo-software/react-hooks';
@@ -9,7 +10,6 @@ import { useRenderElement } from '~@lib/hooks';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useRadioCardRootContext } from '../root/RadioCardRootContext';
-import { RadioCardRootDataAttributes } from '../root/RadioCardRootDataAttributes';
 
 import type { RadioCardRoot } from '../root/RadioCardRoot';
 

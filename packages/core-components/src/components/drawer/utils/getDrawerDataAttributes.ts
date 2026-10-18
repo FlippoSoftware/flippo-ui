@@ -1,11 +1,11 @@
 import { DrawerGestureDataAttributes } from '../drag/DrawerGestureDataAttributes';
 
-import type { DrawerDirection, DrawerPopupDataAttributes } from '../store/DrawerStore';
+import type { DrawerDirection, DrawerPopupDataAttributeValues } from '../store/DrawerStore';
 
 /**
  * Data attributes describing the swipe direction and whether snap points are used.
  */
-export function getDrawerDataAttributes(snapPoints: boolean, swipeDirection: DrawerDirection): DrawerPopupDataAttributes {
+export function getDrawerDataAttributes(snapPoints: boolean, swipeDirection: DrawerDirection): DrawerPopupDataAttributeValues {
     return {
         [DrawerGestureDataAttributes.snapPoints]: snapPoints ? '' : null,
         [DrawerGestureDataAttributes.swipeDirectionRight]: swipeDirection === 'right' ? '' : null,

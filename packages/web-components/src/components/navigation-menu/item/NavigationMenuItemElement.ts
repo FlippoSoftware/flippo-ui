@@ -10,6 +10,11 @@ import { NavigationMenuItemContext, NavigationMenuPart } from '../root/Navigatio
  * Attributes: `value` (an id by default).
  */
 export class NavigationMenuItemElement extends NavigationMenuPart.withAttributes({
+    /**
+     * A unique value that identifies this navigation menu item.
+     * If no value is provided, a unique ID will be generated automatically.
+     * Use when controlling the navigation menu programmatically.
+     */
     value: 'string'
 }) {
     private readonly fallbackValue = createId('navigation-menu-item');

@@ -91,6 +91,10 @@ export const SELECT_GROUP = [SelectGroupContext] as const;
  * Base of the arrows that scroll the list while hovered, shown while it can scroll that way.
  */
 export abstract class SelectScrollArrowPart extends SelectPositionedPart.withAttributes({
+    /**
+     * Whether to keep the arrow in the DOM while the list cannot be scrolled in its direction.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     protected abstract readonly direction: 'up' | 'down';

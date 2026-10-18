@@ -18,7 +18,21 @@ import { FormContext, type FormSubmitDetail } from './FormRootContext';
  * script).
  */
 export class FormElement extends MachineElement.withAttributes({
+    /**
+     * Determines when the form should be validated.
+     * The `validation-mode` attribute on `<prefix>-field` takes precedence over this.
+     *
+     * - `onSubmit` (default): validates the field when the form is submitted, afterwards fields will re-validate on change.
+     * - `onBlur`: validates a field when it loses focus.
+     * - `onChange`: validates the field on every change to its value.
+     * @default 'onSubmit'
+     */
     'validation-mode': ['onSubmit', 'onBlur', 'onChange'],
+    /**
+     * Validation errors returned externally, typically after submission by a server or a form action.
+     * This should be an object where keys correspond to the `name` attribute on `<prefix>-field`,
+     * and values correspond to error(s) related to that field.
+     */
     errors: property<FormErrors>()
 }) {
     private form!: FormController;

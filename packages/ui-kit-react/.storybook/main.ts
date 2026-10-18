@@ -1,14 +1,18 @@
 import type { StorybookConfig } from '@storybook/react-vite';
 
 import { clientConditions, stylesAliases } from '@flippo-software/workspace-tools';
+import { brandAssets } from '@flippo-software/workspace-tools/storybook/theme';
 
 import { alias } from '../aliases';
 
 const config: StorybookConfig = {
     framework: '@storybook/react-vite',
-    stories: ['../src/**/__stories__/*.stories.tsx'],
+    // The overview pages (theirs, and the tokens page shared by both kits), then the stories next to the components.
+    stories: ['./pages/*.mdx', '../../../tools/storybook/pages/*.mdx', '../src/**/__stories__/*.stories.tsx'],
     addons: ['@storybook/addon-essentials'],
     core: { disableTelemetry: true },
+    // The logo and the favicon of the theme (`manager.ts`, `manager-head.html`).
+    staticDirs: [brandAssets],
     typescript: { reactDocgen: false },
     async viteFinal(config) {
         // component-styles from its sources: style and recipe changes reload without building it.

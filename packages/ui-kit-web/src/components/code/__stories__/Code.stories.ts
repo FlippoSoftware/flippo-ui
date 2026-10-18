@@ -2,7 +2,7 @@ import { code as recipe } from '@flippo-software/component-styles/code';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { page, renderExample, row, section, variantControls } from '~@stories';
+import { page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -20,7 +20,7 @@ const meta: Meta<Props> = {
     parameters: {
         docs: {
             source: { code: markup, language: 'html' },
-            description: { component: 'Код внутри текста: моноширинный шрифт и подложка. Размер 1–9 и четыре варианта.' }
+            description: { component: 'code.description' }
         }
     }
 };
@@ -33,15 +33,19 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Варианты',
+                t('code.sections.variants.title'),
                 '',
                 ['soft', 'solid', 'outline', 'ghost'].map((variant) => row(variant, code('npm run build', `variant="${variant}"`))).join('')
             ) +
-                section('Размеры', '', row('size', ['1', '2', '3', '4', '5'].map((size) => code('map()', `size="${size}"`)).join(''))) +
                 section(
-                    'В тексте',
+                    t('code.sections.sizes.title'),
                     '',
-                    `<demo-text as-child><p>Метод ${code('Array.prototype.map')} возвращает новый массив, а ${code('forEach')} — ${code('undefined')}.</p></demo-text>`
+                    row('size', ['1', '2', '3', '4', '5'].map((size) => code('map()', `size="${size}"`)).join(''))
+                ) +
+                section(
+                    t('code.sections.inAText.title'),
+                    '',
+                    `<demo-text as-child><p>${t('code.content.theMethod')} ${code('Array.prototype.map')} ${t('code.content.returnsANewArray')} ${code('forEach')} — ${code('undefined')}.</p></demo-text>`
                 )
         )
 };

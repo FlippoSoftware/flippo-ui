@@ -5,7 +5,7 @@ import { em as recipe } from '@flippo-software/component-styles/em';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Em, Text } from '~@src';
-import { variantControls } from '~@stories';
+import { t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -15,7 +15,7 @@ function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example'>
             <Text>
-                Внутри абзаца: <Em {...args}>выделенный фрагмент</Em> и обычный текст.
+                {t('common.insideAParagraph')} <Em {...args}>{t('common.aHighlightedFragment')}</Em> {t('common.andPlainText')}
             </Text>
         </div>
     );
@@ -26,7 +26,7 @@ const meta = {
     component: Example,
     args: {},
     argTypes: variantControls(recipe),
-    parameters: { docs: { description: { component: 'Логическое ударение: курсив.' } } }
+    parameters: { docs: { description: { component: 'em.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -37,7 +37,8 @@ export const InText: Story = {
     render: () => (
         <div className='story-example sb-medium'>
             <Text>
-                Карточку нужно повторить <Em>сегодня</Em>, иначе интервал собьётся.
+                {t('em.content.theCardHasTo')} <Em>{t('em.content.today')}</Em>
+                {t('em.content.orTheIntervalIs')}
             </Text>
         </div>
     )

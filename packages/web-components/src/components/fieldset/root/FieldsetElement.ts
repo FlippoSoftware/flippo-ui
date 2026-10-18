@@ -16,6 +16,10 @@ import { FieldsetContext } from './FieldsetRootContext';
  * State attributes: `data-disabled`.
  */
 export class FieldsetElement extends MachineElement.withAttributes({
+    /**
+     * Whether the fieldset and every control in it ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private fieldset!: FieldsetMachine;

@@ -67,6 +67,53 @@ family's entry, then the kit's built-in defaults. Nested providers merge with th
 part by part. `DefaultProps` types the config from the kit's exports, so a wrong family, prop or value is a type
 error. The same config works for `@flippo-software/ui-kit-web` (`define({ defaults })`).
 
+## Theme and control size
+
+`FlippoProvider` sets the theme and the control size of the application (or of a part of it) and takes the default
+props too (`defaults`).
+
+```tsx
+import { FlippoProvider, useControlSize, useTheme } from '@flippo-software/ui-kit-react';
+
+<FlippoProvider theme={theme} onThemeChange={saveTheme} themes={{ sepia: 'light' }} size='small'>
+    <App />
+</FlippoProvider>;
+
+const { theme, resolvedTheme, colorScheme, themes, setTheme } = useTheme(); // 'system', 'dark', 'dark', …
+const { size, height } = useControlSize(); // 'small', 40
+const select = useControlSize('select'); // the select's size (its default props, else the global one), and `global`
+```
+
+- **Theme.** `system` (the default), `light`, `dark` or a theme of your own (a `[data-theme]` rule, see
+  `component-styles`, registered in `themes` with its colour scheme). The outermost provider puts `data-theme` on
+  `<html>` (none for `system`); a nested provider with a theme of its own, or one with `scoped`, puts it on a wrapper
+  (`display: contents`), and the kit's popups in portals keep it. A provider without `theme`/`defaultTheme` leaves the
+  theme alone. Outside a provider `useTheme` follows the system.
+- **Control size.** The families with a control size (`CONTROL_FAMILIES`: button, input, select, checkbox…) take
+  the provider's `size` unless their own is set: a prop, then the default props, then the provider. Other families
+  with a `size` (a dialog's width, an avatar) keep theirs. Checkboxes, radios and switches with their `Label` take
+  the height of a control row (40/48/56), so a row of mixed controls aligned at the top looks centred; so do a
+  `Toggle` and a `SegmentedControl` through their block margins. `compact` (on the label, the toggle, the
+  segmented control) drops it; toggles in a `ToggleGroup` have none.
+- **A stored choice without a flash.** `storageKey` keeps the theme chosen with `setTheme` in `localStorage` and
+  starts from it. The provider runs after hydration, so render `<ThemeScript>` with the same key in the `<head>`: it
+  puts the stored theme on `<html>` before the first paint.
+
+  ```tsx
+  <html lang='ru' suppressHydrationWarning>
+      <head>
+          <ThemeScript storageKey='flippo-theme' nonce={nonce} />
+      </head>
+      <body>
+          <FlippoProvider storageKey='flippo-theme'>…</FlippoProvider>
+      </body>
+  </html>
+  ```
+
+  (`suppressHydrationWarning` on `<html>`: the script changes its attribute before React hydrates.) If the server
+  should know the theme itself, keep it in a cookie instead, render `data-theme` on `<html>` from it and control the
+  provider with `theme` and `onThemeChange`.
+
 ## Inputs
 
 The headless Input and Textarea roots provide control state. Their Slot renders the native control; Body renders its visual container. Control is an alias for Slot. Field.Control is the convenience form that supplies a native slot when no children are given.
@@ -114,7 +161,7 @@ All 43 original recipe families are included, including Autocomplete, Combobox, 
 This package is part of the `flippo-ui` pnpm workspace (see the root README): install and run the checks from the root
 (`pnpm install`, `pnpm check`), or one package with `pnpm --filter @flippo-software/ui-kit-react <script>`. It reads
 `component-styles` from its sources in Storybook, tests and typecheck, so style changes show up without a build.
-The behaviour packages it uses (react-components, core-components, react-hooks, store) come from the workspace and their `dist`:
+The behaviour packages it uses (react-components, core-components, store) come from the workspace and their `dist`:
 rebuild them after a change (`pnpm build`, or keep `pnpm dev` running at the root).
 
 ## Stories and tests
@@ -126,7 +173,7 @@ Stories live in `src/components/<name>/__stories__/`, tests in `__tests__/` fold
 ## Storybook
 
 Each component keeps its stories next to it, in `src/components/<name>/__stories__/` (one CSF page for each of the 63
-public component families), in Russian, with the same
+public component families), in English and Russian (the toolbar switches the language), with the same
 catalog groups and content in both packages. Each page has a `Default` story with Controls for the recipe variants,
 and a `Gallery` (some also `Examples`) laid out like the Figma component sheets: sections of labelled rows with the
 sizes, variants and states, and realistic compositions from the Flippo screens. The gallery layout (`src/__stories__`, imported as `~@stories`)

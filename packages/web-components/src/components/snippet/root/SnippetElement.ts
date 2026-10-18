@@ -14,7 +14,15 @@ import { SnippetContext } from './SnippetRootContext';
  * State attributes: `data-disable-copy`.
  */
 export class SnippetElement extends MachineElement.withAttributes({
+    /**
+     * The symbol to display in the snippet.
+     * @default '$'
+     */
     symbol: 'string',
+    /**
+     * Whether to disable the copy functionality.
+     * @default false
+     */
     'disable-copy': 'boolean'
 }) {
     private snippet!: SnippetMachine;

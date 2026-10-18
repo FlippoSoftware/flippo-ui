@@ -5,7 +5,7 @@ import { menu as recipe } from '@flippo-software/component-styles/menu';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Icon, Menu } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -15,32 +15,37 @@ function CardMenu(props: Props & { onAction?: (action: string) => void }): React
     const { onAction = () => undefined, ...rest } = props;
     return (
         <Menu.Root {...rest}>
-            <Menu.Trigger render={<Button variant='label' iconOnly={true} aria-label='Действия с карточкой' />}>
+            <Menu.Trigger render={<Button variant='label' iconOnly={true} aria-label={t('menu.labels.cardActions')} />}>
                 <Icon name='dots-vertical' />
             </Menu.Trigger>
             <Menu.Portal>
                 <Menu.Positioner>
                     <Menu.Popup>
-                        <Menu.Item onClick={() => onAction('Редактирование')}>
+                        <Menu.Item onClick={() => onAction(t('menu.content.editing'))}>
                             <Icon name='pencil' />
-                            Редактировать
+
+                            {t('menu.content.edit')}
                             <Menu.ItemEnd>E</Menu.ItemEnd>
                         </Menu.Item>
-                        <Menu.Item onClick={() => onAction('Дублирование')}>
+                        <Menu.Item onClick={() => onAction(t('menu.content.duplicating'))}>
                             <Icon name='copy' />
-                            Дублировать
+
+                            {t('menu.content.duplicate')}
                         </Menu.Item>
-                        <Menu.Item onClick={() => onAction('Назначение')}>
+                        <Menu.Item onClick={() => onAction(t('menu.content.assignment'))}>
                             <Icon name='person-add' />
-                            Назначить себе
+
+                            {t('menu.content.assignToMe')}
                         </Menu.Item>
                         <Menu.Item disabled={true}>
-                            <Icon name='bookmark' />В список готовых
+                            <Icon name='bookmark' />
+                            {t('menu.content.moveToDone')}
                         </Menu.Item>
                         <Menu.Separator />
-                        <Menu.Item tone='destructive' onClick={() => onAction('Удаление')}>
+                        <Menu.Item tone='destructive' onClick={() => onAction(t('menu.content.deleting'))}>
                             <Icon name='delete' />
-                            Удалить
+
+                            {t('common.delete')}
                         </Menu.Item>
                     </Menu.Popup>
                 </Menu.Positioner>
@@ -69,8 +74,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Меню действий (Figma "Menu Item"): обычные и опасные пункты, флажки, переключатели, группы и вложенные меню. Подсветка следует за курсором и стрелками.'
+                component: 'menu.description'
             }
         }
     }
@@ -85,33 +89,33 @@ function ViewMenu(): React.JSX.Element {
     return (
         <Menu.Root>
             <Menu.Trigger render={<Button variant='secondary' />}>
-                Вид
+                {t('common.view')}
                 <Icon name='chevron-down' />
             </Menu.Trigger>
             <Menu.Portal>
                 <Menu.Positioner>
                     <Menu.Popup>
                         <Menu.Group>
-                            <Menu.GroupLabel>Показывать</Menu.GroupLabel>
+                            <Menu.GroupLabel>{t('menu.content.show')}</Menu.GroupLabel>
                             <Menu.CheckboxItem defaultChecked={true}>
-                                Подсказки
+                                {t('common.hints')}
                                 <Menu.CheckboxItemIndicator />
                             </Menu.CheckboxItem>
                             <Menu.CheckboxItem>
-                                Пустые карточки
+                                {t('menu.content.emptyCards')}
                                 <Menu.CheckboxItemIndicator />
                             </Menu.CheckboxItem>
                         </Menu.Group>
                         <Menu.Separator />
                         <Menu.Group>
-                            <Menu.GroupLabel>Сортировка</Menu.GroupLabel>
+                            <Menu.GroupLabel>{t('menu.content.sort')}</Menu.GroupLabel>
                             <Menu.RadioGroup value={sort} onValueChange={setSort}>
                                 <Menu.RadioItem value='recent'>
-                                    Недавние
+                                    {t('menu.content.recent')}
                                     <Menu.RadioItemIndicator />
                                 </Menu.RadioItem>
                                 <Menu.RadioItem value='alpha'>
-                                    По алфавиту
+                                    {t('menu.content.alphabetical')}
                                     <Menu.RadioItemIndicator />
                                 </Menu.RadioItem>
                             </Menu.RadioGroup>
@@ -120,7 +124,8 @@ function ViewMenu(): React.JSX.Element {
                         <Menu.SubmenuRoot>
                             <Menu.SubmenuTrigger>
                                 <Icon name='folder' />
-                                Переместить в папку
+
+                                {t('menu.content.moveToAFolder')}
                                 <Menu.ItemEnd>
                                     <Icon name='chevron-right' />
                                 </Menu.ItemEnd>
@@ -128,8 +133,8 @@ function ViewMenu(): React.JSX.Element {
                             <Menu.Portal>
                                 <Menu.Positioner>
                                     <Menu.Popup>
-                                        <Menu.Item>Саморазвитие</Menu.Item>
-                                        <Menu.Item>2 семестр</Menu.Item>
+                                        <Menu.Item>{t('common.selfImprovement')}</Menu.Item>
+                                        <Menu.Item>{t('common.term2')}</Menu.Item>
                                     </Menu.Popup>
                                 </Menu.Positioner>
                             </Menu.Portal>
@@ -144,12 +149,15 @@ function ViewMenu(): React.JSX.Element {
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Действия' description='Иконки, сочетание клавиш, недоступный и опасный пункты.'>
+            <Section title={t('menu.sections.actions.title')} description={t('menu.sections.actions.description')}>
                 <Row label='card menu'>
                     <CardMenu />
                 </Row>
             </Section>
-            <Section title='Флажки, выбор и вложенное меню' description='Группы с заголовками, CheckboxItem, RadioGroup и подменю.'>
+            <Section
+                title={t('menu.sections.checkboxesChoiceAndA.title')}
+                description={t('menu.sections.checkboxesChoiceAndA.description')}
+            >
                 <Row label='view'>
                     <ViewMenu />
                 </Row>

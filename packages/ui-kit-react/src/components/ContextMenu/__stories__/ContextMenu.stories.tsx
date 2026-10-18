@@ -5,7 +5,7 @@ import { contextMenu as recipe } from '@flippo-software/component-styles/context
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { ContextMenu, Icon } from '~@src';
-import { Page, Section, variantControls } from '~@stories';
+import { Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -18,30 +18,35 @@ function SetCard(props: Props & { onAction?: (action: string) => void }): React.
             <ContextMenu.Trigger className='sb-card' style={{ cursor: 'context-menu' }}>
                 <span className='sb-caption' style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--fl-color-set)' }}>
                     <Icon name='set' />
-                    32 карточки
+
+                    {t('contextMenu.content.32Cards')}
                 </span>
-                <strong>Экзамен Законы UX</strong>
-                <span className='sb-caption'>Нажмите правой кнопкой мыши или долго удерживайте</span>
+                <strong>{t('common.uxLawsExam')}</strong>
+                <span className='sb-caption'>{t('contextMenu.content.rightClickOrLong')}</span>
             </ContextMenu.Trigger>
             <ContextMenu.Portal>
                 <ContextMenu.Positioner>
                     <ContextMenu.Popup>
-                        <ContextMenu.Item onClick={() => onAction('Открыт')}>
+                        <ContextMenu.Item onClick={() => onAction(t('contextMenu.content.opened'))}>
                             <Icon name='preview' />
-                            Открыть
+
+                            {t('contextMenu.content.open')}
                         </ContextMenu.Item>
-                        <ContextMenu.Item onClick={() => onAction('Переименование')}>
+                        <ContextMenu.Item onClick={() => onAction(t('contextMenu.content.renaming'))}>
                             <Icon name='pencil' />
-                            Переименовать
+
+                            {t('common.rename')}
                         </ContextMenu.Item>
-                        <ContextMenu.Item onClick={() => onAction('Ссылка скопирована')}>
+                        <ContextMenu.Item onClick={() => onAction(t('common.linkCopied'))}>
                             <Icon name='link' />
-                            Скопировать ссылку
+
+                            {t('contextMenu.content.copyTheLink')}
                         </ContextMenu.Item>
                         <ContextMenu.Separator />
-                        <ContextMenu.Item tone='destructive' onClick={() => onAction('Удалён')}>
+                        <ContextMenu.Item tone='destructive' onClick={() => onAction(t('contextMenu.content.deleted'))}>
                             <Icon name='delete' />
-                            Удалить набор
+
+                            {t('common.deleteTheSet')}
                         </ContextMenu.Item>
                     </ContextMenu.Popup>
                 </ContextMenu.Positioner>
@@ -70,7 +75,7 @@ const meta = {
     args: {},
     argTypes: variantControls(recipe),
     parameters: {
-        docs: { description: { component: 'Контекстное меню: открывается у курсора по правой кнопке мыши или долгому касанию.' } }
+        docs: { description: { component: 'contextMenu.description' } }
     }
 } satisfies Meta<typeof Example>;
 export default meta;
@@ -81,7 +86,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Карточка набора' description='Меню действий набора на правой кнопке мыши.'>
+            <Section title={t('contextMenu.sections.setCard.title')} description={t('contextMenu.sections.setCard.description')}>
                 <div className='sb-narrow'>
                     <SetCard />
                 </div>

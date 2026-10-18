@@ -13,6 +13,7 @@ import { SelectPart } from '../root/SelectRootContext';
  * State attributes: `data-popup-open`, `data-disabled`, `data-readonly`, `data-placeholder`, and those of the field.
  */
 export class SelectTriggerElement extends SelectPart.withAttributes({
+    /** Whether the component should ignore user interaction. */
     disabled: 'boolean'
 }) {
     private trigger!: SelectTriggerMachine;

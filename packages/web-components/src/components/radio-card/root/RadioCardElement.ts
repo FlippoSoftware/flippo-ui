@@ -21,9 +21,13 @@ import { RadioCardContext } from './RadioCardRootContext';
  * of the field.
  */
 export class RadioCardElement extends ControlElement.withAttributes({
+    /** The unique identifying value of this card in the group. */
     value: 'string',
+    /** Whether the component should ignore user interaction. */
     disabled: 'boolean',
+    /** Whether the user should be unable to change the selection. */
     'read-only': 'boolean',
+    /** Whether the user must choose a value before submitting a form. */
     required: 'boolean'
 }) {
     private radio!: RadioCardMachine;

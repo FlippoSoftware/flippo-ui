@@ -3,27 +3,27 @@ import type * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, DefaultPropsProvider, Icon, Input, SegmentedControl, Select } from '~@src';
-import { Page, Row, Section } from '~@stories';
+import { Page, Row, Section, t } from '~@stories';
 
 import type { DefaultProps } from '~@src';
 
 type Size = 'small' | 'medium' | 'large';
 type Props = { size: Size; appearance: 'light' | 'inverted'; buttonVariant: 'primary' | 'secondary' | 'outlined' };
 
-const FILTERS = { all: 'Все карточки', mine: 'Мои', done: 'Готовые' };
+const FILTERS = () => ({ all: t('common.allCards'), mine: t('common.mine'), done: t('common.completed') });
 
 /** Components without size or look props: they take them from the provider. */
 function Screen(): React.JSX.Element {
     return (
         <div className='sb-items sb-items--column' style={{ alignItems: 'stretch', maxInlineSize: 420 }}>
-            <Input.Root placeholder='Поиск наборов'>
+            <Input.Root placeholder={t('common.searchSets')}>
                 <Input.Body>
                     <Input.Icon aria-hidden='true' />
-                    <Input.Slot aria-label='Поиск наборов' />
+                    <Input.Slot aria-label={t('common.searchSets')} />
                 </Input.Body>
             </Input.Root>
-            <Select.Root defaultValue='all' items={FILTERS}>
-                <Select.Trigger aria-label='Фильтр'>
+            <Select.Root defaultValue='all' items={FILTERS()}>
+                <Select.Trigger aria-label={t('common.filter')}>
                     <Select.Value />
                     <Select.Icon />
                 </Select.Trigger>
@@ -31,7 +31,7 @@ function Screen(): React.JSX.Element {
                     <Select.Positioner>
                         <Select.Popup>
                             <Select.List>
-                                {Object.entries(FILTERS).map(([value, label]) => (
+                                {Object.entries(FILTERS()).map(([value, label]) => (
                                     <Select.Item key={value} value={value}>
                                         <Select.ItemText>{label}</Select.ItemText>
                                         <Select.ItemIndicator />
@@ -42,17 +42,18 @@ function Screen(): React.JSX.Element {
                     </Select.Positioner>
                 </Select.Portal>
             </Select.Root>
-            <SegmentedControl.Root defaultValue='week' aria-label='Период'>
-                <SegmentedControl.Item value='day'>День</SegmentedControl.Item>
-                <SegmentedControl.Item value='week'>Неделя</SegmentedControl.Item>
-                <SegmentedControl.Item value='month'>Месяц</SegmentedControl.Item>
+            <SegmentedControl.Root defaultValue='week' aria-label={t('common.period')}>
+                <SegmentedControl.Item value='day'>{t('common.day')}</SegmentedControl.Item>
+                <SegmentedControl.Item value='week'>{t('common.week')}</SegmentedControl.Item>
+                <SegmentedControl.Item value='month'>{t('common.month')}</SegmentedControl.Item>
             </SegmentedControl.Root>
             <div className='sb-items'>
                 <Button>
                     <Icon name='plus' />
-                    Создать набор
+
+                    {t('common.createASet')}
                 </Button>
-                <Button variant='label'>Отмена</Button>
+                <Button variant='label'>{t('common.cancel')}</Button>
             </div>
         </div>
     );
@@ -86,8 +87,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    '`DefaultPropsProvider` задаёт props по умолчанию для семейств кита: `{ button: { size }, select: { size, positioner: { sideOffset } } }`. Ключ семейства — имя компонента с маленькой буквы, ключ части — имя части (`positioner`, `trigger`). Порядок: prop на компоненте → запись части → то, что передаёт корень → запись семейства → встроенные умолчания. Вложенные провайдеры сливаются с внешними.'
+                component: 'defaultProps.description'
             }
         }
     }
@@ -100,7 +100,10 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Один экран, разные настройки' description='Компоненты не задают ни размер, ни вид — их даёт провайдер.'>
+            <Section
+                title={t('defaultProps.sections.oneScreenDifferentSettings.title')}
+                description={t('defaultProps.sections.oneScreenDifferentSettings.description')}
+            >
                 {(['small', 'large'] as const).map((size) => (
                     <Row key={size} label={size}>
                         <DefaultPropsProvider
@@ -112,18 +115,18 @@ export const Gallery: Story = {
                 ))}
             </Section>
             <Section
-                title='Вложенный провайдер'
-                description='Внешний задаёт размер, внутренний — вид кнопок только для своей области; prop на компоненте всё равно главнее.'
+                title={t('defaultProps.sections.nestedProvider.title')}
+                description={t('defaultProps.sections.nestedProvider.description')}
             >
                 <DefaultPropsProvider defaults={{ button: { size: 'small' } }}>
                     <Row label='outer'>
-                        <Button>Сохранить</Button>
-                        <Button size='large'>size=&quot;large&quot; на кнопке</Button>
+                        <Button>{t('common.save')}</Button>
+                        <Button size='large'>{t('defaultProps.content.sizeQuotLargeQuot')}</Button>
                     </Row>
                     <DefaultPropsProvider defaults={{ button: { variant: 'outlined' } }}>
                         <Row label='inner'>
-                            <Button>Сохранить</Button>
-                            <Button>Отмена</Button>
+                            <Button>{t('common.save')}</Button>
+                            <Button>{t('common.cancel')}</Button>
                         </Row>
                     </DefaultPropsProvider>
                 </DefaultPropsProvider>

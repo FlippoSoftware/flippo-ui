@@ -14,7 +14,13 @@ import type { PopupStoreState } from './popupStoreState';
 import type { AnyPopupStore } from './popupTriggers';
 
 export enum PopupViewportCssVars {
+    /**
+     * The width of the popup content, while the viewport animates a change of size.
+     */
     popupWidth = '--popup-width',
+    /**
+     * The height of the popup content, while the viewport animates a change of size.
+     */
     popupHeight = '--popup-height'
 }
 

@@ -12,6 +12,7 @@ import type {
 import type { AttributeSpecs, AttributeType } from '@flippo-software/web-components';
 
 import { configuredProp } from './defaultProps';
+import { fallbackSize } from './provider';
 
 export type Recipe = ((props: never) => string | Record<string, string>) & {
     readonly variantKeys: readonly string[];
@@ -150,11 +151,14 @@ function readVariants(element: Element, recipe: Recipe): Record<string, unknown>
     }
     return selected;
 }
-/** The variants configured for the element's family: the fallback of a part rendered without its root. */
-function familyVariants(element: HTMLElement, recipe: Recipe): Record<string, unknown> {
+/**
+ * The variants configured for the element's family, then the control size of its subtree: the fallback of a part
+ * rendered without its root.
+ */
+function familyVariants(element: HTMLElement, recipe: Recipe, family: string): Record<string, unknown> {
     const selected: Record<string, unknown> = {};
     for (const key of recipe.variantKeys) {
-        const value = configuredProp(element, key, true);
+        const value = configuredProp(element, key, true) ?? (key === 'size' ? fallbackSize(element, family) : undefined);
         if (value !== undefined) selected[key] = value;
     }
     return selected;
@@ -250,7 +254,7 @@ export function styled<B extends Constructor, R extends Recipe, K extends string
         protected override getProps(target?: HTMLElement): ElementProps {
             const props = (Base.prototype as unknown as { getProps(target?: HTMLElement): ElementProps }).getProps.call(this, target);
             const ancestor = root ? null : familyRoot(this, family);
-            const inherited = ancestor ? readVariants(ancestor, recipe) : root ? {} : familyVariants(this, recipe);
+            const inherited = ancestor ? readVariants(ancestor, recipe) : root ? {} : familyVariants(this, recipe, family);
             const selected = { ...inherited, ...readVariants(this, recipe) };
             const classes = options.bareAsChild === true && this.asChild ? undefined : slotClasses(recipe(selected as never), slot);
             const style = layout ? { ...layoutStyle(this, layout), ...props.style } : props.style;
@@ -258,7 +262,7 @@ export function styled<B extends Constructor, R extends Recipe, K extends string
         }
     }
     // Absent attributes fall back to the default props (`define({ defaults })`, `<prefix>-default-props`), then to the
-    // kit's own defaults.
+    // kit's own defaults; a control's size to the control size of its subtree (`<prefix>-provider size`, `define({ size })`).
     const builtin: Record<string, (element: HTMLElement) => unknown> = {
         ...Object.fromEntries(Object.entries(options.defaults ?? {}).map(([key, value]) => [key, () => value])),
         ...options.compute
@@ -268,7 +272,12 @@ export function styled<B extends Constructor, R extends Recipe, K extends string
         ...Object.keys(builtin)
     ]);
     for (const key of keys) {
-        defineDefault(StyledElement.prototype, key, (element) => configuredProp(element, key) ?? builtin[key]?.(element));
+        defineDefault(
+            StyledElement.prototype,
+            key,
+            (element) =>
+                configuredProp(element, key) ?? builtin[key]?.(element) ?? (key === 'size' ? fallbackSize(element, family) : undefined)
+        );
     }
     return StyledElement as unknown as StyledConstructor<B, R, K>;
 }

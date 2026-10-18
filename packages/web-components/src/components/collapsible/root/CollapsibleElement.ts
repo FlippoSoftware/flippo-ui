@@ -17,8 +17,23 @@ import { CollapsibleContext, type CollapsibleOpenChangeDetail } from './Collapsi
  * State attributes: `data-open`/`data-closed`, `data-disabled`, transition attributes.
  */
 export class CollapsibleElement extends MachineElement.withAttributes({
+    /**
+     * Whether the collapsible panel is currently open.
+     *
+     * To render an uncontrolled collapsible, use the `default-open` attribute instead.
+     */
     open: 'boolean',
+    /**
+     * Whether the collapsible panel is initially open.
+     *
+     * To render a controlled collapsible, use the `open` attribute instead.
+     * @default false
+     */
     'default-open': 'boolean',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private collapsible!: CollapsibleMachine;

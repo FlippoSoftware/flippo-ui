@@ -19,6 +19,10 @@ abstract class CheckboxCardPart extends ContextPart<typeof CHECKBOX_CARD_CARD> {
  * State attributes: those of the card, and transition attributes.
  */
 export class CheckboxCardIndicatorElement extends CheckboxCardPart.withAttributes({
+    /**
+     * Whether to keep the element in the DOM when the card is not checked.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     private indicator!: MenuItemIndicatorMachine;

@@ -19,9 +19,26 @@ import { MenubarContext } from './MenubarRootContext';
  * State attributes: `data-orientation`, `data-modal`, `data-has-submenu-open`.
  */
 export class MenubarElement extends MachineElement.withAttributes({
+    /**
+     * The orientation of the menubar.
+     * @default 'horizontal'
+     */
     orientation: ['horizontal', 'vertical'],
+    /**
+     * Whether to loop keyboard focus back to the first item
+     * when the end of the list is reached while using the arrow keys.
+     * @default true
+     */
     'loop-focus': 'boolean',
+    /**
+     * Whether the menubar is modal.
+     * @default true
+     */
     modal: 'boolean',
+    /**
+     * Whether the whole menubar is disabled.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private menubar!: MenubarMachine;

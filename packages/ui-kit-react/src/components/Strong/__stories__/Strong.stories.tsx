@@ -5,7 +5,7 @@ import { strong as recipe } from '@flippo-software/component-styles/strong';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Strong, Text } from '~@src';
-import { variantControls } from '~@stories';
+import { t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -15,7 +15,7 @@ function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example'>
             <Text>
-                Внутри абзаца: <Strong {...args}>выделенный фрагмент</Strong> и обычный текст.
+                {t('common.insideAParagraph')} <Strong {...args}>{t('common.aHighlightedFragment')}</Strong> {t('common.andPlainText')}
             </Text>
         </div>
     );
@@ -26,7 +26,7 @@ const meta = {
     component: Example,
     args: {},
     argTypes: variantControls(recipe),
-    parameters: { docs: { description: { component: 'Важное в тексте: насыщенное начертание.' } } }
+    parameters: { docs: { description: { component: 'strong.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -37,7 +37,7 @@ export const InText: Story = {
     render: () => (
         <div className='story-example sb-medium'>
             <Text>
-                Удалённый набор <Strong>нельзя восстановить</Strong>.
+                {t('strong.content.aDeletedSet')} <Strong>{t('strong.content.cannotBeRestored')}</Strong>.
             </Text>
         </div>
     )

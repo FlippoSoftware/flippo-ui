@@ -5,7 +5,7 @@ import { flex as recipe } from '@flippo-software/component-styles/flex';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Box, Flex } from '~@src';
-import { Page, Resizable, Row, Section, variantControls } from '~@stories';
+import { Page, Resizable, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -40,7 +40,7 @@ const meta = {
     component: Example,
     args: { direction: 'row', gap: '12px' },
     argTypes: { ...variantControls(recipe), direction: { control: 'select', options: ['row', 'column'] }, gap: { control: 'text' } },
-    parameters: { docs: { description: { component: 'Флекс-контейнер: `direction`, `gap`, `align`, `justify`, `wrap` пропсами.' } } }
+    parameters: { docs: { description: { component: 'flex.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -50,7 +50,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Направление'>
+            <Section title={t('flex.sections.direction.title')}>
                 <Resizable>
                     <Row label='row'>
                         <Flex gap='8px'>
@@ -64,7 +64,7 @@ export const Gallery: Story = {
                     </Row>
                 </Resizable>
             </Section>
-            <Section title='Распределение' description='`justify` вдоль оси на всю ширину.'>
+            <Section title={t('flex.sections.distribution.title')} description={t('flex.sections.distribution.description')}>
                 <Resizable>
                     {(['flex-start', 'center', 'space-between', 'flex-end'] as const).map((justify) => (
                         <Row key={justify} label={justify} fill={true}>
@@ -75,7 +75,7 @@ export const Gallery: Story = {
                     ))}
                 </Resizable>
             </Section>
-            <Section title='Перенос' description='`wrap="wrap"` — элементы переходят на новую строку.'>
+            <Section title={t('flex.sections.wrapping.title')} description={t('flex.sections.wrapping.description')}>
                 <Resizable>
                     <Flex wrap='wrap' gap='8px' maxWidth='320px'>
                         <Tiles count={9} />

@@ -5,14 +5,14 @@ import { meter as recipe } from '@flippo-software/component-styles/meter';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Meter } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe> & { value?: number; label?: string; max?: number };
 
 function Gauge(props: Props): React.JSX.Element {
-    const { value = 72, label = 'Выучено карточек', max = 100, ...rest } = props;
+    const { value = 72, label = t('meter.content.cardsLearned'), max = 100, ...rest } = props;
     return (
         <Meter.Root {...rest} value={value} min={0} max={max}>
             <Meter.Label>{label}</Meter.Label>
@@ -40,8 +40,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Измеритель: доля от известного диапазона (заполненность, прогресс обучения). Выглядит как Progress, но это не ход задачи.'
+                component: 'meter.description'
             }
         }
     }
@@ -54,7 +53,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Значения' description='Пусто, частично и полностью.'>
+            <Section title={t('meter.sections.values.title')} description={t('meter.sections.values.description')}>
                 <Row label='0%' fill={true}>
                     <Gauge value={0} />
                 </Row>
@@ -62,15 +61,15 @@ export const Gallery: Story = {
                     <Gauge value={72} />
                 </Row>
                 <Row label='100%' fill={true}>
-                    <Gauge value={100} label='Набор выучен' />
+                    <Gauge value={100} label={t('meter.labels.setLearned')} />
                 </Row>
             </Section>
-            <Section title='Размеры' description='Medium и large.'>
+            <Section title={t('meter.sections.sizes.title')} description={t('meter.sections.sizes.description')}>
                 <Row label='medium' fill={true}>
-                    <Gauge value={48} label='Хранилище' size='medium' />
+                    <Gauge value={48} label={t('meter.labels.storage')} size='medium' />
                 </Row>
                 <Row label='large' fill={true}>
-                    <Gauge value={48} label='Хранилище' size='large' />
+                    <Gauge value={48} label={t('meter.labels.storage')} size='large' />
                 </Row>
             </Section>
         </Page>

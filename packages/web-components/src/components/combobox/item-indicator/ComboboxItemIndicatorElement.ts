@@ -18,6 +18,10 @@ abstract class ComboboxItemPart extends ContextPart<typeof COMBOBOX_ITEM> {
  * State attributes: `data-selected`, transition attributes.
  */
 export class ComboboxItemIndicatorElement extends ComboboxItemPart.withAttributes({
+    /**
+     * Whether to keep the HTML element in the DOM when the item is not selected.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     private indicator!: ComboboxItemIndicatorMachine;

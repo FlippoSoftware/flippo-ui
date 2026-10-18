@@ -5,7 +5,7 @@ import { code as recipe } from '@flippo-software/component-styles/code';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Code, Text } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -24,7 +24,7 @@ const meta = {
     component: Example,
     args: {},
     argTypes: variantControls(recipe),
-    parameters: { docs: { description: { component: 'Код внутри текста: моноширинный шрифт и подложка. Размер 1–9 и четыре варианта.' } } }
+    parameters: { docs: { description: { component: 'code.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -34,14 +34,14 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Варианты'>
+            <Section title={t('code.sections.variants.title')}>
                 {(['soft', 'solid', 'outline', 'ghost'] as const).map((variant) => (
                     <Row key={variant} label={variant}>
                         <Code variant={variant}>npm run build</Code>
                     </Row>
                 ))}
             </Section>
-            <Section title='Размеры'>
+            <Section title={t('code.sections.sizes.title')}>
                 <Row label='size'>
                     {(['1', '2', '3', '4', '5'] as const).map((size) => (
                         <Code key={size} size={size}>
@@ -50,9 +50,10 @@ export const Gallery: Story = {
                     ))}
                 </Row>
             </Section>
-            <Section title='В тексте'>
+            <Section title={t('code.sections.inAText.title')}>
                 <Text>
-                    Метод <Code>Array.prototype.map</Code> возвращает новый массив, а <Code>forEach</Code> — <Code>undefined</Code>.
+                    {t('code.content.theMethod')} <Code>Array.prototype.map</Code> {t('code.content.returnsANewArray')} <Code>forEach</Code>{' '}
+                    — <Code>undefined</Code>.
                 </Text>
             </Section>
         </Page>

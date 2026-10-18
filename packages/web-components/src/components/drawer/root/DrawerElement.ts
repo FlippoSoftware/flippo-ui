@@ -20,11 +20,29 @@ import type { DialogRootDriver } from '../../dialog/root/DialogRootContext';
  * `drag-end` (`detail: { open }`).
  */
 export class DrawerElement extends DialogElement.withAttributes({
+    /**
+     * Direction from which the drawer opens.
+     * @default 'down'
+     */
     direction: ['down', 'up', 'left', 'right'],
+    /**
+     * Whether dragging should be enabled.
+     * @default true
+     */
     'should-drag': 'boolean',
+    /** Index of the currently active snap point. */
     'active-snap-point': 'number',
+    /**
+     * Whether to scale the background when the drawer is open.
+     * @default false
+     */
     'should-scale-background': 'boolean',
+    /**
+     * The scale factor for the background when the drawer is open.
+     * @default 0.96
+     */
     'background-scale': 'number',
+    /** Array of snap points for the drawer. Can be numbers (pixels) or strings (percentages). */
     snapPoints: property<SnapPoint[]>()
 }) {
     private drawer!: DrawerRootMachine;

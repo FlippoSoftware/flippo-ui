@@ -34,27 +34,116 @@ import {
  * { inputValue, reason }`), `open-change` (cancelable; `detail: { open, reason }`), `open-change-complete`.
  */
 export class ComboboxElement extends ControlElement.withAttributes({
+    /**
+     * The uncontrolled selected value of the combobox when it's initially rendered.
+     *
+     * To render a controlled combobox, use the `value` attribute instead.
+     */
     'default-value': 'string',
+    /** The input value of the combobox. Use when controlled. */
     'input-value': 'string',
+    /**
+     * The uncontrolled input value when initially rendered.
+     *
+     * To render a controlled input, use the `input-value` attribute instead.
+     */
     'default-input-value': 'string',
+    /** Whether the popup is currently open. Use when controlled. */
     open: 'boolean',
+    /**
+     * Whether the popup is initially open.
+     *
+     * To render a controlled popup, use the `open` attribute instead.
+     * @default false
+     */
     'default-open': 'boolean',
+    /** Identifies the field when a form is submitted. */
     name: 'string',
+    /**
+     * Whether multiple items can be selected.
+     * @default false
+     */
     multiple: 'boolean',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the user should be unable to choose a different option from the popup.
+     * @default false
+     */
     'read-only': 'boolean',
+    /**
+     * Whether the user must choose a value before submitting a form.
+     * @default false
+     */
     required: 'boolean',
+    /**
+     * Whether the popup opens when clicking the input.
+     * @default true
+     */
     'open-on-input-click': 'boolean',
+    /**
+     * Whether the first matching item is highlighted automatically while filtering.
+     * @default false
+     */
     'auto-highlight': 'boolean',
+    /**
+     * Determines if the popup enters a modal state when open.
+     * - `true`: user interaction is limited to the popup: document page scroll is locked and pointer interactions
+     *   on outside elements are disabled.
+     * - `false`: user interaction with the rest of the document is allowed.
+     * @default false
+     */
     modal: 'boolean',
+    /**
+     * The maximum number of items to display in the list.
+     * @default -1
+     */
     limit: 'number',
+    /**
+     * How the input completes the text:
+     * - `list`: the list is filtered by the text;
+     * - `inline`: the input shows the highlighted item’s label, the list is not filtered;
+     * - `both`: both of them;
+     * - `none`: neither, the list shows every item.
+     * @default 'list'
+     */
     'auto-complete': ['list', 'both', 'inline', 'none'],
+    /**
+     * The locale to use for string comparison.
+     * Defaults to the user's runtime locale.
+     */
     locale: 'string',
+    /** The selected value of the combobox. Use when controlled. */
     value: property<unknown>(),
+    /**
+     * The items to be displayed in the list.
+     * Can be either a flat array of items or an array of groups with items.
+     */
     items: property<ComboboxRootOptions['items']>(),
+    /** Filter function used to match items vs input query. */
     filter: property<ComboboxRootOptions['filter']>(),
+    /**
+     * When the item values are objects (the `value` property of the items), this function converts the object
+     * value to a string representation for display in the input.
+     * If the shape of the object is `{ value, label }`, the label will be used automatically without needing
+     * to specify this attribute.
+     */
     itemToStringLabel: property<ComboboxRootOptions['itemToStringLabel']>(),
+    /**
+     * When the item values are objects (the `value` property of the items), this function converts the object
+     * value to a string representation for form submission.
+     * If the shape of the object is `{ value, label }`, the value will be used automatically without needing
+     * to specify this attribute.
+     */
     itemToStringValue: property<ComboboxRootOptions['itemToStringValue']>(),
+    /**
+     * Custom comparison logic used to determine if a combobox item value matches the current selected value.
+     * Useful when item values are objects without matching referentially.
+     * Defaults to `Object.is` comparison.
+     */
     isItemEqualToValue: property<ComboboxRootOptions['isItemEqualToValue']>()
 }) {
     /**

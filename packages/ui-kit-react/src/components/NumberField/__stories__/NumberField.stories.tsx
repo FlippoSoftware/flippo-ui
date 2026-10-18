@@ -5,7 +5,7 @@ import { numberField as recipe } from '@flippo-software/component-styles/number-
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { NumberField } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -15,9 +15,9 @@ function Count(props: Props & { defaultValue?: number }): React.JSX.Element {
     return (
         <NumberField.Root defaultValue={10} min={1} max={50} {...props}>
             <NumberField.Group>
-                <NumberField.Decrement aria-label='Меньше' />
-                <NumberField.Input aria-label='Карточек за раз' />
-                <NumberField.Increment aria-label='Больше' />
+                <NumberField.Decrement aria-label={t('numberField.labels.fewer')} />
+                <NumberField.Input aria-label={t('numberField.labels.cardsAtATime')} />
+                <NumberField.Increment aria-label={t('numberField.labels.more')} />
             </NumberField.Group>
         </NumberField.Root>
     );
@@ -39,7 +39,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component: 'Числовое поле с кнопками − и +; стрелки клавиатуры и колесо меняют значение, границы — `min` и `max`.'
+                component: 'numberField.description'
             }
         }
     }
@@ -52,7 +52,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Размеры' description='Large, Medium и Small, как у Input.'>
+            <Section title={t('numberField.sections.sizes.title')} description={t('numberField.sections.sizes.description')}>
                 {(['large', 'medium', 'small'] as const).map((size) => (
                     <Row key={size} label={size}>
                         <Count size={size} />
@@ -60,8 +60,8 @@ export const Gallery: Story = {
                 ))}
             </Section>
             <Section
-                title='Оформление и состояния'
-                description='Inverted — на карточке; на границе диапазона кнопка выключается.'
+                title={t('numberField.sections.lookAndStates.title')}
+                description={t('numberField.sections.lookAndStates.description')}
                 raised={true}
             >
                 <Row label='inverted'>

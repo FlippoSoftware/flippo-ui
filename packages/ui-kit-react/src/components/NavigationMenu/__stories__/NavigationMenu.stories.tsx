@@ -5,7 +5,7 @@ import { navigationMenu as recipe } from '@flippo-software/component-styles/navi
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { NavigationMenu } from '~@src';
-import { Page, Section, variantControls } from '~@stories';
+import { Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -17,43 +17,49 @@ function Site(props: Props): React.JSX.Element {
             <NavigationMenu.List>
                 <NavigationMenu.Item value='learn'>
                     <NavigationMenu.Trigger>
-                        Учиться
+                        {t('navigationMenu.content.learn')}
                         <NavigationMenu.Icon />
                     </NavigationMenu.Trigger>
                     <NavigationMenu.Content>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 220px))', gap: 4 }}>
                             <NavigationMenu.Link href='#sets'>
-                                Наборы
-                                <NavigationMenu.LinkDescription>Карточки по темам от сообщества</NavigationMenu.LinkDescription>
+                                {t('navigationMenu.content.sets')}
+                                <NavigationMenu.LinkDescription>
+                                    {t('navigationMenu.content.cardsOnTopicsFrom')}
+                                </NavigationMenu.LinkDescription>
                             </NavigationMenu.Link>
                             <NavigationMenu.Link href='#repeat'>
-                                Повторение
-                                <NavigationMenu.LinkDescription>Интервальное повторение на сегодня</NavigationMenu.LinkDescription>
+                                {t('navigationMenu.content.review')}
+                                <NavigationMenu.LinkDescription>
+                                    {t('navigationMenu.content.spacedRepetitionForToday')}
+                                </NavigationMenu.LinkDescription>
                             </NavigationMenu.Link>
                             <NavigationMenu.Link href='#exam'>
-                                Проверь себя
-                                <NavigationMenu.LinkDescription>Тест по всем карточкам набора</NavigationMenu.LinkDescription>
+                                {t('navigationMenu.content.testYourself')}
+                                <NavigationMenu.LinkDescription>{t('navigationMenu.content.aTestOnEvery')}</NavigationMenu.LinkDescription>
                             </NavigationMenu.Link>
                             <NavigationMenu.Link href='#stats'>
-                                Статистика
-                                <NavigationMenu.LinkDescription>Прогресс за неделю и месяц</NavigationMenu.LinkDescription>
+                                {t('navigationMenu.content.statistics')}
+                                <NavigationMenu.LinkDescription>
+                                    {t('navigationMenu.content.progressOverTheWeek')}
+                                </NavigationMenu.LinkDescription>
                             </NavigationMenu.Link>
                         </div>
                     </NavigationMenu.Content>
                 </NavigationMenu.Item>
                 <NavigationMenu.Item value='create'>
                     <NavigationMenu.Trigger>
-                        Создавать
+                        {t('navigationMenu.content.create')}
                         <NavigationMenu.Icon />
                     </NavigationMenu.Trigger>
                     <NavigationMenu.Content>
                         <NavigationMenu.Link href='#new'>
-                            Новый набор
-                            <NavigationMenu.LinkDescription>С нуля или из шаблона</NavigationMenu.LinkDescription>
+                            {t('common.newSet')}
+                            <NavigationMenu.LinkDescription>{t('navigationMenu.content.fromScratchOrFrom')}</NavigationMenu.LinkDescription>
                         </NavigationMenu.Link>
                         <NavigationMenu.Link href='#import'>
-                            Импорт
-                            <NavigationMenu.LinkDescription>Из CSV, Anki или Quizlet</NavigationMenu.LinkDescription>
+                            {t('navigationMenu.content.import')}
+                            <NavigationMenu.LinkDescription>{t('navigationMenu.content.fromCsvAnkiOr')}</NavigationMenu.LinkDescription>
                         </NavigationMenu.Link>
                     </NavigationMenu.Content>
                 </NavigationMenu.Item>
@@ -62,7 +68,7 @@ function Site(props: Props): React.JSX.Element {
                         href='#community'
                         className='fl-navigation-menu-trigger fl-interactive fl-focus-ring fl-text-body-minus-stronger'
                     >
-                        Сообщество
+                        {t('common.community')}
                     </NavigationMenu.Link>
                 </NavigationMenu.Item>
             </NavigationMenu.List>
@@ -93,7 +99,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component: 'Навигация сайта: панель меняет размер под содержимое и сдвигает его в сторону, откуда пришёл курсор.'
+                component: 'navigationMenu.description'
             }
         }
     }
@@ -106,7 +112,10 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Главная навигация' description='Наведите на «Учиться», затем на «Создавать»: панель подстраивает размер.'>
+            <Section
+                title={t('navigationMenu.sections.mainNavigation.title')}
+                description={t('navigationMenu.sections.mainNavigation.description')}
+            >
                 <div style={{ minHeight: 260 }}>
                     <Site />
                 </div>

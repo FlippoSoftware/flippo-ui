@@ -13,9 +13,30 @@ import { PopoverPart } from '../root/PopoverRootContext';
  * State attributes: `data-popup-open` (`data-pressed` when opened by a press), `data-disabled`.
  */
 export class PopoverTriggerElement extends PopoverPart.withAttributes({
+    /**
+     * Whether the trigger ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the popover should also open when the trigger is hovered.
+     * @default false
+     */
     'open-on-hover': 'boolean',
+    /**
+     * How long to wait before the popover may be opened on hover. Specified in milliseconds.
+     *
+     * Requires the `open-on-hover` attribute.
+     * @default 300
+     */
     delay: 'number',
+    /**
+     * How long to wait before closing the popover that was opened on hover.
+     * Specified in milliseconds.
+     *
+     * Requires the `open-on-hover` attribute.
+     * @default 0
+     */
     'close-delay': 'number'
 }) {
     private trigger!: PopoverTriggerMachine;

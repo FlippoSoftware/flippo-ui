@@ -8,7 +8,7 @@
  * `--dry-run` prints the plan and changes nothing.
  */
 import { execFileSync } from 'node:child_process';
-import { appendFileSync, readFileSync } from 'node:fs';
+import { appendFileSync } from 'node:fs';
 import process from 'node:process';
 import { parseArgs } from 'node:util';
 

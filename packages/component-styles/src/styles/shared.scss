@@ -74,6 +74,20 @@
         @include fl.choice-label;
     }
 
+    // The control sizes of the row; `compact` drops the row height (a dense table, a list of options): the label is as
+    // high as its text.
+    .fl-choice-label--small {
+        --_fl-choice-label-row-height: var(--fl-size-small);
+    }
+
+    .fl-choice-label--large {
+        --_fl-choice-label-row-height: var(--fl-size-large);
+    }
+
+    .fl-choice-label--compact {
+        --_fl-choice-label-row-height: 0px;
+    }
+
     .fl-choice-group {
         @include fl.choice-group;
     }

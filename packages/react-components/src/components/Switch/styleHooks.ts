@@ -1,8 +1,8 @@
+import { SwitchRootDataAttributes } from '@flippo-software/core-components/switch';
+
 import type { CustomStyleHookMapping } from '~@lib/getStyleHookProps';
 
 import { fieldValidityMapping } from '../Field/utils/constants';
-
-import { SwitchRootDataAttributes } from './root/SwitchRootDataAttributes';
 
 import type { SwitchRoot } from './root/SwitchRoot';
 

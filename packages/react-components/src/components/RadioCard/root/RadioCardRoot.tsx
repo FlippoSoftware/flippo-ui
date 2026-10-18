@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { RadioCardMachine } from '@flippo-software/core-components/radio-card';
+import { RadioCardMachine, RadioCardRootDataAttributes } from '@flippo-software/core-components/radio-card';
 
 import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { useHeadlessUiId, useRenderElement } from '~@lib/hooks';
@@ -18,7 +18,6 @@ import { useRadioGroupContext } from '../../RadioGroup/RadioGroupContext';
 import type { FieldRoot } from '../../Field/root/FieldRoot';
 
 import { RadioCardRootContext } from './RadioCardRootContext';
-import { RadioCardRootDataAttributes } from './RadioCardRootDataAttributes';
 
 import type { RadioCardRootContextValue } from './RadioCardRootContext';
 

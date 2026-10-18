@@ -5,7 +5,7 @@ import { skeletonText as recipe } from '@flippo-software/component-styles/skelet
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { SkeletonText } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -27,8 +27,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Заглушка абзаца. Строки занимают ровно высоту строки текущего шрифта (`1lh`), а полоса — 0.7em: подставьте заглушку в любой стиль текста, и при загрузке макет не сдвинется. Последняя строка короче.'
+                component: 'skeletonText.description'
             }
         }
     }
@@ -38,20 +37,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-const STYLES = [
-    ['fl-text-heading-3-default', 'Экзамен Законы UX'],
-    ['fl-text-body-default', 'Закон Хика: время принятия решения растёт с числом и сложностью вариантов выбора.'],
-    ['fl-text-body-minus-default', 'Создано 12 октября · 32 карточки']
-] as const;
+const STYLES = () =>
+    [
+        ['fl-text-heading-3-default', t('common.uxLawsExam')],
+        ['fl-text-body-default', t('skeletonText.content.hickSLawThe')],
+        ['fl-text-body-minus-default', t('skeletonText.content.createdOnOctober12')]
+    ] as const;
 
 export const Gallery: Story = {
     render: () => (
         <Page>
             <Section
-                title='Подстраивается под шрифт'
-                description='Слева — заглушка в стиле текста, справа — сам текст. Высота блоков совпадает.'
+                title={t('skeletonText.sections.followsTheFont.title')}
+                description={t('skeletonText.sections.followsTheFont.description')}
             >
-                {STYLES.map(([className, text]) => (
+                {STYLES().map(([className, text]) => (
                     <Row key={className} label={className.replace('fl-text-', '')}>
                         <div
                             className={className}
@@ -63,7 +63,7 @@ export const Gallery: Story = {
                     </Row>
                 ))}
             </Section>
-            <Section title='Анимация'>
+            <Section title={t('skeletonText.sections.animation.title')}>
                 {(['pulse', 'shimmer', 'none'] as const).map((animation) => (
                     <Row key={animation} label={animation} fill={true}>
                         <SkeletonText lines={3} animation={animation} />

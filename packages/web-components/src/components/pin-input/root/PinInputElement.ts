@@ -22,18 +22,57 @@ import { PinInputContext, type PinInputValueChangeDetail } from './PinInputRootC
  * State attributes: `data-disabled`, `data-readonly`, `data-complete`, and those of the field.
  */
 export class PinInputElement extends ControlElement.withAttributes({
+    /**
+     * The controlled value of the pin input: the characters entered.
+     *
+     * To render an uncontrolled pin input, use the `default-value` attribute instead.
+     */
     value: 'string',
+    /**
+     * The initial value of an uncontrolled pin input.
+     *
+     * To render a controlled pin input, use the `value` attribute instead.
+     */
     'default-value': 'string',
+    /** Identifies the field when a form is submitted. */
     name: 'string',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the user should be unable to select a different radio button in the group.
+     * @default false
+     */
     'read-only': 'boolean',
+    /**
+     * Whether the user must choose a value before submitting a form.
+     * @default false
+     */
     required: 'boolean',
+    /**
+     * The placeholder text for the input
+     * @default "○"
+     */
     placeholder: 'string',
+    /** The type of input to render */
     type: ['numeric', 'alphabetic', 'alphanumeric'],
+    /** The regular expression that the user-entered input value is checked against. */
     pattern: 'string',
+    /**
+     * Whether the input takes one-time codes: `autocomplete="one-time-code"`, so the browser can fill the code it received.
+     * @default false
+     */
     otp: 'boolean',
+    /**
+     * Whether to hide the entered characters, like a password input.
+     * @default false
+     */
     mask: 'boolean',
+    /** Whether to blur the input when the value is complete */
     'blur-on-complete': 'boolean',
+    /** Whether to select input value when input is focused */
     'select-on-focus': 'boolean'
 }) {
     private pinInput!: PinInputMachine;

@@ -5,7 +5,7 @@ import { collapsible as recipe } from '@flippo-software/component-styles/collaps
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Collapsible, Icon } from '~@src';
-import { Card, Page, Section, variantControls } from '~@stories';
+import { Card, Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -17,14 +17,13 @@ function Hint(props: Props): React.JSX.Element {
             <Collapsible.Trigger>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                     <Icon name='hint' />
-                    Подсказка
+
+                    {t('common.hint')}
                 </span>
                 <Collapsible.Icon />
             </Collapsible.Trigger>
             <Collapsible.Panel>
-                <Collapsible.Content>
-                    Вспомните пример с банкоматами Hitachi: участники оценивали удобство по внешнему виду.
-                </Collapsible.Content>
+                <Collapsible.Content>{t('collapsible.content.rememberTheHitachiAtm')}</Collapsible.Content>
             </Collapsible.Panel>
         </Collapsible.Root>
     );
@@ -47,7 +46,7 @@ const meta = {
         defaultOpen: { control: 'boolean', table: { category: 'Behaviour' } },
         disabled: { control: 'boolean', table: { category: 'Behaviour' } }
     },
-    parameters: { docs: { description: { component: 'Раскрывающийся блок: одна панель под своим заголовком, как у аккордеона.' } } }
+    parameters: { docs: { description: { component: 'collapsible.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -57,7 +56,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='На карточке' description='Подсказка под вопросом: закрыта, открыта и недоступна.'>
+            <Section title={t('collapsible.sections.onACard.title')} description={t('collapsible.sections.onACard.description')}>
                 <div className='sb-grid' style={{ ['--sb-min' as string]: '280px' }}>
                     <Card>
                         <Hint />

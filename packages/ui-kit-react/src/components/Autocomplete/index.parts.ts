@@ -4,6 +4,7 @@ import { Autocomplete as Primitive } from '@flippo-software/react-components/aut
 
 import { icon } from '~@lib/Icon';
 import { withAnchor, withAnchorRoot, withAnchorTarget } from '~@lib/InputGroupAnchor';
+import { themedPortal } from '~@lib/Provider';
 import { createStyler } from '~@lib/Styled';
 
 import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
@@ -24,7 +25,7 @@ export const Input: StyledComponent<typeof Primitive.Input, typeof recipe> = sty
 export const Item: StyledComponent<typeof Primitive.Item, typeof recipe> = styled(Primitive.Item, 'item', false);
 export const List: StyledComponent<typeof Primitive.List, typeof recipe> = styled(Primitive.List, 'list', false);
 export const Popup: StyledComponent<typeof Primitive.Popup, typeof recipe> = styled(Primitive.Popup, 'popup', false);
-export const Portal: typeof Primitive.Portal = Primitive.Portal;
+export const Portal: typeof Primitive.Portal = themedPortal(Primitive.Portal) as typeof Primitive.Portal;
 export const Positioner: StyledComponent<typeof Primitive.Positioner, typeof recipe> = withAnchor(
     styled(Primitive.Positioner, 'positioner', false, {
         defaults: { sideOffset: 8 }

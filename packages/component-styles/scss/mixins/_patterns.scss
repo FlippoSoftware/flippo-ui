@@ -1,20 +1,22 @@
-// Shared visual patterns. The package builds its shared classes from these mixins (`.fl-popup` is `@include
-// fl.popup`), and you can include them in your own selectors to style your components like Flippo's.
-//
-// Every property reads `var(--_fl-<pattern>-<prop>-hook, var(--fl-<pattern>-<prop>, var(--_fl-<pattern>-<prop>,
-// <default>)))`, from the strongest value to the weakest:
-// - `--_fl-<pattern>-<prop>-hook` passes the component's public hook, set without a fallback:
-//   `--_fl-popup-bg-hook: var(--fl-tooltip-bg)`. While the user has not set `--fl-tooltip-bg` it is invalid, and
-//   `var()` moves on to the next value;
-// - `--fl-<pattern>-<prop>` is the public hook of every component built on the pattern (`--fl-popup-bg`);
-// - `--_fl-<pattern>-<prop>` is the component's default (`--_fl-popup-bg: var(--fl-color-bg-3)`);
-// - the last value is the pattern's default, a token.
-// The package never sets the public `--fl-*` hooks. So `--fl-tooltip-bg` wins over `--fl-popup-bg`, which wins over
-// the defaults.
-// State rules use the selectors of `state.scss`, ordered from the weakest state to the strongest.
+//// Shared visual patterns. The package builds its shared classes from these mixins (`.fl-popup` is `@include
+//// fl.popup`), and you can include them in your own selectors to style your components like Flippo's.
+////
+//// Every property reads `var(--_fl-<pattern>-<prop>-hook, var(--fl-<pattern>-<prop>, var(--_fl-<pattern>-<prop>,
+//// <default>)))`, from the strongest value to the weakest:
+//// - `--_fl-<pattern>-<prop>-hook` passes the component's public hook, set without a fallback:
+////   `--_fl-popup-bg-hook: var(--fl-tooltip-bg)`. While the user has not set `--fl-tooltip-bg` it is invalid, and
+////   `var()` moves on to the next value;
+//// - `--fl-<pattern>-<prop>` is the public hook of every component built on the pattern (`--fl-popup-bg`);
+//// - `--_fl-<pattern>-<prop>` is the component's default (`--_fl-popup-bg: var(--fl-color-bg-3)`);
+//// - the last value is the pattern's default, a token.
+//// The package never sets the public `--fl-*` hooks. So `--fl-tooltip-bg` wins over `--fl-popup-bg`, which wins over
+//// the defaults.
+//// State rules use the selectors of `state.scss`, ordered from the weakest state to the strongest.
+//// @group patterns
+
 @use 'state';
 
-// A clickable element: pointer cursor, no text selection, colour transitions.
+/// A clickable element: pointer cursor, no text selection, colour transitions.
 @mixin interactive {
     cursor: pointer;
     user-select: none;
@@ -29,11 +31,11 @@
     }
 }
 
-// An icon: an `<svg>`, or an element around one (a custom element, a span) whose `<svg>` fills it and stays centred,
-// so a turned chevron turns around its own centre. Its size is the closest component's `--_fl-icon-size`: by default
-// the line height of the text (`1lh`), so the icons of a component grow with its size (Figma: a Large button has
-// Body+ 18/26 text and 26px icons). Components with other proportions set `--_fl-icon-size` per size; set
-// `--fl-icon-size` to size every icon, or `--_fl-icon-size-hook` in a component to pass its own public hook.
+/// An icon: an `<svg>`, or an element around one (a custom element, a span) whose `<svg>` fills it and stays centred,
+/// so a turned chevron turns around its own centre. Its size is the closest component's `--_fl-icon-size`: by default
+/// the line height of the text (`1lh`), so the icons of a component grow with its size (Figma: a Large button has
+/// Body+ 18/26 text and 26px icons). Components with other proportions set `--_fl-icon-size` per size; set
+/// `--fl-icon-size` to size every icon, or `--_fl-icon-size-hook` in a component to pass its own public hook.
 @mixin icon {
     display: inline-flex;
     flex-shrink: 0;
@@ -49,7 +51,7 @@
     }
 }
 
-// The focus ring shown for keyboard focus. A negative offset draws it inside the element (buttons in Figma).
+/// The focus ring shown for keyboard focus. A negative offset draws it inside the element (buttons in Figma).
 @mixin focus-ring {
     outline: 0 solid transparent;
 
@@ -60,8 +62,8 @@
     }
 }
 
-// The surface of a floating element (menu, select, popover, tooltip): background, radius, shadow and the
-// enter/exit animation driven by `data-starting-style` / `data-ending-style`.
+/// The surface of a floating element (menu, select, popover, tooltip): background, radius, shadow and the
+/// enter/exit animation driven by `data-starting-style` / `data-ending-style`.
 @mixin popup {
     box-sizing: border-box;
     display: flex;
@@ -90,7 +92,7 @@
     }
 }
 
-// A full-screen layer behind modal popups.
+/// A full-screen layer behind modal popups.
 @mixin backdrop {
     position: fixed;
     inset: 0;
@@ -110,8 +112,8 @@
     }
 }
 
-// The arrow of a popup: a rotated square in the popup colour (it inherits `--_fl-popup-bg` from its popup).
-// The core machine places it along the edge; `data-side` puts it across the edge.
+/// The arrow of a popup: a rotated square in the popup colour (it inherits `--_fl-popup-bg` from its popup).
+/// The core machine places it along the edge; `data-side` puts it across the edge.
 @mixin arrow {
     --_fl-arrow-offset: calc(var(--_fl-arrow-size-hook, var(--fl-arrow-size, var(--_fl-arrow-size, 10px))) / -2);
 
@@ -148,7 +150,7 @@
     }
 }
 
-// An option of a list (menu item, select option, combobox option): highlighted by keyboard or pointer.
+/// An option of a list (menu item, select option, combobox option): highlighted by keyboard or pointer.
 @mixin item {
     position: relative;
     box-sizing: border-box;
@@ -188,7 +190,7 @@
     }
 }
 
-// Colours of a destructive item ("Delete"), to combine with `item`.
+/// Colours of a destructive item ("Delete"), to combine with `item`.
 @mixin item-destructive {
     --_fl-item-color: var(--fl-color-error);
     --_fl-item-color-selected: var(--fl-color-error);
@@ -197,8 +199,8 @@
     --_fl-item-bg-active: var(--fl-color-error-desaturated);
 }
 
-// The box of a text control (input, select trigger, number field): background, inside border and the hover,
-// focus, invalid and disabled states. `data-focused` / `data-invalid` / `data-disabled` come from Field.
+/// The box of a text control (input, select trigger, number field): background, inside border and the hover,
+/// focus, invalid and disabled states. `data-focused` / `data-invalid` / `data-disabled` come from Field.
 @mixin control {
     box-sizing: border-box;
     display: flex;
@@ -259,14 +261,16 @@
     }
 }
 
-// The box of a checkbox or a radio: a bordered square (a circle with `--_fl-check-radius: 50%`) that fills with
-// the brand colour when `data-checked` / `data-indeterminate`.
+/// The box of a checkbox or a radio: a bordered square (a circle with `--_fl-check-radius: 50%`) that fills with
+/// the brand colour when `data-checked` / `data-indeterminate`.
 @mixin check {
     box-sizing: border-box;
     display: inline-flex;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
+    --_fl-choice-control-height: var(--_fl-check-size-hook, var(--fl-check-size, var(--_fl-check-size, var(--fl-spacing-5))));
+
     inline-size: var(--_fl-check-size-hook, var(--fl-check-size, var(--_fl-check-size, var(--fl-spacing-5))));
     block-size: var(--_fl-check-size-hook, var(--fl-check-size, var(--_fl-check-size, var(--fl-spacing-5))));
     padding: 0;
@@ -323,7 +327,7 @@
     }
 }
 
-// A round icon button inside a control: clear, open, increment (Figma "Searchbar Clear Icon Area": 36px, icon 24px).
+/// A round icon button inside a control: clear, open, increment (Figma "Searchbar Clear Icon Area": 36px, icon 24px).
 @mixin control-button {
     box-sizing: border-box;
     display: inline-flex;
@@ -359,10 +363,14 @@
     }
 }
 
-// A checkbox, radio or switch laid out with its text (usually a `<label>` around the control).
+/// A checkbox, radio or switch laid out with its text (usually a `<label>` around the control). Its first line is
+/// centred in a control row of its size (`--fl-size-*`), so in a row with inputs and selects aligned at the top it looks
+/// centred like them; the control (`.fl-choice-control`) is centred on that first line, and a longer text wraps below.
 @mixin choice-label {
+    box-sizing: border-box;
     display: inline-flex;
-    align-items: center;
+    align-items: flex-start;
+    padding-block: max(0px, calc((var(--_fl-choice-label-row-height-hook, var(--fl-choice-label-row-height, var(--_fl-choice-label-row-height, var(--fl-size-medium)))) - 1lh) / 2));
     gap: var(--_fl-choice-label-gap-hook, var(--fl-choice-label-gap, var(--_fl-choice-label-gap, var(--fl-spacing-3))));
     color: var(--_fl-choice-label-color-hook, var(--fl-choice-label-color, var(--_fl-choice-label-color, var(--fl-color-text-2))));
     cursor: pointer;
@@ -372,9 +380,15 @@
         color: var(--fl-color-text-disabled);
         cursor: not-allowed;
     }
+
+    // The control takes the height of one line of the text (negative margins when it is higher), so it is centred on
+    // the first line. `--_fl-choice-control-height` is its own height.
+    & > :where(.fl-choice-control) {
+        margin-block: calc((1lh - var(--_fl-choice-control-height, 1lh)) / 2);
+    }
 }
 
-// A group of checkboxes or radios: a column, or a wrapping row.
+/// A group of checkboxes or radios: a column, or a wrapping row.
 @mixin choice-group {
     display: flex;
     flex-direction: var(--_fl-choice-group-direction-hook, var(--fl-choice-group-direction, var(--_fl-choice-group-direction, column)));
@@ -383,7 +397,7 @@
     gap: var(--_fl-choice-group-gap-hook, var(--fl-choice-group-gap, var(--_fl-choice-group-gap, var(--fl-spacing-3))));
 }
 
-// A card that is itself a checkbox or a radio: bordered, highlighted in the brand colour when checked.
+/// A card that is itself a checkbox or a radio: bordered, highlighted in the brand colour when checked.
 @mixin choice-card {
     position: relative;
     box-sizing: border-box;

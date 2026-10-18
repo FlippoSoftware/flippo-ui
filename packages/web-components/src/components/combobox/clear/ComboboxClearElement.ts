@@ -12,7 +12,15 @@ import { ComboboxPart } from '../root/ComboboxRootContext';
  * State attributes: `data-popup-open`, `data-disabled`, transition attributes.
  */
 export class ComboboxClearElement extends ComboboxPart.withAttributes({
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the component should remain mounted in the DOM when not visible.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     private clear!: ComboboxClearMachine;

@@ -223,6 +223,19 @@ describe('Field and Form', () => {
         expect(validate).toHaveBeenCalledTimes(1);
     });
 
+    it('warns when a second control registers in a field, not when the same one registers again', () => {
+        const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const field = new FieldRootMachine({});
+        const control = (id: string) => ({ id, value: null, getValue: () => null, controlRef: { current: null } });
+        const unregister = field.registerControl(control('select'));
+        unregister();
+        field.registerControl(control('select'));
+        expect(spy).not.toHaveBeenCalled();
+        field.registerControl(control('checkbox'));
+        expect(spy).toHaveBeenCalledWith(expect.stringContaining('A Field.Root holds one control'));
+        spy.mockRestore();
+    });
+
     it('validates a field and reports errors to the form', async () => {
         const form = new FormController({ errors: { email: 'Taken' } });
         const field = new FieldRootMachine({

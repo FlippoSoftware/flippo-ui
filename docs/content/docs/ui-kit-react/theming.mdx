@@ -1,0 +1,44 @@
+---
+title: "Themes and sizes"
+description: "FlippoProvider: the theme of the application, your own themes and the size grid of the controls."
+---
+
+`FlippoProvider` sets the theme and the control size of the application (or of a part of it) and the default props of
+the components.
+
+```tsx
+<FlippoProvider storageKey="flippo-theme" themes={{ sepia: 'light' }} size="small" defaults={{ select: { positioner: { sideOffset: 4 } } }}>
+    <App />
+</FlippoProvider>
+
+const { theme, resolvedTheme, colorScheme, themes, setTheme } = useTheme();
+const { size, height } = useControlSize();          // 'small', 40
+const select = useControlSize('select');             // the family's size and the global one (global)
+```
+
+## Themes
+
+- `system` (the default), `light`, `dark` or one of your own. The outer provider puts `data-theme` on `<html>`, a
+  nested one with a theme of its own on a wrapper; the popups in portals keep it.
+- Your own theme is a CSS rule `[data-theme='sepia']`, with the SCSS mixin:
+
+```scss
+@use '@flippo-software/component-styles/scss' as fl;
+
+@include fl.theme('sepia', light, $colors: ('bg-1': #f6edd9, 'text-primary': #3b2f1e));
+```
+
+  registered with its colour scheme: `themes={{ sepia: 'light' }}`.
+- No flash on load: `storageKey` keeps the choice, `<ThemeScript storageKey="flippo-theme" />` in the `<head>` puts it on
+  `<html>` before the first paint.
+
+## Size grid
+
+| Size | Row height | Controls |
+| --- | --- | --- |
+| `small` | 40 | inputs, selects and buttons are that high; a checkbox, a radio or a switch with its label, a Toggle and a SegmentedControl reach it with spacing |
+| `medium` | 48 | the default |
+| `large` | 56 | |
+
+A row of mixed controls aligned at the top looks centred. `compact` drops the spacing (dense tables, lists of options).
+In code: `CONTROL_HEIGHTS`, `useControlSize()`.

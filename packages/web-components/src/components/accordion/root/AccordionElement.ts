@@ -23,13 +23,53 @@ const WHITESPACE = /\s+/;
  * State attributes: `data-disabled`, `data-orientation`.
  */
 export class AccordionElement extends MachineElement.withAttributes({
+    /**
+     * Whether multiple items can be open at the same time.
+     * @default false
+     */
     multiple: 'boolean',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * The visual orientation of the accordion.
+     * Controls whether roving focus uses left/right or up/down arrow keys.
+     * @default 'vertical'
+     */
     orientation: ['vertical', 'horizontal'],
+    /**
+     * Whether to loop keyboard focus back to the first item
+     * when the end of the list is reached while using the arrow keys.
+     * @default true
+     */
     'loop-focus': 'boolean',
+    /**
+     * Allows the browser’s built-in page search to find and expand the panel contents.
+     *
+     * Overrides the `keep-mounted` attribute and uses `hidden="until-found"`
+     * to hide the element without removing it from the DOM.
+     * @default false
+     */
     'hidden-until-found': 'boolean',
+    /**
+     * Whether to keep the element in the DOM while the panel is closed.
+     * This attribute is ignored when `hidden-until-found` is used.
+     * @default false
+     */
     'keep-mounted': 'boolean',
+    /**
+     * The uncontrolled value of the item(s) that should be initially expanded.
+     *
+     * To render a controlled accordion, use the `value` attribute instead.
+     */
     'default-value': 'string',
+    /**
+     * The controlled value of the item(s) that should be expanded.
+     *
+     * To render an uncontrolled accordion, use the `default-value` attribute instead.
+     */
     value: property<AccordionValue>()
 }) {
     private accordion!: AccordionMachine;

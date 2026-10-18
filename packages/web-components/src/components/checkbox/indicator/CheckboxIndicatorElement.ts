@@ -19,6 +19,10 @@ abstract class CheckboxPart extends ContextPart<typeof CHECKBOX> {
  * State attributes: those of the checkbox, and transition attributes.
  */
 export class CheckboxIndicatorElement extends CheckboxPart.withAttributes({
+    /**
+     * Whether to keep the element in the DOM when the checkbox is not checked.
+     * @default false
+     */
     'keep-mounted': 'boolean'
 }) {
     private indicator!: MenuItemIndicatorMachine;

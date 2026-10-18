@@ -5,7 +5,7 @@ import { skeleton as recipe } from '@flippo-software/component-styles/skeleton';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Skeleton, SkeletonText } from '~@src';
-import { Grid, Page, Row, Section, variantControls } from '~@stories';
+import { Grid, Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -42,7 +42,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component: 'Заглушка на время загрузки: прямоугольник или круг нужного размера; анимации pulse, shimmer или без неё.'
+                component: 'skeleton.description'
             }
         }
     }
@@ -55,7 +55,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Анимация' description='Pulse мерцает целиком, shimmer пробегает бликом, none — статичная заливка.'>
+            <Section title={t('skeleton.sections.animation.title')} description={t('skeleton.sections.animation.description')}>
                 {(['pulse', 'shimmer', 'none'] as const).map((animation) => (
                     <Row key={animation} label={animation}>
                         <Skeleton animation={animation} circle={true} style={{ width: 40, height: 40 }} />
@@ -63,7 +63,10 @@ export const Gallery: Story = {
                     </Row>
                 ))}
             </Section>
-            <Section title='Карточки при загрузке' description='Сетка наборов, пока данные не пришли.'>
+            <Section
+                title={t('skeleton.sections.cardsWhileLoading.title')}
+                description={t('skeleton.sections.cardsWhileLoading.description')}
+            >
                 <Grid min={220}>
                     <SetCardSkeleton />
                     <SetCardSkeleton animation='shimmer' />

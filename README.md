@@ -8,7 +8,7 @@ is versioned and published on its own.
 | --- | --- |
 | [`packages/store`](packages/store) · `@flippo-software/store` | Reactive stores, no DOM, no framework. |
 | [`packages/core-components`](packages/core-components) · `@flippo-software/core-components` | Framework-agnostic state machines of every component. |
-| [`packages/react-hooks`](packages/react-hooks) · `@flippo-software/react-hooks` | Generic React hooks; the store in React. |
+| [`packages/react-store`](packages/react-store) · `@flippo-software/react-store` | The store in React: `useStore`, `ReactStore`. |
 | [`packages/react-components`](packages/react-components) · `@flippo-software/react-components` | Unstyled React components (Base UI API) on the machines. |
 | [`packages/web-components`](packages/web-components) · `@flippo-software/web-components` | Unstyled custom elements on the same machines. |
 | [`packages/component-styles`](packages/component-styles) · `@flippo-software/component-styles` | Tokens, themes, component CSS (SCSS) and class recipes. |
@@ -30,10 +30,61 @@ pnpm dev                # watch builds of store, core, hooks, react-components a
 pnpm check              # build, lint, typecheck and test everything
 pnpm storybook:react    # Storybook of the React kit (port 6006)
 pnpm storybook:web      # Storybook of the web components kit (port 6007)
+pnpm docs:build         # generates and checks the pages of the documentation site (after pnpm build)
 ```
 
 One package: `pnpm --filter <name> <script>`, e.g. `pnpm --filter @flippo-software/ui-kit-react test`, or run the
 script inside its folder. Add a dependency to one package: `pnpm --filter <name> add <dependency>`.
+
+## Storybook and the API reference
+
+Both kits share their Storybook setup in `tools/storybook/`: the theme (Flippo palette, logo, favicon in `assets/`),
+the docs page of every component (`DocsPage.tsx`) and the tokens page (`pages/Tokens.mdx`); each kit adds its own
+overview pages (`.storybook/pages/*.mdx`: getting started, themes and sizes).
+
+The docs page carries an API reference like Base UI's: every part with its props (or, in the web kit, the attributes
+and events of its element), data attributes and CSS variables, then the kit's variants and CSS hooks. Each adapter is
+documented from its own sources and from the core it is built on:
+
+- React: the JSDoc of the props of `react-components` (with `@default`), read by `tools/api-docs.ts`
+  (`tools/storybook/api.json`, not versioned);
+- web: the Custom Elements Manifest of `web-components` (`custom-elements.json`, written by its build from the JSDoc of
+  `withAttributes`);
+- both: the data attributes and CSS variables of the core machines, their `<Name><Part>DataAttributes` and
+  `<Name><Part>CssVars` enums in `core-components` (`tools/storybook/core-enums.json`, written by `tools/api-docs.ts`);
+- the kit's variants and CSS hooks: the recipes and stylesheets of `component-styles`.
+
+Document a prop, an attribute or a data attribute in its source and it shows up; the kits' `storybook`,
+`build-storybook` and `typecheck` scripts run the generator.
+
+The Storybooks are in English and Russian: the toolbar switches the language of the docs pages, the overview pages
+and the stories. The texts live in two dictionaries with the same keys, `tools/storybook/i18n/en.json` and `ru.json`:
+
+- stories: `t('select.sections.sizes.title')` from `~@stories`, called at render time (not in module-level constants,
+  or the text cannot follow the language); keys by family and role — `<family>.description`,
+  `<family>.sections.<section>.title|description`, `<family>.rows.*`, `<family>.labels.*`, `<family>.placeholders.*`,
+  `<family>.content.*` (demo content), `common.*` (texts several families share); the web kit's own wording of a text
+  ends in `Web` (`checkbox.descriptionWeb`); `{name}` placeholders take values (`t('pinInput.labels.digit', { number })`);
+- the docs page: `docs.*`;
+- the API references: `api.<Family>.<Part>.description|props.<prop>` (React; `api.common.props.*` for the props every
+  part has), `web.<Class>.<attribute>` (the attributes of the web components, under the class that declares them),
+  `core.<Enum>.<value>` (the data attributes and CSS variables, shared by both). The English texts are those of the
+  sources: `node tools/i18n-check.ts --write` copies them into `en.json` and lists the keys whose Russian text needs a
+  look.
+
+The prose of the overview pages is not in the dictionaries: it is markdown, one document per language
+(`.storybook/pages/introduction.md` and `introduction.ru.md`; the themes page renders the documentation site's
+`docs/content/docs/ui-kit-*/theming*.mdx`), shown by `<MarkdownPage en={en} ru={ru} />`. `node tools/i18n-check.ts`
+(part of `pnpm lint:check`) fails when the dictionaries differ, a story uses an unknown key or `en.json` is behind the
+JSDoc.
+
+## Documentation site
+
+`docs/` holds the content of the documentation site, laid out for Fumadocs: hand-written guides (markdown, one file per
+language) and reference pages generated from the sources — TypeDoc for store, react-store and core-components, the
+JSDoc of react-components, the Custom Elements Manifest of web-components (`custom-elements.json`, written by its
+build), SassDoc and the recipes of component-styles, the READMEs. `pnpm docs:build` (after `pnpm build`) generates and checks
+them; see `docs/README.md`.
 
 ## Working across packages
 
@@ -153,4 +204,4 @@ Versions live in `.release-please-manifest.json`, the packages in `release-pleas
 Dependencies between packages: `workspace:^` (published as `^<version>`, so a new version of a dependency reaches the
 dependents' users without re-releasing them, as long as it stays in range), `workspace:*` for dev dependencies. Shared tool versions are in the
 `catalog` of `pnpm-workspace.yaml` (`"typescript": "catalog:"`); a package that needs another version writes it
-explicitly (`react-hooks` keeps `"typescript": "^5.9.2"`).
+explicitly (`internal-test-utils` keeps TypeScript 5 for tsup).

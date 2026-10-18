@@ -12,7 +12,15 @@ import { CompositeItem, findCompositeProvider, NavigationMenuPart } from '../roo
  * State attributes: `data-active`.
  */
 export class NavigationMenuLinkElement extends NavigationMenuPart.withAttributes({
+    /**
+     * Whether the link is the currently active page.
+     * @default false
+     */
     active: 'boolean',
+    /**
+     * Whether to close the navigation menu when the link is clicked.
+     * @default false
+     */
     'close-on-click': 'boolean'
 }) {
     private readonly compositeItem = new CompositeItem();

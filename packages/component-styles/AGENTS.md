@@ -19,6 +19,7 @@ src/components/<name>/
   <name>.scss                     the component's classes (layer fl.components); some only @use another (meter)
   index.ts                        its recipe: cva (one element) or sva (slots)
 src/index.ts                      re-exports every recipe
+src/theme/, src/sizes/            framework-free theme helpers and the control size grid (entries `theme`, `sizes`)
 scripts/build-css.ts              compiles the stylesheets, generates src/styles/index.scss
 test/styles.test.ts               recipes ⊆ CSS classes, tokens defined, private vars read, layers
 fonts/                            Vela Sans woff2 (OFL)
@@ -47,6 +48,14 @@ fonts/                            Vela Sans woff2 (OFL)
   `var(--fl-icon-size, var(--_fl-icon-size, 1lh))` — by default the line height of the component's text. A component
   sets `--_fl-icon-size` per size (controls: 24/20/18) rather than sizing its `<svg>` children; some older parts still
   size them in their own rules.
+- Size grid: control rows are `--fl-size-small|medium|large` (40/48/56); `src/sizes` mirrors them (tested) and lists
+  `CONTROL_FAMILIES`, the families whose `size` takes the application's control size — add a family there when its
+  `size` means a control height (not a width, like Dialog). Smaller controls reach the row height without changing their own
+  size: choices through their label (`.fl-choice-label` padding centres its first line in the row; the control,
+  `.fl-choice-control` with its `--_fl-choice-control-height`, is centred on that line by its margins), toggles and segmented controls through
+  `margin-block`; `compact` drops it.
+- Themes: `[data-theme='<name>']` rules; custom ones through the `fl.theme` mixin, which re-declares the semantic
+  colours and shadows (custom properties resolve `var()` where declared).
 - Default icons of the styled packages come from `src/icons` (`@flippo-software/component-styles/icons`, from
   `../icons/svgs`); indicators show `[data-icon=check]`, or `[data-icon=minus]` when indeterminate (`check` pattern).
 

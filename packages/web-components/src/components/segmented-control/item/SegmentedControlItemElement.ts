@@ -17,7 +17,12 @@ abstract class SegmentedControlPart extends ContextPart<typeof SEGMENTED_CONTROL
  * State attributes: `data-selected`, `data-disabled`.
  */
 export class SegmentedControlItemElement extends SegmentedControlPart.withAttributes({
+    /** The unique value that identifies this item within the group. */
     value: 'string',
+    /**
+     * Whether this item should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private item!: SegmentedControlItemMachine;

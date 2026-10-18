@@ -1,15 +1,36 @@
 import type { CustomStyleHookMapping } from './getStyleHookProps';
 
 export enum CommonPopupDataAttributes {
+    /**
+     * Present when the popup is open.
+     */
     open = 'data-open',
+    /**
+     * Present when the popup is closed.
+     */
     closed = 'data-closed',
+    /**
+     * Present when the popup is animating in.
+     */
     startingStyle = 'data-starting-style',
+    /**
+     * Present when the popup is animating out.
+     */
     endingStyle = 'data-ending-style',
+    /**
+     * Present when the anchor is hidden.
+     */
     anchorHidden = 'data-anchor-hidden'
 }
 
 export enum CommonTriggerDataAttributes {
+    /**
+     * Present when the popup of the trigger is open.
+     */
     popupOpen = 'data-popup-open',
+    /**
+     * Present when the trigger is pressed.
+     */
     pressed = 'data-pressed'
 }
 

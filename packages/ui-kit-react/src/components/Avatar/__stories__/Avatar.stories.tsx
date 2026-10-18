@@ -5,7 +5,7 @@ import { avatar as recipe } from '@flippo-software/component-styles/avatar';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Avatar } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -15,7 +15,7 @@ const PHOTO =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23545be8'/%3E%3Ccircle cx='40' cy='30' r='14' fill='%23fff'/%3E%3Cpath d='M12 80a28 28 0 0 1 56 0' fill='%23fff'/%3E%3C/svg%3E";
 
 function Person(props: Props & { src?: string; initials?: string; name?: string }): React.JSX.Element {
-    const { src, initials = 'ЕГ', name = 'Егор Горочкин', ...rest } = props;
+    const { src, initials = t('common.eg'), name = t('common.egorGorochkin'), ...rest } = props;
     return (
         <Avatar.Root {...rest}>
             {src && <Avatar.Image src={src} alt={name} />}
@@ -39,7 +39,7 @@ const meta = {
     argTypes: variantControls(recipe),
     parameters: {
         docs: {
-            description: { component: 'Аватар: фото или инициалы, пока фото грузится или если его нет. Пять размеров, круг или квадрат.' }
+            description: { component: 'avatar.description' }
         }
     }
 } satisfies Meta<typeof Example>;
@@ -49,17 +49,18 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 const SIZES = ['x-small', 'small', 'medium', 'large', 'x-large'] as const;
-const TEAM = [
-    ['ЕГ', PHOTO],
-    ['НЗ', undefined],
-    ['РШ', undefined],
-    ['АК', PHOTO]
-] as const;
+const TEAM = () =>
+    [
+        [t('common.eg'), PHOTO],
+        [t('common.nz'), undefined],
+        [t('common.rs'), undefined],
+        [t('avatar.content.ak'), PHOTO]
+    ] as const;
 
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Размеры'>
+            <Section title={t('avatar.sections.sizes.title')}>
                 <Row label='photo'>
                     {SIZES.map((size) => (
                         <Person key={size} size={size} src={PHOTO} />
@@ -71,7 +72,7 @@ export const Gallery: Story = {
                     ))}
                 </Row>
             </Section>
-            <Section title='Форма'>
+            <Section title={t('avatar.sections.shape.title')}>
                 <Row label='circle'>
                     <Person src={PHOTO} />
                     <Person />
@@ -81,9 +82,9 @@ export const Gallery: Story = {
                     <Person shape='square' />
                 </Row>
             </Section>
-            <Section title='Участники' description='Стопка аватаров с перекрытием и счётчиком остальных.'>
+            <Section title={t('avatar.sections.members.title')} description={t('avatar.sections.members.description')}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {TEAM.map(([initials, src], index) => (
+                    {TEAM().map(([initials, src], index) => (
                         <span
                             key={initials}
                             style={{

@@ -18,6 +18,7 @@ export type ReadTrackerOptions = {
  * last render changes.
  *
  * @example
+ * ```ts
  * const reads = new ReadTracker();
  *
  * function render() {
@@ -25,6 +26,7 @@ export type ReadTrackerOptions = {
  *     const html = reads.track(() => template(store.state, other.state));
  *     // subscribe to `reads.sources`, then check `reads.hasChanged()` to catch changes made in between
  * }
+ * ```
  */
 export class ReadTracker {
     private readonly reads: Reads = new Map();
@@ -60,7 +62,7 @@ export class ReadTracker {
     }
 
     /**
-     * The stores and computed values read since the last {@link clear}.
+     * The stores and computed values read since the last {@link ReadTracker.clear}.
      */
     get sources(): ReadableStore<unknown>[] {
         return [...this.reads.keys()];

@@ -19,8 +19,21 @@ import { TabsContext, type TabsValueChangeDetail } from './TabsRootContext';
  * Tabs and panels without `value` are matched by their position.
  */
 export class TabsElement extends MachineElement.withAttributes({
+    /**
+     * The value of the currently active `Tab`. Use when the component is controlled.
+     * When the value is `null`, no Tab will be active.
+     */
     value: 'string',
+    /**
+     * The default value. Use when the component is not controlled.
+     * When the value is `null`, no Tab will be active.
+     * @default 0
+     */
     'default-value': 'string',
+    /**
+     * The component orientation (layout flow direction).
+     * @default 'horizontal'
+     */
     orientation: ['horizontal', 'vertical']
 }) {
     private tabs!: TabsMachine;

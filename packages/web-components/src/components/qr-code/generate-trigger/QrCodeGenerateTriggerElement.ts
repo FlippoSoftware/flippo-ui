@@ -11,6 +11,10 @@ import { QrCodePart } from '../root/QrCodeRootContext';
  * Attributes: `disabled`.
  */
 export class QrCodeGenerateTriggerElement extends QrCodePart.withAttributes({
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private trigger!: QrCodeGenerateTriggerMachine;

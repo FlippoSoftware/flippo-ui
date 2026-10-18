@@ -1,13 +1,13 @@
 import React from 'react';
 
+import { SnippetSymbolDataAttributes } from '@flippo-software/core-components/snippet';
+
 import { useRenderElement } from '~@lib/hooks';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
 import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useSnippetRootContext } from '../root/SnippetRootContext';
-
-import { SnippetSymbolDataAttributes } from './SnippetSymbolDataAttributes';
 
 const snippetSymbolStyleHook: StateAttributesMapping<SnippetSymbol.State> = {
     snippetSymbol(value): Record<string, string> | null {

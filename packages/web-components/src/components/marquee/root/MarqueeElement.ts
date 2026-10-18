@@ -23,14 +23,52 @@ import { MarqueeContext } from './MarqueeRootContext';
  * State attributes: `data-playing`, `data-orientation`, `data-direction`.
  */
 export class MarqueeElement extends MachineElement.withAttributes({
+    /**
+     * Whether to play or pause the marquee.
+     * @default true
+     */
     play: 'boolean',
+    /**
+     * Whether to pause the marquee when hovered.
+     * @default true
+     */
     'pause-on-hover': 'boolean',
+    /**
+     * Whether to pause the marquee when clicked.
+     * @default false
+     */
     'pause-on-click': 'boolean',
+    /**
+     * The orientation of the marquee.
+     * @default "horizontal"
+     */
     orientation: ['horizontal', 'vertical'],
+    /**
+     * The animation direction.
+     * - `normal`: left-to-right (horizontal) or top-to-bottom (vertical)
+     * - `reverse`: right-to-left (horizontal) or bottom-to-top (vertical)
+     * @default "normal"
+     */
     direction: ['normal', 'reverse'],
+    /**
+     * Speed calculated as pixels/second.
+     * @default 50
+     */
     speed: 'number',
+    /**
+     * Duration to delay the animation after render, in seconds.
+     * @default 0
+     */
     delay: 'number',
+    /**
+     * The number of times the marquee should loop, 0 is equivalent to infinite.
+     * @default 0
+     */
     loop: 'number',
+    /**
+     * Whether to automatically fill blank space in the marquee with copies of the children.
+     * @default true
+     */
     'auto-fill': 'boolean'
 }) {
     private marquee!: MarqueeMachine;

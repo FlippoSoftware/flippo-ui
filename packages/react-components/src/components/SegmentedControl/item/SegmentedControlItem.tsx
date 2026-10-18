@@ -1,4 +1,4 @@
-import { SegmentedControlItemMachine } from '@flippo-software/core-components/segmented-control';
+import { SegmentedControlItemDataAttributes, SegmentedControlItemMachine } from '@flippo-software/core-components/segmented-control';
 
 import { toReactProps, useMachine, useMachineState, useTracker } from '~@lib/core';
 import { useRenderElement } from '~@lib/hooks';
@@ -6,8 +6,6 @@ import { useRenderElement } from '~@lib/hooks';
 import type { HeadlessUIComponentProps, NativeButtonProps } from '~@lib/types';
 
 import { useSegmentedControlContext } from '../root/SegmentedControlRootContext';
-
-import { SegmentedControlItemDataAttributes } from './SegmentedControlItemDataAttributes';
 
 const stateAttributesMapping = {
     selected(value: boolean): Record<string, string> {

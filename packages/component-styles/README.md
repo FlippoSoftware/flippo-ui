@@ -96,6 +96,38 @@ Semantic colours are `light-dark()` pairs. The page follows the system theme; `d
 `data-theme="dark"` on any element fixes the theme of its subtree. The dark values are the Figma tokens; the light
 theme mirrors the neutral scale.
 
+### Your own themes
+
+A theme is a `[data-theme='<name>']` rule built on a colour scheme. The `fl.theme` mixin writes it: the semantic
+colours of the scheme, recomputed from the primitives you override, then your semantic overrides.
+
+```scss
+@use '@flippo-software/component-styles/scss' as fl;
+
+@include fl.theme('sepia', light, $colors: ('bg-1': #f6edd9, 'text-primary': #3b2f1e), $primitives: ('brand-40': #8a5a2b));
+```
+
+Register its name and scheme with the provider of the kit (`themes={{ sepia: 'light' }}`, `registerThemes`), so it
+knows the colour scheme of the theme. `@flippo-software/component-styles/theme` has the framework-free helpers the
+providers use: `resolveTheme`, `systemColorScheme`, `subscribeSystemColorScheme`, `readStoredTheme` and `storeTheme`,
+the `ThemeSetting` types, and `themeScript({ storageKey })`, the source of an inline `<head>` script that puts the
+stored theme on `<html>` before the first paint.
+
+### The size grid of the controls
+
+Controls come in three sizes, each with the height of its row: small 40, medium 48, large 56 (`--fl-size-*`). Inputs,
+selects and buttons are that high. A checkbox, a radio or a switch with its label (`.fl-choice-label`, the `label`
+part) takes the height of the row: the first line of its text is centred in it and the control is centred on that
+line (a longer text wraps below it), so a row of mixed controls aligned at the top (`align-items: flex-start`) looks
+centred. Toggles and segmented controls keep their height and reach the row
+through block margins. The `compact` variant (of the label, the toggle, the segmented control) drops the row height
+(dense tables, lists of options); `--fl-choice-label-row-height`, `--fl-toggle-margin-block` and
+`--fl-segmented-control-margin-block` override it.
+
+`@flippo-software/component-styles/sizes` gives the grid to code: `CONTROL_SIZES`, `CONTROL_HEIGHTS`
+(`{ small: 40, medium: 48, large: 56 }`, tested against the tokens), `controlHeight(size)`, and `CONTROL_FAMILIES`,
+the families whose `size` follows the control size of the application.
+
 ## SCSS
 
 ```scss

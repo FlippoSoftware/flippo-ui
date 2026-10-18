@@ -5,7 +5,7 @@ import { checkbox as recipe } from '@flippo-software/component-styles/checkbox';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Checkbox } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -26,7 +26,7 @@ function Option(props: Props & { label: string; defaultChecked?: boolean; indete
 function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example'>
-            <Option {...args} label='Перемешивать карточки' />
+            <Option {...args} label={t('common.shuffleTheCards')} />
         </div>
     );
 }
@@ -39,8 +39,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Чекбокс: рамка 20px, при выборе заливается цветом бренда. Индикатор сам рисует галочку или минус (indeterminate). `Checkbox.Label` — `<label>` вокруг чекбокса и текста.'
+                component: 'checkbox.description'
             }
         }
     }
@@ -53,24 +52,24 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Состояния' description='Выключен, включён, частично выбран и недоступен.'>
+            <Section title={t('checkbox.sections.states.title')} description={t('checkbox.sections.states.description')}>
                 <Row label='enabled'>
-                    <Option label='Не выбран' />
-                    <Option label='Выбран' defaultChecked={true} />
-                    <Option label='Частично' indeterminate={true} />
+                    <Option label={t('checkbox.labels.unchecked')} />
+                    <Option label={t('checkbox.labels.checked')} defaultChecked={true} />
+                    <Option label={t('checkbox.labels.partly')} indeterminate={true} />
                 </Row>
                 <Row label='disabled'>
-                    <Option label='Не выбран' disabled={true} />
-                    <Option label='Выбран' disabled={true} defaultChecked={true} />
-                    <Option label='Частично' disabled={true} indeterminate={true} />
+                    <Option label={t('checkbox.labels.unchecked')} disabled={true} />
+                    <Option label={t('checkbox.labels.checked')} disabled={true} defaultChecked={true} />
+                    <Option label={t('checkbox.labels.partly')} disabled={true} indeterminate={true} />
                 </Row>
             </Section>
-            <Section title='Размеры' description='16, 20 и 24px; галочка масштабируется вместе с рамкой.'>
+            <Section title={t('checkbox.sections.sizes.title')} description={t('checkbox.sections.sizes.description')}>
                 {(['small', 'medium', 'large'] as const).map((size) => (
                     <Row key={size} label={size}>
-                        <Option size={size} label='Не выбран' />
-                        <Option size={size} label='Выбран' defaultChecked={true} />
-                        <Option size={size} label='Частично' indeterminate={true} />
+                        <Option size={size} label={t('checkbox.labels.unchecked')} />
+                        <Option size={size} label={t('checkbox.labels.checked')} defaultChecked={true} />
+                        <Option size={size} label={t('checkbox.labels.partly')} indeterminate={true} />
                     </Row>
                 ))}
             </Section>

@@ -2,7 +2,7 @@ import { pinInput as recipe } from '@flippo-software/component-styles/pin-input'
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { page, renderExample, row, section, variantControls } from '~@stories';
+import { page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -13,16 +13,16 @@ function code(attributes = '', options: { length?: number; invalid?: boolean } =
     const pins = Array.from(
         { length },
         (_, index) =>
-            `<demo-pin-input-pin as-child><input aria-label="Цифра ${index + 1}"${invalid ? ' aria-invalid="true"' : ''}/></demo-pin-input-pin>`
+            `<demo-pin-input-pin as-child><input aria-label="${t('pinInput.labels.digit', { number: index + 1 })}"${invalid ? ' aria-invalid="true"' : ''}/></demo-pin-input-pin>`
     ).join('');
-    return `<div class="sb-items sb-items--column" style="align-items: flex-start"><demo-pin-input ${attributes}><demo-pin-input-group><demo-pin-input-focus-funnel>${pins}</demo-pin-input-focus-funnel></demo-pin-input-group></demo-pin-input><output aria-live="polite" class="sb-caption">Введите код из письма</output></div>`;
+    return `<div class="sb-items sb-items--column" style="align-items: flex-start"><demo-pin-input ${attributes}><demo-pin-input-group><demo-pin-input-focus-funnel>${pins}</demo-pin-input-focus-funnel></demo-pin-input-group></demo-pin-input><output aria-live="polite" class="sb-caption">${t('pinInput.content.enterTheCodeFrom')}</output></div>`;
 }
 
 /** Reports the complete code under each pin input. */
 function reportComplete(root: HTMLElement): void {
     root.addEventListener('value-complete', (event) => {
         const output = (event.target as HTMLElement).parentElement?.querySelector('output');
-        if (output) output.textContent = 'Код введён';
+        if (output) output.textContent = t('pinInput.content.codeEntered');
     });
 }
 
@@ -37,8 +37,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component:
-                    'Ввод кода (Figma "Numeric"): ячейки 64×80 по одной цифре; вставка из буфера заполняет все ячейки. Когда код введён, элемент шлёт `value-complete`.'
+                component: 'pinInput.descriptionWeb'
             }
         }
     }
@@ -52,21 +51,21 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Состояния',
-                'Пустой, заполненный, с ошибкой и недоступный.',
+                t('pinInput.sections.states.title'),
+                t('pinInput.sections.states.description'),
                 row('blank', code()) +
                     row('filled', code('default-value="4271"')) +
                     row('wrong', code('default-value="4271"', { invalid: true })) +
                     row('disabled', code('default-value="42" disabled'))
             ) +
                 section(
-                    'Размеры',
-                    'Large 64×80 (Figma) и Medium 48×56 для форм потеснее.',
+                    t('pinInput.sections.sizes.title'),
+                    t('pinInput.sections.sizes.description'),
                     row('large', code('size="large"', { length: 6 })) + row('medium', code('size="medium"', { length: 6 }))
                 ) +
                 section(
-                    'На карточке',
-                    'Inverted и скрытые символы (`mask`).',
+                    t('pinInput.sections.onACard.title'),
+                    t('pinInput.sections.onACard.descriptionWeb'),
                     row('inverted', code('appearance="inverted" default-value="4271" mask')),
                     {
                         raised: true

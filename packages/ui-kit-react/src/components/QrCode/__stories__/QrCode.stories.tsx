@@ -5,7 +5,7 @@ import { qrCode as recipe } from '@flippo-software/component-styles/qr-code';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Icon, QrCode, Spinner } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -20,10 +20,11 @@ function Overlay(): React.JSX.Element {
                 status === 'error' ? (
                     <span style={{ display: 'grid', justifyItems: 'center', gap: 8 }}>
                         <Icon name='circle-xmark-fill' />
-                        Не удалось создать код
+
+                        {t('qrCode.content.couldNotCreateThe')}
                     </span>
                 ) : (
-                    <Spinner aria-label='Создаём код' />
+                    <Spinner aria-label={t('qrCode.labels.creatingTheCode')} />
                 )
             }
         </QrCode.Overlay>
@@ -39,11 +40,13 @@ function Share(props: Props & { onGenerate?: () => Promise<void> }): React.JSX.E
             <QrCode.Actions>
                 <QrCode.DownloadTrigger>
                     <Icon name='arrow-outward' />
-                    Скачать
+
+                    {t('qrCode.content.download')}
                 </QrCode.DownloadTrigger>
                 <QrCode.ClipboardTrigger>
                     <Icon name='copy' />
-                    Копировать
+
+                    {t('qrCode.content.copy')}
                 </QrCode.ClipboardTrigger>
             </QrCode.Actions>
         </QrCode.Root>
@@ -73,7 +76,8 @@ function Regenerate(): React.JSX.Element {
             <Share key={key} size={160} onGenerate={() => wait(1500)} />
             <Button size='small' variant='label' onClick={() => setKey((current) => current + 1)}>
                 <Icon name='shuffle' />
-                Пересоздать
+
+                {t('qrCode.content.regenerate')}
             </Button>
         </div>
     );
@@ -91,8 +95,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'QR-код набора: рисуется цветом `--fl-qr-code-color` на прозрачном фоне и следует за темой; уголки-видоискатель вокруг кода. Пока код создаётся или если создать не вышло — поверх матовая подложка (`QrCode.Overlay`).'
+                component: 'qrCode.description'
             }
         }
     }
@@ -105,7 +108,7 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Размеры'>
+            <Section title={t('qrCode.sections.sizes.title')}>
                 <Row label='size'>
                     <QrCode.Root value={SET_URL} size={120}>
                         <QrCode.Frame />
@@ -115,7 +118,7 @@ export const Gallery: Story = {
                     </QrCode.Root>
                 </Row>
             </Section>
-            <Section title='Состояния' description='Загрузка (медленный onGenerate) и ошибка (onGenerate отклонён).'>
+            <Section title={t('qrCode.sections.states.title')} description={t('qrCode.sections.states.description')}>
                 <Row label='loading'>
                     <Regenerate />
                 </Row>
@@ -123,10 +126,7 @@ export const Gallery: Story = {
                     <Share size={160} onGenerate={() => Promise.reject(new Error('offline'))} />
                 </Row>
             </Section>
-            <Section
-                title='Свой цвет'
-                description='Цвет кода и уголков задаётся токенами `--fl-qr-code-color` и `--fl-qr-code-corner-color`.'
-            >
+            <Section title={t('qrCode.sections.customColour.title')} description={t('qrCode.sections.customColour.description')}>
                 <Row label='brand'>
                     <QrCode.Root value={SET_URL} size={140} style={BRAND}>
                         <QrCode.Frame />

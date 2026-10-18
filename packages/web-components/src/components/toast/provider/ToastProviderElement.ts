@@ -22,8 +22,19 @@ import { ToastProviderContext } from '../root/ToastRootContext';
  * Events: `toasts-change` (`detail: { toasts }`), for frameworks rendering the toasts themselves.
  */
 export class ToastProviderElement extends MachineElement.withAttributes({
+    /**
+     * The default amount of time (in ms) before a toast is auto dismissed.
+     * A value of `0` will prevent the toast from being dismissed automatically.
+     * @default 5000
+     */
     timeout: 'number',
+    /**
+     * The maximum number of toasts that can be displayed at once.
+     * When the limit is reached, the oldest toast will be removed to make room for the new one.
+     * @default 3
+     */
     limit: 'number',
+    /** A toast manager (`createToastManager()`) to add toasts from outside the provider. */
     toastManager: property<ToastManager>()
 }) {
     private provider!: ToastProviderMachine;

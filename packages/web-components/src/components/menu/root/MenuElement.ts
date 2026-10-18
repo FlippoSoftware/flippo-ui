@@ -26,13 +26,51 @@ import { MenuContext, type MenuOpenChangeDetail, type MenuRootDriver } from './M
  * trigger, so that Tab moves from the trigger into the menu.
  */
 export class MenuElement extends MachineElement.withAttributes({
+    /** Whether the menu is currently open. */
     open: 'boolean',
+    /**
+     * Whether the menu is initially open.
+     *
+     * To render a controlled menu, use the `open` attribute instead.
+     * @default false
+     */
     'default-open': 'boolean',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Determines if the menu enters a modal state when open.
+     * - `true`: user interaction is limited to the menu: document page scroll is locked and and pointer
+     * interactions on outside elements are disabled.
+     * - `false`: user interaction with the rest of the document is allowed.
+     * @default true
+     */
     modal: 'boolean',
+    /**
+     * Whether to loop keyboard focus back to the first item
+     * when the end of the list is reached while using the arrow keys.
+     * @default true
+     */
     'loop-focus': 'boolean',
+    /**
+     * The visual orientation of the menu.
+     * Controls whether roving focus uses up/down or left/right arrow keys.
+     * @default 'vertical'
+     */
     orientation: ['vertical', 'horizontal'],
+    /**
+     * Whether moving the pointer over items should highlight them.
+     * Disabling this attribute allows CSS `:hover` to be differentiated from the `:focus` (`data-highlighted`) state.
+     * @default true
+     */
     'highlight-item-on-hover': 'boolean',
+    /**
+     * When in a submenu, determines whether pressing the Escape key
+     * closes the entire menu, or only the current child menu.
+     * @default true
+     */
     'close-parent-on-esc': 'boolean'
 }) {
     /**

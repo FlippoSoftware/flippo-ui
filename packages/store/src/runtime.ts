@@ -183,8 +183,10 @@ export function runWithReads<T>(reads: Reads, read: () => T): T {
  * effect or a tracked function).
  *
  * @example
+ * ```ts
  * const total = computed(() => cart.state.price * untracked(() => settings.state.rate));
  * // `total` is recomputed when `cart` changes, but not when only `settings` changes.
+ * ```
  */
 export function untracked<T>(fn: () => T): T {
     const previous = tracker;

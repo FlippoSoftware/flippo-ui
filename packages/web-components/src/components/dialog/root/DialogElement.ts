@@ -34,9 +34,29 @@ function toModalOption(value: unknown): DialogRootOptions['modal'] {
  * inside the popup of another one is nested.
  */
 export class DialogElement extends MachineElement.withAttributes({
+    /** Whether the dialog is currently open. */
     open: 'boolean',
+    /**
+     * Whether the dialog is initially open.
+     *
+     * To render a controlled dialog, use the `open` attribute instead.
+     * @default false
+     */
     'default-open': 'boolean',
+    /**
+     * Determines if the dialog enters a modal state when open.
+     * - `true`: user interaction is limited to just the dialog: focus is trapped, document page scroll is locked,
+     *   and pointer interactions on outside elements are disabled.
+     * - `false`: user interaction with the rest of the document is allowed.
+     * - `'trap-focus'`: focus is trapped inside the dialog, but document page scroll is not locked and pointer
+     *   interactions outside of it remain enabled.
+     * @default true
+     */
     modal: 'string',
+    /**
+     * Determines whether the dialog should close on outside clicks.
+     * @default false
+     */
     'disable-pointer-dismissal': 'boolean'
 }) {
     /**

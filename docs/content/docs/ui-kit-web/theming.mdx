@@ -1,0 +1,48 @@
+---
+title: "Themes and sizes"
+description: "define() and <prefix>-provider: the theme of the page, your own themes and the size grid of the controls."
+---
+
+The theme and the control size of the page come from `define()` and functions, those of a part of the page from
+`<ui-provider>`.
+
+```ts
+define({ prefix: 'ui', themes: { sepia: 'light' }, storageKey: 'flippo-theme', size: 'medium' });
+
+setTheme('dark');
+const { theme, resolvedTheme, colorScheme } = getTheme();
+subscribeTheme((state) => …);
+setControlSize('small');
+getControlSize(element); // { size: 'small', height: 40 }
+```
+
+```html
+<ui-provider theme="sepia" size="large">…</ui-provider>
+```
+
+## Themes
+
+- `system` (the default), `light`, `dark` or one of your own. `setTheme` puts `data-theme` on `<html>`,
+  `<ui-provider theme>` on itself (`display: contents`); the popups in the top layer stay inside it and keep the theme.
+- Your own theme is a CSS rule `[data-theme='sepia']`, with the SCSS mixin:
+
+```scss
+@use '@flippo-software/component-styles/scss' as fl;
+
+@include fl.theme('sepia', light, $colors: ('bg-1': #f6edd9, 'text-primary': #3b2f1e));
+```
+
+  registered with `registerThemes({ sepia: 'light' })` or `define({ themes })`.
+- No flash on load: `storageKey` keeps the choice, `<script>${themeScript({ storageKey })}</script>` in the `<head>` puts
+  it on `<html>` before the first paint.
+
+## Size grid
+
+| Size | Row height | Controls |
+| --- | --- | --- |
+| `small` | 40 | inputs, selects and buttons are that high; a checkbox, a radio or a switch with its label, a toggle and a segmented control reach it with spacing |
+| `medium` | 48 | the default |
+| `large` | 56 | |
+
+A row of mixed controls aligned at the top looks centred. `compact` drops the spacing. In code: `CONTROL_HEIGHTS`,
+`getControlSize(element)`.

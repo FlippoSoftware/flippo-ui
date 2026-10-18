@@ -23,14 +23,51 @@ import { type CheckboxCheckedChangeDetail, CheckboxContext, CheckboxGroupContext
  * `data-required`, and those of the field.
  */
 export class CheckboxElement extends ControlElement.withAttributes({
+    /**
+     * Whether the checkbox is currently ticked.
+     *
+     * To render an uncontrolled checkbox, use the `default-checked` attribute instead.
+     */
     checked: 'boolean',
+    /**
+     * Whether the checkbox is initially ticked.
+     *
+     * To render a controlled checkbox, use the `checked` attribute instead.
+     * @default false
+     */
     'default-checked': 'boolean',
+    /**
+     * Whether the checkbox is in a mixed state: neither ticked, nor unticked.
+     * @default false
+     */
     indeterminate: 'boolean',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the user should be unable to tick or untick the checkbox.
+     * @default false
+     */
     'read-only': 'boolean',
+    /**
+     * Whether the user must tick the checkbox before submitting a form.
+     * @default false
+     */
     required: 'boolean',
+    /**
+     * Identifies the field when a form is submitted.
+     */
     name: 'string',
+    /** The value of the selected checkbox. */
     value: 'string',
+    /**
+     * Whether the checkbox controls a group of child checkboxes.
+     *
+     * Must be used in a `<prefix>-checkbox-group`.
+     * @default false
+     */
     parent: 'boolean'
 }) {
     private checkbox!: CheckboxMachine;

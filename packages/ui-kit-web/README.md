@@ -83,6 +83,37 @@ setDefaultProps({ button: { size: 'small' } });
 An attribute or a property set on an element wins, then the part's entry, then what the root passes down to its parts,
 then the family's entry, then the kit's built-in defaults. `DefaultProps` types the config from the families.
 
+## Theme and control size
+
+The theme and the control size of the page, and of a part of it:
+
+```ts
+define({ prefix: 'ui', themes: { sepia: 'light' }, theme: 'system', size: 'medium', storageKey: 'flippo-theme' });
+
+setTheme('dark'); // data-theme on <html>; 'system' removes it
+const { theme, resolvedTheme, colorScheme, themes } = getTheme();
+subscribeTheme((state) => …);
+setControlSize('small');
+getControlSize(element); // { size: 'small', height: 40 }: its closest provider's, else the page's
+```
+
+```html
+<ui-provider theme="sepia" size="large">…</ui-provider>
+```
+
+With `storageKey`, the theme set with `setTheme` is kept in `localStorage` and the page starts from it. The scripts of
+the page run after it is shown: inline `themeScript({ storageKey })` in the `<head>` (`<script>${themeScript(…)}</script>`
+when the page is rendered on a server or at build time), so the stored theme is there before the first paint.
+
+`<ui-provider>` renders as `display: contents` and puts `data-theme` on itself; the popups of its elements stay in
+its subtree (top layer) and keep the theme. It also takes `defaults`, like `<ui-default-props>`. Themes of your own
+are `[data-theme]` rules (see `component-styles`) registered with `registerThemes` or `define({ themes })`.
+
+The families with a control size (button, input, select, checkbox…) take the size of their provider, else of the
+page, unless their attribute or their default props set one. Checkboxes, radios and switches with their label take
+the height of a control row (40/48/56), so a row of mixed controls aligned at the top looks centred; so do toggles and
+segmented controls through their block margins. `compact` drops it; toggles in a toggle group have none. Same rules as `@flippo-software/ui-kit-react`'s `FlippoProvider`.
+
 ## Shared catalog
 
 Every family in `web-components` is covered. Input, Textarea, Link and the presentation families are also included: Card, Text, Code, Kbd, Blockquote, Em, Strong, Quote, Box, Flex, Grid, Center, Container, Section, List, Skeleton, SkeletonText, Spinner and Slot. Presentation elements add styling; use `as-child` with native markup to supply semantics. List presentation parts do not add React's composite List behaviour.
@@ -108,7 +139,7 @@ Stories live in `src/components/<name>/__stories__/`, tests in `__tests__/` fold
 ## Storybook
 
 Each component keeps its stories next to it, in `src/components/<name>/__stories__/` (one CSF page for each of the 63
-public component families), in Russian, with the same
+public component families), in English and Russian (the toolbar switches the language), with the same
 catalog groups and content in both packages. Each page has a `Default` story with Controls for the recipe variants,
 and a `Gallery` (some also `Examples`) laid out like the Figma component sheets: sections of labelled rows with the
 sizes, variants and states, and realistic compositions from the Flippo screens. The gallery layout (`src/__stories__`, imported as `~@stories`)

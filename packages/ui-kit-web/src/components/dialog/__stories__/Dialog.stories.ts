@@ -2,7 +2,7 @@ import { dialog as recipe } from '@flippo-software/component-styles/dialog';
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { icon, page, renderExample, row, section, textInput, triggerButton, variantControls } from '~@stories';
+import { icon, page, renderExample, row, section, t, textInput, triggerButton, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -14,26 +14,26 @@ function close(label: string, variant: 'label' | 'primary' | 'danger'): string {
 
 function deleteSet(attributes = ''): string {
     return `<demo-dialog ${attributes}>
-<demo-dialog-trigger as-child>${triggerButton(`${icon('delete')}Удалить набор`, { variant: 'danger' })}</demo-dialog-trigger>
+<demo-dialog-trigger as-child>${triggerButton(`${icon('delete')}${t('common.deleteTheSet')}`, { variant: 'danger' })}</demo-dialog-trigger>
 <demo-dialog-backdrop></demo-dialog-backdrop>
 <demo-dialog-popup>
-<demo-dialog-title>Удалить набор?</demo-dialog-title>
-<demo-dialog-description>«Экзамен Законы UX» и 7 карточек исчезнут у всех участников. Это действие нельзя отменить.</demo-dialog-description>
-<demo-dialog-actions>${close('Отмена', 'label')}${close('Удалить', 'danger')}</demo-dialog-actions>
-<demo-dialog-close aria-label="Закрыть"></demo-dialog-close>
+<demo-dialog-title>${t('dialog.content.deleteTheSet')}</demo-dialog-title>
+<demo-dialog-description>${t('dialog.content.uxLawsExamAnd')}</demo-dialog-description>
+<demo-dialog-actions>${close(t('common.cancel'), 'label')}${close(t('common.delete'), 'danger')}</demo-dialog-actions>
+<demo-dialog-close aria-label="${t('common.close')}"></demo-dialog-close>
 </demo-dialog-popup>
 </demo-dialog>`;
 }
 
-function renameSet(attributes = '', label = 'Переименовать'): string {
+function renameSet(attributes = '', label = t('common.rename')): string {
     return `<demo-dialog ${attributes}>
 <demo-dialog-trigger as-child>${triggerButton(`${icon('pencil')}${label}`, { variant: 'secondary' })}</demo-dialog-trigger>
 <demo-dialog-backdrop></demo-dialog-backdrop>
 <demo-dialog-popup>
-<demo-dialog-title>Новое название</demo-dialog-title>
-<demo-field name="title"><demo-field-label>Название набора</demo-field-label>${textInput('appearance="inverted"', '', { control: 'default-value="Экзамен Законы UX"' })}</demo-field>
-<demo-dialog-actions>${close('Отмена', 'label')}${close('Сохранить', 'primary')}</demo-dialog-actions>
-<demo-dialog-close aria-label="Закрыть"></demo-dialog-close>
+<demo-dialog-title>${t('dialog.content.newName')}</demo-dialog-title>
+<demo-field name="title"><demo-field-label>${t('common.setName')}</demo-field-label>${textInput('appearance="inverted"', '', { control: `default-value="${t('common.uxLawsExam')}"` })}</demo-field>
+<demo-dialog-actions>${close(t('common.cancel'), 'label')}${close(t('common.save'), 'primary')}</demo-dialog-actions>
+<demo-dialog-close aria-label="${t('common.close')}"></demo-dialog-close>
 </demo-dialog-popup>
 </demo-dialog>`;
 }
@@ -49,8 +49,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component:
-                    'Модальный диалог: подложка затемняет страницу и перехватывает нажатия — нажатие на неё закрывает диалог. Закрывается и по Escape; крестик — `demo-dialog-close` без `as-child`.'
+                component: 'dialog.descriptionWeb'
             }
         }
     }
@@ -64,13 +63,13 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Подтверждение и форма',
-                'Опасное действие с подтверждением; короткая форма в диалоге.',
+                t('dialog.sections.confirmationAndForm.title'),
+                t('dialog.sections.confirmationAndForm.description'),
                 row('confirm', deleteSet()) + row('form', renameSet())
             ) +
                 section(
-                    'Размеры',
-                    'Small 420, Medium 732, Large 1064 (по ширине окна на узких экранах).',
+                    t('dialog.sections.sizes.title'),
+                    t('dialog.sections.sizes.description'),
                     row(
                         'sizes',
                         renameSet('size="small"', 'Small') + renameSet('size="medium"', 'Medium') + renameSet('size="large"', 'Large')

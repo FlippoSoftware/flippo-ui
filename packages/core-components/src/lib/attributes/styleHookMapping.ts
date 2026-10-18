@@ -3,7 +3,13 @@ import type { TransitionStatus } from '~@lib/types';
 import type { CustomStyleHookMapping } from './getStyleHookProps';
 
 export enum TransitionStatusDataAttributes {
+    /**
+     * Present when the element is animating in.
+     */
     startingStyle = 'data-starting-style',
+    /**
+     * Present when the element is animating out.
+     */
     endingStyle = 'data-ending-style'
 }
 

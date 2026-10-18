@@ -2,7 +2,7 @@ import { segmentedControl as recipe } from '@flippo-software/component-styles/se
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { icon, page, renderExample, row, section, variantControls } from '~@stories';
+import { icon, page, renderExample, row, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -13,7 +13,7 @@ function segment(value: string, content: string, attributes = ''): string {
 }
 
 function period(attributes = ''): string {
-    return `<demo-segmented-control ${attributes} default-value="week" aria-label="Период статистики">${segment('day', 'День')}${segment('week', 'Неделя')}${segment('month', 'Месяц')}${segment('year', 'Год', 'disabled')}</demo-segmented-control>`;
+    return `<demo-segmented-control ${attributes} default-value="week" aria-label="${t('segmentedControl.labels.statisticsPeriod')}">${segment('day', t('common.day'))}${segment('week', t('common.week'))}${segment('month', t('common.month'))}${segment('year', t('segmentedControl.content.year'), 'disabled')}</demo-segmented-control>`;
 }
 
 const markup = period('data-story-target');
@@ -26,7 +26,7 @@ const meta: Meta<Props> = {
     parameters: {
         docs: {
             source: { code: markup, language: 'html' },
-            description: { component: 'Переключатель вида: один вариант из нескольких на общей подложке.' }
+            description: { component: 'segmentedControl.description' }
         }
     }
 };
@@ -39,16 +39,16 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Размеры',
-                'Высота сегмента 28, 32 и 40px.',
+                t('segmentedControl.sections.sizes.title'),
+                t('segmentedControl.sections.sizes.description'),
                 (['small', 'medium', 'large'] as const).map((size) => row(size, period(`size="${size}"`))).join('')
             ) +
                 section(
-                    'С иконками и недоступный',
-                    'Иконка перед подписью; вся группа может быть недоступна.',
+                    t('segmentedControl.sections.withIconsAndDisabled.title'),
+                    t('segmentedControl.sections.withIconsAndDisabled.description'),
                     row(
                         'icons',
-                        `<demo-segmented-control default-value="cards" aria-label="Вид">${segment('list', `${icon('format-list-ul')}Список`)}${segment('cards', `${icon('set')}Карточки`)}</demo-segmented-control>`
+                        `<demo-segmented-control default-value="cards" aria-label="${t('common.view')}">${segment('list', `${icon('format-list-ul')}${t('common.list')}`)}${segment('cards', `${icon('set')}${t('common.cards')}`)}</demo-segmented-control>`
                     ) + row('disabled', period('disabled'))
                 )
         )

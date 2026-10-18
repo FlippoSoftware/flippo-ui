@@ -13,8 +13,20 @@ import { QrCodePart } from '../root/QrCodeRootContext';
  * State attributes: `data-downloading`.
  */
 export class QrCodeDownloadTriggerElement extends QrCodePart.withAttributes({
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * The name of the QR code to download.
+     * @default 'qrcode'
+     */
     name: 'string',
+    /**
+     * The extension of the QR code to download.
+     * @default 'svg'
+     */
     extension: ['svg', 'png', 'jpeg', 'webp']
 }) {
     private trigger!: QrCodeDownloadTriggerMachine;

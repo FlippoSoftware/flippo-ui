@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DialogPopupMachine } from '@flippo-software/core-components/dialog';
+import { DialogPopupDataAttributes, DialogPopupMachine } from '@flippo-software/core-components/dialog';
 
 import type { DialogPopupOptions } from '@flippo-software/core-components/dialog';
 import type { Interaction } from '@flippo-software/react-hooks/use-enhanced-click-handler';
@@ -17,8 +17,6 @@ import type { HeadlessUIComponentProps } from '~@lib/types';
 
 import { useDialogPortalContext } from '../portal/DialogPortalContext';
 import { useDialogRootContext } from '../root/DialogRootContext';
-
-import { DialogPopupDataAttributes } from './DialogPopupDataAttributes';
 
 const stateAttributesMapping: StateAttributesMapping<DialogPopup.State> = {
     ...baseMapping,

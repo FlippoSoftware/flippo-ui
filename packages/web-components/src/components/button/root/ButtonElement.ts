@@ -14,7 +14,12 @@ import { MachineElement } from '../../../lib/MachineElement';
  * State attributes: `data-disabled`.
  */
 export class ButtonElement extends MachineElement.withAttributes({
+    /** Whether the button should ignore user interaction. */
     disabled: 'boolean',
+    /**
+     * Whether the button should be focusable when disabled.
+     * @default false
+     */
     'focusable-when-disabled': 'boolean'
 }) {
     private button!: ButtonMachine;

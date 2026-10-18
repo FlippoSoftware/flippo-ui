@@ -10,3 +10,18 @@ coverage/
 
 # Personal Claude Code settings; the agent docs and skills (.claude/skills) are versioned.
 .claude/settings.local.json
+tools/storybook/api.json
+tools/storybook/core-enums.json
+tools/storybook/api.json.*.tmp
+
+# API Extractor work files (the reports in etc/ are versioned)
+packages/*/temp/
+
+# Custom Elements Manifest of web-components (written by its build)
+packages/web-components/custom-elements.json
+
+# Generated pages of the documentation site (docs/scripts/generate.ts); the hand-written ones are versioned
+docs/content/docs/*/index.mdx
+docs/content/docs/*/meta.json
+docs/content/docs/*/meta.ru.json
+docs/content/docs/*/api/

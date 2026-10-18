@@ -5,7 +5,7 @@ import { segmentedControl as recipe } from '@flippo-software/component-styles/se
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Icon, SegmentedControl } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -13,12 +13,12 @@ type Props = RecipeVariants<typeof recipe> & { disabled?: boolean };
 
 function Period(props: Props): React.JSX.Element {
     return (
-        <SegmentedControl.Root defaultValue='week' aria-label='Период статистики' {...props}>
-            <SegmentedControl.Item value='day'>День</SegmentedControl.Item>
-            <SegmentedControl.Item value='week'>Неделя</SegmentedControl.Item>
-            <SegmentedControl.Item value='month'>Месяц</SegmentedControl.Item>
+        <SegmentedControl.Root defaultValue='week' aria-label={t('segmentedControl.labels.statisticsPeriod')} {...props}>
+            <SegmentedControl.Item value='day'>{t('common.day')}</SegmentedControl.Item>
+            <SegmentedControl.Item value='week'>{t('common.week')}</SegmentedControl.Item>
+            <SegmentedControl.Item value='month'>{t('common.month')}</SegmentedControl.Item>
             <SegmentedControl.Item value='year' disabled={true}>
-                Год
+                {t('segmentedControl.content.year')}
             </SegmentedControl.Item>
         </SegmentedControl.Root>
     );
@@ -37,7 +37,7 @@ const meta = {
     component: Example,
     args: {},
     argTypes: { ...variantControls(recipe), disabled: { control: 'boolean', table: { category: 'Behaviour' } } },
-    parameters: { docs: { description: { component: 'Переключатель вида: один вариант из нескольких на общей подложке.' } } }
+    parameters: { docs: { description: { component: 'segmentedControl.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -47,23 +47,28 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Размеры' description='Высота сегмента 28, 32 и 40px.'>
+            <Section title={t('segmentedControl.sections.sizes.title')} description={t('segmentedControl.sections.sizes.description')}>
                 {(['small', 'medium', 'large'] as const).map((size) => (
                     <Row key={size} label={size}>
                         <Period size={size} />
                     </Row>
                 ))}
             </Section>
-            <Section title='С иконками и недоступный' description='Иконка перед подписью; вся группа может быть недоступна.'>
+            <Section
+                title={t('segmentedControl.sections.withIconsAndDisabled.title')}
+                description={t('segmentedControl.sections.withIconsAndDisabled.description')}
+            >
                 <Row label='icons'>
-                    <SegmentedControl.Root defaultValue='cards' aria-label='Вид'>
+                    <SegmentedControl.Root defaultValue='cards' aria-label={t('common.view')}>
                         <SegmentedControl.Item value='list'>
                             <Icon name='format-list-ul' />
-                            Список
+
+                            {t('common.list')}
                         </SegmentedControl.Item>
                         <SegmentedControl.Item value='cards'>
                             <Icon name='set' />
-                            Карточки
+
+                            {t('common.cards')}
                         </SegmentedControl.Item>
                     </SegmentedControl.Root>
                 </Row>

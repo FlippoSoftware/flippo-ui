@@ -1,0 +1,10 @@
+import { Meta } from '@storybook/blocks';
+
+import { MarkdownPage } from '../Lang';
+import { Palette, Typeset } from './TokenWidgets';
+import en from './tokens.md?raw';
+import ru from './tokens.ru.md?raw';
+
+<Meta title="Overview/Tokens" />
+
+<MarkdownPage en={en} ru={ru} slots={{ palette: <Palette />, typeset: <Typeset /> }} />

@@ -15,6 +15,10 @@ import { MenuItemPart } from '../root/MenuRootContext';
  * State attributes: `data-highlighted`, `data-disabled`.
  */
 export class MenuItemElement extends MenuItemPart.withAttributes({
+    /**
+     * Whether to close the menu when the item is clicked.
+     * @default true
+     */
     'close-on-click': 'boolean'
 }) {
     protected item!: MenuRegularItemMachine;

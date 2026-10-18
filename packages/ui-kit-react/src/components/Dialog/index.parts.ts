@@ -3,6 +3,7 @@ import { dialog as recipe } from '@flippo-software/component-styles/dialog';
 import { Dialog as Primitive } from '@flippo-software/react-components/dialog';
 
 import { icon } from '~@lib/Icon';
+import { themedPortal } from '~@lib/Provider';
 import { createStyler } from '~@lib/Styled';
 
 import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
@@ -20,7 +21,7 @@ export const Description: StyledComponent<typeof Primitive.Description, typeof r
     false
 );
 export const Popup: StyledComponent<typeof Primitive.Popup, typeof recipe> = styled(Primitive.Popup, 'popup', false);
-export const Portal: typeof Primitive.Portal = Primitive.Portal;
+export const Portal: typeof Primitive.Portal = themedPortal(Primitive.Portal) as typeof Primitive.Portal;
 const StyledRoot = styled(Primitive.Root, undefined, true);
 export const Root = StyledRoot as <Payload = unknown>(props: Primitive.Root.Props<Payload> & Variants) => React.ReactElement;
 export const createHandle: typeof Primitive.createHandle = Primitive.createHandle;

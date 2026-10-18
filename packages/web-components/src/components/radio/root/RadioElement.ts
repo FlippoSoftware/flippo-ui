@@ -20,9 +20,13 @@ import { RadioContext, RadioGroupContext } from './RadioRootContext';
  * of the field.
  */
 export class RadioElement extends ControlElement.withAttributes({
+    /** The unique identifying value of the radio in a group. */
     value: 'string',
+    /** Whether the component should ignore user interaction. */
     disabled: 'boolean',
+    /** Whether the user should be unable to select the radio button. */
     'read-only': 'boolean',
+    /** Whether the user must choose a value before submitting a form. */
     required: 'boolean'
 }) {
     private radio!: RadioMachine;

@@ -1,7 +1,11 @@
 // Behaviour and utility APIs remain available; explicit styled exports take precedence.
+
+export { CONTROL_HEIGHTS, CONTROL_SIZES } from '@flippo-software/component-styles/sizes';
 export * from '@flippo-software/react-components';
 
 export type { IconName } from '@flippo-software/component-styles/icons';
+export type { ControlSize } from '@flippo-software/component-styles/sizes';
+export type { ColorScheme, ThemeName, ThemeSetting, Themes } from '@flippo-software/component-styles/theme';
 
 export { Accordion } from './components/Accordion';
 export { Autocomplete } from './components/Autocomplete';
@@ -68,6 +72,8 @@ export { Tooltip } from './components/Tooltip';
 export { DefaultPropsProvider } from './lib/DefaultProps';
 export { Icon } from './lib/Icon';
 export * from './lib/layouts';
+export { FlippoProvider, ThemeScript, useControlSize, useTheme } from './lib/Provider';
 
 export type { DefaultProps } from './lib/DefaultProps';
+export type { ControlSizeState, FlippoProviderProps, ThemeState } from './lib/Provider';
 export type * from './lib/types';

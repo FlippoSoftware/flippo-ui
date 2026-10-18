@@ -13,8 +13,15 @@ import { TooltipProviderContext } from '../root/TooltipRootContext';
  * tooltip opens instantly after one closes; 400 by default).
  */
 export class TooltipProviderElement extends MachineElement.withAttributes({
+    /** How long to wait before opening a tooltip. Specified in milliseconds. */
     delay: 'number',
+    /** How long to wait before closing a tooltip. Specified in milliseconds. */
     'close-delay': 'number',
+    /**
+     * Another tooltip will open instantly if the previous tooltip
+     * is closed within this timeout. Specified in milliseconds.
+     * @default 400
+     */
     timeout: 'number'
 }) {
     private providerMachine!: TooltipProviderMachine;

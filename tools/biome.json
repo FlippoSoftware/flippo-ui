@@ -1,0 +1,40 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+    "root": false,
+    "extends": ["@flippo-software/biome/base", "@flippo-software/biome/react"],
+    "files": {
+        "includes": ["!**/node_modules", "!storybook/api.json", "!storybook/core-enums.json", "!storybook/assets"]
+    },
+    "linter": {
+        "rules": {
+            "style": {
+                "useFilenamingConvention": "off"
+            },
+            "performance": {
+                "noBarrelFile": "off",
+                "noReExportAll": "off"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "includes": ["*.ts", "*.mjs"],
+            "linter": {
+                "rules": {
+                    "correctness": {
+                        "noNodejsModules": "off"
+                    },
+                    "style": {
+                        "noProcessEnv": "off"
+                    },
+                    "suspicious": {
+                        "noConsole": "off"
+                    },
+                    "performance": {
+                        "useTopLevelRegex": "off"
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -40,6 +40,13 @@ test/                             *.test.ts(x) per family; stubPopoverApi.ts, st
 - `RootContext` files must not import element classes at runtime (only `import type`): use `providesContext(ctx)`
   instead of `instanceof`, or a cycle breaks module initialisation.
 
+## Documentation
+
+- Every attribute of `withAttributes({ … })` has a JSDoc comment (with `@default` when it has one); the class comment
+  keeps its `Attributes:` / `Events:` / `State attributes:` lines (the events' descriptions come from there).
+- `pnpm build` also writes `custom-elements.json` (Custom Elements Manifest, `custom-elements-manifest.config.js`
+  teaches the analyzer `withAttributes`, `property<T>()` and `this.emit`); it is published, not versioned.
+
 ## Commands
 
 `pnpm lint:check`, `pnpm typecheck`, `pnpm test`, `pnpm build`. Core and store come from the workspace (`workspace:^`)

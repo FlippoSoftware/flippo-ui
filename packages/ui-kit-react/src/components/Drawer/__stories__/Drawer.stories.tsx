@@ -5,14 +5,14 @@ import { drawer as recipe } from '@flippo-software/component-styles/drawer';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Drawer, Icon, Switch } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe> & { direction?: 'down' | 'up' | 'left' | 'right' };
 
 function Settings(props: Props & { label?: string }): React.JSX.Element {
-    const { label = 'Настройки повторения', ...rest } = props;
+    const { label = t('drawer.content.reviewSettings'), ...rest } = props;
     return (
         <Drawer.Root {...rest}>
             <Drawer.Trigger render={<Button variant='secondary' />}>
@@ -24,20 +24,22 @@ function Settings(props: Props & { label?: string }): React.JSX.Element {
                 <Drawer.Viewport>
                     <Drawer.Popup>
                         <Drawer.Drag />
-                        <Drawer.Title>Настройки повторения</Drawer.Title>
-                        <Drawer.Description>Потяните вниз или нажмите Escape, чтобы закрыть.</Drawer.Description>
+                        <Drawer.Title>{t('drawer.content.reviewSettings')}</Drawer.Title>
+                        <Drawer.Description>{t('drawer.content.pullDownOrPress')}</Drawer.Description>
                         <div className='sb-items sb-items--column'>
-                            {['Перемешивать карточки', 'Показывать подсказки', 'Повторять сложные чаще'].map((text, index) => (
-                                <Switch.Label key={text}>
-                                    <Switch.Root defaultChecked={index !== 1}>
-                                        <Switch.Thumb />
-                                    </Switch.Root>
-                                    {text}
-                                </Switch.Label>
-                            ))}
+                            {[t('common.shuffleTheCards'), t('common.showHints'), t('drawer.content.reviewHardOnesMore')].map(
+                                (text, index) => (
+                                    <Switch.Label key={text}>
+                                        <Switch.Root defaultChecked={index !== 1}>
+                                            <Switch.Thumb />
+                                        </Switch.Root>
+                                        {text}
+                                    </Switch.Label>
+                                )
+                            )}
                         </div>
                         <Drawer.Actions>
-                            <Drawer.Close render={<Button />}>Готово</Drawer.Close>
+                            <Drawer.Close render={<Button />}>{t('drawer.content.done')}</Drawer.Close>
                         </Drawer.Actions>
                     </Drawer.Popup>
                 </Drawer.Viewport>
@@ -65,7 +67,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component: 'Выезжающая панель: снизу на телефоне или сбоку на компьютере; следует за жестом и закрывается свайпом.'
+                component: 'drawer.description'
             }
         }
     }
@@ -78,18 +80,18 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Направления' description='С какой стороны выезжает панель и куда её можно смахнуть.'>
+            <Section title={t('drawer.sections.directions.title')} description={t('drawer.sections.directions.description')}>
                 <Row label='down'>
-                    <Settings direction='down' label='Снизу' />
+                    <Settings direction='down' label={t('common.bottom')} />
                 </Row>
                 <Row label='up'>
-                    <Settings direction='up' label='Сверху' />
+                    <Settings direction='up' label={t('common.top')} />
                 </Row>
                 <Row label='right'>
-                    <Settings direction='right' label='Справа' />
+                    <Settings direction='right' label={t('common.right')} />
                 </Row>
                 <Row label='left'>
-                    <Settings direction='left' label='Слева' />
+                    <Settings direction='left' label={t('common.left')} />
                 </Row>
             </Section>
         </Page>

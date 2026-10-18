@@ -5,14 +5,14 @@ import { slider as recipe } from '@flippo-software/component-styles/slider';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Slider } from '~@src';
-import { Card, Grid, Page, Section, variantControls } from '~@stories';
+import { Card, Grid, Page, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe> & { disabled?: boolean };
 
 function Daily(props: Props & { defaultValue?: number | number[]; label?: string }): React.JSX.Element {
-    const { label = 'Карточек в день', defaultValue = 40, ...rest } = props;
+    const { label = t('slider.content.cardsADay'), defaultValue = 40, ...rest } = props;
     const range = Array.isArray(defaultValue);
     return (
         <Slider.Root defaultValue={defaultValue} min={0} max={100} {...rest}>
@@ -23,8 +23,8 @@ function Daily(props: Props & { defaultValue?: number | number[]; label?: string
             <Slider.Control>
                 <Slider.Track>
                     <Slider.Indicator />
-                    <Slider.Thumb aria-label={range ? 'От' : label} />
-                    {range && <Slider.Thumb aria-label='До' />}
+                    <Slider.Thumb aria-label={range ? t('slider.content.from') : label} />
+                    {range && <Slider.Thumb aria-label={t('slider.labels.to')} />}
                 </Slider.Track>
             </Slider.Control>
         </Slider.Root>
@@ -45,7 +45,7 @@ const meta = {
     args: {},
     argTypes: { ...variantControls(recipe), disabled: { control: 'boolean', table: { category: 'Behaviour' } } },
     parameters: {
-        docs: { description: { component: 'Ползунок: одно значение или диапазон из двух бегунков; стрелки клавиатуры двигают бегунок.' } }
+        docs: { description: { component: 'slider.description' } }
     }
 } satisfies Meta<typeof Example>;
 export default meta;
@@ -56,16 +56,16 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Значение и диапазон' description='Один бегунок или два для диапазона.'>
+            <Section title={t('slider.sections.valueAndRange.title')} description={t('slider.sections.valueAndRange.description')}>
                 <Grid min={300}>
                     <Card>
                         <Daily />
                     </Card>
                     <Card>
-                        <Daily label='Сложность' defaultValue={[20, 70]} />
+                        <Daily label={t('slider.labels.difficulty')} defaultValue={[20, 70]} />
                     </Card>
                     <Card>
-                        <Daily label='Недоступен' disabled={true} />
+                        <Daily label={t('common.disabled')} disabled={true} />
                     </Card>
                 </Grid>
             </Section>

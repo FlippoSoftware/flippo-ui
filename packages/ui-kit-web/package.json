@@ -14,11 +14,11 @@
     ],
     "scripts": {
         "build": "tsdown",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "node ../../tools/api-docs.ts && tsc --noEmit",
         "lint:check": "biome check",
         "test": "vitest run",
-        "storybook": "storybook dev -p 6007",
-        "build-storybook": "storybook build",
+        "storybook": "node ../../tools/api-docs.ts && storybook dev -p 6007",
+        "build-storybook": "node ../../tools/api-docs.ts && storybook build",
         "prepublishOnly": "pnpm --workspace-root run publish-guard && pnpm build"
     },
     "dependencies": {
@@ -32,6 +32,8 @@
         "@flippo-software/tsconfig": "catalog:",
         "@flippo-software/workspace-tools": "workspace:*",
         "@storybook/addon-essentials": "catalog:",
+        "@storybook/blocks": "8.6.14",
+        "@storybook/manager-api": "8.6.14",
         "@storybook/web-components": "8.6.14",
         "@storybook/web-components-vite": "8.6.14",
         "@types/node": "catalog:",

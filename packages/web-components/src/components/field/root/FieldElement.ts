@@ -25,13 +25,54 @@ import { FieldContext, LabelableContext } from './FieldRootContext';
  * `data-filled`, `data-focused`.
  */
 export class FieldElement extends MachineElement.withAttributes({
+    /**
+     * Identifies the field when a form is submitted.
+     * Takes precedence over the `name` attribute on the `<prefix>-field-control`.
+     */
     name: 'string',
+    /**
+     * Whether the component should ignore user interaction.
+     * Takes precedence over the `disabled` attribute on the `<prefix>-field-control`.
+     * @default false
+     */
     disabled: 'boolean',
+    /**
+     * Whether the field is invalid.
+     * Useful when the field state is controlled by an external library.
+     */
     invalid: 'boolean',
+    /**
+     * Whether the field's value has been changed from its initial value.
+     * Useful when the field state is controlled by an external library.
+     */
     dirty: 'boolean',
+    /**
+     * Whether the field has been touched.
+     * Useful when the field state is controlled by an external library.
+     */
     touched: 'boolean',
+    /**
+     * Determines when the field should be validated.
+     * This takes precedence over the `validation-mode` attribute on `<prefix>-form`.
+     *
+     * - `onSubmit`: triggers validation when the form is submitted, and re-validates on change after submission.
+     * - `onBlur`: triggers validation when the control loses focus.
+     * - `onChange`: triggers validation on every change to the control value.
+     * @default 'onSubmit'
+     */
     'validation-mode': ['onSubmit', 'onBlur', 'onChange'],
+    /**
+     * How long to wait between `validate` callbacks if
+     * `validation-mode="onChange"` is used. Specified in milliseconds.
+     * @default 0
+     */
     'validation-debounce-time': 'number',
+    /**
+     * A function for custom validation. Return a string or an array of strings with
+     * the error message(s) if the value is invalid, or `null` if the value is valid.
+     * Asynchronous functions are supported, but they do not prevent form submission
+     * when using `validation-mode="onSubmit"`.
+     */
     validate: property<FieldValidate>()
 }) {
     readonly labelable = new LabelableController(createId('field-control'));

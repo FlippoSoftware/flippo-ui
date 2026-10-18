@@ -1,0 +1,25 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+    "root": false,
+    "extends": ["@flippo-software/biome/base"],
+    "files": {
+        "includes": ["!**/node_modules", "!content"]
+    },
+    "linter": {
+        "rules": {
+            "correctness": {
+                "noNodejsModules": "off"
+            },
+            "style": {
+                "noProcessEnv": "off",
+                "useFilenamingConvention": "off"
+            },
+            "suspicious": {
+                "noConsole": "off"
+            },
+            "performance": {
+                "useTopLevelRegex": "off"
+            }
+        }
+    }
+}

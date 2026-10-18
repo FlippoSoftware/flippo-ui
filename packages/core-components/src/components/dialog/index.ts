@@ -1,5 +1,7 @@
 export * from './backdrop/DialogBackdrop';
+export * from './backdrop/DialogBackdropDataAttributes';
 export * from './backdrop/dialogBackdropStateAttributesMapping';
+export * from './close/DialogCloseDataAttributes';
 export * from './close/DialogCloseMachine';
 export * from './description/registerDialogDescription';
 export * from './popup/DialogPopupCssVars';
@@ -10,6 +12,8 @@ export * from './root/DialogRootMachine';
 export * from './store/DialogHandle';
 export * from './store/DialogStore';
 export * from './title/registerDialogTitle';
+export * from './trigger/DialogTriggerDataAttributes';
 export * from './trigger/DialogTriggerMachine';
 export * from './viewport/DialogViewport';
+export * from './viewport/DialogViewportDataAttributes';
 export * from './viewport/dialogViewportStateAttributesMapping';

@@ -1,0 +1,16 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+    "root": false,
+    "extends": ["@flippo-software/biome/base", "@flippo-software/biome/react", "@flippo-software/biome/test"],
+    "linter": {
+        "rules": {
+            "performance": {
+                "noBarrelFile": "off",
+                "noReExportAll": "off"
+            }
+        }
+    },
+    "files": {
+        "includes": ["!**/temp"]
+    }
+}

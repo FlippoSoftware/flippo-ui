@@ -15,15 +15,59 @@ import { TooltipPart, TooltipPositionerContext } from '../root/TooltipRootContex
  * State attributes: `data-open`/`data-closed`, `data-side`, `data-align`, `data-anchor-hidden`.
  */
 export class TooltipPositionerElement extends TooltipPart.withAttributes({
+    /**
+     * Which side of the anchor element to align the popup against.
+     * May automatically change to avoid collisions.
+     * @default 'top'
+     */
     side: ['top', 'bottom', 'left', 'right', 'inline-start', 'inline-end'],
+    /**
+     * How to align the popup relative to the specified side.
+     * @default 'center'
+     */
     align: ['start', 'center', 'end'],
+    /**
+     * Distance between the anchor and the popup in pixels.
+     * @default 0
+     */
     'side-offset': 'number',
+    /**
+     * Additional offset along the alignment axis in pixels.
+     * @default 0
+     */
     'align-offset': 'number',
+    /**
+     * Additional space to maintain from the edge of the collision boundary.
+     * @default 5
+     */
     'collision-padding': 'number',
+    /**
+     * Minimum distance to maintain between the arrow and the edges of the popup.
+     *
+     * Use it to prevent the arrow element from hanging out of the rounded corners of a popup.
+     * @default 5
+     */
     'arrow-padding': 'number',
+    /**
+     * Whether to maintain the popup in the viewport after
+     * the anchor element was scrolled out of view.
+     * @default false
+     */
     sticky: 'boolean',
+    /**
+     * Determines which CSS `position` property to use.
+     * @default 'fixed'
+     */
     'position-method': ['fixed', 'absolute'],
+    /**
+     * Whether to keep the popup in the DOM while the tooltip is closed.
+     * @default false
+     */
     'keep-mounted': 'boolean',
+    /**
+     * Whether to disable the popup from tracking any layout shift of its positioning anchor.
+     * @default false
+     */
     'disable-anchor-tracking': 'boolean'
 }) {
     private positionerMachine!: TooltipPositionerMachine;

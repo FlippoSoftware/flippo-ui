@@ -15,9 +15,16 @@ import { FieldPart, type FieldValueChangeDetail } from '../root/FieldRootContext
  * Events: `value-change` (cancelable; `detail: { value, reason }`).
  */
 export class FieldControlElement extends FieldPart.withAttributes({
+    /** The name of the control in the form. The field’s `name` takes precedence over it. */
     name: 'string',
+    /** The value of the control. To render an uncontrolled control, use the `default-value` attribute instead. */
     value: 'string',
+    /** The initial value of an uncontrolled control. */
     'default-value': 'string',
+    /**
+     * Whether the control ignores user interaction. The field’s `disabled` takes precedence over it.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private control!: FieldControlMachine;

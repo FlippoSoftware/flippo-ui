@@ -1,8 +1,8 @@
+import { MenuCheckboxItemDataAttributes } from '@flippo-software/core-components/menu';
+
 import { transitionStatusMapping } from '~@lib/styleHookMapping';
 
 import type { StateAttributesMapping } from '~@lib/getStyleHookProps';
-
-import { MenuCheckboxItemDataAttributes } from '../checkbox-item/MenuCheckboxItemDataAttributes';
 
 export const itemMapping: StateAttributesMapping<{ checked: boolean }> = {
     checked(value): Record<string, string> {

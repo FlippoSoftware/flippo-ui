@@ -3,6 +3,7 @@ import { toast as recipe } from '@flippo-software/component-styles/toast';
 import { Toast as Primitive } from '@flippo-software/react-components/toast';
 
 import { icon } from '~@lib/Icon';
+import { themedPortal } from '~@lib/Provider';
 import { createStyler } from '~@lib/Styled';
 
 import type { RecipeVariants, StyledComponent } from '~@lib/Styled';
@@ -19,7 +20,7 @@ export const Description: StyledComponent<typeof Primitive.Description, typeof r
     'description',
     false
 );
-export const Portal: typeof Primitive.Portal = Primitive.Portal;
+export const Portal: typeof Primitive.Portal = themedPortal(Primitive.Portal) as typeof Primitive.Portal;
 export const Provider: typeof Primitive.Provider = Primitive.Provider;
 export const Root: StyledComponent<typeof Primitive.Root, typeof recipe> = styled(Primitive.Root, 'root', true);
 export const Title: StyledComponent<typeof Primitive.Title, typeof recipe> = styled(Primitive.Title, 'title', false);

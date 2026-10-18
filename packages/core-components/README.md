@@ -96,7 +96,7 @@ store.setOpen(true, createChangeEventDetails(REASONS.triggerPress, event, trigge
 
 ## Adapter contract
 
-`ComponentStore` (from `@flippo-software/store`) is the framework-free base of `ReactStore` in `@flippo-software/react-hooks`,
+`ComponentStore` (from `@flippo-software/store`) is the framework-free base of `ReactStore` in `@flippo-software/react-store`,
 which extends it with hooks and nothing else:
 
 ```ts

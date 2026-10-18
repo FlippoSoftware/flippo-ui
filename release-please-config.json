@@ -15,8 +15,8 @@
         "packages/react-components": {
             "component": "react-components"
         },
-        "packages/react-hooks": {
-            "component": "react-hooks"
+        "packages/react-store": {
+            "component": "react-store"
         },
         "packages/store": {
             "component": "store"

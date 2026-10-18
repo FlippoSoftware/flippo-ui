@@ -1,0 +1,18 @@
+{
+    "title": "Flippo UI",
+    "pages": [
+        "index",
+        "installation",
+        "---UI-киты---",
+        "ui-kit-react",
+        "ui-kit-web",
+        "---Компоненты---",
+        "react-components",
+        "web-components",
+        "component-styles",
+        "---Основа---",
+        "core-components",
+        "store",
+        "react-store"
+    ]
+}

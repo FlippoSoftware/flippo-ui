@@ -13,6 +13,7 @@ import { SelectItemPart } from '../root/SelectRootContext';
  * State attributes: `data-selected`, transition attributes.
  */
 export class SelectItemIndicatorElement extends SelectItemPart.withAttributes({
+    /** Whether to keep the HTML element in the DOM when the item is not selected. */
     'keep-mounted': 'boolean'
 }) {
     private indicator!: SelectItemIndicatorMachine;

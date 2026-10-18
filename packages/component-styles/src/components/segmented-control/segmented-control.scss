@@ -1,4 +1,6 @@
-// Segmented control: pill segments on a filled track; the selected segment is raised.
+// Segmented control: pill segments on a filled track; the selected segment is raised. The track's block margins make
+// it as high as a control row of its size (40, 48, 56: the size grid), so it lines up with inputs in a row aligned at
+// the top.
 @use '../../styles/layers';
 @use '../../../scss' as fl;
 
@@ -9,11 +11,20 @@
         display: inline-flex;
         align-items: stretch;
         gap: var(--fl-spacing-1);
+        margin-block: var(
+            --fl-segmented-control-margin-block,
+            var(
+                --_fl-segmented-control-margin-block,
+                max(0px, calc((var(--_fl-segmented-control-row-height, var(--fl-size-medium)) - var(--fl-segmented-control-height, var(--_fl-segmented-control-height, var(--fl-spacing-8))) - 2 * var(--fl-segmented-control-padding, var(--_fl-segmented-control-padding, var(--fl-spacing-1)))) / 2))
+            )
+        );
         padding: var(--fl-segmented-control-padding, var(--_fl-segmented-control-padding, var(--fl-spacing-1)));
         border-radius: var(--fl-radius-full);
         background-color: var(--fl-segmented-control-bg, var(--_fl-segmented-control-bg, var(--fl-color-bg-1)));
 
         &:where([data-orientation='vertical']) {
+            --_fl-segmented-control-margin-block: 0px;
+
             flex-direction: column;
             border-radius: var(--fl-radius-xl);
         }
@@ -51,9 +62,16 @@
     .fl-segmented-control-root--small {
         --_fl-icon-size: var(--fl-spacing-4);
         --_fl-segmented-control-height: var(--fl-spacing-7);
+        --_fl-segmented-control-row-height: var(--fl-size-small);
     }
 
     .fl-segmented-control-root--large {
         --_fl-segmented-control-height: var(--fl-size-small);
+        --_fl-segmented-control-row-height: var(--fl-size-large);
+    }
+
+    // No row margins: a dense layout.
+    .fl-segmented-control-root--compact {
+        --_fl-segmented-control-margin-block: 0px;
     }
 }

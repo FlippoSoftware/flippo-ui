@@ -10,6 +10,10 @@ import { DialogPart } from '../root/DialogRootContext';
  * Attributes: `disabled`.
  */
 export class DialogCloseElement extends DialogPart.withAttributes({
+    /**
+     * Whether the button ignores user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private close!: DialogCloseMachine;

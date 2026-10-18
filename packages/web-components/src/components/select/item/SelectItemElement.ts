@@ -14,8 +14,21 @@ import { SelectItemContext, SelectPositionedPart } from '../root/SelectRootConte
  * State attributes: `data-selected`, `data-highlighted`, `data-disabled`.
  */
 export class SelectItemElement extends SelectPositionedPart.withAttributes({
+    /**
+     * A unique value that identifies this select item.
+     * @default null
+     */
     value: 'string',
+    /**
+     * Specifies the text label to use when the item is matched during keyboard text navigation.
+     *
+     * Defaults to the item text content if not provided.
+     */
     label: 'string',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private item!: SelectItemMachine;

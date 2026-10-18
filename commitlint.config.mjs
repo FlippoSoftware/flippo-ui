@@ -11,7 +11,7 @@ export default {
             [
                 'store',
                 'core-components',
-                'react-hooks',
+                'react-store',
                 'react-components',
                 'web-components',
                 'component-styles',

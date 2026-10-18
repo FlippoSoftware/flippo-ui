@@ -12,6 +12,7 @@ import { SnippetPart } from '../root/SnippetRootContext';
  * State attributes: `data-index`.
  */
 export class SnippetLineElement extends SnippetPart.withAttributes({
+    /** The text copied for this line. Defaults to the line's text content without its symbols. */
     value: 'string'
 }) {
     private item!: ListRegistryItem<{ text: string | null | undefined }>;

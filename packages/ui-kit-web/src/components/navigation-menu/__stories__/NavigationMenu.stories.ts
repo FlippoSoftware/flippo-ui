@@ -2,7 +2,7 @@ import { navigationMenu as recipe } from '@flippo-software/component-styles/navi
 
 import type { Meta, StoryObj } from '@storybook/web-components';
 
-import { page, renderExample, section, variantControls } from '~@stories';
+import { page, renderExample, section, t, variantControls } from '~@stories';
 
 import type { VariantProps } from '~@stories';
 
@@ -18,17 +18,19 @@ function item(value: string, label: string, content: string): string {
 
 function site(attributes = ''): string {
     const learn = `<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 220px)); gap: 4px">${
-        link('#sets', 'Наборы', 'Карточки по темам от сообщества') +
-        link('#repeat', 'Повторение', 'Интервальное повторение на сегодня') +
-        link('#exam', 'Проверь себя', 'Тест по всем карточкам набора') +
-        link('#stats', 'Статистика', 'Прогресс за неделю и месяц')
+        link('#sets', t('navigationMenu.content.sets'), t('navigationMenu.content.cardsOnTopicsFrom')) +
+        link('#repeat', t('navigationMenu.content.review'), t('navigationMenu.content.spacedRepetitionForToday')) +
+        link('#exam', t('navigationMenu.content.testYourself'), t('navigationMenu.content.aTestOnEvery')) +
+        link('#stats', t('navigationMenu.content.statistics'), t('navigationMenu.content.progressOverTheWeek'))
     }</div>`;
-    const create = link('#new', 'Новый набор', 'С нуля или из шаблона') + link('#import', 'Импорт', 'Из CSV, Anki или Quizlet');
+    const create =
+        link('#new', t('common.newSet'), t('navigationMenu.content.fromScratchOrFrom')) +
+        link('#import', t('navigationMenu.content.import'), t('navigationMenu.content.fromCsvAnkiOr'));
     return `<demo-navigation-menu ${attributes}>
 <demo-navigation-menu-list>
-${item('learn', 'Учиться', learn)}
-${item('create', 'Создавать', create)}
-<demo-navigation-menu-item><demo-navigation-menu-link as-child><a href="#community" class="fl-navigation-menu-trigger fl-interactive fl-focus-ring fl-text-body-minus-stronger">Сообщество</a></demo-navigation-menu-link></demo-navigation-menu-item>
+${item('learn', t('navigationMenu.content.learn'), learn)}
+${item('create', t('navigationMenu.content.create'), create)}
+<demo-navigation-menu-item><demo-navigation-menu-link as-child><a href="#community" class="fl-navigation-menu-trigger fl-interactive fl-focus-ring fl-text-body-minus-stronger">${t('common.community')}</a></demo-navigation-menu-link></demo-navigation-menu-item>
 </demo-navigation-menu-list>
 <demo-navigation-menu-positioner><demo-navigation-menu-popup><demo-navigation-menu-viewport></demo-navigation-menu-viewport></demo-navigation-menu-popup></demo-navigation-menu-positioner>
 </demo-navigation-menu>`;
@@ -45,7 +47,7 @@ const meta: Meta<Props> = {
         docs: {
             source: { code: markup, language: 'html' },
             description: {
-                component: 'Навигация сайта: панель меняет размер под содержимое и сдвигает его в сторону, откуда пришёл курсор.'
+                component: 'navigationMenu.description'
             }
         }
     }
@@ -59,8 +61,8 @@ export const Gallery: Story = {
     render: () =>
         page(
             section(
-                'Главная навигация',
-                'Наведите на «Учиться», затем на «Создавать»: панель подстраивает размер.',
+                t('navigationMenu.sections.mainNavigation.title'),
+                t('navigationMenu.sections.mainNavigation.description'),
                 `<div style="min-height: 260px">${site()}</div>`
             )
         )

@@ -2,6 +2,9 @@
     "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
     "root": false,
     "extends": ["@flippo-software/biome/base", "@flippo-software/biome/test"],
+    "files": {
+        "includes": ["!custom-elements.json"]
+    },
     "plugins": ["./node_modules/@flippo-software/biome/src/plugins/no-node-process-import/no-node-process-import.grit"],
     "linter": {
         "rules": {

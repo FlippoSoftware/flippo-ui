@@ -5,7 +5,7 @@ import { button as recipe } from '@flippo-software/component-styles/button';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Button, Icon } from '~@src';
-import { Card, Grid, Page, Row, Section, variantControls } from '~@stories';
+import { Card, Grid, Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -19,7 +19,8 @@ function Example(args: Props): React.JSX.Element {
         <div className='story-example'>
             <Button {...args}>
                 <Icon name='plus' />
-                Создать набор
+
+                {t('common.createASet')}
             </Button>
         </div>
     );
@@ -33,8 +34,7 @@ const meta = {
     parameters: {
         docs: {
             description: {
-                component:
-                    'Кнопка (Figma "Button", "Icon Button"): CTA, Secondary, Outlined, Label и Danger; размеры 56 / 48 / 40 / 24. Иконки — дочерние `<svg>`, кнопка подгоняет их размер.'
+                component: 'button.description'
             }
         }
     }
@@ -47,58 +47,57 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Варианты' description='Основное действие экрана — primary; остальные варианты — по убыванию акцента.'>
+            <Section title={t('button.sections.variants.title')} description={t('button.sections.variants.description')}>
                 {VARIANTS.map((variant) => (
                     <Row key={variant} label={variant}>
                         <Button variant={variant}>
                             <Icon name='plus' />
-                            Кнопка
+
+                            {t('button.content.button')}
                         </Button>
                         <Button variant={variant}>
-                            Далее
+                            {t('button.content.next')}
                             <Icon name='chevron-right' />
                         </Button>
-                        <Button variant={variant} iconOnly={true} aria-label='Добавить'>
+                        <Button variant={variant} iconOnly={true} aria-label={t('button.labels.add')}>
                             <Icon name='plus' />
                         </Button>
                         <Button variant={variant} disabled={true}>
-                            Недоступно
+                            {t('common.disabled')}
                         </Button>
                     </Row>
                 ))}
             </Section>
-            <Section
-                title='Размеры'
-                description='Large 56, Medium 48, Small 40, X-Small 24. Иконка-кнопка остаётся кругом того же размера.'
-            >
+            <Section title={t('button.sections.sizes.title')} description={t('button.sections.sizes.description')}>
                 {SIZES.map((size) => (
                     <Row key={size} label={size}>
                         <Button size={size}>
                             <Icon name='plus' />
-                            Создать набор
+
+                            {t('common.createASet')}
                         </Button>
                         <Button size={size} variant='secondary'>
-                            Отмена
+                            {t('common.cancel')}
                         </Button>
-                        <Button size={size} variant='secondary' iconOnly={true} aria-label='Настройки'>
+                        <Button size={size} variant='secondary' iconOnly={true} aria-label={t('button.labels.settings')}>
                             <Icon name='settings' />
                         </Button>
-                        <Button size={size} variant='label' iconOnly={true} aria-label='Ещё'>
+                        <Button size={size} variant='label' iconOnly={true} aria-label={t('button.labels.more')}>
                             <Icon name='dots-vertical' />
                         </Button>
                     </Row>
                 ))}
             </Section>
-            <Section title='Состояния' description='Загрузка блокирует повторное нажатие и показывает спиннер; ссылка выглядит как кнопка.'>
+            <Section title={t('button.sections.states.title')} description={t('button.sections.states.description')}>
                 <Row label='loading'>
-                    <Button loading={true}>Сохраняю…</Button>
+                    <Button loading={true}>{t('button.content.saving')}</Button>
                     <Button variant='secondary' loading={true}>
-                        Загрузка
+                        {t('common.loading')}
                     </Button>
                 </Row>
                 <Row label='link'>
                     <Button href='#set' variant='outlined'>
-                        Открыть набор
+                        {t('common.openTheSet')}
                         <Icon name='arrow-outward' />
                     </Button>
                 </Row>
@@ -110,38 +109,42 @@ export const Gallery: Story = {
 export const Examples: Story = {
     render: () => (
         <Page>
-            <Section title='В интерфейсе' description='Типичные сочетания кнопок из экранов Flippo.'>
+            <Section title={t('button.sections.inAnInterface.title')} description={t('button.sections.inAnInterface.description')}>
                 <Grid min={300}>
-                    <Card caption='Пустая коллекция'>
-                        <p className='sb-section-text'>У вас пока нет наборов. Создайте первый или загрузите из файла.</p>
+                    <Card caption={t('button.content.emptyCollection')}>
+                        <p className='sb-section-text'>{t('button.content.youHaveNoSets')}</p>
                         <div className='sb-items'>
                             <Button>
                                 <Icon name='plus' />
-                                Создать набор
+
+                                {t('common.createASet')}
                             </Button>
-                            <Button variant='outlined'>Загрузить</Button>
+                            <Button variant='outlined'>{t('button.content.upload')}</Button>
                         </div>
                     </Card>
-                    <Card caption='Подтверждение'>
-                        <p className='sb-section-text'>Удалить «Экзамен Законы UX» и 7 карточек?</p>
+                    <Card caption={t('button.content.confirmation')}>
+                        <p className='sb-section-text'>{t('button.content.deleteUxLawsExam')}</p>
                         <div className='sb-items'>
-                            <Button variant='label'>Отмена</Button>
+                            <Button variant='label'>{t('common.cancel')}</Button>
                             <Button variant='danger'>
                                 <Icon name='delete' />
-                                Удалить
+
+                                {t('common.delete')}
                             </Button>
                         </div>
                     </Card>
-                    <Card caption='Панель карточки'>
+                    <Card caption={t('button.content.cardToolbar')}>
                         <div className='sb-items'>
                             <Button size='small' variant='secondary'>
                                 <Icon name='hint' />
-                                Доб. подсказку
+
+                                {t('button.content.addAHint')}
                             </Button>
                             <Button size='small' variant='secondary'>
-                                <Icon name='bookmark' />В готовые
+                                <Icon name='bookmark' />
+                                {t('common.markAsDone')}
                             </Button>
-                            <Button size='small' variant='label' iconOnly={true} aria-label='Ещё'>
+                            <Button size='small' variant='label' iconOnly={true} aria-label={t('button.labels.more')}>
                                 <Icon name='dots-horizontal' />
                             </Button>
                         </div>

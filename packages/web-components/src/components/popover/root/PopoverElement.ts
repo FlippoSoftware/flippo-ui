@@ -31,8 +31,22 @@ function toModalOption(value: unknown): PopoverRootOptions['modal'] {
  * another one is nested: pressing inside it does not close the parent.
  */
 export class PopoverElement extends MachineElement.withAttributes({
+    /** Whether the popover is currently open. */
     open: 'boolean',
+    /**
+     * Whether the popover is initially open.
+     *
+     * To render a controlled popover, use the `open` attribute instead.
+     * @default false
+     */
     'default-open': 'boolean',
+    /**
+     * Determines if the popover enters a modal state when open.
+     * - `true`: user interaction is limited to the popover: document page scroll is locked, and pointer interactions on outside elements are disabled.
+     * - `false`: user interaction with the rest of the document is allowed.
+     * - `'trap-focus'`: focus is trapped inside the popover, but document page scroll is not locked and pointer interactions outside of it remain enabled.
+     * @default false
+     */
     modal: 'string'
 }) {
     private rootMachine!: PopoverRootMachine;

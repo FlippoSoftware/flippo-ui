@@ -1,0 +1,100 @@
+/* The API reference of the docs pages (`DocsPage.tsx`), in the palette of the Storybook theme (`theme.ts`). */
+.fl-docs-part {
+    margin-block: 32px;
+}
+
+.fl-docs-part h3 {
+    margin-block-end: 8px;
+}
+
+.fl-docs-code {
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: #23252e;
+    color: #e1e2e5;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.fl-docs-part h3 .fl-docs-code {
+    padding: 2px 8px;
+    color: #a073fb;
+    font-size: 1rem;
+}
+
+.fl-docs-table {
+    inline-size: 100%;
+    margin-block: 12px 20px;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.fl-docs-table th {
+    padding: 8px 12px;
+    border-block-end: 1px solid #313440;
+    color: #878a99;
+    font-weight: 600;
+    text-align: start;
+}
+
+.fl-docs-table td {
+    padding: 10px 12px;
+    vertical-align: top;
+}
+
+/* Storybook stripes every other row of a docs table: a description row belongs to the row above it. */
+.sbdocs .fl-docs-table tr:nth-of-type(n) {
+    border: 0;
+    background: transparent;
+}
+
+.fl-docs-row td {
+    border-block-start: 1px solid #313440;
+}
+
+.fl-docs-row td:first-child {
+    inline-size: 28%;
+    white-space: nowrap;
+}
+
+.fl-docs-description td {
+    padding-block-start: 0;
+    color: #a5a7b3;
+}
+
+.fl-docs-description p,
+.fl-docs-row p {
+    margin: 0;
+}
+
+.fl-docs-type {
+    margin-block-start: 6px;
+}
+
+.fl-docs-lead {
+    color: #a5a7b3;
+}
+
+.fl-docs-hooks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    list-style: none;
+}
+
+.fl-docs-typeset {
+    display: grid;
+    gap: 12px;
+    margin-block: 16px 32px;
+}
+
+.fl-docs-typeset-row {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    align-items: baseline;
+    gap: 16px;
+    color: var(--fl-color-text-primary);
+}

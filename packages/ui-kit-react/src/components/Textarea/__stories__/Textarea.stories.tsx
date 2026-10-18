@@ -5,7 +5,7 @@ import { textarea as recipe } from '@flippo-software/component-styles/textarea';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Textarea } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
@@ -13,9 +13,9 @@ type Props = RecipeVariants<typeof recipe> & { disabled?: boolean };
 
 function Answer(props: Props & { defaultValue?: string; rows?: number }): React.JSX.Element {
     return (
-        <Textarea.Root placeholder='Введи текст ответа' rows={3} {...props}>
+        <Textarea.Root placeholder={t('textarea.placeholders.typeYourAnswer')} rows={3} {...props}>
             <Textarea.Body>
-                <Textarea.Slot aria-label='Ответ' />
+                <Textarea.Slot aria-label={t('textarea.labels.answer')} />
             </Textarea.Body>
         </Textarea.Root>
     );
@@ -35,7 +35,7 @@ const meta = {
     args: {},
     argTypes: { ...variantControls(recipe), disabled: { control: 'boolean', table: { category: 'Behaviour' } } },
     parameters: {
-        docs: { description: { component: 'Многострочное поле: ответ карточки, описание набора. Рамка ведёт себя как у Input.' } }
+        docs: { description: { component: 'textarea.description' } }
     }
 } satisfies Meta<typeof Example>;
 export default meta;
@@ -46,18 +46,18 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Состояния' description='Пустое, заполненное и недоступное.'>
+            <Section title={t('textarea.sections.states.title')} description={t('textarea.sections.states.description')}>
                 <Row fill={true} label='blank'>
                     <Answer />
                 </Row>
                 <Row fill={true} label='filled'>
-                    <Answer defaultValue='Пользователи воспринимают эстетичный дизайн как более удобный.' />
+                    <Answer defaultValue={t('textarea.content.usersPerceiveAnAesthetic')} />
                 </Row>
                 <Row fill={true} label='disabled'>
-                    <Answer disabled={true} defaultValue='Карточка заблокирована владельцем набора.' />
+                    <Answer disabled={true} defaultValue={t('textarea.content.theCardIsLocked')} />
                 </Row>
             </Section>
-            <Section title='На карточке' description='Inverted — для полей на поверхности bg-1.' raised={true}>
+            <Section title={t('textarea.sections.onACard.title')} description={t('textarea.sections.onACard.description')} raised={true}>
                 <Row fill={true} label='inverted'>
                     <Answer appearance='inverted' rows={4} />
                 </Row>

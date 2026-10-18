@@ -13,7 +13,15 @@ import { drawerOf } from '../root/DrawerRootContext';
  * State attributes: `data-dragging`, `data-open`.
  */
 export class DrawerDragElement extends DialogPart.withAttributes({
+    /**
+     * The threshold for closing the drawer.
+     * @default 0.4
+     */
     'close-threshold': 'number',
+    /**
+     * The threshold for the velocity of the drag.
+     * @default 0.5
+     */
     'velocity-threshold': 'number'
 }) {
     private drag!: DrawerDragMachine;

@@ -20,7 +20,17 @@ abstract class AccordionPart extends ContextPart<typeof ACCORDION> {
  * State attributes: `data-open`, `data-disabled`, `data-orientation`, `data-index`.
  */
 export class AccordionItemElement extends AccordionPart.withAttributes({
+    /**
+     * A unique value that identifies this accordion item.
+     * If no value is provided, a unique ID will be generated automatically.
+     * Use when controlling the accordion programmatically, or to set an initial
+     * open state.
+     */
     value: 'string',
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private item!: AccordionItemMachine;

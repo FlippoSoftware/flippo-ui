@@ -257,6 +257,7 @@ export class Computed<Value> implements ReadableStore<Value>, ReactiveNode, Obse
  * `compute` must not change stores, and should not have side effects: it runs lazily, when the value is read.
  *
  * @example
+ * ```ts
  * const cart = new Store({ items: [] as Item[] });
  * const settings = new Store({ currency: 'EUR' });
  *
@@ -267,6 +268,7 @@ export class Computed<Value> implements ReadableStore<Value>, ReactiveNode, Obse
  *
  * total.state; // computed on first read
  * total.subscribe((value) => render(value)); // notified once per change, after the stores
+ * ```
  */
 export function computed<Value>(compute: () => Value, options?: ComputedOptions<Value>): Computed<Value> {
     return new Computed(compute, options);

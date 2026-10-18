@@ -15,6 +15,10 @@ import { ComboboxChipsContext, ComboboxPart } from '../root/ComboboxRootContext'
  * State attributes: `data-popup-open`, `data-disabled`, `data-readonly`, and those of the field.
  */
 export class ComboboxInputElement extends ComboboxPart.withAttributes({
+    /**
+     * Whether the component should ignore user interaction.
+     * @default false
+     */
     disabled: 'boolean'
 }) {
     private input!: ComboboxInputMachine;

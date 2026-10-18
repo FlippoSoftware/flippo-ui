@@ -5,18 +5,18 @@ import { blockquote as recipe } from '@flippo-software/component-styles/blockquo
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { Blockquote } from '~@src';
-import { Page, Row, Section, variantControls } from '~@stories';
+import { Page, Row, Section, t, variantControls } from '~@stories';
 
 import type { RecipeVariants } from '~@stories';
 
 type Props = RecipeVariants<typeof recipe>;
 
-const TEXT = 'Пользователи проводят большую часть времени на других сайтах и ожидают, что ваш будет работать так же.';
+const TEXT = () => t('blockquote.content.usersSpendMostOf');
 
 function Example(args: Props): React.JSX.Element {
     return (
         <div className='story-example sb-medium'>
-            <Blockquote {...args}>{TEXT}</Blockquote>
+            <Blockquote {...args}>{TEXT()}</Blockquote>
         </div>
     );
 }
@@ -26,7 +26,7 @@ const meta = {
     component: Example,
     args: {},
     argTypes: variantControls(recipe),
-    parameters: { docs: { description: { component: 'Цитата-абзац с акцентной чертой слева. Три размера и цвета черты.' } } }
+    parameters: { docs: { description: { component: 'blockquote.description' } } }
 } satisfies Meta<typeof Example>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -36,17 +36,17 @@ export const Default: Story = {};
 export const Gallery: Story = {
     render: () => (
         <Page>
-            <Section title='Цвета' description='Закон Якоба.'>
+            <Section title={t('blockquote.sections.colours.title')} description={t('blockquote.sections.colours.description')}>
                 {(['primary', 'brand', 'success', 'warning', 'error'] as const).map((color) => (
                     <Row key={color} label={color} fill={true}>
-                        <Blockquote color={color}>{TEXT}</Blockquote>
+                        <Blockquote color={color}>{TEXT()}</Blockquote>
                     </Row>
                 ))}
             </Section>
-            <Section title='Размеры'>
+            <Section title={t('blockquote.sections.sizes.title')}>
                 {(['1', '2', '3'] as const).map((size) => (
                     <Row key={size} label={size} fill={true}>
-                        <Blockquote size={size}>{TEXT}</Blockquote>
+                        <Blockquote size={size}>{TEXT()}</Blockquote>
                     </Row>
                 ))}
             </Section>
