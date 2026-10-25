@@ -1,7 +1,7 @@
 name: Check
 
 # Builds the workspace once, then lints, typechecks and tests it in parallel against that build. Pull requests run it
-# on the packages they change and their dependents (`tools/affected.mjs`); the release workflow calls it
+# on the packages they change and their dependents (`tools/affected.ts`); the release workflow calls it
 # (`workflow_call`) on the whole workspace and publishes only when it passes.
 
 on:
@@ -17,6 +17,7 @@ jobs:
         outputs:
             any: ${{ steps.scope.outputs.any }}
             verify: ${{ steps.scope.outputs.verify }}
+            docs: ${{ steps.scope.outputs.docs }}
         steps:
             - uses: actions/checkout@v4
               with:
@@ -24,13 +25,19 @@ jobs:
                   # Strings on purpose: `cond && 0 || 1` is always 1, as 0 is falsy.
                   fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
 
+            # The Node of `.nvmrc` runs the TypeScript of tools/ (the runner's own Node may be too old for it).
+            - uses: actions/setup-node@v4
+              if: github.event_name == 'pull_request'
+              with:
+                  node-version-file: .nvmrc
+
             # Pull requests only; empty outputs (the release workflow) mean the whole workspace.
             - name: Select the packages to check
               id: scope
               if: github.event_name == 'pull_request'
               env:
                   BASE_REF: ${{ github.base_ref }}
-              run: node tools/affected.mjs "$(git merge-base "origin/$BASE_REF" HEAD)" >> "$GITHUB_OUTPUT"
+              run: node tools/affected.ts "$(git merge-base "origin/$BASE_REF" HEAD)" >> "$GITHUB_OUTPUT"
 
             - uses: ./.github/actions/setup
               if: steps.scope.outputs.any != 'false'
@@ -48,7 +55,9 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: dist
-                  path: packages/*/dist
+                  path: |
+                      packages/*/dist
+                      packages/web-components/custom-elements.json
                   if-no-files-found: error
                   retention-days: 1
 
@@ -80,11 +89,44 @@ jobs:
                   TASK: ${{ matrix.task }}
               run: pnpm --recursive $FILTERS "$TASK"
 
-    # The one check to require in the branch rules. Skipped jobs (a pull request that changes only Markdown) report
+    docs:
+        needs: build
+        if: needs.build.outputs.docs != 'false'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ./.github/actions/setup
+            - uses: actions/download-artifact@v4
+              with:
+                  name: dist
+                  path: packages
+            - name: Generate and compile documentation
+              id: generate
+              continue-on-error: true
+              run: pnpm docs:build
+            - name: Check dictionary translations
+              if: ${{ !cancelled() }}
+              continue-on-error: true
+              run: node tools/i18n-check.ts --json .docs-reports/i18n.json
+            - name: Check pages and their translations
+              if: ${{ !cancelled() }}
+              continue-on-error: true
+              run: node docs/scripts/check.ts --json .docs-reports/pages.json
+            - name: Check guide contracts
+              if: ${{ !cancelled() }}
+              continue-on-error: true
+              run: node docs/scripts/registry.ts --json .docs-reports/registry.json
+            - name: Report documentation status
+              if: ${{ !cancelled() }}
+              env:
+                  GENERATION: ${{ steps.generate.outcome }}
+              run: node tools/docs-summary.ts --generation "$GENERATION" --reports .docs-reports
+
+    # The one check to require in the branch rules. Skipped jobs (a pull request that changes only unrelated Markdown) report
     # under names a rule cannot expect (`${{ matrix.task }}`), so the rule waits for this job instead: it always runs
     # and fails when a check failed or was cancelled.
     checks:
-        needs: [build, verify]
+        needs: [build, verify, docs]
         if: always()
         runs-on: ubuntu-latest
         steps:

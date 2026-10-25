@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Controls, Markdown, Primary, Stories, Subtitle, Title, useOf } from '@storybook/blocks';
 
 import manifest from '../../packages/web-components/custom-elements.json';
+import { coreEnumOf, registeredWebParts } from '../core-enums';
 
 import api from './api.json';
 import coreEnumData from './core-enums.json';
@@ -67,11 +68,8 @@ export type DocsPageOptions =
     | { kind: 'web'; prefix: string };
 
 const kebab = (name: string) => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-const camel = (name: string) => name.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-const FIRST_LETTER = /^\w/;
-const PART = /(\w+):\s*(\w+)/g;
 const CUSTOM_EVENT = /^CustomEvent<(.+)>$/s;
-const pascal = (name: string) => camel(name).replace(FIRST_LETTER, (letter) => letter.toUpperCase());
+const registeredParts = registeredWebParts(manifest);
 
 /** The family a docs page documents: `parameters.api.family`, else the last segment of the title (`Forms/Checkbox`). */
 function useFamily(): Family | undefined {
@@ -206,22 +204,15 @@ function AttributesTable({ title, rows }: { title: string; rows: Attribute[] }) 
  * declarations in the manifest.
  */
 function webParts(name: string): { part: string; element: Declaration }[] {
-    const elements = declarations.find(
-        ({ module, declaration }) => module === `src/components/${name}/index.ts` && declaration.name === 'elements'
-    );
-    const value = elements?.declaration.default ?? '';
-    const parts = value.startsWith('{') ? [...value.matchAll(PART)].map(([, part, className]) => [part, className]) : [['root', value]];
-    return parts.flatMap(([part, className]) => {
-        const element = declarations.find(({ declaration }) => declaration.kind === 'class' && declaration.name === className)?.declaration;
-        return element ? [{ part: part as string, element }] : [];
-    });
-}
-
-/** The core enum of a web part (`checkbox` + `indicator` → `CheckboxIndicatorDataAttributes`; a root: `CheckboxRoot…` or `Checkbox…`). */
-function coreEnumOf(name: string, part: string, suffix: 'DataAttributes' | 'CssVars'): string | undefined {
-    const candidates =
-        part === 'root' ? [`${pascal(name)}Root${suffix}`, `${pascal(name)}${suffix}`] : [`${pascal(name)}${pascal(part)}${suffix}`];
-    return candidates.find((candidate) => coreEnums[candidate]);
+    return registeredParts
+        .filter((registration) => registration.family === name)
+        .map(({ part, className }) => {
+            const element = declarations.find(
+                ({ declaration }) => declaration.kind === 'class' && declaration.name === className
+            )?.declaration;
+            if (!element) throw new Error(`api-docs: missing declaration for ${name}.${part}: ${className}.`);
+            return { part, element };
+        });
 }
 
 /** A part of a web component: its tag, attributes (without the style variants), events, data attributes, CSS variables. */
@@ -252,8 +243,8 @@ function WebPartReference({
         type: event.type?.text.match(CUSTOM_EVENT)?.[1],
         description: event.description ?? ''
     }));
-    const dataEnum = coreEnumOf(name, part, 'DataAttributes');
-    const cssEnum = coreEnumOf(name, part, 'CssVars');
+    const dataEnum = coreEnumOf(coreEnums, name, part, 'DataAttributes');
+    const cssEnum = coreEnumOf(coreEnums, name, part, 'CssVars');
     return (
         <section className='fl-docs-part'>
             <h3 id={`api-${tag}`}>

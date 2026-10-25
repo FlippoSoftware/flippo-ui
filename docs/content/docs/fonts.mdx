@@ -1,0 +1,128 @@
+---
+title: Styles and fonts
+description: Load the stylesheet and Vela Sans so the first screen is styled and the layout does not shift when the font arrives.
+---
+
+The kits' stylesheet (`@flippo-software/ui-kit-react/styles.css`, `@flippo-software/ui-kit-web/styles.css`) is
+`@flippo-software/component-styles/css/index.css`: the six `@font-face` rules of Vela Sans (weights 300–800, one
+`woff2` of about 55 kB each, `font-display: swap`), then the tokens, the reset and the component styles. The font
+files ship in `@flippo-software/component-styles/fonts/`; the stylesheet refers to them with relative URLs, so the
+bundler copies them along with it.
+
+## Import the stylesheet in the entry point
+
+```tsx
+// src/main.tsx: first, before the components of the application
+import '@flippo-software/ui-kit-react/styles.css';
+import './app.css'; // your styles after it, so they win over the kit's
+```
+
+A production build (Vite, webpack, Next.js…) extracts the CSS into a file linked in `<head>`: the page is never
+painted unstyled. In development, Vite injects the styles from JavaScript, so a short unstyled flash there is
+expected. Do not copy the fonts into `public/` by hand: the bundler already emits them (with a content hash in their
+names), and a second set of `@font-face` rules for the same family would load them twice.
+
+Set the theme before the first paint too: `<ThemeScript storageKey="…" />` (React) or the `themeScript()` output in
+`<head>` (custom elements), see [Themes and sizes](./ui-kit-react/theming.mdx).
+
+## Preload the fonts of the first screen
+
+The browser requests a font late: once it has parsed the CSS and laid out text set in it. A
+`<link rel="preload">` starts the download with the HTML. Preload only the weights of the first screen: the body
+text uses 500 (Medium) and 600 (SemiBold). Preloading all six weights (about 330 kB) competes with the CSS and the
+JavaScript.
+
+The built files have hashed names, so the links are added after the build. With Vite:
+
+```ts
+// vite.config.ts
+import { defineConfig, type Plugin } from 'vite';
+
+/** Preloads the fonts of the first screen: their hashed names are known only after the build. */
+function preloadFonts(names: RegExp): Plugin {
+    return {
+        name: 'preload-fonts',
+        apply: 'build',
+        transformIndexHtml: {
+            order: 'post',
+            handler(_html, { bundle }) {
+                return Object.keys(bundle ?? {})
+                    .filter((file) => file.endsWith('.woff2') && names.test(file))
+                    .map((file) => ({
+                        tag: 'link',
+                        attrs: { rel: 'preload', href: `/${file}`, as: 'font', type: 'font/woff2', crossorigin: '' },
+                        injectTo: 'head-prepend'
+                    }));
+            }
+        }
+    };
+}
+
+export default defineConfig({
+    plugins: [preloadFonts(/VelaSans-(Medium|SemiBold)/)]
+});
+```
+
+Keep `crossorigin` even on your own domain: fonts are always fetched in CORS mode, and a preload without it is not
+reused, so the font downloads twice. Change `href` if the application is served under a sub-path (Vite's `base`).
+
+## Keep the layout still
+
+`font-display: swap` shows the text in the fallback font (`system-ui`…) until Vela Sans arrives, then swaps it. The
+fonts have different widths and line heights, so the text reflows: a layout shift. Preloading only shortens the time
+before the swap. To remove the shift:
+
+- **A metric-matched fallback.** Declare a fallback face scaled to the metrics of Vela Sans and put it right after
+  `'Vela Sans'` in the font stack. The swap then keeps every line where it was (this is what `next/font` generates).
+  The numbers come from the font file, e.g. with [`@capsizecss/unpack`](https://github.com/seek-oss/capsize) or
+  [`fontaine`](https://github.com/unjs/fontaine):
+
+  ```css
+  @font-face {
+      font-family: 'Vela Sans Fallback';
+      src: local('Arial');
+      size-adjust: …;
+      ascent-override: …;
+      descent-override: …;
+      line-gap-override: …;
+  }
+
+  :root {
+      --fl-font-family: 'Vela Sans', 'Vela Sans Fallback', system-ui, sans-serif;
+  }
+  ```
+
+- **`font-display: optional` with the preload.** When the font is not there within about 100 ms, the page keeps the
+  fallback for the whole visit: no shift at all, but a first visit on a slow network may never show Vela Sans. It
+  needs your own `@font-face` rules: import the parts of `component-styles` without its `css/fonts.css` (see below).
+
+## Cache the files
+
+The emitted fonts carry a content hash, so they never change under the same name. Serve the build's assets with
+`Cache-Control: public, max-age=31536000, immutable`: after the first visit the fonts come from the cache and the
+preload costs nothing.
+
+## Next.js and your own font loading
+
+To load the fonts with `next/font/local` (or any loader of your own), skip the kit's `@font-face` rules: instead of
+`styles.css`, import `@flippo-software/component-styles/css/base.css` (tokens, reset, shared classes) and the
+stylesheets of the components you use from `@flippo-software/component-styles/css/components/`. Point the loader at
+the files of `@flippo-software/component-styles/fonts/` and hand the family to the tokens:
+
+```tsx
+import localFont from 'next/font/local';
+
+const velaSans = localFont({
+    src: [
+        { path: '../node_modules/@flippo-software/component-styles/fonts/VelaSans-Medium.woff2', weight: '500' },
+        { path: '../node_modules/@flippo-software/component-styles/fonts/VelaSans-SemiBold.woff2', weight: '600' }
+        // …the other weights you use
+    ],
+    variable: '--font-vela-sans'
+});
+
+// <html className={velaSans.variable}> and, in your CSS:
+// :root { --fl-font-family: var(--font-vela-sans), system-ui, sans-serif; }
+```
+
+`next/font` preloads the fonts and generates the metric-matched fallback itself.

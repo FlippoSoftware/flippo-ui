@@ -3,6 +3,7 @@
     "pages": [
         "index",
         "installation",
+        "fonts",
         "---UI kits---",
         "ui-kit-react",
         "ui-kit-web",

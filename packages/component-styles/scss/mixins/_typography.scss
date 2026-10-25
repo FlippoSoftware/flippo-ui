@@ -24,7 +24,7 @@
     font-size: var(--fl-text-#{$style}-size);
     font-weight: var(--fl-text-#{$style}-weight-#{$weight});
     line-height: var(--fl-text-#{$style}-line-height);
-    letter-spacing: var(--fl-text-#{$style}-letter-spacing);
+    letter-spacing: var(--fl-text-#{$style}-letter-spacing-#{$weight});
 }
 
 /// The monospace font, without ligatures (code, keys).

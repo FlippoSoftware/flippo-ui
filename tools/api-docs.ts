@@ -18,9 +18,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import ts from 'typescript5';
 
+import { coreEnumOf, registeredWebParts } from './core-enums.ts';
+
 type Prop = {
     name: string;
     type: string;
+    required: boolean;
     default?: string;
     description: string;
 };
@@ -77,18 +80,138 @@ const coreConfig = ts.parseJsonConfigFileContent(
     coreComponents
 );
 const coreProgram = ts.createProgram({
-    rootNames: coreConfig.fileNames.filter((file) => /(DataAttributes|CssVars)\.ts$|\/lib\/attributes\//.test(file)),
+    // Discover declarations, not filenames: a misspelled filename must not hide an otherwise public enum.
+    rootNames: coreConfig.fileNames.filter((file) => file.startsWith(join(coreComponents, 'src')) && !file.endsWith('.test.ts')),
     options: { ...coreConfig.options, noEmit: true }
 });
 const coreChecker = coreProgram.getTypeChecker();
 const coreEnums = new Map<string, ts.EnumDeclaration>();
-for (const source of coreProgram.getSourceFiles().filter((file) => file.fileName.startsWith(coreComponents))) {
+for (const source of coreProgram.getSourceFiles().filter((file) => file.fileName.startsWith(`${coreComponents}/src/`))) {
     for (const node of source.statements) {
-        if (ts.isEnumDeclaration(node)) coreEnums.set(node.name.text, node);
+        if (!ts.isEnumDeclaration(node) || !/(DataAttributes|CssVars)$/.test(node.name.text)) continue;
+        if (coreEnums.has(node.name.text)) throw new Error(`api-docs: duplicate core enum ${node.name.text}.`);
+        coreEnums.set(node.name.text, node);
     }
 }
-/** Parts that render another machine's part: the input is a field control. */
-const ENUM_OF: Record<string, string> = { Input: 'FieldControl' };
+const enumIndex = Object.fromEntries(coreEnums);
+
+/** Reviewed parts that render no state attributes (providers, portals, text and structural parts). */
+const NO_STATE_ATTRIBUTES = {
+    react: new Set([
+        'AutocompleteRoot',
+        'AutocompleteValue',
+        'AvatarFallback',
+        'AvatarImage',
+        'AvatarRoot',
+        'CSPProvider',
+        'LabelableProvider',
+        'NoSsr',
+        'ComboboxChips',
+        'ComboboxCollection',
+        'ComboboxEmpty',
+        'ComboboxGroup',
+        'ComboboxGroupLabel',
+        'ComboboxPortal',
+        'ComboboxRoot',
+        'ComboboxRow',
+        'ComboboxStatus',
+        'ComboboxValue',
+        'ContextMenuRoot',
+        'DialogDescription',
+        'DialogPortal',
+        'DialogRoot',
+        'DialogTitle',
+        'DrawerDescription',
+        'DrawerPortal',
+        'DrawerRoot',
+        'DrawerTitle',
+        'FieldValidity',
+        'Form',
+        'MarqueeTrack',
+        'MenuGroup',
+        'MenuGroupLabel',
+        'MenuPortal',
+        'MenuRadioGroup',
+        'MenuRoot',
+        'MenuSubmenuRoot',
+        'MeterIndicator',
+        'MeterLabel',
+        'MeterRoot',
+        'MeterTrack',
+        'MeterValue',
+        'NavigationMenuItem',
+        'NavigationMenuPortal',
+        'NavigationMenuViewport',
+        'PopoverClose',
+        'PopoverDescription',
+        'PopoverPortal',
+        'PopoverRoot',
+        'PopoverTitle',
+        'ScrollAreaCorner',
+        'SelectGroup',
+        'SelectGroupLabel',
+        'SelectItemText',
+        'SelectPortal',
+        'SelectRoot',
+        'ToastPortal',
+        'ToastProvider',
+        'TooltipMultiple',
+        'TooltipPortal',
+        'TooltipProvider',
+        'TooltipRoot'
+    ]),
+    web: new Set([
+        'autocomplete.root',
+        'avatar.fallback',
+        'avatar.image',
+        'avatar.root',
+        // Unlike their React counterparts, the web chip and remove button emit only native/ARIA attributes.
+        'combobox.chip',
+        'combobox.chipLabel',
+        'combobox.chipRemove',
+        'combobox.chips',
+        'combobox.empty',
+        'combobox.group',
+        'combobox.groupLabel',
+        'combobox.root',
+        'combobox.row',
+        'combobox.status',
+        'combobox.value',
+        'context-menu.root',
+        'dialog.description',
+        'dialog.root',
+        'dialog.title',
+        'drawer.description',
+        'drawer.root',
+        'drawer.title',
+        'form.root',
+        'marquee.track',
+        'menu.group',
+        'menu.groupLabel',
+        'menu.radioGroup',
+        'menu.root',
+        'menu.submenu',
+        'meter.indicator',
+        'meter.label',
+        'meter.root',
+        'meter.track',
+        'meter.value',
+        'navigation-menu.item',
+        'popover.close',
+        'popover.description',
+        'popover.root',
+        'popover.title',
+        'select.group',
+        'select.groupLabel',
+        'select.itemText',
+        'select.list',
+        'select.root',
+        'toast.provider',
+        'tooltip.provider',
+        'tooltip.root'
+    ])
+};
+const missingEnums = new Set<string>();
 
 function docs(symbol: ts.Symbol, from = checker): string {
     return ts.displayPartsToString(symbol.getDocumentationComment(from)).trim();
@@ -130,6 +253,7 @@ function propsOf(component: ts.Symbol): Prop[] {
             .map((prop) => ({
                 name: prop.getName(),
                 type: typeOf(prop),
+                required: !(prop.flags & ts.SymbolFlags.Optional),
                 default: tag(prop, 'default'),
                 description: docs(prop)
             }))
@@ -158,14 +282,15 @@ function enumMembers(enumName: string): Attribute[] {
 
 /** The data attributes and CSS variables of a part: the core enums named after it. */
 function partEnums(componentName: string): Pick<Part, 'dataAttributes' | 'cssVariables' | 'dataAttributesEnum' | 'cssVariablesEnum'> {
-    const base = ENUM_OF[componentName] ?? componentName;
-    const data = `${base}DataAttributes`;
-    const css = `${base}CssVars`;
+    const options = { adapter: 'react' as const, componentName };
+    const data = coreEnumOf(enumIndex, '', '', 'DataAttributes', options);
+    const css = coreEnumOf(enumIndex, '', '', 'CssVars', options);
+    if (!data && !NO_STATE_ATTRIBUTES.react.has(componentName)) missingEnums.add(`react:${componentName}`);
     return {
-        dataAttributes: enumMembers(data),
-        cssVariables: enumMembers(css),
-        ...(coreEnums.has(data) && { dataAttributesEnum: data }),
-        ...(coreEnums.has(css) && { cssVariablesEnum: css })
+        dataAttributes: data ? enumMembers(data) : [],
+        cssVariables: css ? enumMembers(css) : [],
+        ...(data && { dataAttributesEnum: data }),
+        ...(css && { cssVariablesEnum: css })
     };
 }
 
@@ -319,6 +444,25 @@ function variantsOf(recipe: Recipe | undefined): Variant[] {
 
 const recipes = await loadRecipes();
 const kitFamilies = readdirSync(kitComponents).filter((name) => existsSync(join(kitComponents, name, 'index.ts')));
+const reactParts = new Map(entryFiles.map((entry) => [entry, partsOf(entry)]));
+
+const manifestFile = join(root, 'packages/web-components/custom-elements.json');
+if (!existsSync(manifestFile)) throw new Error('api-docs: custom-elements.json is missing: build web-components first (pnpm build).');
+const manifest = JSON.parse(readFileSync(manifestFile, 'utf8')) as Parameters<typeof registeredWebParts>[0];
+for (const { family, part, className } of registeredWebParts(manifest)) {
+    const name = `${family}.${part}`;
+    if (!coreEnumOf(enumIndex, family, part, 'DataAttributes') && !NO_STATE_ATTRIBUTES.web.has(name)) {
+        missingEnums.add(`web:${name} (${className})`);
+    }
+}
+if (missingEnums.size > 0) {
+    throw new Error(
+        `api-docs: missing core data-attribute enums:\n${[...missingEnums]
+            .sort()
+            .map((name) => `  ${name}`)
+            .join('\n')}\nAdd the enum or its explicit alias; only stateless parts belong in NO_STATE_ATTRIBUTES.`
+    );
+}
 
 const api: Record<string, Family> = {};
 for (const name of kitFamilies) {
@@ -327,7 +471,7 @@ for (const name of kitFamilies) {
     api[name] = {
         name,
         kebab: kebab(name),
-        parts: entry ? partsOf(entry) : [],
+        parts: entry ? (reactParts.get(entry) ?? []) : [],
         variants: variantsOf(recipe),
         cssHooks: cssHooks(kebab(name))
     };

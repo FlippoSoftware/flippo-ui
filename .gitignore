@@ -2,6 +2,7 @@ node_modules/
 dist/
 storybook-static/
 coverage/
+.docs-reports/
 *.log
 .DS_Store
 .idea

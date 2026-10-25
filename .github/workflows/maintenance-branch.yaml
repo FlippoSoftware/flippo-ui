@@ -2,7 +2,7 @@ name: Maintenance branch
 
 # Run by hand (Actions → Maintenance branch → Run workflow) when an old major of a package needs fixes: creates
 # `maintenance/<component>-v<major>` from the tag of its last release, with the release tooling of main
-# (`tools/maintenance-branch.mjs`). Fixes are then cherry-picked into it, and the Release workflow releases them there
+# (`tools/maintenance-branch.ts`). Fixes are then cherry-picked into it, and the Release workflow releases them there
 # and publishes them under the npm dist-tag `v<major>` (README «Fixes for a previous major»).
 
 on:
@@ -43,6 +43,11 @@ jobs:
                   # push has to start the Release workflow there (pushes with GITHUB_TOKEN start no workflow).
                   token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
+            # The Node of `.nvmrc` runs the TypeScript of tools/ (the runner's own Node may be too old for it).
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: .nvmrc
+
             - name: Create the branch
               env:
                   COMPONENT: ${{ inputs.component }}
@@ -50,4 +55,4 @@ jobs:
               run: |
                   git config user.name "github-actions[bot]"
                   git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                  node tools/maintenance-branch.mjs "$COMPONENT" "$MAJOR"
+                  node tools/maintenance-branch.ts "$COMPONENT" "$MAJOR"

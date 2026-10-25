@@ -7,7 +7,7 @@
  * not on npm. So every `workspace:` dependency (and peer dependency) of a released package must either be published
  * already, or be released by the same run, in which case it is published first.
  *
- * Usage: `node tools/release-order.mjs '["packages/core-components","packages/react-components"]'`.
+ * Usage: `node tools/release-order.ts '["packages/core-components","packages/react-components"]'`.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -15,42 +15,52 @@ import process from 'node:process';
 
 const REGISTRY = 'https://registry.npmjs.org';
 
-const paths = JSON.parse(process.argv[2] ?? '[]');
+type Manifest = {
+    name: string;
+    version: string;
+    dependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
+};
+
+function readManifest(path: string): Manifest {
+    return JSON.parse(readFileSync(join(path, 'package.json'), 'utf8'));
+}
+
+const paths: string[] = JSON.parse(process.argv[2] ?? '[]');
 const released = new Map(
     paths.map((path) => {
-        const manifest = JSON.parse(readFileSync(join(path, 'package.json'), 'utf8'));
+        const manifest = readManifest(path);
         return [manifest.name, { path, manifest }];
     })
 );
 
 /** The workspace packages `manifest` depends on (dependencies and peers), with their versions in the workspace. */
-function workspaceDependencies(manifest) {
+function workspaceDependencies(manifest: Manifest): { name: string; version: string }[] {
     const names = Object.entries({ ...manifest.dependencies, ...manifest.peerDependencies })
         .filter(([, spec]) => spec.startsWith('workspace:'))
         .map(([name]) => name);
     return names.map((name) => {
-        const path = join('packages', name.replace('@flippo-software/', ''));
-        const { version } = JSON.parse(readFileSync(join(path, 'package.json'), 'utf8'));
+        const { version } = readManifest(join('packages', name.replace('@flippo-software/', '')));
         return { name, version };
     });
 }
 
-async function isPublished(name, version) {
+async function isPublished(name: string, version: string): Promise<boolean> {
     const response = await fetch(`${REGISTRY}/${name.replace('/', '%2F')}/${version}`);
     return response.ok;
 }
 
-const problems = [];
-const order = [];
-const visiting = new Set();
+const problems: string[] = [];
+const order: string[] = [];
+const visiting = new Set<string>();
 
-async function visit(name) {
-    if (order.includes(name) || visiting.has(name)) {
+async function visit(name: string): Promise<void> {
+    const release = released.get(name);
+    if (!release || order.includes(name) || visiting.has(name)) {
         return;
     }
     visiting.add(name);
-    const { manifest } = released.get(name);
-    for (const dependency of workspaceDependencies(manifest)) {
+    for (const dependency of workspaceDependencies(release.manifest)) {
         if (released.has(dependency.name)) {
             await visit(dependency.name);
         } else if (!(await isPublished(dependency.name, dependency.version))) {
@@ -71,4 +81,4 @@ if (problems.length > 0) {
     process.exit(1);
 }
 
-console.log(order.map((name) => released.get(name).path).join('\n'));
+console.log(order.map((name) => released.get(name)?.path).join('\n'));

@@ -1,0 +1,129 @@
+---
+title: Стили и шрифты
+description: Как подключить таблицу стилей и Vela Sans, чтобы первый экран был оформлен, а лейаут не прыгал, когда приходит шрифт.
+l10n: { source: "30b02d8cd4c9" }
+---
+
+Таблица стилей китов (`@flippo-software/ui-kit-react/styles.css`, `@flippo-software/ui-kit-web/styles.css`) — это
+`@flippo-software/component-styles/css/index.css`: шесть правил `@font-face` Vela Sans (начертания 300–800, по одному
+`woff2` примерно на 55 КБ, `font-display: swap`), затем токены, reset и стили компонентов. Файлы шрифтов лежат в
+`@flippo-software/component-styles/fonts/`; таблица стилей ссылается на них относительными URL, поэтому сборщик
+копирует их вместе с ней.
+
+## Подключите стили в точке входа
+
+```tsx
+// src/main.tsx: первой строкой, до компонентов приложения
+import '@flippo-software/ui-kit-react/styles.css';
+import './app.css'; // свои стили — после, чтобы они перекрывали стили кита
+```
+
+Продакшен-сборка (Vite, webpack, Next.js…) выносит CSS в файл, подключённый в `<head>`: страница не рисуется без
+оформления. В режиме разработки Vite подставляет стили из JavaScript, так что короткое мигание без стилей там
+нормально. Не копируйте шрифты в `public/` руками: сборщик уже кладёт их в сборку (с хешем содержимого в имени), а
+второй набор `@font-face` для того же семейства загрузил бы их дважды.
+
+Тему тоже ставьте до первой отрисовки: `<ThemeScript storageKey="…" />` (React) или результат `themeScript()` в
+`<head>` (custom elements), см. [Темы и размеры](./ui-kit-react/theming.mdx).
+
+## Предзагрузите шрифты первого экрана
+
+Браузер запрашивает шрифт поздно: когда разобрал CSS и разместил набранный им текст. `<link rel="preload">` начинает
+загрузку вместе с HTML. Предзагружайте только начертания первого экрана: основной текст набран в 500 (Medium) и
+600 (SemiBold). Предзагрузка всех шести (около 330 КБ) конкурирует с CSS и JavaScript.
+
+У собранных файлов имена с хешем, поэтому ссылки добавляются после сборки. Для Vite:
+
+```ts
+// vite.config.ts
+import { defineConfig, type Plugin } from 'vite';
+
+/** Preloads the fonts of the first screen: their hashed names are known only after the build. */
+function preloadFonts(names: RegExp): Plugin {
+    return {
+        name: 'preload-fonts',
+        apply: 'build',
+        transformIndexHtml: {
+            order: 'post',
+            handler(_html, { bundle }) {
+                return Object.keys(bundle ?? {})
+                    .filter((file) => file.endsWith('.woff2') && names.test(file))
+                    .map((file) => ({
+                        tag: 'link',
+                        attrs: { rel: 'preload', href: `/${file}`, as: 'font', type: 'font/woff2', crossorigin: '' },
+                        injectTo: 'head-prepend'
+                    }));
+            }
+        }
+    };
+}
+
+export default defineConfig({
+    plugins: [preloadFonts(/VelaSans-(Medium|SemiBold)/)]
+});
+```
+
+Оставляйте `crossorigin` даже для своего домена: шрифты всегда загружаются в режиме CORS, и preload без этого
+атрибута не переиспользуется — шрифт скачается дважды. Поправьте `href`, если приложение отдаётся из подпапки
+(`base` в Vite).
+
+## Чтобы лейаут не прыгал
+
+`font-display: swap` показывает текст запасным шрифтом (`system-ui`…), пока не придёт Vela Sans, а потом подменяет
+его. У шрифтов разная ширина и высота строк, поэтому текст перестраивается — лейаут сдвигается. Preload только
+сокращает время до подмены. Чтобы убрать сдвиг:
+
+- **Запасной шрифт с подогнанными метриками.** Объявите запасное начертание, масштабированное под метрики Vela Sans,
+  и поставьте его в стек сразу после `'Vela Sans'`. Тогда при подмене строки остаются на месте (так делает
+  `next/font`). Числа берутся из файла шрифта, например утилитой
+  [`@capsizecss/unpack`](https://github.com/seek-oss/capsize) или [`fontaine`](https://github.com/unjs/fontaine):
+
+  ```css
+  @font-face {
+      font-family: 'Vela Sans Fallback';
+      src: local('Arial');
+      size-adjust: …;
+      ascent-override: …;
+      descent-override: …;
+      line-gap-override: …;
+  }
+
+  :root {
+      --fl-font-family: 'Vela Sans', 'Vela Sans Fallback', system-ui, sans-serif;
+  }
+  ```
+
+- **`font-display: optional` вместе с preload.** Если шрифт не пришёл примерно за 100 мс, страница до конца визита
+  остаётся на запасном: сдвига нет совсем, но при первом визите на медленной сети Vela Sans можно не увидеть. Для
+  этого нужны свои правила `@font-face`: подключите части `component-styles` без её `css/fonts.css` (см. ниже).
+
+## Кэшируйте файлы
+
+У шрифтов в сборке хеш содержимого в имени: под тем же именем они не меняются. Отдавайте ассеты сборки с
+`Cache-Control: public, max-age=31536000, immutable` — после первого визита шрифты берутся из кэша, и preload ничего
+не стоит.
+
+## Next.js и своя загрузка шрифтов
+
+Чтобы загружать шрифты через `next/font/local` (или своим способом), не подключайте правила `@font-face` кита:
+вместо `styles.css` подключите `@flippo-software/component-styles/css/base.css` (токены, reset, общие классы) и
+таблицы стилей нужных компонентов из `@flippo-software/component-styles/css/components/`. Укажите загрузчику файлы
+из `@flippo-software/component-styles/fonts/` и передайте семейство токенам:
+
+```tsx
+import localFont from 'next/font/local';
+
+const velaSans = localFont({
+    src: [
+        { path: '../node_modules/@flippo-software/component-styles/fonts/VelaSans-Medium.woff2', weight: '500' },
+        { path: '../node_modules/@flippo-software/component-styles/fonts/VelaSans-SemiBold.woff2', weight: '600' }
+        // …остальные начертания, которые вы используете
+    ],
+    variable: '--font-vela-sans'
+});
+
+// <html className={velaSans.variable}> и в своём CSS:
+// :root { --fl-font-family: var(--font-vela-sans), system-ui, sans-serif; }
+```
+
+`next/font` сам предзагружает шрифты и создаёт запасной шрифт с подогнанными метриками.

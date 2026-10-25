@@ -51,9 +51,8 @@ return useRenderElement('button', componentProps, {
   Write the test against the expected Base UI behaviour first.
 - Build is Vite (+ `tsc -p tsconfig.build.json` and `scripts/rewrite-dts-aliases.mjs` for types); do not move it to
   tsdown. TypeScript 7.
-- `@flippo-software/react-hooks` is its own repository (`../../../hooks`, a published dependency; linked from the
-  sibling checkout until its first release, see the root `pnpm-workspace.yaml`); `@flippo-software/internal-test-utils`
-  comes from the workspace (`workspace:*`, private, tests only).
+- `@flippo-software/react-hooks` is its own repository (`../../../react-hooks`), installed from npm;
+  `@flippo-software/internal-test-utils` comes from the workspace (`workspace:*`, private, tests only).
 
 ## Commands
 

@@ -1,5 +1,6 @@
 ---
 title: "Flippo UI для Web Components"
+l10n: { source: "136a3b72075f" }
 ---
 
 Стилизованные custom elements дизайн-системы Flippo: поведение — из `@flippo-software/web-components` (те же

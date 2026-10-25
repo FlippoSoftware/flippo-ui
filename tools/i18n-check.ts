@@ -10,16 +10,19 @@
  *   shared by both adapters), `web.<Class>.<attribute>` the attributes of the web components (their Custom Elements
  *   Manifest).
  *
- * `--write` rewrites these texts of `en.json` from the sources; a new or changed one then needs its Russian
- * text in `ru.json`, which the check lists.
+ * `--write` refreshes English texts and prunes removed keys, never acknowledging translations.
+ * After translating, `--review <key|prefix>…` records their English hashes in `ru.sources.json`.
+ * Missing texts/source hashes fail; stale translations warn. `--json <file>` writes the CI report.
  *
- * Usage: `node tools/i18n-check.ts [--write]` (the `lint:check` of this package runs it without `--write`).
+ * Usage: `node tools/i18n-check.ts [--write] [--review <key|prefix>…] [--json <file>]`.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, globSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, globSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+
+import { docsHash } from './docs-hash.ts';
 
 type Dictionary = { [key: string]: string | Dictionary };
 
@@ -111,7 +114,7 @@ function webTexts(): Map<string, string> {
 
 /** The texts of the sources: `api.*`, `core.*`, `web.*`. */
 function apiTexts(): Map<string, string> {
-    execFileSync('node', [join(root, 'tools/api-docs.ts')], { stdio: 'ignore' });
+    execFileSync(process.execPath, [join(root, 'tools/api-docs.ts')], { stdio: 'ignore' });
     const api: Api = JSON.parse(readFileSync(join(root, 'tools/storybook/api.json'), 'utf8'));
     const common = commonTexts(api);
     const texts = new Map([...common].map(([name, text]) => [`api.common.props.${name}`, text]));
@@ -128,47 +131,158 @@ function apiTexts(): Map<string, string> {
     return texts;
 }
 
-const problems: string[] = [];
-const en = flatten(read('en'));
-const ru = flatten(read('ru'));
+type Report = {
+    missing: string[];
+    stale: { key: string; en: string; ru: string }[];
+    current: number;
+    errors: string[];
+};
 
-// The API reference: en.json follows the sources.
-const sources = apiTexts();
-const stale = [...sources].filter(([key, text]) => en.get(key) !== text).map(([key]) => key);
-const removed = [...en.keys()].filter((key) => /^(api|core|web)\./.test(key) && !sources.has(key));
-if (process.argv.includes('--write')) {
-    for (const key of removed) en.delete(key);
-    for (const [key, text] of sources) en.set(key, text);
-    writeFileSync(dictionaryFile('en'), `${JSON.stringify(nest(en), null, 4)}\n`);
-    for (const key of removed) ru.delete(key);
-    writeFileSync(dictionaryFile('ru'), `${JSON.stringify(nest(ru), null, 4)}\n`);
-    if (stale.length > 0) {
-        console.log(`en.json: ${stale.length} API text(s) updated from the sources; check their Russian text in ru.json:`);
-        for (const key of stale) console.log(`  ${key}`);
+const report: Report = { missing: [], stale: [], current: 0, errors: [] };
+const args = process.argv.slice(2);
+let jsonFile: string | undefined;
+let write = false;
+const selectors: string[] = [];
+
+function options() {
+    for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        if (arg === '--write') {
+            write = true;
+            continue;
+        }
+        if (arg === '--json') {
+            const candidate = args[++i];
+            if (!candidate || candidate.startsWith('--')) throw new Error('--json requires a file');
+            jsonFile = candidate;
+            continue;
+        }
+        if (arg === '--review') {
+            const start = selectors.length;
+            while (args[i + 1] && !args[i + 1].startsWith('--')) selectors.push(args[++i]);
+            if (selectors.length === start) throw new Error('--review requires a key or prefix');
+            continue;
+        }
+        throw new Error(`Unknown argument: ${arg}`);
     }
-} else {
-    for (const key of [...stale, ...removed]) problems.push(`en.json: ${key} differs from the sources (node tools/i18n-check.ts --write)`);
 }
 
-// Both dictionaries have the same keys.
-for (const key of en.keys()) if (!ru.has(key)) problems.push(`ru.json: missing ${key}`);
-for (const key of ru.keys()) if (!en.has(key)) problems.push(`en.json: missing ${key} (it is in ru.json)`);
+function saveSources(sources: Record<string, string>) {
+    writeFileSync(
+        dictionaryFile('ru.sources'),
+        `${JSON.stringify(
+            Object.fromEntries(
+                Object.keys(sources)
+                    .sort()
+                    .map((key) => [key, sources[key]])
+            ),
+            null,
+            4
+        )}\n`
+    );
+}
 
-// The keys the stories use exist.
-const KEY_USES = [/\bt\(\s*'([\w.-]+)'/g, /component:\s*'([\w.-]+)'/g];
-const KEYED_FILES = ['packages/ui-kit-*/src/**/__stories__/*.{ts,tsx}', 'tools/storybook/pages/*.tsx'];
-for (const file of globSync(KEYED_FILES, { cwd: root })) {
-    const text = readFileSync(join(root, file), 'utf8');
-    for (const pattern of KEY_USES) {
-        for (const [, key] of text.matchAll(pattern)) {
-            if (key.includes('.') && !en.has(key)) problems.push(`${file}: unknown key ${key}`);
+type State = { en: Map<string, string>; ru: Map<string, string>; reviewed: Record<string, string> };
+
+function refreshSources({ en, ru, reviewed }: State) {
+    // English still follows the source comments; a stale translation is a separate warning.
+    const sources = apiTexts();
+    const changed = [...sources].filter(([key, text]) => en.get(key) !== text).map(([key]) => key);
+    const removed = [...en.keys()].filter((key) => /^(api|core|web)\./.test(key) && !sources.has(key));
+    if (write) {
+        for (const key of removed) {
+            en.delete(key);
+            ru.delete(key);
+        }
+        for (const [key, text] of sources) en.set(key, text);
+        writeFileSync(dictionaryFile('en'), `${JSON.stringify(nest(en), null, 4)}\n`);
+        writeFileSync(dictionaryFile('ru'), `${JSON.stringify(nest(ru), null, 4)}\n`);
+        for (const key of Object.keys(reviewed)) if (!ru.has(key)) delete reviewed[key];
+        saveSources(reviewed);
+        if (changed.length > 0) console.log(`en.json: ${changed.length} API text(s) updated from the sources.`);
+    } else {
+        for (const key of [...changed, ...removed]) {
+            report.errors.push(`en.json: ${key} differs from the sources (node tools/i18n-check.ts --write)`);
         }
     }
 }
 
-if (problems.length > 0) {
-    console.error(`i18n: ${problems.length} problem(s):`);
-    for (const problem of problems) console.error(`  ${problem}`);
-    process.exit(1);
+/** Validate every selector before changing any hashes. */
+function reviewKeys({ en, ru, reviewed }: State) {
+    if (selectors.length === 0) return;
+    const selected = new Set<string>();
+    for (const selector of selectors) {
+        const keys = [...en.keys()].filter((key) => key === selector || key.startsWith(`${selector}.`));
+        if (keys.length === 0) throw new Error(`--review: unknown key or prefix ${selector}`);
+        for (const key of keys) {
+            if (!en.get(key)?.trim() || !ru.get(key)?.trim()) throw new Error(`--review: missing text for ${key}`);
+            selected.add(key);
+        }
+    }
+    if (report.errors.length > 0) throw new Error('--review: update en.json from the sources with --write first');
+    for (const key of selected) reviewed[key] = docsHash(en.get(key) as string);
+    saveSources(reviewed);
+    console.log(`i18n: reviewed ${selected.size} key(s).`);
 }
-console.log(`i18n: ${en.size} keys in en.json and ru.json, every key of the stories exists.`);
+
+function checkTranslations({ en, ru, reviewed }: State) {
+    for (const [key, text] of en) {
+        const translated = ru.get(key);
+        if (!text.trim()) report.missing.push(`en.json: empty ${key}`);
+        if (!translated?.trim()) report.missing.push(`ru.json: missing ${key}`);
+        else if (!/^[a-f0-9]{12}$/.test(reviewed[key] ?? '')) report.missing.push(`ru.sources.json: missing source hash for ${key}`);
+        else if (reviewed[key] !== docsHash(text)) report.stale.push({ key, en: text, ru: translated });
+        else report.current++;
+    }
+    for (const key of ru.keys()) if (!en.has(key)) report.missing.push(`en.json: missing ${key} (it is in ru.json)`);
+    for (const key of Object.keys(reviewed)) {
+        if (!ru.has(key)) report.errors.push(`ru.sources.json: unknown key ${key} (run --write to prune it)`);
+    }
+}
+
+function checkStoryKeys(en: Map<string, string>) {
+    const keyUses = [/\bt\(\s*'([\w.-]+)'/g, /component:\s*'([\w.-]+)'/g];
+    const keyedFiles = ['packages/ui-kit-*/src/**/__stories__/*.{ts,tsx}', 'tools/storybook/pages/*.tsx'];
+    for (const file of globSync(keyedFiles, { cwd: root })) {
+        const text = readFileSync(join(root, file), 'utf8');
+        for (const pattern of keyUses) {
+            for (const [, key] of text.matchAll(pattern)) {
+                if (key.includes('.') && !en.has(key)) report.errors.push(`${file}: unknown key ${key}`);
+            }
+        }
+    }
+}
+
+function printReport(size: number) {
+    console.log(`i18n: ${size} keys, ${report.current} current, ${report.missing.length} missing, ${report.stale.length} stale.`);
+    const groups = new Map<string, number>();
+    for (const { key } of report.stale) {
+        const prefix = key.split('.')[0];
+        groups.set(prefix, (groups.get(prefix) ?? 0) + 1);
+    }
+    for (const [prefix, count] of groups) console.warn(`  ${prefix}: ${count} stale`);
+    for (const { key } of report.stale) console.warn(`  stale: ${key}`);
+}
+
+try {
+    options();
+    const sourceFile = dictionaryFile('ru.sources');
+    const state: State = {
+        en: flatten(read('en')),
+        ru: flatten(read('ru')),
+        reviewed: existsSync(sourceFile) ? JSON.parse(readFileSync(sourceFile, 'utf8')) : {}
+    };
+    refreshSources(state);
+    reviewKeys(state);
+    checkTranslations(state);
+    checkStoryKeys(state.en);
+    printReport(state.en.size);
+} catch (error) {
+    report.errors.push((error as Error).message);
+}
+if (jsonFile) {
+    mkdirSync(dirname(jsonFile), { recursive: true });
+    writeFileSync(jsonFile, `${JSON.stringify(report, null, 4)}\n`);
+}
+for (const problem of [...report.missing, ...report.errors]) console.error(`i18n: ${problem}`);
+if (report.missing.length > 0 || report.errors.length > 0) process.exitCode = 1;
