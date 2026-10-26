@@ -18,6 +18,14 @@ on:
 permissions:
     contents: read
 
+# One release run per branch at a time: merging several release pull requests one after another queues the runs
+# instead of publishing side by side. GitHub keeps one waiting run and cancels an older waiting one; that is safe, as
+# release-please tags every merged release pull request still pending, so the run left releases them all, in
+# dependency order (`tools/release-order.ts`).
+concurrency:
+    group: release-${{ github.ref }}
+    cancel-in-progress: false
+
 jobs:
     check:
         uses: ./.github/workflows/check.yaml
