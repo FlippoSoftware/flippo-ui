@@ -1,7 +1,7 @@
 {
     "name": "@flippo-software/store",
     "type": "module",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Framework-agnostic observable store with computed values, effects, selectors, controlled values and batched notifications.",
     "author": "BlackPoretsky (Egor Gorochkin)",
     "license": "ISC",

@@ -3,7 +3,7 @@
     "packages/core-components": "0.1.2",
     "packages/react-components": "0.1.0",
     "packages/react-store": "0.1.0",
-    "packages/store": "0.1.0",
+    "packages/store": "0.2.0",
     "packages/ui-kit-react": "0.1.0",
     "packages/ui-kit-web": "0.1.0",
     "packages/web-components": "0.1.0"
