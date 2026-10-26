@@ -1,7 +1,7 @@
 {
     "name": "@flippo-software/web-components",
     "type": "module",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Headless, framework-agnostic web components built on the Flippo UI state machines.",
     "author": "BlackPoretsky (Egor Gorochkin)",
     "license": "ISC",

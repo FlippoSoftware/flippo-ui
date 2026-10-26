@@ -145,7 +145,8 @@ Release a dependency before the packages that need its new version: when `react-
 dependency into the published package (`workspace:^` → `^0.2.0`), so the other order would publish a dependent that
 requires a version not on npm. The publish step checks this (`tools/release-order.ts`): it publishes the dependencies
 of a run first, and stops when a dependency is neither on npm nor in the run (merge its release pull request, then
-re-run the failed workflow).
+re-run the failed workflow). There is no need to wait for one release before merging the next: the release runs of a
+branch queue up, and a run releases every merged release pull request still pending.
 
 ### Changing a package without changing its dependents
 
