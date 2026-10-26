@@ -4,7 +4,6 @@
 /// `--fl-spacing-<step>`: a 4px grid (`Scale/spacing` in Figma counts in 16px units: 0,75 = 12px = step 3).
 /// Half steps are spelled with a dash: `1-5` = 6px.
 $spacing: (
-    '24': 96px,
     '0': 0,
     '0-5': 2px,
     '1': 4px,
@@ -25,7 +24,12 @@ $spacing: (
     '14': 56px,
     '16': 64px,
     '18': 72px,
-    '20': 80px
+    '20': 80px,
+    '22': 88px,
+    '24': 96px,
+    '26': 104px,
+    '28': 112px,
+    '32': 128px
 );
 
 /// `--fl-radius-<name>`: the scale, then the radii Figma names by role (`radius/card`, `radius/popup`…).
@@ -36,6 +40,7 @@ $radius: (
     'md': 12px,
     'lg': 16px,
     'xl': 24px,
+    '2xl': 48px,
     'full': 1000px,
     'card': 16px,
     'zone': 16px,

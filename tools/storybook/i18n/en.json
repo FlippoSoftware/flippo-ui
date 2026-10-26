@@ -2462,6 +2462,13 @@
             "data-orientation": "Indicates the orientation of the tabs.",
             "data-starting-style": "Present when the panel is animating in."
         },
+        "CollapsibleRootDataAttributes": {
+            "data-closed": "Present when the collapsible is closed.",
+            "data-disabled": "Present when the collapsible is disabled.",
+            "data-ending-style": "Present while the panel is animating out.",
+            "data-open": "Present when the collapsible is open.",
+            "data-starting-style": "Present while the panel is animating in."
+        },
         "CollapsibleTriggerDataAttributes": {
             "data-disabled": "Present when the accordion item is disabled.",
             "data-panel-open": "Present when the accordion panel is open."
@@ -2478,6 +2485,12 @@
             "data-ending-style": "Present when the popup is animating out.",
             "data-open": "Present when the popup is open.",
             "data-starting-style": "Present when the popup is animating in."
+        },
+        "ComboboxClearDataAttributes": {
+            "data-disabled": "Present when the clear button is disabled.",
+            "data-ending-style": "Present while the clear button is animating out.",
+            "data-popup-open": "Present when the combobox popup is open.",
+            "data-starting-style": "Present while the clear button is animating in."
         },
         "ComboboxInputDataAttributes": {
             "data-dirty": "Present when the component's value has changed (inside a field).",
@@ -2498,6 +2511,17 @@
             "data-disabled": "Present when the item is disabled.",
             "data-highlighted": "Present when the item is highlighted.",
             "data-selected": "Present when the item is selected."
+        },
+        "ComboboxItemIndicatorDataAttributes": {
+            "data-ending-style": "Present while the selection indicator is animating out.",
+            "data-selected": "Present when the item is selected.",
+            "data-starting-style": "Present while the selection indicator is animating in."
+        },
+        "ComboboxItemIndicatorWebDataAttributes": {
+            "data-selected": "Present when the item is selected."
+        },
+        "ComboboxListDataAttributes": {
+            "data-empty": "Present when no items match the filter."
         },
         "ComboboxPopupDataAttributes": {
             "data-align": "Indicates how the popup is aligned relative to specified side.",
@@ -2700,6 +2724,9 @@
             "data-touched": "Present when the field has been touched.",
             "data-valid": "Present when the field is valid."
         },
+        "FieldsetRootDataAttributes": {
+            "data-disabled": "Present when the fieldset is disabled."
+        },
         "ListItemDataAttributes": {
             "data-index": "The index of the list item.",
             "data-nested": "Whether the list is nested within another list.",
@@ -2722,6 +2749,13 @@
             "data-orientation": "The layout orientation of the list.",
             "data-type": "The type of the list."
         },
+        "ListSubheaderDataAttributes": {
+            "data-index": "The nonzero index of the item containing the subheader.",
+            "data-nestedlistitemnumber": "The nonzero nesting level of the list item.",
+            "data-nestedlistnumber": "The nonzero nesting level of the list.",
+            "data-orientation": "The orientation of the list.",
+            "data-type": "The type of the list."
+        },
         "MarqueeRootCssVars": {
             "--marquee-delay": "The delay before the animation starts.",
             "--marquee-direction": "`normal` or `reverse`: the `animation-direction` of the track.",
@@ -2732,6 +2766,11 @@
             "--marquee-pause-on-click": "`paused` when the marquee pauses while pressed (or does not play), else `running`: the `animation-play-state` of the track while pressed.",
             "--marquee-pause-on-hover": "`paused` when the marquee pauses on hover (or does not play), else `running`: the `animation-play-state` of the track on hover.",
             "--marquee-play": "`running` or `paused`: the `animation-play-state` of the track."
+        },
+        "MarqueeRootDataAttributes": {
+            "data-direction": "The direction of the marquee animation.",
+            "data-orientation": "The orientation of the marquee.",
+            "data-playing": "Present while the marquee is playing."
         },
         "MenuArrowDataAttributes": {
             "data-align": "Indicates how the popup is aligned relative to specified side.",
@@ -2813,6 +2852,11 @@
             "data-popup-open": "Present when the corresponding menu is open.",
             "data-pressed": "Present when the trigger is pressed."
         },
+        "MenubarDataAttributes": {
+            "data-has-submenu-open": "Whether a submenu is open.",
+            "data-modal": "Present when the menubar uses modal behaviour.",
+            "data-orientation": "The orientation of the menubar."
+        },
         "NavigationMenuArrowDataAttributes": {
             "data-align": "Indicates how the popup is aligned relative to specified side.",
             "data-closed": "Present when the popup is closed.",
@@ -2835,6 +2879,9 @@
         },
         "NavigationMenuLinkDataAttributes": {
             "data-active": "Present when the link is the currently active page."
+        },
+        "NavigationMenuListDataAttributes": {
+            "data-open": "Present when a navigation menu item is open."
         },
         "NavigationMenuPopupCssVars": {
             "--popup-height": "The fixed height of the popup element.",
@@ -2864,6 +2911,14 @@
             "data-instant": "Present if animations should be instant.",
             "data-open": "Present when the popup is open.",
             "data-side": "Indicates which side the popup is positioned relative to the trigger."
+        },
+        "NavigationMenuRootDataAttributes": {
+            "data-nested": "Present when the navigation menu is nested.",
+            "data-open": "Present when a navigation menu item is open."
+        },
+        "NavigationMenuRootWebDataAttributes": {
+            "data-closed": "Present when no navigation menu item is open.",
+            "data-open": "Present when a navigation menu item is open."
         },
         "NavigationMenuTriggerDataAttributes": {
             "data-popup-open": "Present when the corresponding navigation menu is open.",
@@ -3050,6 +3105,10 @@
             "data-current": "Applied to the direct child of the viewport when no transitions are present or the new content when it's entering.",
             "data-previous": "Applied to the direct child of the viewport that contains the exiting content when transitions are present.",
             "data-transitioning": "Indicates that the viewport is currently transitioning between old and new content."
+        },
+        "PopupViewportCssVars": {
+            "--popup-height": "The height of the popup content, while the viewport animates a change of size.",
+            "--popup-width": "The width of the popup content, while the viewport animates a change of size."
         },
         "ProgressIndicatorDataAttributes": {
             "data-complete": "Present when the progress has completed.",
@@ -3278,6 +3337,9 @@
         },
         "SelectValueDataAttributes": {
             "data-placeholder": "Present when the select doesn't have a value."
+        },
+        "SeparatorDataAttributes": {
+            "data-orientation": "The orientation of the separator."
         },
         "SliderControlDataAttributes": {
             "data-dirty": "Present when the slider's value has changed (inside a field).",

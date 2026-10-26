@@ -6,7 +6,7 @@
  *   the fixes of an old major do not take `latest` from the current one;
  * - any other release, under `latest`.
  *
- * Usage: `node tools/dist-tag.mjs <version> <branch>`.
+ * Usage: `node tools/dist-tag.ts <version> <branch>`.
  */
 import process from 'node:process';
 

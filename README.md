@@ -69,14 +69,21 @@ and the stories. The texts live in two dictionaries with the same keys, `tools/s
 - the API references: `api.<Family>.<Part>.description|props.<prop>` (React; `api.common.props.*` for the props every
   part has), `web.<Class>.<attribute>` (the attributes of the web components, under the class that declares them),
   `core.<Enum>.<value>` (the data attributes and CSS variables, shared by both). The English texts are those of the
-  sources: `node tools/i18n-check.ts --write` copies them into `en.json` and lists the keys whose Russian text needs a
-  look.
+  sources: `node tools/i18n-check.ts --write` copies them into `en.json`. `ru.sources.json` records the English hash
+  each Russian text was reviewed against. After editing the Russian text, acknowledge only the reviewed keys with
+  `node tools/i18n-check.ts --review api.Checkbox.Root.props.checked` (a dot-delimited prefix also works).
 
 The prose of the overview pages is not in the dictionaries: it is markdown, one document per language
 (`.storybook/pages/introduction.md` and `introduction.ru.md`; the themes page renders the documentation site's
 `docs/content/docs/ui-kit-*/theming*.mdx`), shown by `<MarkdownPage en={en} ru={ru} />`. `node tools/i18n-check.ts`
 (part of `pnpm lint:check`) fails when the dictionaries differ, a story uses an unknown key or `en.json` is behind the
-JSDoc.
+JSDoc. Missing or empty translations and missing source hashes also fail; a stale translation warns on every run
+until explicitly reviewed. `--write` never acknowledges translations. `--json <file>` exports the report for CI.
+
+Translated markdown pages carry `l10n: { source: "<hash>" }` in their frontmatter. After translating an English edit,
+run `node docs/scripts/check.ts --review docs/content/docs/installation.ru.mdx` (or the translated Storybook `.ru.md`
+path). The hash covers the English body, without frontmatter. Existing translations were initialized as the migration
+baseline; this does not certify their linguistic quality. See [docs/README.md](docs/README.md) for guide contracts.
 
 ## Documentation site
 
@@ -102,9 +109,13 @@ open story updates without building `component-styles`. Builds, lint and publish
 packages use each other's `dist`). `.github/actions/setup` installs pnpm, Node and the dependencies for every job.
 
 - On a pull request it checks the packages the pull request changes **and the packages that depend on them**
-  (`tools/affected.mjs`): a change of an API in `core-components` is typechecked and tested in `react-components`,
+  (`tools/affected.ts`): a change of an API in `core-components` is typechecked and tested in `react-components`,
   `web-components` and the kits too. A change outside `packages/` (lockfile, workspace config, `tools/`, workflows)
-  checks everything; a change of Markdown only checks nothing.
+  checks everything. Documentation inputs (including package READMEs and translated Storybook markdown) trigger a
+  complete build and the `docs` job; unrelated Markdown can still skip checks.
+- The `docs` job generates and compiles the pages, checks translations and guide contracts, and writes a job summary.
+  Generation errors, missing translations and broken checked links fail; stale translations and changed guide
+  contracts warn. The build artifact includes the Custom Elements Manifest required by the generators.
 - The release workflow calls it first on the whole workspace: nothing is released or published unless it passes.
 - In the branch rules of `main`, require the `checks` job only: it sums up the others, and a check skipped by the
   selection still lets the pull request merge.
@@ -117,10 +128,12 @@ dependents), or `pnpm --recursive --filter "...[origin/main]" test` (whatever ch
 Each package has its own version and is released on its own, by [release-please](https://github.com/googleapis/release-please)
 from [conventional commits](https://www.conventionalcommits.org) (`.github/workflows/release.yaml`):
 
-1. Commit with a conventional message: `fix(core-components): …` → patch, `feat(core-components): …` → minor, `feat(core-components)!: …` or a
+1. Pull requests are squash-merged: the **pull request title** becomes the commit on `main` (checked by the Pull
+   request title workflow), the commits of the branch are free-form. Title it with a conventional message: `fix(core-components): …` → patch, `feat(core-components): …` → minor, `feat(core-components)!: …` or a
    `BREAKING CHANGE:` footer → major (a minor while the version is `0.x`). The package is the folder the commit
    changes, not the scope: a commit that changes `packages/core-components` and `packages/react-components` releases both.
-   `chore`, `docs`, `test`, `refactor`… do not release anything. Pull requests check the messages (commitlint).
+   `chore`, `docs`, `test`, `refactor`… do not release anything. One pull request is one entry of the CHANGELOGs of the
+   packages it changes, so keep a pull request to one change.
 2. On each push to `main`, release-please keeps **one release pull request per package** with releasable commits
    since its last release (`chore(main): release core-components 0.2.0`): its next version and its CHANGELOG.
    Nothing else is bumped.
@@ -130,7 +143,7 @@ from [conventional commits](https://www.conventionalcommits.org) (`.github/workf
 Release a dependency before the packages that need its new version: when `react-components` uses a new API of
 `core-components`, merge the `core-components` release first. `pnpm publish` writes the workspace version of a
 dependency into the published package (`workspace:^` → `^0.2.0`), so the other order would publish a dependent that
-requires a version not on npm. The publish step checks this (`tools/release-order.mjs`): it publishes the dependencies
+requires a version not on npm. The publish step checks this (`tools/release-order.ts`): it publishes the dependencies
 of a run first, and stops when a dependency is neither on npm nor in the run (merge its release pull request, then
 re-run the failed workflow).
 
@@ -152,7 +165,7 @@ the checks of `react-components` until it is adapted. That is the point of the m
    `pnpm-workspace.yaml`.
 
 Publishing is done by the Release workflow only: the `prepublishOnly` script of every package
-(`tools/publish-guard.mjs`) refuses `pnpm publish` anywhere else. The one exception is the first publication of a new
+(`tools/publish-guard.ts`) refuses `pnpm publish` anywhere else. The one exception is the first publication of a new
 package, before npm trusted publishing can be set up for it: build, then
 `FLIPPO_FIRST_PUBLISH=1 pnpm --filter <package> publish --access public` (always `pnpm publish`, never `npm publish`:
 pnpm replaces the `workspace:` and `catalog:` versions). Afterwards, in the package settings on npmjs.com: trusted
@@ -186,7 +199,7 @@ When `2.x` is out and `1.x` still gets fixes, keep a maintenance branch: Actions
 workflow, with the package and the major (`react-components`, `1`). It creates `maintenance/react-components-v1` from
 the tag of the last `1.x` release (`react-components-v1.4.2`) and brings into it, in one `ci:` commit, the workflows and
 release scripts of `main`: GitHub runs the workflows of the pushed branch, and those of an older tag may not know
-maintenance branches yet (`tools/maintenance-branch.mjs`, `--dry-run` to see the plan locally). It pushes with
+maintenance branches yet (`tools/maintenance-branch.ts`, `--dry-run` to see the plan locally). It pushes with
 `RELEASE_PLEASE_TOKEN`, which needs the permission to change workflows.
 
 Fix on `main` first (`fix(react-components): …`), then bring the commit to the branch with
@@ -194,7 +207,7 @@ Fix on `main` first (`fix(react-components): …`), then bring the commit to the
 `main`: release-please opens a release pull request into the branch (its manifest still says `1.4.2`), and merging it
 tags `react-components-v1.4.3` and publishes it under the dist-tag `v1`, so `latest` stays on `2.x`
 (`pnpm add @flippo-software/react-components@v1`). The branch name must start with `maintenance/`; the dist-tag is
-chosen by `tools/dist-tag.mjs`.
+chosen by `tools/dist-tag.ts`.
 
 A dist-tag set by mistake is fixed without republishing: `npm dist-tag add <package>@<version> latest`.
 

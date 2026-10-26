@@ -13,6 +13,17 @@
         "storybook:react": "pnpm --filter @flippo-software/ui-kit-react storybook",
         "storybook:web": "pnpm --filter @flippo-software/ui-kit-web storybook",
         "docs:build": "pnpm --filter @flippo-software/docs generate && pnpm --filter @flippo-software/docs check",
-        "publish-guard": "node tools/publish-guard.mjs"
+        "publish-guard": "node tools/publish-guard.ts",
+        "prepare": "simple-git-hooks",
+        "hooks:install": "simple-git-hooks"
+    },
+    "simple-git-hooks": {
+        "pre-commit": "test \"$(git symbolic-ref --quiet HEAD)\" != refs/heads/main || { echo \"Direct commits to main are not allowed. Create a feature branch.\" >&2; exit 1; }",
+        "pre-merge-commit": "test \"$(git symbolic-ref --quiet HEAD)\" != refs/heads/main || { echo \"Local merge commits on main are not allowed. Open a pull request.\" >&2; exit 1; }",
+        "pre-push": "while read -r local_ref local_sha remote_ref remote_sha; do if [ \"$remote_ref\" = refs/heads/main ]; then echo \"Direct pushes to main are not allowed. Open a pull request.\" >&2; exit 1; fi; done",
+        "preserveUnused": true
+    },
+    "devDependencies": {
+        "simple-git-hooks": "catalog:"
     }
 }

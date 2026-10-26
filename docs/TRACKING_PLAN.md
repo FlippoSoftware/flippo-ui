@@ -1,5 +1,13 @@
 # Plan: tracking the freshness of the documentation and its translations
 
+Implementation notes (2026-10-18): the workflow is documented in [README.md](README.md). The implementation keeps
+English/source drift as an error: phase 1 acceptance below requires `--write` before checking for stale Russian
+text. Phase 2 tracks hand-written translations only; generated API pages use dictionary tracking. Phase 3 adds
+`exports:<package>` and `theme:<package>` contracts because API Extractor reports do not cover the guides' package
+entry points and provider/theme APIs. There is no Fumadocs application installed here, so its frontmatter-schema
+extension remains a step for that application's setup. See [DOCUMENTATION_AUDIT.md](DOCUMENTATION_AUDIT.md) for
+the review and remaining gaps.
+
 For the agent implementing it. Read `AGENTS.md` at the root, `docs/README.md` and the README section «Storybook and the
 API reference» first. Never commit, push or publish; the user does.
 
@@ -58,8 +66,9 @@ module and import it everywhere (`tools/docs-hash.ts`, exported by `@flippo-soft
 - Document the workflow in `README.md` («Storybook and the API reference», the dictionary list) and in `AGENTS.md`
   (the «Storybook texts» bullet): change a JSDoc → `--write` → fix `ru.json` → `--review <keys>`.
 
-Acceptance: changing one JSDoc sentence in react-components and running `pnpm --filter @flippo-software/workspace-tools
-lint:check` passes but lists that key as stale; after `--review` it is current; deleting a ru key fails the check.
+Acceptance: change one JSDoc sentence in react-components, run `node tools/i18n-check.ts --write`, then
+`pnpm --filter @flippo-software/workspace-tools lint:check`: it passes but lists that key as stale; after `--review`
+it is current; deleting a ru key fails the check. Before `--write`, English/source drift still fails the check.
 
 ## Phase 2: translated pages (`*.ru.mdx`, Storybook markdown)
 
@@ -102,7 +111,7 @@ not.
 
 ## Phase 4: CI report
 
-- In the pull request workflow (`.github/workflows/`, see `tools/affected.mjs` for how packages are selected), add a
+- In the pull request workflow (`.github/workflows/`, see `tools/affected.ts` for how packages are selected), add a
   `docs` job after the build: `pnpm docs:build`, `node tools/i18n-check.ts --json …`, `node docs/scripts/check.ts --json
   …`, `node docs/scripts/registry.ts --json …`, then one script that turns the JSON files into a markdown table in
   `$GITHUB_STEP_SUMMARY` (sections: generated pages OK/failed; translations missing/stale; guides to review).

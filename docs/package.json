@@ -5,9 +5,10 @@
     "description": "The documentation of Flippo UI: hand-written guides (markdown, one file per language) and the API reference generated from the sources, laid out for Fumadocs (content/docs).",
     "scripts": {
         "generate": "node scripts/generate.ts",
-        "check": "node scripts/check.ts",
+        "check": "node scripts/check.ts && node scripts/registry.ts",
         "lint:check": "biome check",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "test": "node --test scripts/*.test.ts"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",

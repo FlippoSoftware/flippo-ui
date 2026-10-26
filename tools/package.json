@@ -7,11 +7,15 @@
         ".": "./workspace.ts",
         "./storybook": "./storybook/index.ts",
         "./storybook/theme": "./storybook/theme.ts",
-        "./storybook/i18n": "./storybook/i18n.ts"
+        "./storybook/i18n": "./storybook/i18n.ts",
+        "./docs-hash": "./docs-hash.ts",
+        "./core-enums": "./core-enums.ts"
     },
     "scripts": {
+        "typecheck": "node api-docs.ts && tsc --noEmit",
         "lint:check": "biome check && node i18n-check.ts",
-        "lint:fix": "biome lint --fix && biome format --fix"
+        "lint:fix": "biome lint --fix && biome format --fix",
+        "test": "node --test *.test.ts"
     },
     "devDependencies": {
         "@biomejs/biome": "catalog:",
@@ -19,8 +23,10 @@
         "@storybook/blocks": "8.6.14",
         "@storybook/preview-api": "8.6.14",
         "@storybook/theming": "8.6.14",
+        "@types/node": "catalog:",
         "@types/react": "catalog:",
         "react": "catalog:",
+        "typescript": "catalog:",
         "typescript5": "npm:typescript@5.9.3"
     }
 }

@@ -41,7 +41,7 @@
     --fl-focus-color: var(--fl-color-brand-light);
 }
 
-/// Writes the typography tokens: font families and `--fl-text-<style>-size|line-height|letter-spacing|weight-*`.
+/// Writes the typography tokens: font families and `--fl-text-<style>-size|line-height|weight-*|letter-spacing-*`.
 @mixin typography-tokens {
     --fl-font-family: #{typography.$font-family};
     --fl-font-family-mono: #{typography.$font-family-mono};
@@ -49,11 +49,11 @@
     @each $style, $config in typography.$text-styles {
         --fl-text-#{$style}-size: #{map.get($config, size)};
         --fl-text-#{$style}-line-height: #{map.get($config, line-height)};
-        --fl-text-#{$style}-letter-spacing: #{map.get($config, letter-spacing)};
 
         @each $weight in typography.$text-weights {
             $index: list.index(typography.$text-weights, $weight);
             --fl-text-#{$style}-weight-#{$weight}: #{list.nth(map.get($config, weights), $index)};
+            --fl-text-#{$style}-letter-spacing-#{$weight}: #{list.nth(map.get($config, letter-spacing), $index)};
         }
     }
 }

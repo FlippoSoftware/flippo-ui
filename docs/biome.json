@@ -5,6 +5,14 @@
     "files": {
         "includes": ["!**/node_modules", "!content"]
     },
+    "overrides": [
+        {
+            "includes": ["registry.json"],
+            "json": {
+                "formatter": { "expand": "always" }
+            }
+        }
+    ],
     "linter": {
         "rules": {
             "correctness": {

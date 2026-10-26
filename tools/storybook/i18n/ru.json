@@ -2462,6 +2462,13 @@
             "data-orientation": "Ориентация вкладок.",
             "data-starting-style": "Есть, пока панель анимируется при появлении."
         },
+        "CollapsibleRootDataAttributes": {
+            "data-closed": "Присутствует, когда раскрывающийся блок закрыт.",
+            "data-disabled": "Присутствует, когда раскрывающийся блок отключён.",
+            "data-ending-style": "Присутствует во время анимации скрытия панели.",
+            "data-open": "Присутствует, когда раскрывающийся блок открыт.",
+            "data-starting-style": "Присутствует во время анимации появления панели."
+        },
         "CollapsibleTriggerDataAttributes": {
             "data-disabled": "Есть, когда пункт аккордеона недоступен.",
             "data-panel-open": "Есть, когда панель аккордеона открыта."
@@ -2478,6 +2485,12 @@
             "data-ending-style": "Есть, пока попап анимируется при исчезновении.",
             "data-open": "Есть, когда попап открыт.",
             "data-starting-style": "Есть, пока попап анимируется при появлении."
+        },
+        "ComboboxClearDataAttributes": {
+            "data-disabled": "Присутствует, когда кнопка очистки отключена.",
+            "data-ending-style": "Присутствует во время анимации скрытия кнопки очистки.",
+            "data-popup-open": "Присутствует, когда всплывающая панель комбобокса открыта.",
+            "data-starting-style": "Присутствует во время анимации появления кнопки очистки."
         },
         "ComboboxInputDataAttributes": {
             "data-dirty": "Есть, когда значение компонента изменилось (внутри поля).",
@@ -2498,6 +2511,17 @@
             "data-disabled": "Есть, когда пункт недоступен.",
             "data-highlighted": "Есть, когда пункт подсвечен.",
             "data-selected": "Есть, когда пункт выбран."
+        },
+        "ComboboxItemIndicatorDataAttributes": {
+            "data-ending-style": "Присутствует во время анимации скрытия индикатора выбора.",
+            "data-selected": "Присутствует, когда элемент выбран.",
+            "data-starting-style": "Присутствует во время анимации появления индикатора выбора."
+        },
+        "ComboboxItemIndicatorWebDataAttributes": {
+            "data-selected": "Присутствует, когда элемент выбран."
+        },
+        "ComboboxListDataAttributes": {
+            "data-empty": "Присутствует, когда ни один элемент не соответствует фильтру."
         },
         "ComboboxPopupDataAttributes": {
             "data-align": "Выравнивание попапа относительно заданной стороны.",
@@ -2700,6 +2724,9 @@
             "data-touched": "Есть, когда с полем уже взаимодействовали.",
             "data-valid": "Есть, когда поле валидно."
         },
+        "FieldsetRootDataAttributes": {
+            "data-disabled": "Присутствует, когда группа полей отключена."
+        },
         "ListItemDataAttributes": {
             "data-index": "Индекс пункта списка.",
             "data-nested": "Вложен ли список в другой список.",
@@ -2722,6 +2749,13 @@
             "data-orientation": "Ориентация раскладки списка.",
             "data-type": "Тип списка."
         },
+        "ListSubheaderDataAttributes": {
+            "data-index": "Ненулевой индекс элемента, содержащего подзаголовок.",
+            "data-nestedlistitemnumber": "Ненулевой уровень вложенности элемента списка.",
+            "data-nestedlistnumber": "Ненулевой уровень вложенности списка.",
+            "data-orientation": "Ориентация списка.",
+            "data-type": "Тип списка."
+        },
         "MarqueeRootCssVars": {
             "--marquee-delay": "Задержка перед началом анимации.",
             "--marquee-direction": "`normal` или `reverse`: `animation-direction` дорожки.",
@@ -2732,6 +2766,11 @@
             "--marquee-pause-on-click": "`paused`, когда бегущая строка останавливается при нажатии (или не проигрывается), иначе `running`: `animation-play-state` дорожки при нажатии.",
             "--marquee-pause-on-hover": "`paused`, когда бегущая строка останавливается при наведении (или не проигрывается), иначе `running`: `animation-play-state` дорожки при наведении.",
             "--marquee-play": "`running` или `paused`: `animation-play-state` дорожки."
+        },
+        "MarqueeRootDataAttributes": {
+            "data-direction": "Направление анимации бегущей строки.",
+            "data-orientation": "Ориентация бегущей строки.",
+            "data-playing": "Присутствует, когда бегущая строка воспроизводится."
         },
         "MenuArrowDataAttributes": {
             "data-align": "Выравнивание попапа относительно заданной стороны.",
@@ -2813,6 +2852,11 @@
             "data-popup-open": "Есть, когда соответствующее меню открыто.",
             "data-pressed": "Есть, когда триггер нажат."
         },
+        "MenubarDataAttributes": {
+            "data-has-submenu-open": "Открыто ли подменю.",
+            "data-modal": "Присутствует, когда строка меню использует модальное поведение.",
+            "data-orientation": "Ориентация строки меню."
+        },
         "NavigationMenuArrowDataAttributes": {
             "data-align": "Выравнивание попапа относительно заданной стороны.",
             "data-closed": "Есть, когда попап закрыт.",
@@ -2835,6 +2879,9 @@
         },
         "NavigationMenuLinkDataAttributes": {
             "data-active": "Есть, когда ссылка ведёт на текущую страницу."
+        },
+        "NavigationMenuListDataAttributes": {
+            "data-open": "Присутствует, когда пункт навигационного меню открыт."
         },
         "NavigationMenuPopupCssVars": {
             "--popup-height": "Фиксированная высота попапа.",
@@ -2864,6 +2911,14 @@
             "data-instant": "Есть, если анимации должны быть мгновенными.",
             "data-open": "Есть, когда попап открыт.",
             "data-side": "Указывает, с какой стороны от триггера расположен попап."
+        },
+        "NavigationMenuRootDataAttributes": {
+            "data-nested": "Присутствует, когда навигационное меню вложенное.",
+            "data-open": "Присутствует, когда пункт навигационного меню открыт."
+        },
+        "NavigationMenuRootWebDataAttributes": {
+            "data-closed": "Присутствует, когда ни один пункт навигационного меню не открыт.",
+            "data-open": "Присутствует, когда пункт навигационного меню открыт."
         },
         "NavigationMenuTriggerDataAttributes": {
             "data-popup-open": "Есть, когда соответствующее навигационное меню открыто.",
@@ -3050,6 +3105,10 @@
             "data-current": "Ставится на прямого потомка области, когда переходов нет, или на новое содержимое, когда оно появляется.",
             "data-previous": "Ставится на прямого потомка области с уходящим содержимым, когда идёт переход.",
             "data-transitioning": "Есть, пока область переключается между старым и новым содержимым."
+        },
+        "PopupViewportCssVars": {
+            "--popup-height": "Высота содержимого всплывающей панели во время анимации изменения размера области отображения.",
+            "--popup-width": "Ширина содержимого всплывающей панели во время анимации изменения размера области отображения."
         },
         "ProgressIndicatorDataAttributes": {
             "data-complete": "Есть, когда прогресс завершён.",
@@ -3278,6 +3337,9 @@
         },
         "SelectValueDataAttributes": {
             "data-placeholder": "Есть, когда у списка нет значения."
+        },
+        "SeparatorDataAttributes": {
+            "data-orientation": "Ориентация разделителя."
         },
         "SliderControlDataAttributes": {
             "data-dirty": "Есть, когда значение ползунка изменилось (внутри поля).",

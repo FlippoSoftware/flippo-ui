@@ -11,6 +11,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { coreEnumOf, registeredWebParts } from '@flippo-software/workspace-tools/core-enums';
+
 import {
     cell,
     clean,
@@ -57,26 +59,6 @@ type CoreItem = { name: string; description: string };
 
 const out = join(content, 'web-components/api');
 const manifestFile = join(root, 'packages/web-components/custom-elements.json');
-const ENTRY = /^src\/components\/([\w-]+)\/index\.ts$/;
-const PART = /(\w+):\s*(\w+)/g;
-
-/** The parts of a component: `elements` of its entry (`{ root: XElement, … }`, or one element). */
-function partsOf(elements: Declaration): [part: string, className: string][] {
-    const value = elements.default ?? '';
-    return value.startsWith('{') ? [...value.matchAll(PART)].map(([, part, name]) => [part, name]) : [['root', value]];
-}
-
-/** The core enum of a part (`checkbox` + `indicator` → `CheckboxIndicatorDataAttributes`; a root: `CheckboxRoot…` or `Checkbox…`). */
-function coreEnumOf(
-    enums: Record<string, CoreItem[]>,
-    name: string,
-    part: string,
-    suffix: 'DataAttributes' | 'CssVars'
-): string | undefined {
-    const candidates =
-        part === 'root' ? [`${pascal(name)}Root${suffix}`, `${pascal(name)}${suffix}`] : [`${pascal(name)}${pascal(part)}${suffix}`];
-    return candidates.find((candidate) => enums[candidate]);
-}
 
 function apiText(locale: Locale, key: string, source: string): string {
     return translation(locale, key) ?? source;
@@ -144,22 +126,23 @@ export function generateWebComponents(): number {
             .filter((item) => item.kind === 'class')
             .map((item) => [item.name, item])
     );
-    const families = manifest.modules
-        .map((module) => ({ name: module.path.match(ENTRY)?.[1], elements: module.declarations?.find((item) => item.name === 'elements') }))
-        .filter((family): family is { name: string; elements: Declaration } => family.name !== undefined && family.elements !== undefined)
-        .sort((a, b) => a.name.localeCompare(b.name));
+    const registrations = registeredWebParts(manifest);
+    const families = [...new Set(registrations.map(({ family }) => family))].sort();
 
     clean(out);
-    for (const { name, elements } of families) {
+    for (const name of families) {
         const title = pascal(name);
-        const parts = partsOf(elements).filter(([, className]) => classes.has(className));
+        const parts = registrations.filter(({ family }) => family === name);
+        for (const { part, className } of parts) {
+            if (!classes.has(className)) throw new Error(`web-components: missing declaration for ${name}.${part}: ${className}.`);
+        }
         for (const locale of LOCALES) {
             const labels = LABELS[locale];
-            const sections = parts.map(([part, className]) => {
+            const sections = parts.map(({ part, className }) => {
                 const tag = part === 'root' ? `ui-${name}` : `ui-${name}-${kebab(part)}`;
                 return partSection(tag, classes.get(className) as Declaration, locale, enums, name, part);
             });
-            const rootElement = classes.get(parts[0]?.[1] ?? '');
+            const rootElement = classes.get(parts[0]?.className ?? '');
             const body = [
                 `## ${labels.import}`,
                 `\`\`\`ts\nimport { define } from '@flippo-software/web-components/${name}';\n\ndefine({ prefix: 'ui' });\n\`\`\``,
@@ -171,7 +154,7 @@ export function generateWebComponents(): number {
             writePage(join(out, pageFile(name, locale)), { title, description: summary(rootElement?.description), body });
         }
     }
-    const pages = families.map((family) => family.name);
+    const pages = families;
     writeMeta(join(out, 'meta.json'), { title: 'Elements', pages });
     writeMeta(join(out, 'meta.ru.json'), { title: 'Элементы', pages });
     return families.length;

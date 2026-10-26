@@ -4,7 +4,7 @@
  * (`.github/` and the release scripts) in one `ci:` commit. On a push, GitHub runs the workflows of the pushed branch:
  * without that commit, a branch made from an older tag would run the release workflow of its time.
  *
- * Usage: `node tools/maintenance-branch.mjs <component> <major> [--dry-run]`, in a clone with the tags and `origin/main`.
+ * Usage: `node tools/maintenance-branch.ts <component> <major> [--dry-run]`, in a clone with the tags and `origin/main`.
  * `--dry-run` prints the plan and changes nothing.
  */
 import { execFileSync } from 'node:child_process';
@@ -13,22 +13,22 @@ import process from 'node:process';
 import { parseArgs } from 'node:util';
 
 const SOURCE = 'origin/main';
-const TOOLING = ['.github', 'tools/affected.mjs', 'tools/dist-tag.mjs', 'tools/publish-guard.mjs', 'tools/release-order.mjs'];
+const TOOLING = ['.github', 'tools/affected.ts', 'tools/dist-tag.ts', 'tools/publish-guard.ts', 'tools/release-order.ts'];
 
 const { values, positionals } = parseArgs({ allowPositionals: true, options: { 'dry-run': { type: 'boolean' } } });
 const [component, majorText] = positionals;
 
-function git(...args) {
+function git(...args: string[]): string {
     return execFileSync('git', args, { encoding: 'utf8' }).trim();
 }
 
-function fail(message) {
+function fail(message: string): never {
     console.error(message);
     process.exit(1);
 }
 
-const config = JSON.parse(git('show', `${SOURCE}:release-please-config.json`));
-const manifest = JSON.parse(git('show', `${SOURCE}:.release-please-manifest.json`));
+const config: { packages: Record<string, { component?: string }> } = JSON.parse(git('show', `${SOURCE}:release-please-config.json`));
+const manifest: Record<string, string> = JSON.parse(git('show', `${SOURCE}:.release-please-manifest.json`));
 const path = Object.keys(config.packages).find((key) => config.packages[key].component === component);
 
 if (!path) {

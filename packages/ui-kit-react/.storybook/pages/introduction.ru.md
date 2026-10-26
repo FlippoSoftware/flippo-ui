@@ -1,5 +1,6 @@
 ---
 title: "Flippo UI для React"
+l10n: { source: "8001f67e1462" }
 ---
 
 Стилизованные компоненты дизайн-системы Flippo: поведение — из `@flippo-software/react-components` (API Base UI:

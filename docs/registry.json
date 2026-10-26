@@ -1,0 +1,114 @@
+{
+    "installation.mdx": {
+        "contracts": [
+            "exports:ui-kit-react",
+            "exports:ui-kit-web",
+            "exports:react-components",
+            "exports:web-components",
+            "exports:component-styles",
+            "theme:ui-kit-react",
+            "theme:ui-kit-web"
+        ],
+        "reviewed": {
+            "exports:ui-kit-react": "c5ba40ffe7c7",
+            "exports:ui-kit-web": "5957d3b8d281",
+            "exports:react-components": "a3b721e35fdf",
+            "exports:web-components": "31a61a91dcb7",
+            "exports:component-styles": "9f41bafbd669",
+            "theme:ui-kit-react": "0dc900e37d43",
+            "theme:ui-kit-web": "a3a7127c5bb1"
+        }
+    },
+    "installation.ru.mdx": {
+        "contracts": [
+            "exports:ui-kit-react",
+            "exports:ui-kit-web",
+            "exports:react-components",
+            "exports:web-components",
+            "exports:component-styles",
+            "theme:ui-kit-react",
+            "theme:ui-kit-web"
+        ],
+        "reviewed": {
+            "exports:ui-kit-react": "c5ba40ffe7c7",
+            "exports:ui-kit-web": "5957d3b8d281",
+            "exports:react-components": "a3b721e35fdf",
+            "exports:web-components": "31a61a91dcb7",
+            "exports:component-styles": "9f41bafbd669",
+            "theme:ui-kit-react": "0dc900e37d43",
+            "theme:ui-kit-web": "a3a7127c5bb1"
+        }
+    },
+    "ui-kit-react/theming.mdx": {
+        "contracts": [
+            "theme:ui-kit-react",
+            "theme:component-styles"
+        ],
+        "reviewed": {
+            "theme:ui-kit-react": "0dc900e37d43",
+            "theme:component-styles": "e482bb9bc143"
+        }
+    },
+    "ui-kit-react/theming.ru.mdx": {
+        "contracts": [
+            "theme:ui-kit-react",
+            "theme:component-styles"
+        ],
+        "reviewed": {
+            "theme:ui-kit-react": "0dc900e37d43",
+            "theme:component-styles": "e482bb9bc143"
+        }
+    },
+    "ui-kit-web/theming.mdx": {
+        "contracts": [
+            "theme:ui-kit-web",
+            "theme:component-styles"
+        ],
+        "reviewed": {
+            "theme:ui-kit-web": "a3a7127c5bb1",
+            "theme:component-styles": "e482bb9bc143"
+        }
+    },
+    "ui-kit-web/theming.ru.mdx": {
+        "contracts": [
+            "theme:ui-kit-web",
+            "theme:component-styles"
+        ],
+        "reviewed": {
+            "theme:ui-kit-web": "a3a7127c5bb1",
+            "theme:component-styles": "e482bb9bc143"
+        }
+    },
+    "fonts.mdx": {
+        "contracts": [
+            "exports:ui-kit-react",
+            "exports:ui-kit-web",
+            "exports:component-styles",
+            "theme:ui-kit-react",
+            "theme:ui-kit-web"
+        ],
+        "reviewed": {
+            "exports:ui-kit-react": "c5ba40ffe7c7",
+            "exports:ui-kit-web": "5957d3b8d281",
+            "exports:component-styles": "9f41bafbd669",
+            "theme:ui-kit-react": "0dc900e37d43",
+            "theme:ui-kit-web": "a3a7127c5bb1"
+        }
+    },
+    "fonts.ru.mdx": {
+        "contracts": [
+            "exports:ui-kit-react",
+            "exports:ui-kit-web",
+            "exports:component-styles",
+            "theme:ui-kit-react",
+            "theme:ui-kit-web"
+        ],
+        "reviewed": {
+            "exports:ui-kit-react": "c5ba40ffe7c7",
+            "exports:ui-kit-web": "5957d3b8d281",
+            "exports:component-styles": "9f41bafbd669",
+            "theme:ui-kit-react": "0dc900e37d43",
+            "theme:ui-kit-web": "a3a7127c5bb1"
+        }
+    }
+}

@@ -7,7 +7,7 @@ name: Release
 #
 # Maintenance branches (`maintenance/<component>-v<major>`, created from the tag of the last release of an old major)
 # work the same way: the release pull request targets the branch and the fixes are published under `v<major>`, not
-# `latest`. Prereleases (`2.0.0-beta.1`) are published under their identifier (`beta`), see `tools/dist-tag.mjs`.
+# `latest`. Prereleases (`2.0.0-beta.1`) are published under their identifier (`beta`), see `tools/dist-tag.ts`.
 
 on:
     push:
@@ -67,17 +67,17 @@ jobs:
 
             # Only the released packages; `workspace:^` ranges become the versions of their dependencies. Dependencies
             # first; a dependency that is neither on npm nor released by this run stops the publication
-            # (`tools/release-order.mjs`). The dist-tag comes from the version and the branch: `latest`, a prerelease
+            # (`tools/release-order.ts`). The dist-tag comes from the version and the branch: `latest`, a prerelease
             # identifier (`beta`) or `v<major>`.
             - name: Publish the released packages
               env:
                   PATHS: ${{ needs.release-please.outputs.paths_released }}
                   BRANCH: ${{ github.ref_name }}
               run: |
-                  order=$(node tools/release-order.mjs "$PATHS")
+                  order=$(node tools/release-order.ts "$PATHS")
                   for path in $order; do
                       version=$(jq -r .version "$path/package.json")
-                      tag=$(node tools/dist-tag.mjs "$version" "$BRANCH")
+                      tag=$(node tools/dist-tag.ts "$version" "$BRANCH")
                       echo "Publishing $path@$version under $tag"
                       pnpm --filter "./$path" publish --no-git-checks --access public --tag "$tag"
                   done
