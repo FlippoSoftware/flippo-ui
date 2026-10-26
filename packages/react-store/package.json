@@ -1,7 +1,7 @@
 {
     "name": "@flippo-software/react-store",
     "type": "module",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "React adapter of @flippo-software/store: useStore and ReactStore, a component store with hooks.",
     "author": "BlackPoretsky (Egor Gorochkin)",
     "license": "ISC",

@@ -1,5 +1,6 @@
 {
     "name": "@flippo-software/workspace-tools",
+    "version": "0.0.0",
     "private": true,
     "type": "module",
     "description": "Development wiring shared by the packages of the workspace (Vite/Vitest conditions, aliases), the Storybook theme and docs pages, and release scripts.",
